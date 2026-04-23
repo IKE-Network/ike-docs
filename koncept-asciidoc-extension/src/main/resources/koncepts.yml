@@ -1,0 +1,324 @@
+# Koncept Definitions
+# ===================
+# Each top-level key is the CamelCase identifier used in AsciiDoc markup
+# via k:Identifier[] syntax.
+#
+# Fields:
+#   label:      Human-readable display name (defaults to camelCase split)
+#   definition: Natural language definition text
+#   axiom:      Description logic axiom using Unicode DL notation
+#   sctid:      SNOMED CT concept identifier (optional)
+#   iri:        OWL IRI for the concept (optional)
+#
+# DL Notation Guide:
+#   ≡  equivalentTo      ⊑  subClassOf
+#   ⊓  intersection      ⊔  union
+#   ∃  someValuesFrom     ∀  allValuesFrom
+#   ¬  complement         ⊥  nothing (bottom)
+#   ⊤  thing (top)
+
+HeartFailure:
+  label: Heart Failure
+  definition: >
+    A clinical syndrome resulting from structural or functional
+    impairment of ventricular filling or ejection of blood,
+    characterized by dyspnea, fatigue, and fluid retention.
+  axiom: "≡ ClinicalSyndrome ⊓ ∃hasPathology.(InsufficientCardiacOutput) ⊓ ∃clinicalCourse.ChronicCourse"
+  sctid: "84114007"
+  iri: "http://snomed.info/id/84114007"
+
+AorticStenosis:
+  label: Aortic Stenosis
+  definition: >
+    Narrowing of the aortic valve orifice, obstructing blood flow
+    from the left ventricle to the aorta during systole.
+  axiom: "≡ DisorderOfCardiacValve ⊓ ∃hasMorphology.Stenosis ⊓ ∃findingSite.AorticValveStructure"
+  sctid: "60573004"
+  iri: "http://snomed.info/id/60573004"
+
+AcuteMyocardialInfarction:
+  label: Acute Myocardial Infarction
+  definition: >
+    Myocardial cell death due to prolonged ischemia, typically
+    resulting from acute coronary artery occlusion.
+  axiom: "≡ MyocardialInfarction ⊓ ∃clinicalCourse.AcuteOnset ⊓ ∃hasCause.(∃associatedWith.CoronaryArteryOcclusion)"
+  sctid: "57054005"
+  iri: "http://snomed.info/id/57054005"
+
+TypeTwoDiabetesMellitus:
+  label: Type 2 Diabetes Mellitus
+  definition: >
+    A metabolic disorder characterized by hyperglycemia resulting
+    from insulin resistance and relative insulin deficiency.
+  axiom: "≡ DiabetesMellitus ⊓ ∃hasPathology.(InsulinResistance ⊔ RelativeInsulinDeficiency)"
+  sctid: "44054006"
+  iri: "http://snomed.info/id/44054006"
+
+ChronicKidneyDisease:
+  label: Chronic Kidney Disease
+  definition: >
+    Abnormalities of kidney structure or function present for
+    more than 3 months, with implications for health.
+  axiom: "≡ DisorderOfKidney ⊓ ∃clinicalCourse.ChronicCourse ⊓ ∃hasDuration.(≥ 3 months)"
+  sctid: "709044004"
+  iri: "http://snomed.info/id/709044004"
+
+PulmonaryEmbolism:
+  label: Pulmonary Embolism
+  definition: >
+    Obstruction of the pulmonary arterial vasculature by
+    thrombus, most commonly originating from the deep veins
+    of the lower extremities.
+  axiom: "≡ Embolism ⊓ ∃findingSite.PulmonaryArterialStructure ⊓ ∃hasCause.(∃associatedWith.Thrombus)"
+  sctid: "59282003"
+  iri: "http://snomed.info/id/59282003"
+
+DiabetesMellitus:
+  label: Diabetes Mellitus
+  definition: >
+    A group of metabolic disorders characterized by chronic
+    hyperglycemia resulting from defects in insulin secretion,
+    insulin action, or both.
+  axiom: "≡ EndocrineDisorder ⊓ MetabolicDisorder ⊓ ∃findingSite.PancreaticStructure ⊓ ∃hasFinding.Hyperglycemia"
+  sctid: "73211009"
+  iri: "http://snomed.info/id/73211009"
+
+EndocrineDisorder:
+  label: Endocrine Disorder
+  definition: >
+    A disorder of the endocrine system, affecting hormone
+    production, secretion, or action.
+  axiom: "⊑ Disease ⊓ ∃findingSite.EndocrineStructure"
+  sctid: "362969004"
+  iri: "http://snomed.info/id/362969004"
+
+MetabolicDisorder:
+  label: Metabolic Disorder
+  definition: >
+    A disorder that disrupts normal metabolism, the chemical
+    processes the body uses to transform food into energy.
+  axiom: "⊑ Disease ⊓ ∃hasPathology.MetabolicProcessAlteration"
+  sctid: "75934005"
+  iri: "http://snomed.info/id/75934005"
+
+PancreaticStructure:
+  label: Pancreatic Structure
+  definition: >
+    Anatomical structure of the pancreas, a glandular organ
+    that produces digestive enzymes and hormones including
+    insulin and glucagon.
+  sctid: "15776009"
+  iri: "http://snomed.info/id/15776009"
+
+Hyperglycemia:
+  label: Hyperglycemia
+  definition: >
+    An abnormally high concentration of glucose in the
+    circulating blood, typically above the normal fasting
+    range of 70-100 mg/dL.
+  axiom: "≡ Finding ⊓ ∃interprets.GlucoseLevel ⊓ ∃hasInterpretation.AboveNormal"
+  sctid: "80394007"
+  iri: "http://snomed.info/id/80394007"
+
+Disease:
+  label: Disease
+  definition: >
+    A disorder of structure or function in a human, animal,
+    or plant that produces specific signs or symptoms and is
+    not simply a direct result of physical injury.
+  axiom: "⊑ ClinicalFinding"
+  sctid: "64572001"
+  iri: "http://snomed.info/id/64572001"
+
+ChestPain:
+  label: Chest Pain
+  definition: >
+    An unpleasant sensory and emotional experience associated
+    with the thoracic region, ranging from sharp and stabbing
+    to dull and aching, with diverse cardiac, pulmonary,
+    musculoskeletal, gastrointestinal, and psychogenic etiologies.
+  axiom: "≡ Finding ⊓ ∃findingSite.ThoracicStructure ⊓ ∃associatedMorphology.Pain"
+  sctid: "29857009"
+  iri: "http://snomed.info/id/29857009"
+
+AbsenceFindings:
+  label: Absence Findings
+  definition: >
+    Parent qualifier value grouping the various ways
+    clinical systems express that a finding is not present.
+    Child concepts include Absent, Negative, No, Nil,
+    Normal absence, and Null — the choice among them
+    is subject to local conventions and FHIR profiles.
+  axiom: "⊑ QualifierValue"
+  sctid: "272519000"
+  iri: "http://snomed.info/id/272519000"
+
+Absent:
+  label: Absent
+  definition: >
+    A qualifier value indicating that a clinical finding
+    has been assessed and determined to be absent.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "2667000"
+  iri: "http://snomed.info/id/2667000"
+
+Negative:
+  label: Negative
+  definition: >
+    A qualifier value indicating a negative result
+    or negative finding on assessment.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "260385009"
+  iri: "http://snomed.info/id/260385009"
+
+"No":
+  label: 'No'
+  definition: >
+    A qualifier value indicating a negative or absent
+    response to a clinical question or assessment.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "373067005"
+  iri: "http://snomed.info/id/373067005"
+
+"Nil":
+  label: 'Nil'
+  definition: >
+    A qualifier value indicating nothing or zero
+    on a clinical assessment.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "260386005"
+  iri: "http://snomed.info/id/260386005"
+
+NormalAbsence:
+  label: Normal Absence
+  definition: >
+    A qualifier value indicating absence that is within
+    the expected normal range for the finding.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "17511009"
+  iri: "http://snomed.info/id/17511009"
+
+NullQualifier:
+  label: 'Null'
+  definition: >
+    A qualifier value indicating a null or void result
+    on a clinical assessment.
+  axiom: "⊑ AbsenceFindings"
+  sctid: "276727009"
+  iri: "http://snomed.info/id/276727009"
+
+Presence:
+  label: Presence
+  definition: >
+    A property type indicating that the observable entity
+    measures presence or absence of a clinical finding,
+    encoded as a countable quantity on a [0,∞) scale.
+  axiom: "⊑ Property"
+  sctid: "705057003"
+  iri: "http://snomed.info/id/705057003"
+
+Present:
+  label: Present
+  definition: >
+    A qualifier value indicating that a clinical finding
+    has been assessed and determined to be present.
+  axiom: "⊑ QualifierValue"
+  sctid: "52101004"
+  iri: "http://snomed.info/id/52101004"
+
+MillimetersOfMercury:
+  label: mmHg
+  definition: >
+    A unit of pressure equal to the pressure exerted by a
+    column of mercury one millimeter high at standard gravity.
+    The standard unit for reporting arterial blood pressure.
+  axiom: "⊑ QualifierValue"
+  sctid: "259018001"
+  iri: "http://snomed.info/id/259018001"
+
+GramPerDeciliter:
+  label: g/dL
+  definition: >
+    A unit of mass concentration equal to one gram per
+    deciliter, commonly used for hemoglobin concentration
+    and similar laboratory measurements.
+  axiom: "⊑ QualifierValue"
+  sctid: "258795003"
+  iri: "http://snomed.info/id/258795003"
+
+GregorianCalendarDate:
+  label: Gregorian Calendar Date
+  definition: >
+    A temporal qualifier value representing a date on
+    the Gregorian calendar system.
+  axiom: "⊑ QualifierValue"
+  sctid: "426763005"
+  iri: "http://snomed.info/id/426763005"
+
+Seconds:
+  label: Seconds
+  definition: >
+    The SI base unit of time, used for clinical measurements
+    such as ECG intervals (PR interval, QRS duration).
+  axiom: "⊑ QualifierValue"
+  sctid: "257997001"
+  iri: "http://snomed.info/id/257997001"
+
+Day:
+  label: Day
+  definition: >
+    A unit of time equal to 24 hours, used for clinical
+    durations such as symptom duration and treatment courses.
+  axiom: "⊑ QualifierValue"
+  sctid: "258703001"
+  iri: "http://snomed.info/id/258703001"
+
+Millimeter:
+  label: Millimeter
+  definition: >
+    A unit of length equal to one thousandth of a meter,
+    used for clinical measurements such as ST elevation
+    and lesion dimensions.
+  axiom: "⊑ QualifierValue"
+  sctid: "258673006"
+  iri: "http://snomed.info/id/258673006"
+
+CountOfEntities:
+  label: Count of Entities
+  definition: >
+    A property type indicating that the observable entity
+    measures a count of discrete entities, such as number
+    of pregnancies, lesions, or episodes.
+  axiom: "⊑ Property"
+  sctid: "410681005"
+  iri: "http://snomed.info/id/410681005"
+
+InternationalNormalizedRatio:
+  label: International Normalized Ratio
+  definition: >
+    An observable entity representing the International
+    Normalized Ratio (INR), a standardized measure of
+    prothrombin time used to monitor coagulation status
+    and anticoagulant therapy.
+  axiom: "⊑ ObservableEntity"
+  sctid: "165581004"
+  iri: "http://snomed.info/id/165581004"
+
+MildNonproliferativeDiabeticRetinopathy:
+  label: Mild Non-Proliferative Diabetic Retinopathy
+  definition: >
+    A disorder of the retina characterized by the earliest
+    stage of diabetic retinopathy, with microaneurysms and
+    small intraretinal hemorrhages.
+  axiom: "≡ DiabeticRetinopathy ⊓ ∃hasSeverity.Mild ⊓ ∃clinicalCourse.NonProliferative"
+  sctid: "312903003"
+  iri: "http://snomed.info/id/312903003"
+
+SystolicBloodPressure:
+  label: Systolic Blood Pressure
+  definition: >
+    The peak arterial blood pressure during ventricular
+    systole, measured in millimeters of mercury (mmHg).
+  axiom: "≡ ObservableEntity ⊓ ∃componentOf.BloodPressure ⊓ ∃inheresIn.ArterialStructure ⊓ ∃hasPhase.Systole"
+  sctid: "271649006"
+  iri: "http://snomed.info/id/271649006"

@@ -1,0 +1,125 @@
+= Semantic Linebreak Demo
+:author: IKE Community
+
+== Introduction
+
+Knowledge architecture requires careful attention to versioning semantics.
+Each coordinate in the version space identifies a unique state
+of the knowledge graph.
+This enables reproducible reasoning across distributed systems,
+which is critical for clinical safety applications.
+
+The IKE Community has established a set of best practices for
+collaborative knowledge curation.
+Dr. Campbell and his team developed SNOMED RT/CT during his
+work at Stanford.
+These terminologies are now used in 49 nations around the world.
+The U.S. Department of Veterans Affairs relies heavily on these standards.
+
+== Technical Details
+
+[source,java]
+----
+public class VersionCoordinate {
+    private final UUID conceptId;
+    private final long stamp;
+
+    // This should NOT be reformatted.
+    // Sentence-like comments inside code. They stay as-is.
+    public VersionCoordinate(UUID conceptId, long stamp) {
+        this.conceptId = conceptId;
+        this.stamp = stamp;
+    }
+}
+----
+
+The STAMP coordinate model provides a five-tuple of Status,
+Time, Author,
+Module, and Path.
+This model was originally described in the SNOMED CT Technical
+Implementation Guide.
+It has since been adopted by the HL7 TINKAR specification.
+Are there alternatives?
+Yes, but none provide the same level of formal rigor.
+
+[plantuml]
+----
+@startuml
+class VersionCoordinate {
+  +conceptId: UUID
+  +stamp: long
+}
+note right: This is a diagram. Don't touch it.
+@enduml
+----
+
+=== Admonitions and Lists
+
+NOTE: This is an admonition block. It should also be reformatted if it contains multiple sentences. The content here is prose just like any other paragraph.
+
+* List items are tricky. They have markers at the start.
+* This item has a single sentence.
+* This item has two sentences. The second one starts here.
+
+=== Tables
+
+|===
+| Header 1 | Header 2
+
+| Cell content should not be reformatted. Even if it has sentences. | Another cell.
+|===
+
+== Abbreviations and Edge Cases
+
+The e.g. HTTP protocol and i.e. the web standard are important.
+Fig. 1 shows the architecture.
+See Vol. 2 for more details.
+The specification was written by Prof. Smith and Dr. Jones.
+
+Version 2.0 introduced several improvements.
+The API changed significantly.
+Release 3.1 is expected next quarter.
+
+The system processes approximately 10,000 transactions per second.
+Each transaction is validated against the knowledge graph.
+Failed validations are logged for review.
+This ensures data quality across all participating institutions.
+
+== Semantic Break Points
+
+The pipeline supports multiple output formats —
+each renderer handles fonts differently.
+The Prawn backend uses Ruby-native PDF generation,
+but the FOP backend relies on Apache Batik for SVG processing.
+
+AsciiDoc provides two em-dash styles:
+the Unicode character \u2014 used in prose,
+and the AsciiDoc convention --
+which uses two dashes surrounded by spaces.
+Both should trigger line breaks.
+
+The STAMP model captures five components:
+Status, Time,
+Author, Module,
+and Path. Each component serves a distinct purpose;
+together they form a unique coordinate for every version of every concept.
+
+The build produces classified artifacts for each renderer,
+and the default profile copies the preferred output to the
+standard location.
+Developers can choose any renderer,
+but Prawn is recommended for most projects,
+yet FOP remains useful for DocBook-based workflows,
+so both are maintained.
+
+URLs like https://ike.network/docs should not break at the colon.
+Neither should times like 10:30 cause a break.
+However, a colon introducing an explanation should break:
+the parser identifies these cases using simple guards.
+
+== Hard Line Breaks
+
+This paragraph has a hard break +
+right here.
+And then continues with another sentence.
+This should be handled correctly.

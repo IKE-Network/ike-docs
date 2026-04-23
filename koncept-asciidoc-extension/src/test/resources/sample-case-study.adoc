@@ -1,0 +1,47 @@
+= Clinical Case Study: Complex Cardiovascular Presentation
+:author: IKE Community
+:revdate: 2026-02-10
+:toc: left
+:icons: font
+:koncept-definitions-classpath: /koncepts.yml
+
+== Chief Complaint
+
+A 68-year-old male presents to the emergency department with
+progressive dyspnea on exertion over the past two weeks,
+accompanied by bilateral lower extremity edema.
+
+== Assessment
+
+Physical examination and echocardiographic findings are
+consistent with k:HeartFailure[] secondary to severe
+k:AorticStenosis[].
+
+The patient's history is significant for
+k:TypeTwoDiabetesMellitus[] diagnosed 12 years ago,
+currently managed with metformin and empagliflozin.
+Renal function has been declining over the past 3 years,
+meeting criteria for stage 3b k:ChronicKidneyDisease[CKD].
+
+== Differential Diagnosis
+
+The acute worsening of k:HeartFailure[congestive heart failure]
+must be evaluated in the context of the known
+k:AorticStenosis[].
+Given the patient's recent immobilization,
+k:PulmonaryEmbolism[] should also be excluded.
+The risk of k:AcuteMyocardialInfarction[acute MI] is elevated
+given the hemodynamic stress imposed by the valvular disease.
+
+== Plan
+
+. Obtain CT pulmonary angiography to rule out k:PulmonaryEmbolism[]
+. Serial troponins to evaluate for k:AcuteMyocardialInfarction[]
+. Optimize k:HeartFailure[] management with IV diuresis
+. Nephrology consultation for k:ChronicKidneyDisease[] staging
+  and contrast risk assessment
+. Cardiothoracic surgery consultation regarding intervention
+  for k:AorticStenosis[]
+
+// The Referenced Koncepts glossary section is auto-generated below
+// by the KonceptGlossaryProcessor treeprocessor.

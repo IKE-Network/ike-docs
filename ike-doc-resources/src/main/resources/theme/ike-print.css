@@ -1,0 +1,718 @@
+/*
+ * IKE Print Stylesheet — CSS Paged Media
+ * ────────────────────────────────────────────────────────────────
+ * Portable across: Prince XML, Antenna House Formatter, WeasyPrint
+ *
+ * Used by the pdf-prince, pdf-ah, and pdf-weasyprint Maven profiles.
+ * Applied ON TOP of the asciidoctor HTML5 backend's inline styles,
+ * adding paged-media rules (page size, margins, headers, footers,
+ * page breaks) that browsers don't support but print renderers do.
+ *
+ * Font handling:
+ *   The HTML backend embeds its own CSS. These @font-face declarations
+ *   let the print renderer find the Noto fonts we ship in ike-minimal-fonts.
+ *   The font path is resolved relative to this stylesheet at render time;
+ *   the Maven build copies fonts alongside this CSS in the output directory.
+ *
+ * References:
+ *   CSS Paged Media Module Level 3  — https://www.w3.org/TR/css-page-3/
+ *   CSS Generated Content for Paged Media — https://www.w3.org/TR/css-gcpm-3/
+ *   Prince CSS reference — https://www.princexml.com/doc/css-props/
+ *   AH Formatter CSS reference — https://www.antenna.co.jp/AHF/help/en/
+ *
+ * Copyright 2025 IKE Community — Apache License 2.0
+ */
+
+/* ── Font Faces ────────────────────────────────────────────────── */
+/* Paths relative to the CSS file location in target/generated-docs/ */
+
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSans-Regular.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 400;
+    src: url('fonts/NotoSans-Italic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: url('fonts/NotoSans-Bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 700;
+    src: url('fonts/NotoSans-BoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSerif-Regular.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: italic;
+    font-weight: 400;
+    src: url('fonts/NotoSerif-Italic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: normal;
+    font-weight: 700;
+    src: url('fonts/NotoSerif-Bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: italic;
+    font-weight: 700;
+    src: url('fonts/NotoSerif-BoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Sans Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSansMono-Regular.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Noto Sans Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: url('fonts/NotoSansMono-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Sans Math';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSansMath-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Sans Symbols';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSansSymbols-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Sans Symbols 2';
+    font-style: normal;
+    font-weight: 400;
+    src: url('fonts/NotoSansSymbols2-Regular.ttf') format('truetype');
+}
+
+
+/* ── Page Geometry ─────────────────────────────────────────────── */
+
+@page {
+    size: letter portrait;
+    margin: 1in 1in 1in 1in !important;
+
+    /* Running footer: document title on left, page number on right */
+    @bottom-left {
+        content: string(doc-title);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #333333;
+    }
+    @bottom-right {
+        content: counter(page);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #333333;
+    }
+    @bottom-center {
+        content: none;
+    }
+
+    /* Running header: chapter title on right (recto pages) */
+    @top-right {
+        content: string(chapter-title);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #7f8c8d;
+    }
+}
+
+/* ── Named Pages for Front Matter ──────────────────────────────── */
+/* Colophon (first page of PDF — Prince watermark lands here),      */
+/* title page, and TOC get no running headers or footers.           */
+/* Body content restarts the page counter at Arabic 1.              */
+
+@page colophon {
+    @top-left     { content: none; }
+    @top-right    { content: none; }
+    @bottom-left  { content: none; }
+    @bottom-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+@page title-page {
+    @top-left     { content: none; }
+    @top-right    { content: none; }
+    @bottom-left  { content: none; }
+    @bottom-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+@page toc-page {
+    @top-left     { content: none; }
+    @top-right    { content: none; }
+    @bottom-left  { content: none; }
+    @bottom-right { content: none; }
+    @bottom-center {
+        content: counter(page, lower-roman);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #999999;
+    }
+}
+
+/* Suppress header/footer on the first page (belt-and-suspenders    */
+/* with the named pages above — :first targets the colophon page). */
+@page :first {
+    @top-right    { content: none; }
+    @bottom-left  { content: none; }
+    @bottom-right { content: none; }
+}
+
+/* Mirror headers for duplex printing */
+@page :left {
+    @top-left {
+        content: string(chapter-title);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #7f8c8d;
+    }
+    @top-right { content: none; }
+    @bottom-left {
+        content: counter(page);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+    }
+    @bottom-right {
+        content: string(doc-title);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #333333;
+    }
+}
+
+
+/* ── String Sets for Running Headers/Footers ───────────────────── */
+/* The asciidoctor HTML backend renders the document title in #header h1 */
+
+#header h1 {
+    string-set: doc-title content();
+}
+
+/* Chapter titles → running header. AsciiDoc uses h2 for top-level sections */
+h2 {
+    string-set: chapter-title content();
+}
+
+
+/* ── Body Typography ───────────────────────────────────────────── */
+
+body {
+    font-family: 'Noto Serif', 'Noto Sans Math', 'Noto Sans Symbols',
+                 'Noto Sans Symbols 2', Georgia, serif;
+    font-size: 10.5pt;
+    line-height: 1.33;
+    color: #333333;
+}
+
+
+/* ── Headings ──────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Sans', Helvetica, Arial, sans-serif;
+    color: #2c3e50;
+    line-height: 1.2;
+    page-break-after: avoid;         /* never orphan a heading at page bottom */
+}
+
+h1 { font-size: 24pt; }
+h2 { font-size: 18pt; }
+.book h2 { page-break-before: always; }  /* new page per chapter — books only */
+h3 { font-size: 14pt; }
+h4 { font-size: 12pt; }
+h5 { font-size: 11pt; }
+h6 { font-size: 10pt; }
+
+/* First h2 shouldn't force a page break if immediately after the title */
+#content h2:first-child {
+    page-break-before: auto;
+}
+
+/* Reset page counter at body content — front matter (colophon,     */
+/* title, TOC) uses the implicit counter; body starts at Arabic 1. */
+#content {
+    counter-reset: page 1;
+}
+
+
+/* ── Code Blocks ───────────────────────────────────────────────── */
+
+code, pre, .listingblock pre {
+    font-family: 'Noto Sans Mono', 'Courier New', monospace;
+    font-size: 9pt;
+}
+
+pre {
+    background-color: #f5f5f5;
+    border: 0.75pt solid #e3e3e3;
+    border-radius: 4pt;
+    padding: 4pt 8pt;
+    line-height: 1.3;
+    page-break-inside: avoid;        /* keep code blocks together */
+    overflow: hidden;                 /* clip rather than overflow the page */
+    white-space: pre-wrap;           /* wrap long lines in print */
+    word-wrap: break-word;
+}
+
+/* Inline code */
+p code, li code, td code {
+    color: #b12146;
+    font-size: 9pt;
+}
+
+
+/* ── Links ─────────────────────────────────────────────────────── */
+
+a {
+    color: #428bca;
+    text-decoration: none;
+}
+
+/* In print, show the URL after external links */
+a[href^="http"]::after,
+a[href^="https"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #999999;
+    word-break: break-all;
+}
+
+/* Don't show URLs for internal cross-references or footnotes */
+a[href^="#"]::after {
+    content: none;
+}
+
+
+/* ── Tables ────────────────────────────────────────────────────── */
+
+table {
+    border-collapse: collapse;
+    border: 0.5pt solid #dddddd;
+    page-break-inside: auto;         /* allow tables to break across pages */
+}
+
+thead {
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: bold;
+    background-color: #f5f5f5;
+}
+
+thead tr {
+    border-bottom: 1.5pt solid #dddddd;
+}
+
+td, th {
+    padding: 3pt 6pt;
+    border: 0.5pt solid #dddddd;
+    font-size: 10pt;
+}
+
+/* Repeat table headers on every page when a table spans pages */
+thead {
+    display: table-header-group;
+}
+
+
+
+/* ── Admonitions ───────────────────────────────────────────────── */
+
+.admonitionblock {
+    page-break-inside: avoid;
+}
+
+.admonitionblock td.icon .title {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+
+/* ── Table of Contents ─────────────────────────────────────────── */
+
+#toc {
+    page: toc-page;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 10pt;
+    line-height: 1.4;
+    page-break-after: always;
+}
+
+#toc a::after {
+    /* Show page numbers in TOC — Prince and AH Formatter support target-counter */
+    content: leader('.') target-counter(attr(href), page);
+    font-size: 9pt;
+    color: #a9a9a9;
+}
+
+/* Override the generic external-link URL display for TOC entries */
+#toc a[href^="#"]::after {
+    content: leader('.') target-counter(attr(href), page);
+    font-size: 9pt;
+    color: #a9a9a9;
+}
+
+#toctitle {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+
+/* ── Colophon Page ─────────────────────────────────────────────── */
+/* First page of the PDF. Prince free-edition watermark lands here, */
+/* contextually alongside the acknowledgment of Prince's support.   */
+/* JS in docinfo.html moves this div before #header at render time. */
+
+#ike-colophon {
+    display: block;                  /* override screen display:none */
+    page: colophon;
+    break-after: right;              /* blank verso → title on next recto */
+    padding-top: 60%;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 9.5pt;
+    color: #555555;
+}
+
+.colophon-inner {
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.colophon-heading {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.colophon-intro {
+    margin-bottom: 1.5em;
+    line-height: 1.5;
+}
+
+table.colophon-credits {
+    border: none;
+    border-collapse: collapse;
+    margin-bottom: 1.5em;
+    font-size: 9pt;
+    width: 100%;
+}
+
+table.colophon-credits td {
+    border: none;
+    padding: 3pt 8pt 3pt 0;
+    vertical-align: top;
+}
+
+.colophon-label {
+    font-weight: 600;
+    color: #2c3e50;
+    white-space: nowrap;
+    width: 25%;
+}
+
+.colophon-acknowledgment {
+    margin-top: 1.5em;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.colophon-license {
+    margin-top: 2em;
+    font-size: 8.5pt;
+    color: #999999;
+}
+
+
+/* ── Title Page ────────────────────────────────────────────────── */
+/* break-before: right forces the title onto a recto (odd) page,    */
+/* auto-inserting a blank verso after the colophon if needed.       */
+
+#header {
+    page: title-page;
+    break-before: right;             /* always start on recto */
+    text-align: center !important;
+    padding-top: 30%;
+    page-break-after: always;
+    border: none !important;
+}
+
+#header > h1:first-child {
+    font-size: 36pt;
+    color: #2c3e50;
+    font-family: 'Noto Sans', sans-serif;
+    line-height: 1.2;
+    border: none !important;
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+#header .details {
+    display: block !important;       /* override AsciiDoc flexbox */
+    margin-top: 4em !important;      /* breathing room below title */
+    padding: 0 !important;
+    font-size: 13pt;
+    color: #555555;
+    text-align: center !important;
+    border: none !important;
+    border-bottom: none !important;
+}
+
+#header .details .author {
+    font-size: 14pt;
+    font-style: italic;
+}
+
+#header .details br {
+    display: none !important;        /* suppress line breaks between author spans */
+}
+
+#header .details #revnumber,
+#header .details #revdate {
+    font-size: 11pt;
+    color: #7f8c8d;
+}
+
+
+/* ── Images / Figures ──────────────────────────────────────────── */
+
+.imageblock {
+    page-break-inside: avoid;
+    text-align: center !important;
+}
+
+.imageblock .content {
+    text-align: center !important;
+}
+
+.imageblock img,
+.imageblock svg {
+    max-width: 100%;
+    height: auto;
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Captions */
+.imageblock > .title {
+    font-size: 9pt !important;
+    font-style: italic !important;
+    text-align: center !important;
+}
+
+
+/* ── Blockquotes ───────────────────────────────────────────────── */
+
+/* Outer wrapper — subtle background, no border */
+.quoteblock {
+    background-color: #f8f7f5 !important;
+    border: none !important;
+    padding: 14pt 20pt !important;
+    margin: 10pt 0 !important;
+    page-break-inside: avoid;
+}
+
+/* Inner blockquote — horizontal rules only, no side borders */
+.quoteblock blockquote {
+    color: #444444 !important;
+    font-size: 10pt !important;
+    background-color: transparent !important;
+    border-top: 0.75pt solid #bbbbbb !important;
+    border-bottom: 0.75pt solid #bbbbbb !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: 10pt 8pt !important;
+    margin: 0 !important;
+}
+
+/* Opening curly quote — restored */
+.quoteblock blockquote::before {
+    content: "\201c" !important;
+    display: block !important;
+    float: left !important;
+    font-size: 2.5em !important;
+    font-weight: bold !important;
+    line-height: 0.6em !important;
+    margin-left: -4pt !important;
+    margin-right: 4pt !important;
+    padding-top: 4pt !important;
+    color: #7a2518 !important;
+}
+
+.quoteblock .attribution {
+    font-size: 9pt;
+    font-style: normal;
+    color: #888888;
+    margin-top: 6pt;
+    text-align: right;
+}
+
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+
+.sidebarblock {
+    background-color: #f8f8f8;
+    border: 0.5pt solid #e7e7e7;
+    border-radius: 4pt;
+    padding: 8pt 12pt;
+    page-break-inside: avoid;
+}
+
+
+/* ── Description Lists ─────────────────────────────────────────── */
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin-left: 1.25em;
+}
+
+
+/* ── Footnotes ─────────────────────────────────────────────────── */
+/* Prince supports CSS-native footnotes via float: footnote.          */
+/* AH Formatter and WeasyPrint have partial support.                  */
+/* The asciidoctor HTML backend renders footnotes as endnotes at the  */
+/* bottom of the document, which works universally.                   */
+
+#footnotes {
+    font-size: 9pt;
+    border-top: 0.5pt solid #dddddd;
+    padding-top: 8pt;
+    margin-top: 24pt;
+}
+
+
+/* ── Print-Specific Overrides ──────────────────────────────────── */
+
+/* Hide the asciidoctor HTML TOC sidebar (we use @page TOC instead) */
+#toc.toc2 {
+    position: static;
+    width: auto;
+    padding: 0;
+    border: none;
+}
+
+/* Remove sticky positioning that doesn't make sense in print */
+#toc.toc2 #toctitle {
+    position: static;
+}
+
+/* Ensure the main content area uses full width (no sidebar offset) */
+body.toc2 #content,
+body.toc2 #header,
+body.toc2 #footer {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Hide screen-only navigation elements */
+#toc.toc2 + #content {
+    margin-left: 0;
+}
+
+
+/* ── Widows & Orphans ──────────────────────────────────────────── */
+
+p, li, dd {
+    widows: 3;
+    orphans: 3;
+}
+
+
+/* ── Mermaid ER Diagram Edge Fix ───────────────────────────────── */
+/* Mermaid's ER renderer generates edge paths with a corrupted       */
+/* style attribute: style="undefined;undefined stroke:#333333;..."   */
+/* The "undefined;undefined" prefix causes CSS parsers to skip the   */
+/* stroke declaration, making relationship lines invisible.          */
+/* These !important rules override the broken inline styles.         */
+
+.erDiagram .edgePaths path[data-edge="true"],
+.erDiagram .edgePaths path {
+    stroke: #333333 !important;
+    stroke-width: 1 !important;
+    fill: none !important;
+}
+
+
+/* ── Koncept Inline Notation ───────────────────────────────────── */
+/* Styles the koncept: inline macro for CSS Paged Media renderers.   */
+/* Same visual language as the HTML5 backend, adapted for print.     */
+
+.koncept,
+.koncept-link {
+    white-space: nowrap;
+}
+
+.koncept-k {
+    color: #2563eb;
+    font-weight: 700;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.92em;
+}
+
+.koncept-bracket {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.88em;
+}
+
+.koncept-name {
+    font-variant: small-caps;
+    color: #1e3a5f;
+    letter-spacing: 0.03em;
+    font-size: 0.95em;
+}
+
+.koncept-link {
+    text-decoration: none;
+    border-bottom: 0.5pt dotted #2563eb;
+}
+
+/* In print, suppress the generic URL display for Koncept links —    */
+/* the K[Name] notation is self-documenting. Show URL only if the    */
+/* reader explicitly needs it (override in project-specific CSS).    */
+.koncept-link[href]::after {
+    content: none;
+}
+
+
+/* ── SVG Diagram Sizing ───────────────────────────────────────── */
+/* Kroki-generated SVGs may have large viewBox dimensions.           */
+/* Constrain to page width and let aspect ratio handle the rest.     */
+
+svg {
+    max-width: 100%;
+    height: auto;
+}

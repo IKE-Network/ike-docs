@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IKE Docs — Doc Maven Plugin
+  ════════════════════════════
+
+  Maven plugin providing asciidoc/render goals for the IKE documentation
+  pipeline (prefix: idoc:). Hosts the 12 mojos that drive AsciiDoctorJ,
+  the 6 PDF renderers, SVG/DocBook fixups, breadcrumb injection, and
+  ike-doc packaging. Split from network.ike.tooling:ike-maven-plugin
+  to break the reverse-dep cycle on koncept-asciidoc-extension
+  (IKE-Network/ike-issues#215). Lives in ike-docs rather than
+  ike-pipeline to dissolve the extensions=true reactor-load cycle
+  (IKE-Network/ike-issues#216).
+
+  Build:    mvn install -pl ike-doc-maven-plugin -am
+  Test:     mvn idoc:help -pl ike-doc-maven-plugin
+  Artifact: network.ike.docs:ike-doc-maven-plugin:${project.version}
+-->
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+         http://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.docs</groupId>
+        <artifactId>ike-docs</artifactId>
+    </parent>
+
+    <artifactId>ike-doc-maven-plugin</artifactId>
+    <packaging>maven-plugin</packaging>
+
+    <name>IKE Doc Maven Plugin</name>
+    <description>
+        Maven plugin (prefix idoc:) driving the IKE documentation pipeline:
+        AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook
+        post-processing, breadcrumb injection, and ike-doc packaging.
+    </description>
+    <url>https://github.com/IKE-Network/ike-docs</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>IKE Community</name>
+        <url>https://ike.network</url>
+    </organization>
+
+    <distributionManagement>
+        <repository>
+            <id>ike-staging</id>
+            <url>${deploy.staging.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ike-snapshots</id>
+            <url>${deploy.snapshot.url}</url>
+        </snapshotRepository>
+        <site>
+            <id>ike-site</id>
+            <url>${site.deploy.url}/${project.artifactId}</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.install.skip>false</maven.install.skip>
+        <!-- Maven 4 API — provided by the Maven 4.0.0-rc-5 runtime -->
+        <maven-api.version>4.0.0-rc-5</maven-api.version>
+        <maven-plugin-plugin.version>4.0.0-beta-2</maven-plugin-plugin.version>
+        <!-- Exclude container tests by default (matches ike-workspace-maven-plugin
+             and ike-tooling plugin conventions) -->
+        <surefire.excludedGroups>container</surefire.excludedGroups>
+    </properties>
+
+    <dependencies>
+        <!-- Shared plugin plumbing: GoalRef, AbstractGoalMojo, GoalReport,
+             MojoParamSupport. Also consumed by ike-maven-plugin.
+             Introduced by ike-issues #215. -->
+        <dependency>
+            <groupId>network.ike.tooling</groupId>
+            <artifactId>ike-maven-plugin-support</artifactId>
+            <version>${ike-tooling.version}</version>
+        </dependency>
+        <!-- Claude instruction files (unpacked at validate phase) -->
+        <dependency>
+            <groupId>network.ike.tooling</groupId>
+            <artifactId>ike-build-standards</artifactId>
+            <version>${ike-tooling.version}</version>
+            <classifier>claude</classifier>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Maven 4 plugin API (native) -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-api-core</artifactId>
+            <version>${maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-api-di</artifactId>
+            <version>${maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-api-plugin</artifactId>
+            <version>${maven-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ── AsciidoctorJ toolchain (idoc:asciidoc, idoc:render-pdf) ── -->
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj</artifactId>
+            <version>${asciidoctorj.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>jruby-base</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj-pdf</artifactId>
+            <version>${asciidoctorj-pdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj-diagram</artifactId>
+            <version>${asciidoctorj-diagram.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby</artifactId>
+            <version>${jruby.version}</version>
+        </dependency>
+        <!-- Koncept inline macro + glossary postprocessor — intra-reactor
+             sibling in ike-docs. The old reverse-dep cycle on
+             network.ike.tooling:ike-maven-plugin (ike-issues #215) is
+             dissolved by relocating the doc mojos to this plugin and
+             the plugin to this repo (ike-issues #216). -->
+        <dependency>
+            <groupId>network.ike.docs</groupId>
+            <artifactId>koncept-asciidoc-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-di</artifactId>
+            <version>${maven-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin><artifactId>maven-clean-plugin</artifactId><version>3.4.0</version></plugin>
+                <plugin><artifactId>maven-install-plugin</artifactId><version>3.1.3</version></plugin>
+                <plugin><artifactId>maven-deploy-plugin</artifactId><version>3.1.3</version></plugin>
+                <plugin><artifactId>maven-compiler-plugin</artifactId><version>3.14.0</version></plugin>
+                <plugin><artifactId>maven-resources-plugin</artifactId><version>3.3.1</version></plugin>
+                <plugin><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version></plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>${maven-plugin-plugin.version}</version>
+                <configuration>
+                    <requiredJavaVersion>${java.version}</requiredJavaVersion>
+                    <goalPrefix>idoc</goalPrefix>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm-tree</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm-commons</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

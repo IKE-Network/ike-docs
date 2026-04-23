@@ -1,0 +1,78 @@
+<!--
+  IKE Colophon — Production Credits
+  ────────────────────────────────────────────────────────────────
+  Injected at end of <body> by AsciiDoc's docinfo=shared mechanism.
+
+  At PDF render time, JavaScript in docinfo.html (head) moves this
+  div before #header, making it the first page of the document —
+  before the title page.  Prince XML and Antenna House execute the
+  script; WeasyPrint (no JS) renders the colophon at the end.
+
+  The Prince free/non-commercial watermark lands on page 1, which
+  is now this colophon — contextually appropriate alongside the
+  acknowledgment of Prince's rendering support.
+
+  Page flow (duplex):
+    Sheet 1 recto:  Colophon  (this div)     ← Prince watermark
+    Sheet 1 verso:  Blank     (CSS break-after: right)
+    Sheet 2 recto:  Title page (#header)
+    Sheet 2 verso:  Blank or abstract
+    Sheet 3 recto:  Table of Contents
+    ...
+    Next recto:     Chapter 1 — page counter resets to Arabic 1
+
+  Copyright 2025 IKE Community — Apache License 2.0
+-->
+<div id="ike-colophon">
+    <div class="colophon-inner">
+
+        <p class="colophon-heading">Colophon</p>
+
+        <p class="colophon-intro">
+            This document was typeset from AsciiDoc source
+            using the IKE Documentation Pipeline.
+        </p>
+
+        <table class="colophon-credits">
+            <tr>
+                <td class="colophon-label">Source format</td>
+                <td>AsciiDoc — asciidoctor.org</td>
+            </tr>
+            <tr>
+                <td class="colophon-label">Build system</td>
+                <td>Apache Maven</td>
+            </tr>
+            <tr>
+                <td class="colophon-label">PDF rendering</td>
+                <td class="colophon-renderer">
+                    <!-- JS populates this; fallback shown if no JS -->
+                    IKE Documentation Pipeline
+                </td>
+            </tr>
+            <tr>
+                <td class="colophon-label">Typography</td>
+                <td>Noto Serif, Noto Sans, Noto Sans Mono, Noto Sans Math
+                    — Google Noto Project</td>
+            </tr>
+            <tr>
+                <td class="colophon-label">Diagrams</td>
+                <td>Kroki (kroki.io) — PlantUML, Mermaid, GraphViz</td>
+            </tr>
+            <tr>
+                <td class="colophon-label">Terminology</td>
+                <td>Koncept notation — IKE Community</td>
+            </tr>
+        </table>
+
+        <p class="colophon-acknowledgment">
+            The IKE Community thanks YesLogic Pty. Ltd. for their
+            rendering support of this open-source project through
+            Prince XML.
+        </p>
+
+        <p class="colophon-license">
+            Licensed under Apache License 2.0 — ike.network
+        </p>
+
+    </div>
+</div>

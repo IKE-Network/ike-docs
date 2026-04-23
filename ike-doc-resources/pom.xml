@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IKE Community — Documentation Resources
+  ════════════════════════════════════════
+
+  Packages shared build resources (assembly descriptors, themes,
+  renderer configs, SVGO configs) as a JAR artifact. Child projects
+  inheriting from ike-parent unpack this JAR at initialize phase
+  via maven-dependency-plugin.
+
+  Build:    mvn install
+  Artifact: network.ike.docs:ike-doc-resources:${project.version}:jar
+-->
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+         http://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.docs</groupId>
+        <artifactId>ike-docs</artifactId>
+    </parent>
+
+    <artifactId>ike-doc-resources</artifactId>
+    <packaging>jar</packaging>
+
+    <name>IKE Documentation Resources</name>
+    <description>
+        Shared build resources for the IKE documentation pipeline:
+        assembly descriptors, PDF themes, renderer configurations,
+        SVGO configs, and AsciiDoc shared docinfo.
+    </description>
+    <url>https://github.com/IKE-Network/ike-docs</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>IKE Community</name>
+        <url>https://ike.network</url>
+    </organization>
+
+    <distributionManagement>
+        <repository>
+            <id>ike-staging</id>
+            <url>${deploy.staging.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ike-snapshots</id>
+            <url>${deploy.snapshot.url}</url>
+        </snapshotRepository>
+        <site>
+            <id>ike-site</id>
+            <url>scpexe://proxy/srv/ike-site/ike-docs/${project.artifactId}</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin><artifactId>maven-clean-plugin</artifactId><version>3.4.0</version></plugin>
+                <plugin><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version></plugin>
+                <plugin><artifactId>maven-install-plugin</artifactId><version>3.1.3</version></plugin>
+                <plugin><artifactId>maven-resources-plugin</artifactId><version>3.3.1</version></plugin>
+                <plugin><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version></plugin>
+                <plugin><artifactId>maven-surefire-plugin</artifactId><version>3.5.2</version></plugin>
+                <plugin><artifactId>maven-deploy-plugin</artifactId><version>3.1.3</version></plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

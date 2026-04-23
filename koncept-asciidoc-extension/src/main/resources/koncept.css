@@ -1,0 +1,89 @@
+/*
+ * Koncept AsciiDoc Extension - Optional Stylesheet
+ *
+ * Include in your AsciiDoc document via:
+ *   :stylesheet: koncept.css
+ * or link in your HTML template.
+ */
+
+/* Inline badge hover effect */
+a.koncept-ref {
+    text-decoration: none;
+}
+
+a.koncept-ref:hover svg rect {
+    fill: #1a3a5a;
+}
+
+a.koncept-ref:hover svg {
+    filter: brightness(0.85);
+}
+
+/* Glossary section */
+.koncept-glossary-section {
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 2px solid #2a5a8a;
+}
+
+.koncept-glossary-section h2 {
+    color: #2a5a8a;
+}
+
+/* Definition list entries */
+dl.koncept-definitions dt {
+    margin-top: 1.2em;
+    padding: 0.3em 0.5em;
+    background-color: #f0f4f8;
+    border-left: 4px solid #2a5a8a;
+}
+
+dl.koncept-definitions dd {
+    margin-left: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Definition text */
+p.koncept-def-text {
+    margin: 0.4em 0;
+    line-height: 1.5;
+}
+
+/* DL axiom display */
+p.koncept-axiom code {
+    display: block;
+    padding: 0.5em 0.8em;
+    margin: 0.3em 0;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 0.95em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Terminology identifiers */
+p.koncept-ids {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 0.2em;
+}
+
+.koncept-sctid,
+.koncept-iri {
+    font-family: monospace;
+}
+
+/* Reference count badge */
+.koncept-ref-count {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #6c757d;
+}
+
+/* Missing definition indicator */
+p.koncept-def-missing {
+    color: #dc3545;
+    font-style: italic;
+}

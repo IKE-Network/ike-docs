@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IKE Community — Minimal Noto Font Subset
+  ═════════════════════════════════════════
+
+  Downloads 13 TTF files from notofonts GitHub releases during the Maven
+  build, assembles them into a single ZIP. No fonts are committed to git;
+  `mvn install` is fully self-sufficient.
+
+  Cached in ~/.m2/repository/.cache/download-maven-plugin/ after first
+  download — no network hit on subsequent builds.
+
+  ZIP contents (13 TTFs at root):
+    NotoSerif-Regular.ttf, NotoSerif-Bold.ttf,
+    NotoSerif-Italic.ttf, NotoSerif-BoldItalic.ttf,
+    NotoSans-Regular.ttf, NotoSans-Bold.ttf,
+    NotoSans-Italic.ttf, NotoSans-BoldItalic.ttf,
+    NotoSansMono-Regular.ttf, NotoSansMono-Bold.ttf,
+    NotoSansMath-Regular.ttf,
+    NotoSansSymbols-Regular.ttf,
+    NotoSansSymbols2-Regular.ttf
+-->
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+         http://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.docs</groupId>
+        <artifactId>ike-docs</artifactId>
+    </parent>
+
+    <artifactId>minimal-fonts</artifactId>
+    <packaging>pom</packaging>
+
+    <name>IKE Minimal Fonts</name>
+    <description>Minimal Noto font subset for IKE documentation (~4MB)</description>
+    <url>https://github.com/IKE-Network/ike-minimal-fonts</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>SIL Open Font License 1.1</name>
+            <url>https://scripts.sil.org/OFL</url>
+            <distribution>repo</distribution>
+            <comments>
+                All fonts from Google Noto project, licensed under SIL OFL 1.1.
+                Text fonts: notofonts/latin-greek-cyrillic (NotoSans v2.015, NotoSerif v2.015, NotoSansMono v2.014)
+                Math font:  notofonts/math (NotoSansMath v3.000)
+                Symbol fonts: notofonts/symbols (NotoSansSymbols v2.003, NotoSansSymbols2 v2.008)
+            </comments>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>IKE Community</name>
+        <url>https://ike.network</url>
+    </organization>
+
+    <distributionManagement>
+        <repository>
+            <id>ike-staging</id>
+            <url>${deploy.staging.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ike-snapshots</id>
+            <url>${deploy.snapshot.url}</url>
+        </snapshotRepository>
+        <site>
+            <id>ike-site</id>
+            <url>scpexe://proxy/srv/ike-site/ike-docs/${project.artifactId}</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <download-maven-plugin.version>1.13.0</download-maven-plugin.version>
+
+
+        <!-- Staging directory where we assemble the JAR contents -->
+        <staging.directory>${project.build.directory}/staging</staging.directory>
+        <downloads.directory>${project.build.directory}/downloads</downloads.directory>
+
+        <!-- notofonts GitHub release base URLs -->
+        <noto.lgc.base>https://github.com/notofonts/latin-greek-cyrillic/releases/download</noto.lgc.base>
+        <noto.math.base>https://github.com/notofonts/math/releases/download</noto.math.base>
+        <noto.symbols.base>https://github.com/notofonts/symbols/releases/download</noto.symbols.base>
+    </properties>
+
+    <dependencies>
+        <!-- Standards unpacked by inherited unpack-claude-standards
+             (unpack-dependencies, reactor-aware) -->
+        <dependency>
+            <groupId>network.ike.tooling</groupId>
+            <artifactId>ike-build-standards</artifactId>
+            <version>${ike-tooling.version}</version>
+            <classifier>claude</classifier>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin><artifactId>maven-clean-plugin</artifactId><version>3.4.0</version></plugin>
+                <plugin><artifactId>maven-resources-plugin</artifactId><version>3.3.1</version></plugin>
+                <plugin><artifactId>maven-install-plugin</artifactId><version>3.1.3</version></plugin>
+                <plugin><artifactId>maven-deploy-plugin</artifactId><version>3.1.3</version></plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-claude-standards</id>
+                        <!-- inherits config from pluginManagement -->
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 1. Download Noto font ZIPs from GitHub releases               -->
+            <!--    Cached in ~/.m2/repository/.cache/download-maven-plugin/    -->
+            <!--    after first download — no network hit on subsequent builds. -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${download-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>download-noto-serif</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.lgc.base}/NotoSerif-v2.015/NotoSerif-v2.015.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-noto-sans</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.lgc.base}/NotoSans-v2.015/NotoSans-v2.015.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-noto-sans-mono</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.lgc.base}/NotoSansMono-v2.014/NotoSansMono-v2.014.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-noto-sans-math</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.math.base}/NotoSansMath-v3.000/NotoSansMath-v3.000.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-noto-sans-symbols</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.symbols.base}/NotoSansSymbols-v2.003/NotoSansSymbols-v2.003.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-noto-sans-symbols2</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>wget</goal></goals>
+                        <configuration>
+                            <url>${noto.symbols.base}/NotoSansSymbols2-v2.008/NotoSansSymbols2-v2.008.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${downloads.directory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 2. Assemble fonts: cherry-pick the 13 needed TTFs into staging -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <!-- NotoSerif: Regular, Bold, Italic, BoldItalic -->
+                    <execution>
+                        <id>copy-noto-serif</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSerif/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSerif-Regular.ttf</include>
+                                        <include>NotoSerif-Bold.ttf</include>
+                                        <include>NotoSerif-Italic.ttf</include>
+                                        <include>NotoSerif-BoldItalic.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- NotoSans: Regular, Bold, Italic, BoldItalic -->
+                    <execution>
+                        <id>copy-noto-sans</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSans/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSans-Regular.ttf</include>
+                                        <include>NotoSans-Bold.ttf</include>
+                                        <include>NotoSans-Italic.ttf</include>
+                                        <include>NotoSans-BoldItalic.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- NotoSansMono: Regular, Bold -->
+                    <execution>
+                        <id>copy-noto-sans-mono</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSansMono/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSansMono-Regular.ttf</include>
+                                        <include>NotoSansMono-Bold.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- NotoSansMath: Regular -->
+                    <execution>
+                        <id>copy-noto-sans-math</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSansMath/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSansMath-Regular.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- NotoSansSymbols: Regular -->
+                    <execution>
+                        <id>copy-noto-sans-symbols</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSansSymbols/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSansSymbols-Regular.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- NotoSansSymbols2: Regular -->
+                    <execution>
+                        <id>copy-noto-sans-symbols2</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${staging.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${downloads.directory}/NotoSansSymbols2/unhinted/ttf</directory>
+                                    <includes>
+                                        <include>NotoSansSymbols2-Regular.ttf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 3. Package staged TTFs into a ZIP artifact                   -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>zip-fonts</id>
+                        <phase>package</phase>
+                        <goals><goal>single</goal></goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/assembly/fonts.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

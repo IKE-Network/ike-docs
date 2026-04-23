@@ -1,0 +1,222 @@
+<!--
+  IKE Shared Document Info
+  ────────────────────────────────────────────────────────────────
+  Injected into <head> by asciidoctor's docinfo=shared attribute.
+  Lives in: ike-parent/src/shared-asciidoc/
+  Resolved via: docinfodir=${ike.shared.asciidoc.directory}
+
+  All IKE projects inheriting ike-parent get these
+  styles automatically.  Project-specific additions go in a
+  docinfo.html in the project's own src/docs/asciidoc/ directory.
+
+  Copyright 2025 IKE Community — Apache License 2.0
+-->
+
+<!-- ── Site Navigation Bar ─────────────────────────────────── -->
+<!-- Breadcrumb bar matching the sentry-purple theme.           -->
+<!-- Inserted before #header by DOMContentLoaded script below.  -->
+<!-- Hidden for PDF renderers via @media print.                 -->
+<style>
+@media print {
+    #ike-site-nav { display: none !important; }
+}
+#ike-site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    /* Full viewport width — break out of any parent padding */
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    background: #4a2a6a;
+    color: #fff;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#ike-site-nav a {
+    color: #dcc8f0;
+    text-decoration: none;
+}
+#ike-site-nav a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+#ike-site-nav .nav-sep {
+    color: #a88cc0;
+    margin: 0 2px;
+}
+#ike-site-nav .nav-current {
+    color: #fff;
+    font-weight: 600;
+}
+</style>
+
+<!-- ── Colophon: hide on screen, relocate for print renderers ── -->
+<style>
+/* Hide the colophon in browser / screen HTML output.
+   The print stylesheet (ike-print.css) makes it visible and
+   styles it as the first page of the PDF.                     */
+#ike-colophon {
+    display: none;
+}
+</style>
+<script>
+/* Move the colophon div from end-of-body (where docinfo-footer
+   injects it) to before #header, making it the first page when
+   a CSS Paged Media renderer processes the document.
+
+   Prince XML and Antenna House execute this script before
+   rendering.  WeasyPrint ignores it (no JS support) — the
+   colophon stays at the end for WeasyPrint output.            */
+document.addEventListener('DOMContentLoaded', function() {
+    var header = document.getElementById('header');
+
+    /* ── Site navigation breadcrumb bar ──────────────────────── */
+    /* Build a breadcrumb bar from the document title.  When the
+       rendered doc lives in target/site/docs/, "../index.html"
+       navigates back to the module's Maven site page.            */
+    var nav = document.createElement('div');
+    nav.id = 'ike-site-nav';
+    var docTitle = document.querySelector('#header h1')
+                 || document.querySelector('#header h2');
+    var title = docTitle ? docTitle.textContent.trim() : 'Document';
+    nav.innerHTML =
+        '<a href="../index.html">Site</a>' +
+        '<span class="nav-sep">\u203a</span>' +
+        '<span class="nav-current">' + title + '</span>';
+    if (header && header.parentNode) {
+        header.parentNode.insertBefore(nav, header);
+    }
+
+    /* ── Colophon relocation ────────────────────────────────── */
+    var colophon = document.getElementById('ike-colophon');
+    if (colophon && header && header.parentNode) {
+        header.parentNode.insertBefore(colophon, header);
+    }
+
+    /* Detect the renderer and populate the credits table.      */
+    var rendererCell = document.querySelector('.colophon-renderer');
+    if (rendererCell) {
+        if (typeof prince !== 'undefined') {
+            rendererCell.textContent = 'Prince XML — princexml.com';
+        } else if (typeof AHFormatter !== 'undefined') {
+            rendererCell.textContent = 'Antenna House Formatter — antennahouse.com';
+        }
+        /* WeasyPrint: no JS, so the static fallback text remains. */
+    }
+});
+</script>
+
+<style>
+/* ── Koncept SVG Badge Styling ──────────────────────────────── */
+/* Styles for the k:Name[] inline macro SVG badges and           */
+/* auto-generated glossary from koncept-asciidoc-extension.      */
+
+/* Inline badge hover effect */
+a.koncept-ref {
+    text-decoration: none;
+}
+
+a.koncept-ref:hover svg rect {
+    fill: #1a3a5a;
+}
+
+a.koncept-ref:hover svg {
+    filter: brightness(0.85);
+}
+
+/* Glossary section */
+.koncept-glossary-section {
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 2px solid #2a5a8a;
+}
+
+.koncept-glossary-section h2 {
+    color: #2a5a8a;
+}
+
+/* Definition list entries */
+dl.koncept-definitions dt {
+    margin-top: 1.2em;
+    padding: 0.3em 0.5em;
+    background-color: #f0f4f8;
+    border-left: 4px solid #2a5a8a;
+}
+
+dl.koncept-definitions dd {
+    margin-left: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Definition text */
+p.koncept-def-text {
+    margin: 0.4em 0;
+    line-height: 1.5;
+}
+
+/* DL axiom display */
+p.koncept-axiom code {
+    display: block;
+    padding: 0.5em 0.8em;
+    margin: 0.3em 0;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 0.95em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Terminology identifiers */
+p.koncept-ids {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 0.2em;
+}
+
+.koncept-sctid,
+.koncept-iri {
+    font-family: monospace;
+}
+
+/* Reference count badge */
+.koncept-ref-count {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #6c757d;
+}
+
+/* Missing definition indicator */
+p.koncept-def-missing {
+    color: #dc3545;
+    font-style: italic;
+}
+
+
+/* ── Mermaid ER Diagram Edge Fix ──────────────────────────────── */
+/* Mermaid's ER renderer generates edge paths with a corrupted      */
+/* style attribute: style="undefined;undefined stroke:#333333;..."  */
+/* The "undefined;undefined" prefix causes CSS parsers to skip the  */
+/* stroke declaration, making relationship lines invisible.         */
+/* These !important rules override the broken inline styles.        */
+
+.erDiagram .edgePaths path[data-edge="true"] {
+    stroke: #333333 !important;
+    stroke-width: 1 !important;
+    fill: none !important;
+}
+
+/* Also catch edges without the data-edge attribute (older Mermaid) */
+.erDiagram .edgePaths path {
+    stroke: #333333 !important;
+    stroke-width: 1 !important;
+    fill: none !important;
+}
+</style>

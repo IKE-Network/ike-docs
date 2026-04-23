@@ -1,0 +1,72 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: network.ike.StandardCleanup
+displayName: IKE Standard Cleanup
+description: Standard code cleanup for IKE projects
+recipeList:
+  - org.openrewrite.java.OrderImports
+  - org.openrewrite.java.format.AutoFormat
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: network.ike.MigrateGroupIds
+displayName: IKE GroupId Migration (ike-docs split)
+description: >-
+  Migrate legacy network.ike and network.ike.pipeline groupId references
+  for artifacts that now live in the ike-docs repo (IKE-Network/ike-issues#216).
+  Run with:
+  mvn rewrite:run -Drewrite.activeRecipes=network.ike.MigrateGroupIds
+recipeList:
+  # ── ike-docs artifacts (moved from network.ike.pipeline) ────────
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: ike-doc-resources
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: koncept-asciidoc-extension
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: minimal-fonts
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: docbook-xsl
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: semantic-linebreak
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: ike-doc-maven-plugin
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangePluginGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: semantic-linebreak
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangePluginGroupIdAndArtifactId:
+      oldGroupId: network.ike.pipeline
+      oldArtifactId: ike-doc-maven-plugin
+      newGroupId: network.ike.docs
+  # ── Legacy network.ike → network.ike.docs (pre-split refs) ──────
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike
+      oldArtifactId: ike-doc-resources
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike
+      oldArtifactId: koncept-asciidoc-extension
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike
+      oldArtifactId: minimal-fonts
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike
+      oldArtifactId: docbook-xsl
+      newGroupId: network.ike.docs
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: network.ike
+      oldArtifactId: semantic-linebreak
+      newGroupId: network.ike.docs

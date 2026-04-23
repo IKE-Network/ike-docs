@@ -1,0 +1,286 @@
+# IKE Default PDF Theme
+# Professional theme for IKE Community documentation
+# Optimized for medical/scientific content with proper symbol support
+
+font:
+  catalog:
+    # Serif font for body text (professional, readable)
+    NotoSerif:
+      normal: NotoSerif-Regular.ttf
+      italic: NotoSerif-Italic.ttf
+      bold: NotoSerif-Bold.ttf
+      bold_italic: NotoSerif-BoldItalic.ttf
+    
+    # Sans-serif for headings (clean, modern)
+    NotoSans:
+      normal: NotoSans-Regular.ttf
+      italic: NotoSans-Italic.ttf
+      bold: NotoSans-Bold.ttf
+      bold_italic: NotoSans-BoldItalic.ttf
+    
+    # Monospace for code
+    NotoSansMono:
+      normal: NotoSansMono-Regular.ttf
+      italic: NotoSansMono-Regular.ttf
+      bold: NotoSansMono-Bold.ttf
+      bold_italic: NotoSansMono-Bold.ttf
+    
+    # Mathematical operators: ⊑ ⊓ ∃ ∀ ≡ (U+2200–U+22FF and beyond)
+    NotoSansMath:
+      normal: NotoSansMath-Regular.ttf
+      italic: NotoSansMath-Regular.ttf
+      bold: NotoSansMath-Regular.ttf
+      bold_italic: NotoSansMath-Regular.ttf
+    
+    # Circled letters, alchemical, astronomical, technical symbols
+    NotoSansSymbols:
+      normal: NotoSansSymbols-Regular.ttf
+      italic: NotoSansSymbols-Regular.ttf
+      bold: NotoSansSymbols-Regular.ttf
+      bold_italic: NotoSansSymbols-Regular.ttf
+    
+    # Arrows, dingbats, geometric shapes, Braille, chess, transport
+    NotoSansSymbols2:
+      normal: NotoSansSymbols2-Regular.ttf
+      italic: NotoSansSymbols2-Regular.ttf
+      bold: NotoSansSymbols2-Regular.ttf
+      bold_italic: NotoSansSymbols2-Regular.ttf
+  
+  # Fallback chain for glyphs missing from the primary font family.
+  # NotoSerif → NotoSansMath (⊑⊓∃∀≡) → NotoSansSymbols → NotoSansSymbols2
+  fallbacks:
+    - NotoSansMath
+    - NotoSansSymbols
+    - NotoSansSymbols2
+
+page:
+  background-color: ffffff
+  layout: portrait
+  margin: [0.75in, 1in, 0.75in, 1in]
+  size: Letter
+
+base:
+  font-family: NotoSerif
+  font-color: 333333
+  font-size: 10.5
+  line-height-length: 14
+  line-height: $base-line-height-length / $base-font-size
+  font-size-large: 13
+  font-size-small: 9
+  font-size-min: 6
+  font-style: normal
+  border-color: eeeeee
+  border-radius: 4
+  border-width: 0.5
+
+vertical-rhythm: $base-line-height-length
+horizontal-rhythm: $base-line-height-length
+
+link:
+  font-color: 428bca
+  text-decoration: none
+
+codespan:
+  font-family: NotoSansMono
+  font-color: b12146
+  font-size: 9
+
+heading:
+  font-family: NotoSans
+  font-color: 2c3e50
+  font-style: bold
+  h1-font-size: 24
+  h2-font-size: 18
+  h3-font-size: 14
+  h4-font-size: 12
+  h5-font-size: 11
+  h6-font-size: 10
+  line-height: 1.2
+  margin-top: $vertical-rhythm * 0.5
+  margin-bottom: $vertical-rhythm * 0.5
+
+title-page:
+  align: center
+  title:
+    top: 40%
+    font-size: 36
+    font-color: 2c3e50
+    font-family: NotoSans
+    font-style: bold
+    line-height: 1.2
+  subtitle:
+    font-size: 18
+    font-color: 7f8c8d
+    font-family: NotoSans
+    font-style: normal
+    line-height: 1.4
+  authors:
+    margin-top: $base-font-size * 5
+    font-size: 13
+    font-color: 333333
+  revision:
+    margin-top: $base-font-size * 2
+    font-size: 11
+    font-color: 7f8c8d
+
+block:
+  margin-top: 0
+  margin-bottom: $vertical-rhythm
+
+caption:
+  align: left
+  font-size: 9
+  font-style: italic
+  margin-inside: $vertical-rhythm / 3
+  margin-outside: 0
+
+lead:
+  font-size: $base-font-size-large
+  line-height: 1.4
+  font-style: italic
+
+abstract:
+  font-color: 555555
+  font-size: 10
+  line-height: 1.4
+  font-style: italic
+  first-line-font-style: bold
+  padding: [0, $horizontal-rhythm * 0.5, 0, $horizontal-rhythm * 0.5]
+
+admonition:
+  column-rule-color: $base-border-color
+  column-rule-width: $base-border-width
+  padding: [0, $horizontal-rhythm, 0, $horizontal-rhythm]
+  label:
+    text-transform: uppercase
+    font-style: bold
+
+quote:
+  font-color: 555555
+  font-size: 10
+  border-color: $base-border-color
+  border-width: 5
+  padding: [0, $horizontal-rhythm, $block-margin-bottom * -0.75, $horizontal-rhythm + $quote-border-width / 2]
+  cite:
+    font-size: 9
+    font-color: 999999
+
+code:
+  font-family: NotoSansMono
+  font-size: 9
+  padding: 4
+  line-height: 1.3
+  background-color: f5f5f5
+  border-color: e3e3e3
+  border-radius: $base-border-radius
+  border-width: 0.75
+
+conum:
+  font-family: NotoSansMono
+  font-color: b12146
+  font-size: 8
+  line-height: 4 / 3
+
+example:
+  border-color: $base-border-color
+  border-radius: $base-border-radius
+  border-width: 0.75
+  padding: [$vertical-rhythm, $horizontal-rhythm, 0, $horizontal-rhythm]
+
+image:
+  align: left
+
+prose:
+  margin-top: 0
+  margin-bottom: $vertical-rhythm
+  text-indent: 0
+
+sidebar:
+  background-color: f8f8f8
+  border-color: e7e7e7
+  border-radius: $base-border-radius
+  border-width: $base-border-width
+  padding: [$vertical-rhythm, $vertical-rhythm * 1.25, 0, $vertical-rhythm * 1.25]
+  title:
+    align: center
+    font-color: 2c3e50
+    font-family: NotoSans
+    font-size: 11
+    font-style: bold
+
+thematic-break:
+  border-color: $base-border-color
+  border-style: solid
+  border-width: $base-border-width
+  margin-top: $vertical-rhythm * 0.5
+  margin-bottom: $vertical-rhythm * 1.5
+
+description-list:
+  term-font-style: bold
+  term-spacing: $vertical-rhythm / 4
+  description-indent: $horizontal-rhythm * 1.25
+
+list:
+  indent: $horizontal-rhythm * 1.5
+  item-spacing: $vertical-rhythm / 2
+
+table:
+  background-color: ffffff
+  border-color: dddddd
+  border-width: $base-border-width
+  cell-padding: 3
+  head:
+    font-style: bold
+    font-family: NotoSans
+    background-color: f5f5f5
+    border-bottom-width: 1.5
+  body:
+    stripe-background-color: f9f9f9
+  foot:
+    background-color: f0f0f0
+
+toc:
+  font-family: NotoSans
+  font-size: 10
+  line-height: 1.4
+  title:
+    font-size: 18
+    font-style: bold
+    font-color: 2c3e50
+  indent: $horizontal-rhythm
+  dot-leader:
+    content: '. '
+    font-color: a9a9a9
+
+running-content:
+  start-at: toc
+
+header:
+  font-size: 9
+  line-height: 1
+  vertical-align: middle
+  recto:
+    right:
+      content: '{chapter-title}'
+  verso:
+    left:
+      content: '{chapter-title}'
+
+footer:
+  font-size: 9
+  border-color: dddddd
+  border-width: 0.5
+  height: $base-line-height-length * 2.5
+  line-height: 1
+  padding: [$base-line-height-length / 2, 1, 0, 1]
+  vertical-align: top
+  recto:
+    right:
+      content: '{page-number}'
+    left:
+      content: '{document-title}'
+  verso:
+    left:
+      content: '{page-number}'
+    right:
+      content: '{document-title}'

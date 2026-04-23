@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IKE Community — RenderX XEP Font Configuration
+  ══════════════════════════════════════════════════════════════════
+
+  Registers the 13 Noto fonts from ike-minimal-fonts for use with
+  RenderX XEP.  The font-family names here MUST match the names
+  used in the DocBook XSL customization layer (ike-fo.xsl):
+
+    body.font.family     = NotoSerif
+    title.font.family    = NotoSans
+    monospace.font.family = NotoSansMono
+    symbol.font.family   = NotoSansSymbols, NotoSansSymbols2, NotoSansMath
+
+  Installation:
+    Include this file in your xep.xml via <font-group href="path/to/xep-ike-fonts.xml"/>
+    OR merge the <font-group> element into your existing xep.xml <fonts> section.
+
+  The xml:base attribute points to the fonts directory relative to this file's
+  location.  At build time, the fonts are copied to the same directory as
+  this configuration file (target/xep-config/fonts/).
+
+  Copyright 2025 IKE Community — Apache License 2.0
+-->
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- Noto Fonts for IKE Documentation                                   -->
+<!-- xml:base resolves font file paths relative to this config file.    -->
+<!-- embed="true" subset="true" → fonts are embedded and subsetted in   -->
+<!-- the output PDF, producing self-contained documents.                -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<font-group xmlns="http://www.renderx.com/XEP/config"
+            xml:base="fonts/"
+            label="IKE Noto Fonts"
+            embed="true"
+            subset="true">
+
+  <!-- ─── NotoSerif: Body text ────────────────────────────────────── -->
+  <font-family name="NotoSerif">
+    <font><font-data ttf="NotoSerif-Regular.ttf"/></font>
+    <font style="italic"><font-data ttf="NotoSerif-Italic.ttf"/></font>
+    <font weight="bold"><font-data ttf="NotoSerif-Bold.ttf"/></font>
+    <font weight="bold" style="italic"><font-data ttf="NotoSerif-BoldItalic.ttf"/></font>
+  </font-family>
+
+  <!-- ─── NotoSans: Headings, headers/footers, UI elements ───────── -->
+  <font-family name="NotoSans">
+    <font><font-data ttf="NotoSans-Regular.ttf"/></font>
+    <font style="italic"><font-data ttf="NotoSans-Italic.ttf"/></font>
+    <font weight="bold"><font-data ttf="NotoSans-Bold.ttf"/></font>
+    <font weight="bold" style="italic"><font-data ttf="NotoSans-BoldItalic.ttf"/></font>
+  </font-family>
+
+  <!-- ─── NotoSansMono: Code blocks, inline code, CLI output ──────── -->
+  <font-family name="NotoSansMono">
+    <font><font-data ttf="NotoSansMono-Regular.ttf"/></font>
+    <font weight="bold"><font-data ttf="NotoSansMono-Bold.ttf"/></font>
+  </font-family>
+
+  <!-- ─── NotoSansMath: Mathematical operators (U+2200–U+22FF) ───── -->
+  <!-- Used for DL axiom notation: ∀ ∃ ≡ ⊑ ⊓ ⊔ ¬ → etc.             -->
+  <font-family name="NotoSansMath">
+    <font><font-data ttf="NotoSansMath-Regular.ttf"/></font>
+  </font-family>
+
+  <!-- ─── NotoSansSymbols: Technical and scientific symbols ─────── -->
+  <font-family name="NotoSansSymbols">
+    <font><font-data ttf="NotoSansSymbols-Regular.ttf"/></font>
+  </font-family>
+
+  <!-- ─── NotoSansSymbols2: Arrows, dingbats, geometric shapes ──── -->
+  <font-family name="NotoSansSymbols2">
+    <font><font-data ttf="NotoSansSymbols2-Regular.ttf"/></font>
+  </font-family>
+
+</font-group>

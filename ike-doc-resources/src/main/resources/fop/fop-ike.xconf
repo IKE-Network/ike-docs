@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IKE Community — Apache FOP Configuration
+  ══════════════════════════════════════════════════════════════════
+
+  Registers the 13 Noto fonts from ike-minimal-fonts for use with
+  Apache FOP.  The font-family names here MUST match the names
+  used in the DocBook XSL customization layer (ike-fo.xsl):
+
+    body.font.family     = NotoSerif
+    title.font.family    = NotoSans
+    monospace.font.family = NotoSansMono
+    symbol.font.family   = NotoSansSymbols, NotoSansSymbols2, NotoSansMath
+
+  At build time, this file and the TTF fonts are copied to:
+    target/fop-config/fop-ike.xconf
+    target/fop-config/fonts/*.ttf
+
+  The <font-base> element resolves font embed-url paths relative
+  to this config file's location.
+
+  Copyright 2025 IKE Community — Apache License 2.0
+-->
+<fop version="1.0">
+
+  <!-- Base URI for font file paths (relative to this config file) -->
+  <font-base>fonts/</font-base>
+
+  <renderers>
+    <renderer mime="application/pdf">
+
+      <!-- ─── NotoSerif: Body text ────────────────────────────────── -->
+      <fonts>
+        <font embed-url="NotoSerif-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSerif" style="normal" weight="normal"/>
+        </font>
+        <font embed-url="NotoSerif-Italic.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSerif" style="italic" weight="normal"/>
+        </font>
+        <font embed-url="NotoSerif-Bold.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSerif" style="normal" weight="bold"/>
+        </font>
+        <font embed-url="NotoSerif-BoldItalic.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSerif" style="italic" weight="bold"/>
+        </font>
+
+        <!-- ─── NotoSans: Headings, headers/footers, UI elements ── -->
+        <font embed-url="NotoSans-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSans" style="normal" weight="normal"/>
+        </font>
+        <font embed-url="NotoSans-Italic.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSans" style="italic" weight="normal"/>
+        </font>
+        <font embed-url="NotoSans-Bold.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSans" style="normal" weight="bold"/>
+        </font>
+        <font embed-url="NotoSans-BoldItalic.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSans" style="italic" weight="bold"/>
+        </font>
+
+        <!-- ─── NotoSansMono: Code blocks, inline code, CLI output ── -->
+        <font embed-url="NotoSansMono-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSansMono" style="normal" weight="normal"/>
+        </font>
+        <font embed-url="NotoSansMono-Bold.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSansMono" style="normal" weight="bold"/>
+        </font>
+
+        <!-- ─── NotoSansMath: Mathematical operators (U+2200-U+22FF) ── -->
+        <font embed-url="NotoSansMath-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSansMath" style="normal" weight="normal"/>
+        </font>
+
+        <!-- ─── NotoSansSymbols: Technical and scientific symbols ── -->
+        <font embed-url="NotoSansSymbols-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSansSymbols" style="normal" weight="normal"/>
+        </font>
+
+        <!-- ─── NotoSansSymbols2: Arrows, dingbats, geometric shapes ── -->
+        <font embed-url="NotoSansSymbols2-Regular.ttf" embedding-mode="subset">
+          <font-triplet name="NotoSansSymbols2" style="normal" weight="normal"/>
+        </font>
+      </fonts>
+
+    </renderer>
+  </renderers>
+
+</fop>

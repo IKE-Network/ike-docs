@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IKE Community — RenderX XEP Configuration Wrapper
+  ══════════════════════════════════════════════════════
+
+  Extends the default XEP configuration with IKE Noto fonts.
+  Passed to XEP via -Dcom.renderx.xep.CONFIG=path/to/xep-ike.xml
+
+  At build time this file is staged to target/xep-config/ alongside
+  a fonts/ directory containing the Noto TTF files.
+
+  Copyright 2025 IKE Community — Apache License 2.0
+-->
+<config xmlns="http://www.renderx.com/XEP/config">
+
+  <options>
+    <option name="TMPDIR" value="none"/>
+  </options>
+
+  <fonts default-family="NotoSerif">
+
+    <!-- Base 14 PDF fonts (always available, not embedded) -->
+    <font-group label="Base 14" embed="false" subset="false" initial-encoding="standard">
+      <font-family name="Courier">
+        <font><font-data afm="Courier.afm"/></font>
+        <font style="oblique"><font-data afm="Courier-Oblique.afm"/></font>
+        <font weight="bold"><font-data afm="Courier-Bold.afm"/></font>
+        <font weight="bold" style="oblique"><font-data afm="Courier-BoldOblique.afm"/></font>
+      </font-family>
+      <font-family name="Helvetica">
+        <font><font-data afm="Helvetica.afm"/></font>
+        <font style="oblique"><font-data afm="Helvetica-Oblique.afm"/></font>
+        <font weight="bold"><font-data afm="Helvetica-Bold.afm"/></font>
+        <font weight="bold" style="oblique"><font-data afm="Helvetica-BoldOblique.afm"/></font>
+      </font-family>
+      <font-family name="Times" ligatures="&#xFB01; &#xFB02;">
+        <font><font-data afm="Times-Roman.afm"/></font>
+        <font style="italic"><font-data afm="Times-Italic.afm"/></font>
+        <font weight="bold"><font-data afm="Times-Bold.afm"/></font>
+        <font weight="bold" style="italic"><font-data afm="Times-BoldItalic.afm"/></font>
+      </font-family>
+      <font-family name="Symbol">
+        <font><font-data afm="Symbol.afm"/></font>
+      </font-family>
+      <font-family name="ZapfDingbats">
+        <font><font-data afm="ZapfDingbats.afm"/></font>
+      </font-family>
+    </font-group>
+
+    <!-- IKE Noto Fonts — embedded and subsetted -->
+    <font-group xml:base="fonts/"
+                label="IKE Noto Fonts"
+                embed="true"
+                subset="true">
+
+      <font-family name="NotoSerif">
+        <font><font-data ttf="NotoSerif-Regular.ttf"/></font>
+        <font style="italic"><font-data ttf="NotoSerif-Italic.ttf"/></font>
+        <font weight="bold"><font-data ttf="NotoSerif-Bold.ttf"/></font>
+        <font weight="bold" style="italic"><font-data ttf="NotoSerif-BoldItalic.ttf"/></font>
+      </font-family>
+
+      <font-family name="NotoSans">
+        <font><font-data ttf="NotoSans-Regular.ttf"/></font>
+        <font style="italic"><font-data ttf="NotoSans-Italic.ttf"/></font>
+        <font weight="bold"><font-data ttf="NotoSans-Bold.ttf"/></font>
+        <font weight="bold" style="italic"><font-data ttf="NotoSans-BoldItalic.ttf"/></font>
+      </font-family>
+
+      <font-family name="NotoSansMono">
+        <font><font-data ttf="NotoSansMono-Regular.ttf"/></font>
+        <font weight="bold"><font-data ttf="NotoSansMono-Bold.ttf"/></font>
+      </font-family>
+
+      <font-family name="NotoSansMath">
+        <font><font-data ttf="NotoSansMath-Regular.ttf"/></font>
+      </font-family>
+
+      <font-family name="NotoSansSymbols">
+        <font><font-data ttf="NotoSansSymbols-Regular.ttf"/></font>
+      </font-family>
+
+      <font-family name="NotoSansSymbols2">
+        <font><font-data ttf="NotoSansSymbols2-Regular.ttf"/></font>
+      </font-family>
+
+    </font-group>
+
+  </fonts>
+
+</config>
