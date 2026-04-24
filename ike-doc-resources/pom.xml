@@ -9,7 +9,7 @@
   via maven-dependency-plugin.
 
   Build:    mvn install
-  Artifact: network.ike.docs:ike-doc-resources:1:jar
+  Artifact: network.ike.docs:ike-doc-resources:${project.version}:jar
 -->
 <project xmlns="http://maven.apache.org/POM/4.1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
