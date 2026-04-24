@@ -159,9 +159,9 @@
                     <doclint>all,-missing</doclint>
                     <quiet>true</quiet>
                     <show>protected</show>
-                    <doctitle>Koncept AsciiDoc Extension ${project.version} API</doctitle>
+                    <doctitle>Koncept AsciiDoc Extension 1 API</doctitle>
                     <windowtitle>Koncept Extension API</windowtitle>
-                    <header>&lt;b&gt;Koncept Extension&lt;/b&gt; ${project.version}</header>
+                    <header>&lt;b&gt;Koncept Extension&lt;/b&gt; 1</header>
                     <bottom>
                         Copyright &amp;copy; 2025 IKE Community.
                         Licensed under the Apache License, Version 2.0.
