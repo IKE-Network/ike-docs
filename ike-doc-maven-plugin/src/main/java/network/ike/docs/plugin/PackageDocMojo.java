@@ -1,9 +1,12 @@
 package network.ike.docs.plugin;
 
+import org.apache.maven.api.ProducedArtifact;
 import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.ArtifactManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +53,10 @@ public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
     @org.apache.maven.api.di.Inject
     private Project project;
 
+    /** The current Maven session (injected by Maven 4). */
+    @org.apache.maven.api.di.Inject
+    private Session session;
+
     /**
      * AsciiDoc source directory to package.
      * Defaults to the standard IKE documentation source location.
@@ -92,7 +99,17 @@ public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
                     "Failed to create documentation archive", e);
         }
 
-        // TODO: Maven 4 artifact attachment via ProjectManager
+        // Set the zip as this project's main artifact. For ike-doc
+        // packaging, the ArtifactHandler declared in components.xml
+        // gives the main artifact a .zip extension; we just supply
+        // the file.
+        ProducedArtifact mainArtifact = project.getMainArtifact()
+                .orElseThrow(() -> new MojoException(
+                        "package-doc: project has no main artifact. "
+                                + "Is packaging set to ike-doc?"));
+        ArtifactManager artifactManager =
+                session.getService(ArtifactManager.class);
+        artifactManager.setPath(mainArtifact, zipFile);
     }
 
     // ── Pure testable function ───────────────────────────────────────
