@@ -604,7 +604,7 @@
                 <plugin>
                     <groupId>network.ike.docs</groupId>
                     <artifactId>semantic-linebreak</artifactId>
-                    <version>2</version>
+                    <version>${project.version}</version>
                 </plugin>
 
                 <!-- Build Helper Plugin — attach classified PDF artifacts -->
@@ -717,7 +717,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                         <dependency>
                             <groupId>network.ike.docs</groupId>
                             <artifactId>koncept-asciidoc-extension</artifactId>
-                            <version>2</version>
+                            <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>
