@@ -360,6 +360,27 @@
                                 <overWriteSnapshots>true</overWriteSnapshots>
                             </configuration>
                         </execution>
+                        <!-- Forest theme site.css + ike-logo.svg from
+                             ike-build-standards (#318, #330). Unpacked at
+                             pre-site into ${project.build.directory}/
+                             generated-site/resources/, which the Maven
+                             Site Plugin merges into target/site at
+                             site:site time. Activated via the
+                             site-resources profile below so only modules
+                             with src/site/ pull it. -->
+                        <execution>
+                            <id>unpack-site-theme</id>
+                            <phase>pre-site</phase>
+                            <goals><goal>unpack-dependencies</goal></goals>
+                            <configuration>
+                                <includeArtifactIds>ike-build-standards</includeArtifactIds>
+                                <includeClassifiers>site-theme</includeClassifiers>
+                                <includeTypes>zip</includeTypes>
+                                <outputDirectory>${project.build.directory}/generated-site/resources</outputDirectory>
+                                <overWriteReleases>true</overWriteReleases>
+                                <overWriteSnapshots>true</overWriteSnapshots>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
 
@@ -1598,6 +1619,45 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                         <descriptor>${ike.assembly.directory}/adoc.xml</descriptor>
                                     </descriptors>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ── site-resources ───────────────────────────────────────── -->
+        <!-- Activated when src/site exists. Pulls the canonical Forest -->
+        <!-- theme site.css + ike-logo.svg from ike-build-standards     -->
+        <!-- (classifier=site-theme) and unpacks them at pre-site into  -->
+        <!-- target/generated-site/resources/, which Maven Site merges  -->
+        <!-- into target/site at site:site time. See #318, #330.        -->
+        <profile>
+            <id>site-resources</id>
+            <activation>
+                <file><exists>src/site</exists></file>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>network.ike.tooling</groupId>
+                    <artifactId>ike-build-standards</artifactId>
+                    <version>${ike-tooling.version}</version>
+                    <classifier>site-theme</classifier>
+                    <type>zip</type>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-site-theme</id>
+                                <!-- inherits config from pluginManagement -->
                             </execution>
                         </executions>
                     </plugin>
