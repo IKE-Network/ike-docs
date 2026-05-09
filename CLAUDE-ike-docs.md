@@ -60,28 +60,40 @@ Subprojects are built in dependency order:
 | `minimal-fonts` | Noto font subset for PDF rendering | ZIP (pom) |
 | `docbook-xsl` | DocBook XSL 1.79.2 + IKE FO customization | JAR |
 | `koncept-asciidoc-extension` | AsciidoctorJ `k:Name[]` inline macro + glossary | JAR |
-| `ike-doc-maven-plugin` | `idoc:*` goals, `ike-doc` packaging handler (extensions=true) | maven-plugin |
+| `ike-doc-maven-plugin` | `idoc:*` AsciiDoc render and packaging goals | maven-plugin |
 | `semantic-linebreak` | CLI — AsciiDoc semantic linefeed reformatter | maven-plugin |
 
-### The extensions=true Story
+### Plugin shape (post-#321)
 
-`ike-doc-maven-plugin` declares the `ike-doc` custom packaging type
-through `META-INF/plexus/components.xml`. Consumers of `ike-parent`
-(in `ike-platform`) pick up this plugin declared with
-`<extensions>true</extensions>` and can therefore use
-`<packaging>ike-doc</packaging>`.
+`ike-doc-maven-plugin` is a regular Maven plugin — no
+`<extensions>true</extensions>`, no custom packaging type registered
+into the build extension realm. It provides the `idoc:*` goal prefix
+for AsciiDoc rendering and multi-renderer PDF wrappers. Consumers
+declare it as an ordinary managed plugin under property indirection
+(`${ike-docs.version}`); doc artifacts use `<packaging>pom</packaging>`
++ `<classifier>adoc</classifier><type>zip</type>` rather than a
+custom packaging type.
 
-The plugin **must be released from this repo before `ike-platform`
-can build**, because `ike-parent`'s extension declaration resolves
-the plugin JAR from Nexus at project-load time. This is the
-repository-level fix for the cycle that `ike-pipeline` could not
-resolve when the plugin was a sibling reactor module.
+Earlier revisions registered the `<packaging>ike-doc</packaging>`
+custom type via `<extensions>true</extensions>`. That mechanism was
+retired in `IKE-Network/ike-issues#321` in favor of the classifier-
+canonical doc shape — see
+`ike-doc-maven-plugin/src/site/asciidoc/index.adoc` for the full
+design rationale, or `dev-classifier-canonical-doc-shape` in
+`ike-lab-documents/topics/`.
+
+The plugin still **must be released from this repo before `ike-platform`
+can build**, because `ike-parent`'s `<pluginManagement>` declares it
+at `${ike-docs.version}`, which Maven resolves from Nexus during
+plugin-management resolution. The cascade ordering is unchanged from
+the extension-realm era; only the literal-pinning constraint went
+away.
 
 ### Dependencies on Other Repos
 
 - `network.ike.tooling:ike-maven-plugin` — release orchestration, BOM
-  generation, site deploy, AsciiDoc utilities. Declared at literal
-  version `${ike-tooling.version}` in the root `<pluginManagement>`.
+  generation, site deploy, AsciiDoc utilities. Declared at
+  `${ike-tooling.version}` in the root `<pluginManagement>`.
 - `network.ike.tooling:ike-maven-plugin-support` — shared `GoalRef`,
   `AbstractGoalMojo`, etc., consumed by `ike-doc-maven-plugin`.
 - `network.ike.tooling:ike-build-standards` — versioned Claude
