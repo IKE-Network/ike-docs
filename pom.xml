@@ -192,7 +192,7 @@
         <ike.skip.fop>true</ike.skip.fop>
         <ike.skip.pdf-default>false</ike.skip.pdf-default>
         <ike.skip.docbook>true</ike.skip.docbook>
-        <ike.skip.asciidoc-zip>true</ike.skip.asciidoc-zip>
+        <ike.skip.adoc>true</ike.skip.adoc>
 
         <!-- Default renderer for the pdf-default copy -->
         <ike.pdf.default>prince</ike.pdf.default>
@@ -1589,13 +1589,13 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>zip-asciidoc</id>
+                                <id>zip-adoc</id>
                                 <phase>package</phase>
                                 <goals><goal>single</goal></goals>
                                 <configuration>
-                                    <skipAssembly>${ike.skip.asciidoc-zip}</skipAssembly>
+                                    <skipAssembly>${ike.skip.adoc}</skipAssembly>
                                     <descriptors>
-                                        <descriptor>${ike.assembly.directory}/asciidoc.xml</descriptor>
+                                        <descriptor>${ike.assembly.directory}/adoc.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
