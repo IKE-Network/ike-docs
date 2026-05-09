@@ -1,0 +1,12 @@
+# DocBook XSL
+
+> DocBook XSL 1.79.2 stylesheets with IKE FO customization layer.
+> Ready-to-use artifact for the AsciiDoc → DocBook5 → XSL-FO → PDF pipeline.
+
+## Reports
+
+- [About](https://github.com/IKE-Network/ike-docbook-xsl/index.html.md)
+- [Project Summary](https://github.com/IKE-Network/ike-docbook-xsl/summary.html.md)
+- [Project Licenses](https://github.com/IKE-Network/ike-docbook-xsl/licenses.html.md)
+- [Maven Coordinates](https://github.com/IKE-Network/ike-docbook-xsl/dependency-info.html.md)
+- [Project Information](https://github.com/IKE-Network/ike-docbook-xsl/project-info.html.md)
