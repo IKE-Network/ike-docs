@@ -1,7 +1,7 @@
 # IKE Docs
 
 Documentation plumbing for the IKE Community. Provides the
-`ike-doc-maven-plugin` (`idoc:*` goals + `ike-doc` packaging), the
+`ike-doc-maven-plugin` (`idoc:*` render and packaging goals), the
 Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc
 resources, and a semantic linebreak reformatter.
 
@@ -17,7 +17,7 @@ for the architectural rationale.
 | [`minimal-fonts`](minimal-fonts) | `network.ike.docs:minimal-fonts` | Noto font subset for PDF rendering (ZIP) |
 | [`docbook-xsl`](docbook-xsl) | `network.ike.docs:docbook-xsl` | DocBook XSL 1.79.2 + IKE FO customization |
 | [`koncept-asciidoc-extension`](koncept-asciidoc-extension) | `network.ike.docs:koncept-asciidoc-extension` | AsciidoctorJ `k:Name[]` inline macro + glossary |
-| [`ike-doc-maven-plugin`](ike-doc-maven-plugin) | `network.ike.docs:ike-doc-maven-plugin` | `idoc:*` goals and `ike-doc` packaging (extensions=true) |
+| [`ike-doc-maven-plugin`](ike-doc-maven-plugin) | `network.ike.docs:ike-doc-maven-plugin` | `idoc:*` goals: AsciiDoc rendering, multi-renderer PDF wrappers, doc packaging utilities |
 | [`semantic-linebreak`](semantic-linebreak) | `network.ike.docs:semantic-linebreak` | AsciiDoc one-sentence-per-line reformatter |
 
 ## Build
@@ -38,8 +38,21 @@ ike-tooling  →  ike-docs  →  ike-platform  →  { doc-example, example-proje
 ```
 
 `ike-docs` releases **before** `ike-platform` because `ike-platform`'s
-`ike-parent` pins `${ike-docs.version}` as a literal value and uses
-`<extensions>true</extensions>` to activate the `ike-doc` packaging.
+`ike-parent` declares `ike-doc-maven-plugin` and the other ike-docs
+artifacts (themes, fonts, DocBook XSL, koncept extension) in its
+`<pluginManagement>` and `<dependencyManagement>` at
+`${ike-docs.version}`. Those artifacts must be resolvable from
+Nexus when downstream reactors load.
+
+The cascade ordering is structurally upstream-first; it is not
+driven by extension-realm timing. Earlier revisions of these docs
+cited `<extensions>true</extensions>` and literal-version pinning
+as the reason — that constraint was eliminated in
+[`IKE-Network/ike-issues#321`](https://github.com/IKE-Network/ike-issues/issues/321)
+when `ike-doc-maven-plugin` retired its `<packaging>ike-doc</packaging>`
+custom type in favor of a classifier-canonical doc shape. See
+[`ike-doc-maven-plugin/src/site/asciidoc/index.adoc`](ike-doc-maven-plugin/src/site/asciidoc/index.adoc)
+for the full design rationale.
 
 ## License
 
