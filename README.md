@@ -1,6 +1,6 @@
 # IKE Docs
 
-Documentation plumbing for the IKE Community. Provides the
+Documentation plumbing for the IKE Network. Provides the
 `ike-doc-maven-plugin` (`idoc:*` render and packaging goals), the
 Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc
 resources, and a semantic linebreak reformatter.

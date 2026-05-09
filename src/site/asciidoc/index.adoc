@@ -1,5 +1,5 @@
 = IKE Documentation Pipeline
-:author: IKE Community
+:author: IKE Network
 :revnumber: 5-SNAPSHOT
 :icons: font
 :source-highlighter: coderay
@@ -294,12 +294,12 @@ and makes sentence-level review practical.
 | Nexus Artifacts
 | https://nexus.tinkar.org
 
-| IKE Community
+| IKE Network
 | https://ike.network
 |===
 
 == License
 
-Copyright 2025 IKE Community.
+Copyright 2025 IKE Network.
 Licensed under the Apache License,
 Version 2.0.

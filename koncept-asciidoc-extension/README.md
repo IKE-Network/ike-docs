@@ -127,4 +127,4 @@ mvn clean install
 
 ## License
 
-Apache 2.0 (or as specified by IKE Community governance)
+Apache 2.0 (or as specified by IKE Network governance)

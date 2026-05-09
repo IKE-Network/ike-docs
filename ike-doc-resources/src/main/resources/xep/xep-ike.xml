@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  IKE Community — RenderX XEP Configuration Wrapper
+  IKE Network — RenderX XEP Configuration Wrapper
   ══════════════════════════════════════════════════════
 
   Extends the default XEP configuration with IKE Noto fonts.
@@ -9,7 +9,7 @@
   At build time this file is staged to target/xep-config/ alongside
   a fonts/ directory containing the Noto TTF files.
 
-  Copyright 2025 IKE Community — Apache License 2.0
+  Copyright 2025 IKE Network — Apache License 2.0
 -->
 <config xmlns="http://www.renderx.com/XEP/config">
 

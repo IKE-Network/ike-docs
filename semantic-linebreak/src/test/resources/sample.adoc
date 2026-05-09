@@ -1,5 +1,5 @@
 = Semantic Linebreak Demo
-:author: IKE Community
+:author: IKE Network
 
 == Introduction
 
@@ -9,7 +9,7 @@ of the knowledge graph.
 This enables reproducible reasoning across distributed systems,
 which is critical for clinical safety applications.
 
-The IKE Community has established a set of best practices for
+The IKE Network has established a set of best practices for
 collaborative knowledge curation.
 Dr. Campbell and his team developed SNOMED RT/CT during his
 work at Stanford.

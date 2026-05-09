@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  IKE Community — DocBook XSL Stylesheets + IKE Customization Layer
+  IKE Network — DocBook XSL Stylesheets + IKE Customization Layer
   ══════════════════════════════════════════════════════════════════════
 
   Packages the DocBook XSL 1.79.2 stylesheets together with the IKE
@@ -73,13 +73,13 @@
             <distribution>repo</distribution>
             <comments>
                 The IKE customization layer (ike-fo.xsl) is Copyright 2025
-                IKE Community, licensed under Apache 2.0.
+                IKE Network, licensed under Apache 2.0.
             </comments>
         </license>
     </licenses>
 
     <organization>
-        <name>IKE Community</name>
+        <name>IKE Network</name>
         <url>https://ike.network</url>
     </organization>
 

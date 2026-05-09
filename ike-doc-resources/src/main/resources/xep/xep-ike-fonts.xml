@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  IKE Community — RenderX XEP Font Configuration
+  IKE Network — RenderX XEP Font Configuration
   ══════════════════════════════════════════════════════════════════
 
   Registers the 13 Noto fonts from ike-minimal-fonts for use with
@@ -20,7 +20,7 @@
   location.  At build time, the fonts are copied to the same directory as
   this configuration file (target/xep-config/fonts/).
 
-  Copyright 2025 IKE Community — Apache License 2.0
+  Copyright 2025 IKE Network — Apache License 2.0
 -->
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->

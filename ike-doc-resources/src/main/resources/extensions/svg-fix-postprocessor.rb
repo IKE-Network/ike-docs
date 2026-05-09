@@ -20,7 +20,7 @@
 #     cause compliant CSS parsers to skip the stroke declaration,
 #     making relationship lines invisible.
 #
-# Copyright 2025 IKE Community — Apache License 2.0
+# Copyright 2025 IKE Network — Apache License 2.0
 #
 
 require 'asciidoctor/extensions'

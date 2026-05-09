@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  IKE Community — DocBook XSL-FO Customization Layer
+  IKE Network — DocBook XSL-FO Customization Layer
   ══════════════════════════════════════════════════════════════════
 
   Imports the stock DocBook XSL-NS FO stylesheet and overrides parameters
@@ -15,7 +15,7 @@
   Reference:  https://tdg.docbook.org/tdg/5.2/
   Parameters: http://docbook.sourceforge.net/release/xsl/current/doc/fo/
 
-  Copyright 2025 IKE Community — Apache License 2.0
+  Copyright 2025 IKE Network — Apache License 2.0
 -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:fo="http://www.w3.org/1999/XSL/Format"

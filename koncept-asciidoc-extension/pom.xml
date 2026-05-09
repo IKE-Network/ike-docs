@@ -163,7 +163,7 @@
                     <windowtitle>Koncept Extension API</windowtitle>
                     <header>&lt;b&gt;Koncept Extension&lt;/b&gt; ${project.version}</header>
                     <bottom>
-                        Copyright &amp;copy; 2025 IKE Community.
+                        Copyright &amp;copy; 2025 IKE Network.
                         Licensed under the Apache License, Version 2.0.
                     </bottom>
                     <detectJavaApiLink>false</detectJavaApiLink>
