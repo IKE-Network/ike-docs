@@ -236,6 +236,23 @@
                                 <skipHtmlSingle>true</skipHtmlSingle>
                             </configuration>
                         </execution>
+                        <!-- SPDX-grouped licenses.adoc generation
+                             (ike-issues#335). Reads target/bom.json
+                             and writes target/generated-site/asciidoc/
+                             licenses.adoc. Maven Site renders that
+                             to target/site/licenses.html with the
+                             project skin chrome. The auto-generated
+                             `licenses` report from
+                             maven-project-info-reports is dropped
+                             from the reactor's reportSet so this
+                             SPDX-grouped page is the only
+                             licenses.html that ships. Skip with
+                             -Dike.skip.spdx-licenses=true. -->
+                        <execution>
+                            <id>render-spdx-licenses</id>
+                            <phase>pre-site</phase>
+                            <goals><goal>render-spdx-licenses</goal></goals>
+                        </execution>
                     </executions>
                 </plugin>
                 <!-- ike-workspace-maven-plugin lives in ike-platform now.
@@ -976,13 +993,18 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                     <dependencyDetailsEnabled>true</dependencyDetailsEnabled>
                     <dependencyLocationsEnabled>true</dependencyLocationsEnabled>
                 </configuration>
+                <!-- The `licenses` report is intentionally absent —
+                     the SPDX-grouped, deduplicated replacement is
+                     generated at pre-site by ike:render-spdx-licenses
+                     (ike-issues#335) from the CycloneDX SBOM. Both
+                     reports would race to write target/site/licenses.html
+                     with non-deterministic winner. -->
                 <reportSets>
                     <reportSet>
                         <reports>
                             <report>index</report>
                             <report>summary</report>
                             <report>modules</report>
-                            <report>licenses</report>
                             <report>dependencies</report>
                             <report>dependency-info</report>
                             <report>dependency-management</report>
