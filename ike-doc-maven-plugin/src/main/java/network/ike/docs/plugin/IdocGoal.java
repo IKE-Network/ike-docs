@@ -36,6 +36,12 @@ public enum IdocGoal implements GoalRef {
     /** {@code idoc:inject-breadcrumb} — inject breadcrumbs into rendered HTML. */
     INJECT_BREADCRUMB("inject-breadcrumb", InjectBreadcrumbMojo.class,
             "Inject breadcrumb navigation into rendered HTML."),
+    /** {@code idoc:lint-site} — lint src/site/site.xml for IKE theme/breadcrumb drift (#319). */
+    LINT_SITE("lint-site", LintSiteMojo.class,
+            "Lint src/site/site.xml for IKE Network theme + "
+                    + "breadcrumb conventions: <bodyClass> drift "
+                    + "(Forest vs Horizon), stale breadcrumb names "
+                    + "(IKE Pipeline post-#216), and skin GAV drift."),
     /** {@code idoc:package-doc} — package rendered docs as an ike-doc artifact. */
     PACKAGE_DOC("package-doc", PackageDocMojo.class,
             "Package rendered docs as an ike-doc artifact."),
