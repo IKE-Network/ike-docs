@@ -1,0 +1,19 @@
+# Minimal Fonts
+
+> Minimal Noto font subset for IKE documentation (~4MB)
+
+## Reports
+
+- [Minimal Fonts](https://github.com/IKE-Network/ike-minimal-fonts/index.html.md)
+- [Project Summary](https://github.com/IKE-Network/ike-minimal-fonts/summary.html.md)
+- [Project Dependencies](https://github.com/IKE-Network/ike-minimal-fonts/dependencies.html.md)
+- [Maven Coordinates](https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.html.md)
+- [Project Plugins](https://github.com/IKE-Network/ike-minimal-fonts/plugins.html.md)
+- [Project Plugin Management](https://github.com/IKE-Network/ike-minimal-fonts/plugin-management.html.md)
+- [Project Distribution Management](https://github.com/IKE-Network/ike-minimal-fonts/distribution-management.html.md)
+- [Project Information](https://github.com/IKE-Network/ike-minimal-fonts/project-info.html.md)
+
+## Other
+
+- [Licenses (SPDX)](https://github.com/IKE-Network/ike-minimal-fonts/licenses.html.md)
+- [Built With](https://github.com/IKE-Network/ike-minimal-fonts/built-with.html.md)
