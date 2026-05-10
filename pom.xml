@@ -931,14 +931,18 @@ IKE projects require Java 21+ (JRuby 10 baseline).
 
                 <!-- OpenRewrite — AST-aware refactoring engine.
                      Invoked standalone: mvn rewrite:run / rewrite:dryRun.
-                     No lifecycle binding — recipes activated per-invocation. -->
+                     No lifecycle binding — recipes activated per-invocation
+                     via -Drewrite.activeRecipes=<recipe>.
+                     Note (#325): no empty <activeRecipes/> element here —
+                     an empty element binds the property to "no recipes
+                     active" and silently overrides the user's
+                     -Drewrite.activeRecipes flag. Recipes either come
+                     from rewrite.yml (auto-discovered) or from the
+                     CLI flag. -->
                 <plugin>
                     <groupId>org.openrewrite.maven</groupId>
                     <artifactId>rewrite-maven-plugin</artifactId>
                     <version>6.36.0</version>
-                    <configuration>
-                        <activeRecipes/>
-                    </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>org.openrewrite.recipe</groupId>
