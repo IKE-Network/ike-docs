@@ -30,8 +30,8 @@ The following is a list of provided dependencies for this project. These depende
 
 | GroupId | ArtifactId | Version | Classifier | Type | Licenses |
 | --- | --- | --- | --- | --- | --- |
-| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[11] | 146 | claude | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
-| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[11] | 146 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
+| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[11] | 147 | claude | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
+| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[11] | 147 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
 | org.apache.maven | [maven-plugin-api](https://maven.apache.org/ref/3.9.9/maven-plugin-api/)[12] | 3.9.9 | - | jar | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
 | org.apache.maven.plugin-tools | [maven-plugin-annotations](https://maven.apache.org/plugin-tools/maven-plugin-annotations)[13] | 3.15.1 | - | jar | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
 
@@ -109,7 +109,7 @@ The following is a list of provided dependencies for this project. These depende
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:semantic-linebreak:maven-plugin:7 ** 
+- network.ike.docs:semantic-linebreak:maven-plugin:8 ** 
   
   | Semantic Linebreak |
   | --- |
@@ -323,7 +323,7 @@ The following is a list of provided dependencies for this project. These depende
             | JRuby Lib Setup |
             | --- |
             | **Description: **JRuby is the effort to recreate the Ruby (https://www.ruby-lang.org) interpreter in Java. **URL: **[https://github.com/jruby/jruby/jruby-stdlib](https://github.com/jruby/jruby/jruby-stdlib)[38] **Project Licenses: **[GPL-2.0](http://www.gnu.org/licenses/gpl-2.0-standalone.html)[4], [LGPL-2.1](http://www.gnu.org/licenses/lgpl-2.1-standalone.html)[5], [EPL-2.0](http://www.eclipse.org/legal/epl-v20.html)[6] |
-    - network.ike.tooling:ike-build-standards:zip:claude:146 (provided) ** 
+    - network.ike.tooling:ike-build-standards:zip:claude:147 (provided) ** 
       
       | IKE Build Standards |
       | --- |
@@ -387,7 +387,7 @@ The following is a list of provided dependencies for this project. These depende
             | Byte Buddy (without dependencies) |
             | --- |
             | **Description: **Byte Buddy is a Java library for creating Java classes at run time. This artifact is a build of Byte Buddy with all ASM dependencies repackaged into its own name space. **URL: **[https://bytebuddy.net/byte-buddy](https://bytebuddy.net/byte-buddy)[45] **Project Licenses: **[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[8] |
-    - network.ike.tooling:ike-build-standards:zip:site-theme:146 (provided) ** 
+    - network.ike.tooling:ike-build-standards:zip:site-theme:147 (provided) ** 
       
       | IKE Build Standards |
       | --- |
@@ -453,8 +453,8 @@ The following is a list of provided dependencies for this project. These depende
 | byte-buddy-1.15.11.jar | 8.5 MB | 5890 | - | - | - | - |
 |    • Root | - | 2950 | 2897 | 38 | 1.5 | Yes |
 |    • Versioned | - | 2940 | 2898 | 39 | 1.8 | Yes |
-| ike-build-standards-146-claude.zip | 81 kB | - | - | - | - | - |
-| ike-build-standards-146-site-theme.zip | 3.4 kB | - | - | - | - | - |
+| ike-build-standards-147-claude.zip | 81 kB | - | - | - | - | - |
+| ike-build-standards-147-site-theme.zip | 3.4 kB | - | - | - | - | - |
 | maven-artifact-3.9.9.jar | 58.8 kB | 59 | 34 | 11 | 1.8 | Yes |
 | maven-model-3.9.9.jar | 217.8 kB | 97 | 80 | 3 | 1.8 | Yes |
 | maven-plugin-api-3.9.9.jar | 47.1 kB | 48 | 27 | 6 | 1.8 | Yes |

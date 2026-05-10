@@ -12,7 +12,7 @@ The following is a list of provided dependencies for this project. These depende
 
 | GroupId | ArtifactId | Version | Classifier | Type | Licenses |
 | --- | --- | --- | --- | --- | --- |
-| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[1] | 146 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[2] |
+| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[1] | 147 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[2] |
 
 # Project Transitive Dependencies
 
@@ -22,13 +22,13 @@ No transitive dependencies are required for this project.
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:ike-doc-resources:jar:7 ** 
+- network.ike.docs:ike-doc-resources:jar:8 ** 
   
   | IKE Documentation Resources |
   | --- |
   | **Description: **Shared build resources for the IKE documentation pipeline: assembly descriptors, PDF themes, renderer configurations, SVGO configs, and AsciiDoc shared docinfo. **URL: **[https://github.com/IKE-Network/ike-docs](https://github.com/IKE-Network/ike-docs)[3] **Project Licenses: **[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[2] |
   
-    - network.ike.tooling:ike-build-standards:zip:site-theme:146 (provided) ** 
+    - network.ike.tooling:ike-build-standards:zip:site-theme:147 (provided) ** 
       
       | IKE Build Standards |
       | --- |
@@ -42,6 +42,6 @@ No transitive dependencies are required for this project.
 
 | Total | Size | Entries | Classes | Packages | Java Version | Debug Information |
 | --- | --- | --- | --- | --- | --- | --- |
-| ike-build-standards-146-site-theme.zip | 3.4 kB | - | - | - | - | - |
+| ike-build-standards-147-site-theme.zip | 3.4 kB | - | - | - | - | - |
 | 1 | 3.4 kB | - | - | - | - | - |
 | provided: 1 | provided: 3.4 kB | - | - | - | - | - |

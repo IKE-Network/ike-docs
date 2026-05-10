@@ -16,7 +16,7 @@
 
 - [Getting Started](https://github.com/IKE-Network/ike-docs/getting-started.html.md)
 - [IKE Documentation Pipeline](https://github.com/IKE-Network/ike-docs/index.html.md)
-- [IKE Docs — Third-Party Notices](https://github.com/IKE-Network/ike-docs/THIRD_PARTY_NOTICES.html.md)
+- [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)
 
 ## Reports
 
