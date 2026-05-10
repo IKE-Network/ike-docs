@@ -6,10 +6,10 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<title>Project Dependencies &ndash; Koncept AsciiDoc Extension</title>
+	<title>Dependencies (SBOM) &ndash; Koncept AsciiDoc Extension</title>
 
 	<meta name="keywords" content="Koncept,AsciiDoc extension,AsciidoctorJ,description logic,SNOMED CT,clinical terminology,SVG badge" />
-	<meta name="generator" content="Maven Site Plugin, Doxia Site Renderer 2.0.0, Skin sentry-maven-skin 7.0.00, with org.apache.maven.plugins:maven-project-info-reports-plugin:3.9.0:dependencies" />
+	<meta name="generator" content="Maven Site Plugin, Doxia Site Renderer 2.0.0, Skin sentry-maven-skin 7.0.00, from asciidoc" />
 	<meta property="article:published_time" content="2026-05-10T00:00:00" />
 	<meta property="article:modified_time" content="2026-05-10T00:00:00" />
 
@@ -22,7 +22,7 @@
 {
 	"@context": "https://schema.org",
 	"@type": "TechArticle",
-	"headline": "Project Dependencies",
+	"headline": "Dependencies (SBOM)",
 	"datePublished": "2026-05-10T00:00:00",
 	"dateModified": "2026-05-10T00:00:00",
 	"mainEntityOfPage": "https://github.com/IKE-Network/ike-docs/dependencies.html",
@@ -89,13 +89,13 @@
 					<div class="header-title">Koncept AsciiDoc Extension</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">11</span>
+							<span class="version">12</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
 						<div class="header-title">Koncept AsciiDoc Extension</div>
 						<div class="header-subtitle">
-							Version <strong>11</strong>
+							Version <strong>12</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -166,7 +166,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							Koncept AsciiDoc Extension 11
+							<h3><small>IKE Docs</small><br/>							Koncept AsciiDoc Extension 12
 							</h3>
 						</div>
 						<div class="parents hidden-xs">
@@ -196,1963 +196,294 @@
 									</a>
 													</ul>
 						</div>
-<section>
- <a id="project-dependencies"></a>
- <h1 id="project-dependencies">Project Dependencies</h1>
- <section>
-  <a id="project-dependencies-compile"></a>
-  <h2 id="compile"><a href="#compile">compile</a></h2>
-  <p>The following is a list of compile dependencies for this project. These dependencies are required to compile and run the application:</p>
-  <table class="bodyTable table table-striped table-hover">
-   <thead>
-    <tr class="a">
-     <th>GroupId</th>
-     <th>ArtifactId</th>
-     <th>Version</th>
-     <th>Type</th>
-     <th>Licenses</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr class="b">
-     <td>org.yaml</td>
-     <td><a href="https://bitbucket.org/snakeyaml/snakeyaml" class="externalLink">snakeyaml</a><sup class="visible-print-inline">[1]</sup></td>
-     <td>2.2</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-   </tbody>
-  </table>
- </section>
- <section>
-  <a id="project-dependencies-test"></a>
-  <h2 id="test"><a href="#test">test</a></h2>
-  <p>The following is a list of test dependencies for this project. These dependencies are only required to compile and run unit tests for the application:</p>
-  <table class="bodyTable table table-striped table-hover">
-   <thead>
-    <tr class="a">
-     <th>GroupId</th>
-     <th>ArtifactId</th>
-     <th>Version</th>
-     <th>Type</th>
-     <th>Licenses</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr class="b">
-     <td>org.apache.logging.log4j</td>
-     <td><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-core/" class="externalLink">log4j-core</a><sup class="visible-print-inline">[3]</sup></td>
-     <td>3.0.0-beta2</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.apache.logging.log4j</td>
-     <td><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-slf4j2-impl/" class="externalLink">log4j-slf4j2-impl</a><sup class="visible-print-inline">[5]</sup></td>
-     <td>3.0.0-beta2</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.junit.jupiter</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-jupiter</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>5.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-   </tbody>
-  </table>
- </section>
- <section>
-  <a id="project-dependencies-provided"></a>
-  <h2 id="provided"><a href="#provided">provided</a></h2>
-  <p>The following is a list of provided dependencies for this project. These dependencies are required to compile the application, but should be provided by default when using the library:</p>
-  <table class="bodyTable table table-striped table-hover">
-   <thead>
-    <tr class="a">
-     <th>GroupId</th>
-     <th>ArtifactId</th>
-     <th>Version</th>
-     <th>Classifier</th>
-     <th>Type</th>
-     <th>Licenses</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr class="b">
-     <td>network.ike.tooling</td>
-     <td><a href="https://ike.network/ike-tooling/ike-build-standards/">ike-build-standards</a><sup class="visible-print-inline">[8]</sup></td>
-     <td>149</td>
-     <td>built-with</td>
-     <td>zip</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>network.ike.tooling</td>
-     <td><a href="https://ike.network/ike-tooling/ike-build-standards/">ike-build-standards</a><sup class="visible-print-inline">[8]</sup></td>
-     <td>149</td>
-     <td>site-theme</td>
-     <td>zip</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.asciidoctor</td>
-     <td><a href="https://github.com/asciidoctor/asciidoctorj" class="externalLink">asciidoctorj</a><sup class="visible-print-inline">[9]</sup></td>
-     <td>3.0.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.jruby</td>
-     <td><a href="https://github.com/jruby/jruby/jruby-artifacts/jruby" class="externalLink">jruby</a><sup class="visible-print-inline">[10]</sup></td>
-     <td>10.0.3.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup><a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup><a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.slf4j</td>
-     <td><a href="http://www.slf4j.org" class="externalLink">slf4j-api</a><sup class="visible-print-inline">[14]</sup></td>
-     <td>2.0.12</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></td>
-    </tr>
-   </tbody>
-  </table>
- </section>
-</section>
-<section>
- <a id="project-transitive-dependencies"></a>
- <h1 id="project-transitive-dependencies">Project Transitive Dependencies</h1>
- <p>The following is a list of transitive dependencies for this project. Transitive dependencies are the dependencies of the project dependencies.</p>
- <section>
-  <a id="project-transitive-dependencies-test"></a>
-  <h2 id="test_2"><a href="#test_2">test</a></h2>
-  <p>The following is a list of test dependencies for this project. These dependencies are only required to compile and run unit tests for the application:</p>
-  <table class="bodyTable table table-striped table-hover">
-   <thead>
-    <tr class="a">
-     <th>GroupId</th>
-     <th>ArtifactId</th>
-     <th>Version</th>
-     <th>Type</th>
-     <th>Licenses</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr class="b">
-     <td>org.apache.logging.log4j</td>
-     <td><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-api/" class="externalLink">log4j-api</a><sup class="visible-print-inline">[16]</sup></td>
-     <td>3.0.0-beta2</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.apache.logging.log4j</td>
-     <td><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/" class="externalLink">log4j-plugins</a><sup class="visible-print-inline">[17]</sup></td>
-     <td>3.0.0-beta2</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.apiguardian</td>
-     <td><a href="https://github.com/apiguardian-team/apiguardian" class="externalLink">apiguardian-api</a><sup class="visible-print-inline">[18]</sup></td>
-     <td>1.1.2</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.junit.jupiter</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-jupiter-api</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>5.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.junit.jupiter</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-jupiter-engine</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>5.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.junit.jupiter</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-jupiter-params</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>5.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.junit.platform</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-platform-commons</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>1.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.junit.platform</td>
-     <td><a href="https://junit.org/junit5/" class="externalLink">junit-platform-engine</a><sup class="visible-print-inline">[6]</sup></td>
-     <td>1.10.2</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.opentest4j</td>
-     <td><a href="https://github.com/ota4j-team/opentest4j" class="externalLink">opentest4j</a><sup class="visible-print-inline">[19]</sup></td>
-     <td>1.3.0</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-   </tbody>
-  </table>
- </section>
- <section>
-  <a id="project-transitive-dependencies-provided"></a>
-  <h2 id="provided_2"><a href="#provided_2">provided</a></h2>
-  <p>The following is a list of provided dependencies for this project. These dependencies are required to compile the application, but should be provided by default when using the library:</p>
-  <table class="bodyTable table table-striped table-hover">
-   <thead>
-    <tr class="a">
-     <th>GroupId</th>
-     <th>ArtifactId</th>
-     <th>Version</th>
-     <th>Classifier</th>
-     <th>Type</th>
-     <th>Licenses</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr class="b">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jffi" class="externalLink">jffi</a><sup class="visible-print-inline">[20]</sup></td>
-     <td>1.3.14</td>
-     <td>native</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup><a href="https://www.gnu.org/licenses/lgpl-3.0.txt" class="externalLink">GNU Lesser General Public License version 3</a><sup class="visible-print-inline">[21]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jffi" class="externalLink">jffi</a><sup class="visible-print-inline">[20]</sup></td>
-     <td>1.3.14</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup><a href="https://www.gnu.org/licenses/lgpl-3.0.txt" class="externalLink">GNU Lesser General Public License version 3</a><sup class="visible-print-inline">[21]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.github.jnr</td>
-     <td><a href="http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm" class="externalLink">jnr-a64asm</a><sup class="visible-print-inline">[22]</sup></td>
-     <td>1.0.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-constants" class="externalLink">jnr-constants</a><sup class="visible-print-inline">[23]</sup></td>
-     <td>0.10.4</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-enxio" class="externalLink">jnr-enxio</a><sup class="visible-print-inline">[24]</sup></td>
-     <td>0.32.19</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-ffi" class="externalLink">jnr-ffi</a><sup class="visible-print-inline">[25]</sup></td>
-     <td>2.2.18</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-netdb" class="externalLink">jnr-netdb</a><sup class="visible-print-inline">[26]</sup></td>
-     <td>1.2.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-posix" class="externalLink">jnr-posix</a><sup class="visible-print-inline">[27]</sup></td>
-     <td>3.1.21</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://www.eclipse.org/legal/epl-2.0/" class="externalLink">Eclipse Public License - v 2.0</a><sup class="visible-print-inline">[28]</sup><a href="http://www.gnu.org/copyleft/gpl.html" class="externalLink">GNU General Public License Version 2</a><sup class="visible-print-inline">[29]</sup><a href="http://www.gnu.org/licenses/lgpl.html" class="externalLink">GNU Lesser General Public License Version 2.1</a><sup class="visible-print-inline">[30]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-unixsocket" class="externalLink">jnr-unixsocket</a><sup class="visible-print-inline">[31]</sup></td>
-     <td>0.38.24</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.github.jnr</td>
-     <td><a href="http://github.com/jnr/jnr-x86asm" class="externalLink">jnr-x86asm</a><sup class="visible-print-inline">[32]</sup></td>
-     <td>1.0.2</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.headius</td>
-     <td><a href="http://nexus.sonatype.org/oss-repository-hosting.html/backport9" class="externalLink">backport9</a><sup class="visible-print-inline">[33]</sup></td>
-     <td>1.13</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>com.headius</td>
-     <td><a href="http://maven.apache.org" class="externalLink">invokebinder</a><sup class="visible-print-inline">[34]</sup></td>
-     <td>1.14</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>com.headius</td>
-     <td><a href="https://github.com/headius/options" class="externalLink">options</a><sup class="visible-print-inline">[35]</sup></td>
-     <td>1.6</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>joda-time</td>
-     <td><a href="https://www.joda.org/joda-time/" class="externalLink">joda-time</a><sup class="visible-print-inline">[36]</sup></td>
-     <td>2.14.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>me.qmx.jitescript</td>
-     <td><a href="https://github.com/qmx/jitescript" class="externalLink">jitescript</a><sup class="visible-print-inline">[37]</sup></td>
-     <td>0.4.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.asciidoctor</td>
-     <td><a href="https://github.com/asciidoctor/asciidoctorj" class="externalLink">asciidoctorj-api</a><sup class="visible-print-inline">[9]</sup></td>
-     <td>3.0.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.crac</td>
-     <td><a href="https://github.com/crac/org.crac" class="externalLink">crac</a><sup class="visible-print-inline">[38]</sup></td>
-     <td>1.5.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://opensource.org/licenses/BSD-2-Clause" class="externalLink">BSD-2-Clause</a><sup class="visible-print-inline">[39]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.jruby</td>
-     <td><a href="https://github.com/jruby/dirgra" class="externalLink">dirgra</a><sup class="visible-print-inline">[40]</sup></td>
-     <td>0.5</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.eclipse.org/legal/epl-v10.html" class="externalLink">EPL</a><sup class="visible-print-inline">[41]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.jruby</td>
-     <td><a href="https://github.com/jruby/jruby/jruby-base" class="externalLink">jruby-base</a><sup class="visible-print-inline">[42]</sup></td>
-     <td>10.0.3.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup><a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup><a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.jruby</td>
-     <td><a href="https://github.com/jruby/jruby/jruby-stdlib" class="externalLink">jruby-stdlib</a><sup class="visible-print-inline">[43]</sup></td>
-     <td>10.0.3.0</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup><a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup><a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.jruby</td>
-     <td><a href="http://www.jcraft.com/jzlib/" class="externalLink">jzlib</a><sup class="visible-print-inline">[44]</sup></td>
-     <td>1.1.5</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.jcraft.com/jzlib/LICENSE.txt" class="externalLink">BSD</a><sup class="visible-print-inline">[45]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.jruby.jcodings</td>
-     <td><a href="http://nexus.sonatype.org/oss-repository-hosting.html/jcodings" class="externalLink">jcodings</a><sup class="visible-print-inline">[46]</sup></td>
-     <td>1.0.63</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.jruby.joni</td>
-     <td><a href="http://nexus.sonatype.org/oss-repository-hosting.html/joni" class="externalLink">joni</a><sup class="visible-print-inline">[47]</sup></td>
-     <td>2.2.6</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.ow2.asm</td>
-     <td><a href="http://asm.ow2.io/" class="externalLink">asm</a><sup class="visible-print-inline">[48]</sup></td>
-     <td>9.7.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.ow2.asm</td>
-     <td><a href="http://asm.ow2.io/" class="externalLink">asm-analysis</a><sup class="visible-print-inline">[48]</sup></td>
-     <td>9.7.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.ow2.asm</td>
-     <td><a href="http://asm.ow2.io/" class="externalLink">asm-commons</a><sup class="visible-print-inline">[48]</sup></td>
-     <td>9.7.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></td>
-    </tr>
-    <tr class="b">
-     <td>org.ow2.asm</td>
-     <td><a href="http://asm.ow2.io/" class="externalLink">asm-tree</a><sup class="visible-print-inline">[48]</sup></td>
-     <td>9.7.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></td>
-    </tr>
-    <tr class="a">
-     <td>org.ow2.asm</td>
-     <td><a href="http://asm.ow2.io/" class="externalLink">asm-util</a><sup class="visible-print-inline">[48]</sup></td>
-     <td>9.7.1</td>
-     <td>-</td>
-     <td>jar</td>
-     <td><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></td>
-    </tr>
-   </tbody>
-  </table>
- </section>
-</section>
-<section>
- <a id="project-dependency-graph"></a>
- <h1 id="project-dependency-graph">Project Dependency Graph</h1>
- <script>
-      function toggleDependencyDetails( divId, imgId )
-      {
-        var div = document.getElementById( divId );
-        var img = document.getElementById( imgId );
-        if( div.style.display == '' )
-        {
-          div.style.display = 'none';
-          img.src='./images/icon_info_sml.gif';
-          img.alt='[Information]';
-        }
-        else
-        {
-          div.style.display = '';
-          img.src='./images/close.gif';
-          img.alt='[Close]';
-        }
-      }
-
-</script>
- <section>
-  <a id="dependency-tree"></a>
-  <h2 id="dependency-tree"><a href="#dependency-tree">Dependency Tree</a></h2>
-  <ul>
-   <li>network.ike.docs:koncept-asciidoc-extension:jar:11 <i class="fa-solid fa-circle-info text-info"></i>
-    <div id="dep0" style="display:none">
-     <table class="bodyTable table table-striped table-hover">
-      <thead>
-       <tr class="a">
-        <th>Koncept AsciiDoc Extension</th>
-       </tr>
-      </thead>
-      <tbody>
-       <tr class="b">
-        <td>
-         <p><b>Description: </b>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.</p>
-         <p><b>URL: </b><a href="https://github.com/IKE-Network/ike-docs">https://github.com/IKE-Network/ike-docs</a><sup class="visible-print-inline">[50]</sup></p>
-         <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></p>
-        </td>
-       </tr>
-      </tbody>
-     </table>
-    </div>
-    <ul>
-     <li>org.asciidoctor:asciidoctorj:jar:3.0.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep2" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>asciidoctorj</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>AsciidoctorJ provides Java bindings for the Asciidoctor RubyGem (asciidoctor) using JRuby.</p>
-           <p><b>URL: </b><a href="https://github.com/asciidoctor/asciidoctorj" class="externalLink">https://github.com/asciidoctor/asciidoctorj</a><sup class="visible-print-inline">[9]</sup></p>
-           <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <ul>
-       <li>org.asciidoctor:asciidoctorj-api:jar:3.0.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep4" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>asciidoctorj-api</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>API for AsciidoctorJ</p>
-             <p><b>URL: </b><a href="https://github.com/asciidoctor/asciidoctorj" class="externalLink">https://github.com/asciidoctor/asciidoctorj</a><sup class="visible-print-inline">[9]</sup></p>
-             <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div></li>
-      </ul></li>
-     <li>org.jruby:jruby:jar:10.0.3.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep6" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>JRuby Main Maven Artifact</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>JRuby is the effort to recreate the Ruby (https://www.ruby-lang.org) interpreter in Java.</p>
-           <p><b>URL: </b><a href="https://github.com/jruby/jruby/jruby-artifacts/jruby" class="externalLink">https://github.com/jruby/jruby/jruby-artifacts/jruby</a><sup class="visible-print-inline">[10]</sup></p>
-           <p><b>Project Licenses: </b><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup>, <a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup>, <a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <ul>
-       <li>org.jruby:jruby-base:jar:10.0.3.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep8" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>JRuby Base</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>JRuby is the effort to recreate the Ruby (https://www.ruby-lang.org) interpreter in Java.</p>
-             <p><b>URL: </b><a href="https://github.com/jruby/jruby/jruby-base" class="externalLink">https://github.com/jruby/jruby/jruby-base</a><sup class="visible-print-inline">[42]</sup></p>
-             <p><b>Project Licenses: </b><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup>, <a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup>, <a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div>
-        <ul>
-         <li>org.ow2.asm:asm:jar:9.7.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep10" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>asm</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>ASM, a very small and fast Java bytecode manipulation framework</p>
-               <p><b>URL: </b><a href="http://asm.ow2.io/" class="externalLink">http://asm.ow2.io/</a><sup class="visible-print-inline">[48]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.ow2.asm:asm-commons:jar:9.7.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep12" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>asm-commons</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Usefull class adapters based on ASM, a very small and fast Java bytecode manipulation framework</p>
-               <p><b>URL: </b><a href="http://asm.ow2.io/" class="externalLink">http://asm.ow2.io/</a><sup class="visible-print-inline">[48]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div>
-          <ul>
-           <li>org.ow2.asm:asm-tree:jar:9.7.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-            <div id="dep14" style="display:none">
-             <table class="bodyTable table table-striped table-hover">
-              <thead>
-               <tr class="a">
-                <th>asm-tree</th>
-               </tr>
-              </thead>
-              <tbody>
-               <tr class="b">
-                <td>
-                 <p><b>Description: </b>Tree API of ASM, a very small and fast Java bytecode manipulation framework</p>
-                 <p><b>URL: </b><a href="http://asm.ow2.io/" class="externalLink">http://asm.ow2.io/</a><sup class="visible-print-inline">[48]</sup></p>
-                 <p><b>Project Licenses: </b><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></p>
-                </td>
-               </tr>
-              </tbody>
-             </table>
-            </div></li>
-          </ul></li>
-         <li>org.ow2.asm:asm-util:jar:9.7.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep16" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>asm-util</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Utilities for ASM, a very small and fast Java bytecode manipulation framework</p>
-               <p><b>URL: </b><a href="http://asm.ow2.io/" class="externalLink">http://asm.ow2.io/</a><sup class="visible-print-inline">[48]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div>
-          <ul>
-           <li>org.ow2.asm:asm-analysis:jar:9.7.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-            <div id="dep18" style="display:none">
-             <table class="bodyTable table table-striped table-hover">
-              <thead>
-               <tr class="a">
-                <th>asm-analysis</th>
-               </tr>
-              </thead>
-              <tbody>
-               <tr class="b">
-                <td>
-                 <p><b>Description: </b>Static code analysis API of ASM, a very small and fast Java bytecode manipulation framework</p>
-                 <p><b>URL: </b><a href="http://asm.ow2.io/" class="externalLink">http://asm.ow2.io/</a><sup class="visible-print-inline">[48]</sup></p>
-                 <p><b>Project Licenses: </b><a href="https://asm.ow2.io/license.html" class="externalLink">BSD-3-Clause</a><sup class="visible-print-inline">[49]</sup></p>
-                </td>
-               </tr>
-              </tbody>
-             </table>
-            </div></li>
-          </ul></li>
-         <li>com.github.jnr:jnr-netdb:jar:1.2.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep20" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-netdb</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Lookup TCP and UDP services from java</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-netdb" class="externalLink">http://github.com/jnr/jnr-netdb</a><sup class="visible-print-inline">[26]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jnr-enxio:jar:0.32.19 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep22" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-enxio</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Native I/O access for java</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-enxio" class="externalLink">http://github.com/jnr/jnr-enxio</a><sup class="visible-print-inline">[24]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jnr-unixsocket:jar:0.38.24 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep24" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-unixsocket</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>UNIX socket channels for java</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-unixsocket" class="externalLink">http://github.com/jnr/jnr-unixsocket</a><sup class="visible-print-inline">[31]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jnr-posix:jar:3.1.21 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep26" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-posix</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Common cross-project/cross-platform POSIX APIs</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-posix" class="externalLink">http://github.com/jnr/jnr-posix</a><sup class="visible-print-inline">[27]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-2.0/" class="externalLink">Eclipse Public License - v 2.0</a><sup class="visible-print-inline">[28]</sup>, <a href="http://www.gnu.org/copyleft/gpl.html" class="externalLink">GNU General Public License Version 2</a><sup class="visible-print-inline">[29]</sup>, <a href="http://www.gnu.org/licenses/lgpl.html" class="externalLink">GNU Lesser General Public License Version 2.1</a><sup class="visible-print-inline">[30]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jnr-constants:jar:0.10.4 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep28" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-constants</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>A set of platform constants (e.g. errno values)</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-constants" class="externalLink">http://github.com/jnr/jnr-constants</a><sup class="visible-print-inline">[23]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jnr-ffi:jar:2.2.18 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep30" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jnr-ffi</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>A library for invoking native functions from java</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jnr-ffi" class="externalLink">http://github.com/jnr/jnr-ffi</a><sup class="visible-print-inline">[25]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div>
-          <ul>
-           <li>com.github.jnr:jnr-a64asm:jar:1.0.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-            <div id="dep32" style="display:none">
-             <table class="bodyTable table table-striped table-hover">
-              <thead>
-               <tr class="a">
-                <th>jnr-a64asm</th>
-               </tr>
-              </thead>
-              <tbody>
-               <tr class="b">
-                <td>
-                 <p><b>Description: </b>A pure-java A64 assembler</p>
-                 <p><b>URL: </b><a href="http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm" class="externalLink">http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm</a><sup class="visible-print-inline">[22]</sup></p>
-                 <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-                </td>
-               </tr>
-              </tbody>
-             </table>
-            </div></li>
-           <li>com.github.jnr:jnr-x86asm:jar:1.0.2 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-            <div id="dep34" style="display:none">
-             <table class="bodyTable table table-striped table-hover">
-              <thead>
-               <tr class="a">
-                <th>jnr-x86asm</th>
-               </tr>
-              </thead>
-              <tbody>
-               <tr class="b">
-                <td>
-                 <p><b>Description: </b>A pure-java X86 and X86_64 assembler</p>
-                 <p><b>URL: </b><a href="http://github.com/jnr/jnr-x86asm" class="externalLink">http://github.com/jnr/jnr-x86asm</a><sup class="visible-print-inline">[32]</sup></p>
-                 <p><b>Project Licenses: </b><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></p>
-                </td>
-               </tr>
-              </tbody>
-             </table>
-            </div></li>
-          </ul></li>
-         <li>com.github.jnr:jffi:jar:1.3.14 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep36" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jffi</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Java Foreign Function Interface</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jffi" class="externalLink">http://github.com/jnr/jffi</a><sup class="visible-print-inline">[20]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup>, <a href="https://www.gnu.org/licenses/lgpl-3.0.txt" class="externalLink">GNU Lesser General Public License version 3</a><sup class="visible-print-inline">[21]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.github.jnr:jffi:jar:native:1.3.14 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep38" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jffi</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Java Foreign Function Interface</p>
-               <p><b>URL: </b><a href="http://github.com/jnr/jffi" class="externalLink">http://github.com/jnr/jffi</a><sup class="visible-print-inline">[20]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup>, <a href="https://www.gnu.org/licenses/lgpl-3.0.txt" class="externalLink">GNU Lesser General Public License version 3</a><sup class="visible-print-inline">[21]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.jruby.joni:joni:jar:2.2.6 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep40" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>Joni</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Java port of Oniguruma: http://www.geocities.jp/kosako3/oniguruma that uses byte arrays directly instead of java Strings and chars</p>
-               <p><b>URL: </b><a href="http://nexus.sonatype.org/oss-repository-hosting.html/joni" class="externalLink">http://nexus.sonatype.org/oss-repository-hosting.html/joni</a><sup class="visible-print-inline">[47]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.jruby.jcodings:jcodings:jar:1.0.63 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep42" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>JCodings</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Byte based encoding support library for java</p>
-               <p><b>URL: </b><a href="http://nexus.sonatype.org/oss-repository-hosting.html/jcodings" class="externalLink">http://nexus.sonatype.org/oss-repository-hosting.html/jcodings</a><sup class="visible-print-inline">[46]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.jruby:dirgra:jar:0.5 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep44" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>Dirgra</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Simple Directed Graph</p>
-               <p><b>URL: </b><a href="https://github.com/jruby/dirgra" class="externalLink">https://github.com/jruby/dirgra</a><sup class="visible-print-inline">[40]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.eclipse.org/legal/epl-v10.html" class="externalLink">EPL</a><sup class="visible-print-inline">[41]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.headius:invokebinder:jar:1.14 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep46" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>invokebinder</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Sonatype helps open source projects to set up Maven repositories on https://oss.sonatype.org/</p>
-               <p><b>URL: </b><a href="http://maven.apache.org" class="externalLink">http://maven.apache.org</a><sup class="visible-print-inline">[34]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.headius:options:jar:1.6 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep48" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>options</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Sonatype helps open source projects to set up Maven repositories on https://oss.sonatype.org/</p>
-               <p><b>URL: </b><a href="https://github.com/headius/options" class="externalLink">https://github.com/headius/options</a><sup class="visible-print-inline">[35]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.jruby:jzlib:jar:1.1.5 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep50" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>JZlib</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>JZlib is a re-implementation of zlib in pure Java</p>
-               <p><b>URL: </b><a href="http://www.jcraft.com/jzlib/" class="externalLink">http://www.jcraft.com/jzlib/</a><sup class="visible-print-inline">[44]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.jcraft.com/jzlib/LICENSE.txt" class="externalLink">BSD</a><sup class="visible-print-inline">[45]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>joda-time:joda-time:jar:2.14.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep52" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>Joda-Time</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Date and time library to replace JDK date handling</p>
-               <p><b>URL: </b><a href="https://www.joda.org/joda-time/" class="externalLink">https://www.joda.org/joda-time/</a><sup class="visible-print-inline">[36]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>me.qmx.jitescript:jitescript:jar:0.4.1 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep54" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>jitescript</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Java API for Bytecode</p>
-               <p><b>URL: </b><a href="https://github.com/qmx/jitescript" class="externalLink">https://github.com/qmx/jitescript</a><sup class="visible-print-inline">[37]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>com.headius:backport9:jar:1.13 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep56" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>backport9</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Sonatype helps open source projects to set up Maven repositories on https://oss.sonatype.org/</p>
-               <p><b>URL: </b><a href="http://nexus.sonatype.org/oss-repository-hosting.html/backport9" class="externalLink">http://nexus.sonatype.org/oss-repository-hosting.html/backport9</a><sup class="visible-print-inline">[33]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache Software License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.crac:crac:jar:1.5.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep58" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>crac</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>A wrapper for OpenJDK CRaC API to build and run on any JDK</p>
-               <p><b>URL: </b><a href="https://github.com/crac/org.crac" class="externalLink">https://github.com/crac/org.crac</a><sup class="visible-print-inline">[38]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://opensource.org/licenses/BSD-2-Clause" class="externalLink">BSD-2-Clause</a><sup class="visible-print-inline">[39]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-        </ul></li>
-       <li>org.jruby:jruby-stdlib:jar:10.0.3.0 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep60" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>JRuby Lib Setup</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>JRuby is the effort to recreate the Ruby (https://www.ruby-lang.org) interpreter in Java.</p>
-             <p><b>URL: </b><a href="https://github.com/jruby/jruby/jruby-stdlib" class="externalLink">https://github.com/jruby/jruby/jruby-stdlib</a><sup class="visible-print-inline">[43]</sup></p>
-             <p><b>Project Licenses: </b><a href="http://www.gnu.org/licenses/gpl-2.0-standalone.html" class="externalLink">GPL-2.0</a><sup class="visible-print-inline">[11]</sup>, <a href="http://www.gnu.org/licenses/lgpl-2.1-standalone.html" class="externalLink">LGPL-2.1</a><sup class="visible-print-inline">[12]</sup>, <a href="http://www.eclipse.org/legal/epl-v20.html" class="externalLink">EPL-2.0</a><sup class="visible-print-inline">[13]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div></li>
-      </ul></li>
-     <li>org.yaml:snakeyaml:jar:2.2 (compile) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep62" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>SnakeYAML</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>YAML 1.1 parser and emitter for Java</p>
-           <p><b>URL: </b><a href="https://bitbucket.org/snakeyaml/snakeyaml" class="externalLink">https://bitbucket.org/snakeyaml/snakeyaml</a><sup class="visible-print-inline">[1]</sup></p>
-           <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div></li>
-     <li>org.slf4j:slf4j-api:jar:2.0.12 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep64" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>SLF4J API Module</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>The slf4j API</p>
-           <p><b>URL: </b><a href="http://www.slf4j.org" class="externalLink">http://www.slf4j.org</a><sup class="visible-print-inline">[14]</sup></p>
-           <p><b>Project Licenses: </b><a href="http://www.opensource.org/licenses/mit-license.php" class="externalLink">MIT License</a><sup class="visible-print-inline">[15]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div></li>
-     <li>org.junit.jupiter:junit-jupiter:jar:5.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep66" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>JUnit Jupiter (Aggregator)</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>Module "junit-jupiter" of JUnit 5.</p>
-           <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-           <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <ul>
-       <li>org.junit.jupiter:junit-jupiter-api:jar:5.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep68" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>JUnit Jupiter API</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>Module "junit-jupiter-api" of JUnit 5.</p>
-             <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-             <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div>
-        <ul>
-         <li>org.opentest4j:opentest4j:jar:1.3.0 (test) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep70" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>org.opentest4j:opentest4j</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Open Test Alliance for the JVM</p>
-               <p><b>URL: </b><a href="https://github.com/ota4j-team/opentest4j" class="externalLink">https://github.com/ota4j-team/opentest4j</a><sup class="visible-print-inline">[19]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.junit.platform:junit-platform-commons:jar:1.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep72" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>JUnit Platform Commons</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Module "junit-platform-commons" of JUnit 5.</p>
-               <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-         <li>org.apiguardian:apiguardian-api:jar:1.1.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep74" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>org.apiguardian:apiguardian-api</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>@API Guardian</p>
-               <p><b>URL: </b><a href="https://github.com/apiguardian-team/apiguardian" class="externalLink">https://github.com/apiguardian-team/apiguardian</a><sup class="visible-print-inline">[18]</sup></p>
-               <p><b>Project Licenses: </b><a href="http://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">The Apache License, Version 2.0</a><sup class="visible-print-inline">[2]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-        </ul></li>
-       <li>org.junit.jupiter:junit-jupiter-params:jar:5.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep76" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>JUnit Jupiter Params</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>Module "junit-jupiter-params" of JUnit 5.</p>
-             <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-             <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div></li>
-       <li>org.junit.jupiter:junit-jupiter-engine:jar:5.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep78" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>JUnit Jupiter Engine</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>Module "junit-jupiter-engine" of JUnit 5.</p>
-             <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-             <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div>
-        <ul>
-         <li>org.junit.platform:junit-platform-engine:jar:1.10.2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-          <div id="dep80" style="display:none">
-           <table class="bodyTable table table-striped table-hover">
-            <thead>
-             <tr class="a">
-              <th>JUnit Platform Engine API</th>
-             </tr>
-            </thead>
-            <tbody>
-             <tr class="b">
-              <td>
-               <p><b>Description: </b>Module "junit-platform-engine" of JUnit 5.</p>
-               <p><b>URL: </b><a href="https://junit.org/junit5/" class="externalLink">https://junit.org/junit5/</a><sup class="visible-print-inline">[6]</sup></p>
-               <p><b>Project Licenses: </b><a href="https://www.eclipse.org/legal/epl-v20.html" class="externalLink">Eclipse Public License v2.0</a><sup class="visible-print-inline">[7]</sup></p>
-              </td>
-             </tr>
-            </tbody>
-           </table>
-          </div></li>
-        </ul></li>
-      </ul></li>
-     <li>org.apache.logging.log4j:log4j-slf4j2-impl:jar:3.0.0-beta2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep82" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>Apache Log4j SLF4J 2.0 Binding</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>The Apache Log4j SLF4J 2.0 API binding to Log4j 2 Core</p>
-           <p><b>URL: </b><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-slf4j2-impl/" class="externalLink">https://logging.apache.org/log4j/3.x/log4j/log4j-slf4j2-impl/</a><sup class="visible-print-inline">[5]</sup></p>
-           <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <ul>
-       <li>org.apache.logging.log4j:log4j-api:jar:3.0.0-beta2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep84" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>Apache Log4j API</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>The Apache Log4j API</p>
-             <p><b>URL: </b><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-api/" class="externalLink">https://logging.apache.org/log4j/3.x/log4j/log4j-api/</a><sup class="visible-print-inline">[16]</sup></p>
-             <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div></li>
-      </ul></li>
-     <li>org.apache.logging.log4j:log4j-core:jar:3.0.0-beta2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep86" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>Apache Log4j Core</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>The Apache Log4j Implementation</p>
-           <p><b>URL: </b><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-core/" class="externalLink">https://logging.apache.org/log4j/3.x/log4j/log4j-core/</a><sup class="visible-print-inline">[3]</sup></p>
-           <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-      <ul>
-       <li>org.apache.logging.log4j:log4j-plugins:jar:3.0.0-beta2 (test) <i class="fa-solid fa-circle-info text-info"></i>
-        <div id="dep88" style="display:none">
-         <table class="bodyTable table table-striped table-hover">
-          <thead>
-           <tr class="a">
-            <th>Apache Log4j Plugins</th>
-           </tr>
-          </thead>
-          <tbody>
-           <tr class="b">
-            <td>
-             <p><b>Description: </b>Log4j Plugin Support</p>
-             <p><b>URL: </b><a href="https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/" class="externalLink">https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/</a><sup class="visible-print-inline">[17]</sup></p>
-             <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache-2.0</a><sup class="visible-print-inline">[4]</sup></p>
-            </td>
-           </tr>
-          </tbody>
-         </table>
-        </div></li>
-      </ul></li>
-     <li>network.ike.tooling:ike-build-standards:zip:site-theme:149 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep90" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>IKE Build Standards</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.</p>
-           <p><b>URL: </b><a href="https://ike.network/ike-tooling/ike-build-standards/">https://ike.network/ike-tooling/ike-build-standards/</a><sup class="visible-print-inline">[8]</sup></p>
-           <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div></li>
-     <li>network.ike.tooling:ike-build-standards:zip:built-with:149 (provided) <i class="fa-solid fa-circle-info text-info"></i>
-      <div id="dep92" style="display:none">
-       <table class="bodyTable table table-striped table-hover">
-        <thead>
-         <tr class="a">
-          <th>IKE Build Standards</th>
-         </tr>
-        </thead>
-        <tbody>
-         <tr class="b">
-          <td>
-           <p><b>Description: </b>Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.</p>
-           <p><b>URL: </b><a href="https://ike.network/ike-tooling/ike-build-standards/">https://ike.network/ike-tooling/ike-build-standards/</a><sup class="visible-print-inline">[8]</sup></p>
-           <p><b>Project Licenses: </b><a href="https://www.apache.org/licenses/LICENSE-2.0.txt" class="externalLink">Apache License, Version 2.0</a><sup class="visible-print-inline">[4]</sup></p>
-          </td>
-         </tr>
-        </tbody>
-       </table>
-      </div></li>
-    </ul></li>
-  </ul>
- </section>
-</section>
-<section>
- <a id="licenses"></a>
- <h1 id="licenses">Licenses</h1>
- <p><b>EPL: </b>Dirgra</p>
- <p><b>LGPL-2.1: </b>JRuby Base, JRuby Lib Setup, JRuby Main Maven Artifact</p>
- <p><b>The Apache License, Version 2.0: </b>org.apiguardian:apiguardian-api, org.opentest4j:opentest4j</p>
- <p><b>BSD-3-Clause: </b>asm, asm-analysis, asm-commons, asm-tree, asm-util</p>
- <p><b>MIT License: </b>JCodings, Joni, SLF4J API Module, jnr-x86asm</p>
- <p><b>BSD-2-Clause: </b>crac</p>
- <p><b>GPL-2.0: </b>JRuby Base, JRuby Lib Setup, JRuby Main Maven Artifact</p>
- <p><b>Eclipse Public License v2.0: </b>JUnit Jupiter (Aggregator), JUnit Jupiter API, JUnit Jupiter Engine, JUnit Jupiter Params, JUnit Platform Commons, JUnit Platform Engine API</p>
- <p><b>BSD: </b>JZlib</p>
- <p><b>Apache License, Version 2.0: </b>IKE Build Standards, Joda-Time, Koncept AsciiDoc Extension, SnakeYAML</p>
- <p><b>GNU Lesser General Public License Version 2.1: </b>jnr-posix</p>
- <p><b>Apache-2.0: </b>Apache Log4j API, Apache Log4j Core, Apache Log4j Plugins, Apache Log4j SLF4J 2.0 Binding</p>
- <p><b>Eclipse Public License - v 2.0: </b>jnr-posix</p>
- <p><b>EPL-2.0: </b>JRuby Base, JRuby Lib Setup, JRuby Main Maven Artifact</p>
- <p><b>The Apache Software License, Version 2.0: </b>asciidoctorj, asciidoctorj-api, backport9, invokebinder, jffi, jitescript, jnr-a64asm, jnr-constants, jnr-enxio, jnr-ffi, jnr-netdb, jnr-unixsocket, options</p>
- <p><b>GNU General Public License Version 2: </b>jnr-posix</p>
- <p><b>GNU Lesser General Public License version 3: </b>jffi</p>
-</section>
-<section>
- <a id="dependency-file-details"></a>
- <h1 id="dependency-file-details">Dependency File Details</h1>
- <table class="bodyTable table table-striped table-hover">
-  <thead>
-   <tr class="b">
-    <th>Total</th>
-    <th>Size</th>
-    <th>Entries</th>
-    <th>Classes</th>
-    <th>Packages</th>
-    <th>Java Version</th>
-    <th>Debug Information</th>
+<h1 id="dependencies-sbom">Dependencies (SBOM)</h1>
+<p>Full transitive dependency graph for <code>koncept-asciidoc-extension</code> 12, generated from <a href="bom.json">bom.json</a><sup class="visible-print-inline">[1]</sup> (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped <a href="licenses.html">licenses.html</a><sup class="visible-print-inline">[2]</sup> and the curated <a href="built-with.html">built-with.html</a><sup class="visible-print-inline">[3]</sup> — three views of the same data.</p>
+<div>
+ <h2 id="summary"><a href="#summary"></a><a id="summary"></a>Summary</h2>
+ <table class="bodyTable table table-striped table-hover" style="background: #FFFFFF">
+  <tbody>
+   <tr class="a">
+    <td style="text-align: left;">Total components</td>
+    <td>34</td>
    </tr>
-  </thead>
+   <tr class="b">
+    <td style="text-align: left;">Distinct license expressions</td>
+    <td>9</td>
+   </tr>
+  </tbody>
+ </table>
+</div>
+<div>
+ <h2 id="components"><a href="#components"></a><a id="components"></a>Components</h2>
+ <p>Sorted by group, artifact, version. Click <a href="bom.json">bom.json</a><sup class="visible-print-inline">[1]</sup> for the raw machine-readable form (Dependency-Track, Trivy, Snyk, GitHub dep-graph all ingest it directly).</p>
+ <table class="bodyTable table table-striped table-hover" style="background: #FFFFFF">
   <thead>
    <tr class="a">
-    <th>Filename</th>
-    <th>Size</th>
-    <th>Entries</th>
-    <th>Classes</th>
-    <th>Packages</th>
-    <th>Java Version</th>
-    <th title="Indicates whether these dependencies have been compiled with debug information.">Debug Information</th>
+    <th>Group</th>
+    <th>Artifact</th>
+    <th>Version</th>
+    <th>License</th>
+    <th>Type</th>
    </tr>
   </thead>
   <tbody>
    <tr class="b">
-    <td style="text-align: left;">jffi-1.3.14-native.jar</td>
-    <td style="text-align: right;">1 MB</td>
-    <td style="text-align: right;">49</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jffi</code></td>
+    <td><code>1.3.14</code></td>
+    <td><code>Apache-2.0 OR GNU Lesser General Public License version 3</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jffi-1.3.14.jar</td>
-    <td style="text-align: right;">163.2 kB</td>
-    <td style="text-align: right;">144</td>
-    <td style="text-align: right;">133</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jffi</code></td>
+    <td><code>1.3.14</code></td>
+    <td><code>Apache-2.0 OR GNU Lesser General Public License version 3</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jnr-a64asm-1.0.0.jar</td>
-    <td style="text-align: right;">86.3 kB</td>
-    <td style="text-align: right;">57</td>
-    <td style="text-align: right;">48</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">1.7</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-a64asm</code></td>
+    <td><code>1.0.0</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jnr-constants-0.10.4.jar</td>
-    <td style="text-align: right;">1.6 MB</td>
-    <td style="text-align: right;">1063</td>
-    <td style="text-align: right;">1038</td>
-    <td style="text-align: right;">17</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-constants</code></td>
+    <td><code>0.10.4</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jnr-enxio-0.32.19.jar</td>
-    <td style="text-align: right;">34.6 kB</td>
-    <td style="text-align: right;">37</td>
-    <td style="text-align: right;">27</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-enxio</code></td>
+    <td><code>0.32.19</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jnr-ffi-2.2.18.jar</td>
-    <td style="text-align: right;">744.6 kB</td>
-    <td style="text-align: right;">745</td>
-    <td style="text-align: right;">669</td>
-    <td style="text-align: right;">50</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-ffi</code></td>
+    <td><code>2.2.18</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jnr-netdb-1.2.0.jar</td>
-    <td style="text-align: right;">63.1 kB</td>
-    <td style="text-align: right;">55</td>
-    <td style="text-align: right;">46</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-netdb</code></td>
+    <td><code>1.2.0</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jnr-posix-3.1.21.jar</td>
-    <td style="text-align: right;">289.7 kB</td>
-    <td style="text-align: right;">256</td>
-    <td style="text-align: right;">245</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-posix</code></td>
+    <td><code>3.1.21</code></td>
+    <td><code>EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jnr-unixsocket-0.38.24.jar</td>
-    <td style="text-align: right;">48.2 kB</td>
-    <td style="text-align: right;">40</td>
-    <td style="text-align: right;">30</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-unixsocket</code></td>
+    <td><code>0.38.24</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jnr-x86asm-1.0.2.jar</td>
-    <td style="text-align: right;">219.9 kB</td>
-    <td style="text-align: right;">97</td>
-    <td style="text-align: right;">84</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.github.jnr</code></td>
+    <td><code>jnr-x86asm</code></td>
+    <td><code>1.0.2</code></td>
+    <td><code>MIT</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">backport9-1.13.jar</td>
-    <td style="text-align: right;">14 kB</td>
-    <td style="text-align: right;">29</td>
-    <td style="text-align: right;">13</td>
-    <td style="text-align: right;">7</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.headius</code></td>
+    <td><code>backport9</code></td>
+    <td><code>1.13</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">invokebinder-1.14.jar</td>
-    <td style="text-align: right;">53.1 kB</td>
-    <td style="text-align: right;">34</td>
-    <td style="text-align: right;">23</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.headius</code></td>
+    <td><code>invokebinder</code></td>
+    <td><code>1.14</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">options-1.6.jar</td>
-    <td style="text-align: right;">14.9 kB</td>
-    <td style="text-align: right;">21</td>
-    <td style="text-align: right;">10</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>com.headius</code></td>
+    <td><code>options</code></td>
+    <td><code>1.6</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">joda-time-2.14.0.jar</td>
-    <td style="text-align: right;">639.8 kB</td>
-    <td style="text-align: right;">770</td>
-    <td style="text-align: right;">248</td>
-    <td style="text-align: right;">7</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>joda-time</code></td>
+    <td><code>joda-time</code></td>
+    <td><code>2.14.0</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jitescript-0.4.1.jar</td>
-    <td style="text-align: right;">23 kB</td>
-    <td style="text-align: right;">20</td>
-    <td style="text-align: right;">9</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.6</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>me.qmx.jitescript</code></td>
+    <td><code>jitescript</code></td>
+    <td><code>0.4.1</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">ike-build-standards-149-built-with.zip</td>
-    <td style="text-align: right;">3.5 kB</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
+    <td style="text-align: left;"><code>network.ike.tooling</code></td>
+    <td><code>ike-build-standards</code></td>
+    <td><code>150</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">ike-build-standards-149-site-theme.zip</td>
-    <td style="text-align: right;">3.4 kB</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
+    <td style="text-align: left;"><code>network.ike.tooling</code></td>
+    <td><code>ike-build-standards</code></td>
+    <td><code>150</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">log4j-api-3.0.0-beta2.jar</td>
-    <td style="text-align: right;">354.8 kB</td>
-    <td style="text-align: right;">241</td>
-    <td style="text-align: right;">213</td>
-    <td style="text-align: right;">11</td>
-    <td style="text-align: center;">17</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.asciidoctor</code></td>
+    <td><code>asciidoctorj</code></td>
+    <td><code>3.0.1</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">log4j-core-3.0.0-beta2.jar</td>
-    <td style="text-align: right;">1.5 MB</td>
-    <td style="text-align: right;">976</td>
-    <td style="text-align: right;">907</td>
-    <td style="text-align: right;">44</td>
-    <td style="text-align: center;">17</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.asciidoctor</code></td>
+    <td><code>asciidoctorj-api</code></td>
+    <td><code>3.0.1</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">log4j-plugins-3.0.0-beta2.jar</td>
-    <td style="text-align: right;">205.9 kB</td>
-    <td style="text-align: right;">186</td>
-    <td style="text-align: right;">156</td>
-    <td style="text-align: right;">14</td>
-    <td style="text-align: center;">17</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.crac</code></td>
+    <td><code>crac</code></td>
+    <td><code>1.5.0</code></td>
+    <td><code>BSD-2-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">log4j-slf4j2-impl-3.0.0-beta2.jar</td>
-    <td style="text-align: right;">26.5 kB</td>
-    <td style="text-align: right;">27</td>
-    <td style="text-align: right;">11</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">17</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby</code></td>
+    <td><code>dirgra</code></td>
+    <td><code>0.5</code></td>
+    <td><code>EPL-1.0</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">apiguardian-api-1.1.2.jar</td>
-    <td style="text-align: right;">6.8 kB</td>
-    <td style="text-align: right;">9</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.6</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby</code></td>
+    <td><code>jruby</code></td>
+    <td><code>10.0.3.0</code></td>
+    <td><code>EPL-2.0 OR GPL-2.0 OR LGPL-2.1</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">asciidoctorj-3.0.1.jar</td>
-    <td style="text-align: right;">1.9 MB</td>
-    <td style="text-align: right;">1255</td>
-    <td style="text-align: right;">142</td>
-    <td style="text-align: right;">11</td>
-    <td style="text-align: center;">11</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby</code></td>
+    <td><code>jruby-base</code></td>
+    <td><code>10.0.3.0</code></td>
+    <td><code>EPL-2.0 OR GPL-2.0 OR LGPL-2.1</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">asciidoctorj-api-3.0.1.jar</td>
-    <td style="text-align: right;">60.3 kB</td>
-    <td style="text-align: right;">91</td>
-    <td style="text-align: right;">82</td>
-    <td style="text-align: right;">6</td>
-    <td style="text-align: center;">11</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby</code></td>
+    <td><code>jruby-stdlib</code></td>
+    <td><code>10.0.3.0</code></td>
+    <td><code>EPL-2.0 OR GPL-2.0 OR LGPL-2.1</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">crac-1.5.0.jar</td>
-    <td style="text-align: right;">13.4 kB</td>
-    <td style="text-align: right;">24</td>
-    <td style="text-align: right;">14</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby</code></td>
+    <td><code>jzlib</code></td>
+    <td><code>1.1.5</code></td>
+    <td><code>BSD-4-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">dirgra-0.5.jar</td>
-    <td style="text-align: right;">17 kB</td>
-    <td style="text-align: right;">21</td>
-    <td style="text-align: right;">11</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.jruby.jcodings</code></td>
+    <td><code>jcodings</code></td>
+    <td><code>1.0.63</code></td>
+    <td><code>MIT</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jruby-10.0.3.0.jar</td>
-    <td style="text-align: right;">26.2 kB</td>
-    <td style="text-align: right;">12</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
+    <td style="text-align: left;"><code>org.jruby.joni</code></td>
+    <td><code>joni</code></td>
+    <td><code>2.2.6</code></td>
+    <td><code>MIT</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jruby-base-10.0.3.0.jar</td>
-    <td style="text-align: right;">9.4 MB</td>
-    <td style="text-align: right;">6530</td>
-    <td style="text-align: right;">6346</td>
-    <td style="text-align: right;">115</td>
-    <td style="text-align: center;">21</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.ow2.asm</code></td>
+    <td><code>asm</code></td>
+    <td><code>9.7.1</code></td>
+    <td><code>BSD-3-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jruby-stdlib-10.0.3.0.jar</td>
-    <td style="text-align: right;">19 MB</td>
-    <td style="text-align: right;">3052</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: right;">0</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
+    <td style="text-align: left;"><code>org.ow2.asm</code></td>
+    <td><code>asm-analysis</code></td>
+    <td><code>9.7.1</code></td>
+    <td><code>BSD-3-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">jzlib-1.1.5.jar</td>
-    <td style="text-align: right;">74.9 kB</td>
-    <td style="text-align: right;">36</td>
-    <td style="text-align: right;">26</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">1.7</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.ow2.asm</code></td>
+    <td><code>asm-commons</code></td>
+    <td><code>9.7.1</code></td>
+    <td><code>BSD-3-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">jcodings-1.0.63.jar</td>
-    <td style="text-align: right;">1.8 MB</td>
-    <td style="text-align: right;">862</td>
-    <td style="text-align: right;">166</td>
-    <td style="text-align: right;">11</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.ow2.asm</code></td>
+    <td><code>asm-tree</code></td>
+    <td><code>9.7.1</code></td>
+    <td><code>BSD-3-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">joni-2.2.6.jar</td>
-    <td style="text-align: right;">232.4 kB</td>
-    <td style="text-align: right;">121</td>
-    <td style="text-align: right;">107</td>
-    <td style="text-align: right;">7</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
+    <td style="text-align: left;"><code>org.ow2.asm</code></td>
+    <td><code>asm-util</code></td>
+    <td><code>9.7.1</code></td>
+    <td><code>BSD-3-Clause</code></td>
+    <td>library</td>
    </tr>
    <tr class="b">
-    <td style="text-align: left;">junit-jupiter-5.10.2.jar</td>
-    <td style="text-align: right;">6.4 kB</td>
-    <td style="text-align: right;">5</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">9</td>
-    <td style="text-align: center;">No</td>
+    <td style="text-align: left;"><code>org.slf4j</code></td>
+    <td><code>slf4j-api</code></td>
+    <td><code>2.0.12</code></td>
+    <td><code>MIT</code></td>
+    <td>library</td>
    </tr>
    <tr class="a">
-    <td style="text-align: left;">junit-jupiter-api-5.10.2.jar</td>
-    <td style="text-align: right;">211 kB</td>
-    <td style="text-align: right;">197</td>
-    <td style="text-align: right;">182</td>
-    <td style="text-align: right;">8</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">junit-jupiter-engine-5.10.2.jar</td>
-    <td style="text-align: right;">244.7 kB</td>
-    <td style="text-align: right;">147</td>
-    <td style="text-align: right;">130</td>
-    <td style="text-align: right;">9</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">junit-jupiter-params-5.10.2.jar</td>
-    <td style="text-align: right;">586 kB</td>
-    <td style="text-align: right;">381</td>
-    <td style="text-align: right;">347</td>
-    <td style="text-align: right;">22</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">junit-platform-commons-1.10.2.jar</td>
-    <td style="text-align: right;">106.2 kB</td>
-    <td style="text-align: right;">64</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Root</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">56</td>
-    <td style="text-align: right;">43</td>
-    <td style="text-align: right;">7</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Versioned</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">8</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">9</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">junit-platform-engine-1.10.2.jar</td>
-    <td style="text-align: right;">204.8 kB</td>
-    <td style="text-align: right;">153</td>
-    <td style="text-align: right;">136</td>
-    <td style="text-align: right;">10</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">opentest4j-1.3.0.jar</td>
-    <td style="text-align: right;">14.3 kB</td>
-    <td style="text-align: right;">15</td>
-    <td style="text-align: right;">9</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.6</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">asm-9.7.1.jar</td>
-    <td style="text-align: right;">126.1 kB</td>
-    <td style="text-align: right;">45</td>
-    <td style="text-align: right;">39</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">asm-analysis-9.7.1.jar</td>
-    <td style="text-align: right;">35.1 kB</td>
-    <td style="text-align: right;">22</td>
-    <td style="text-align: right;">15</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">asm-commons-9.7.1.jar</td>
-    <td style="text-align: right;">73.5 kB</td>
-    <td style="text-align: right;">34</td>
-    <td style="text-align: right;">28</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">asm-tree-9.7.1.jar</td>
-    <td style="text-align: right;">51.9 kB</td>
-    <td style="text-align: right;">45</td>
-    <td style="text-align: right;">39</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">asm-util-9.7.1.jar</td>
-    <td style="text-align: right;">94.5 kB</td>
-    <td style="text-align: right;">33</td>
-    <td style="text-align: right;">27</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">1.5</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">slf4j-api-2.0.12.jar</td>
-    <td style="text-align: right;">68.1 kB</td>
-    <td style="text-align: right;">70</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Root</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">68</td>
-    <td style="text-align: right;">54</td>
-    <td style="text-align: right;">4</td>
-    <td style="text-align: center;">1.8</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Versioned</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: right;">1</td>
-    <td style="text-align: center;">9</td>
-    <td style="text-align: center;">No</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">snakeyaml-2.2.jar</td>
-    <td style="text-align: right;">334.4 kB</td>
-    <td style="text-align: right;">278</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: center;">-</td>
-    <td style="text-align: center;">-</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Root</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">270</td>
-    <td style="text-align: right;">229</td>
-    <td style="text-align: right;">23</td>
-    <td style="text-align: center;">1.7</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: left;">&nbsp;&nbsp;&nbsp;• Versioned</td>
-    <td style="text-align: right;">-</td>
-    <td style="text-align: right;">8</td>
-    <td style="text-align: right;">3</td>
-    <td style="text-align: right;">2</td>
-    <td style="text-align: center;">9</td>
-    <td style="text-align: center;">Yes</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: right;">46</td>
-    <td style="text-align: right;">41.7 MB</td>
-    <td style="text-align: right;">18349</td>
-    <td style="text-align: right;">12086</td>
-    <td style="text-align: right;">427</td>
-    <td style="text-align: center;">21</td>
-    <td style="text-align: right;">40</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: right;">compile: 1</td>
-    <td style="text-align: right;">compile: 334.4 kB</td>
-    <td style="text-align: right;">compile: 278</td>
-    <td style="text-align: right;">compile: 229</td>
-    <td style="text-align: right;">compile: 23</td>
-    <td rowspan="2" style="text-align: center; vertical-align: middle;">21</td>
-    <td style="text-align: right;">compile: 1</td>
-   </tr>
-   <tr class="a">
-    <td style="text-align: right;">provided: 33</td>
-    <td style="text-align: right;">provided: 37.9 MB</td>
-    <td style="text-align: right;">provided: 15670</td>
-    <td style="text-align: right;">provided: 9719</td>
-    <td style="text-align: right;">provided: 272</td>
-    <td style="text-align: right;">provided: 28</td>
-   </tr>
-   <tr class="b">
-    <td style="text-align: right;">test: 12</td>
-    <td style="text-align: right;">test: 3.4 MB</td>
-    <td style="text-align: right;">test: 2401</td>
-    <td style="text-align: right;">test: 2138</td>
-    <td style="text-align: right;">test: 132</td>
-    <td style="text-align: center;">17</td>
-    <td style="text-align: right;">test: 11</td>
+    <td style="text-align: left;"><code>org.yaml</code></td>
+    <td><code>snakeyaml</code></td>
+    <td><code>2.2</code></td>
+    <td><code>Apache-2.0</code></td>
+    <td>library</td>
    </tr>
   </tbody>
  </table>
-</section>
+</div>
+<div>
+ <h2 id="download"><a href="#download"></a><a id="download"></a>Download</h2>
+ <ul>
+  <li><a href="bom.json">Software Bill of Materials (CycloneDX, JSON)</a><sup class="visible-print-inline">[1]</sup> — raw machine-readable form. Includes purls, hashes, and dependency-graph edges that this page summarizes.</li>
+  <li><a href="bom.xml">bom.xml</a><sup class="visible-print-inline">[4]</sup> — same content in XML.</li>
+  <li>As a Maven artifact: pull <code>koncept-asciidoc-extension:​12</code> with <code>&lt;classifier&gt;cyclonedx&lt;/classifier&gt;&lt;type&gt;json&lt;/type&gt;</code> from Nexus / Maven Central.</li>
+ </ul>
+</div>
+<div>
+ <h2 id="see-also"><a href="#see-also"></a><a id="see-also"></a>See also</h2>
+ <ul>
+  <li><a href="licenses.html">Licenses (SPDX)</a><sup class="visible-print-inline">[2]</sup> — same components grouped by license expression.</li>
+  <li><a href="built-with.html">Built With</a><sup class="visible-print-inline">[3]</sup> — curated narrative + per-license summary.</li>
+  <li><a href="https://github.com/IKE-Network/ike-issues/issues/341" class="externalLink">ike-issues#341</a><sup class="visible-print-inline">[5]</sup> — the issue that introduced this page.</li>
+ </ul>
+</div>
 
 							<div class="document-footer">
 <div class="keywords">
@@ -2167,58 +498,14 @@
 <div class="footnotes visible-print-block">
 								Links:
 								<ul class="list-unstyled">
-								<li>[1] https://bitbucket.org/snakeyaml/snakeyaml</li>
-								<li>[2] http://www.apache.org/licenses/LICENSE-2.0.txt</li>
-								<li>[3] https://logging.apache.org/log4j/3.x/log4j/log4j-core/</li>
-								<li>[4] https://www.apache.org/licenses/LICENSE-2.0.txt</li>
-								<li>[5] https://logging.apache.org/log4j/3.x/log4j/log4j-slf4j2-impl/</li>
-								<li>[6] https://junit.org/junit5/</li>
-								<li>[7] https://www.eclipse.org/legal/epl-v20.html</li>
-								<li>[8] https://ike.network/ike-tooling/ike-build-standards/</li>
-								<li>[9] https://github.com/asciidoctor/asciidoctorj</li>
-								<li>[10] https://github.com/jruby/jruby/jruby-artifacts/jruby</li>
-								<li>[11] http://www.gnu.org/licenses/gpl-2.0-standalone.html</li>
-								<li>[12] http://www.gnu.org/licenses/lgpl-2.1-standalone.html</li>
-								<li>[13] http://www.eclipse.org/legal/epl-v20.html</li>
-								<li>[14] http://www.slf4j.org</li>
-								<li>[15] http://www.opensource.org/licenses/mit-license.php</li>
-								<li>[16] https://logging.apache.org/log4j/3.x/log4j/log4j-api/</li>
-								<li>[17] https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/</li>
-								<li>[18] https://github.com/apiguardian-team/apiguardian</li>
-								<li>[19] https://github.com/ota4j-team/opentest4j</li>
-								<li>[20] http://github.com/jnr/jffi</li>
-								<li>[21] https://www.gnu.org/licenses/lgpl-3.0.txt</li>
-								<li>[22] http://nexus.sonatype.org/oss-repository-hosting.html/jnr-a64asm</li>
-								<li>[23] http://github.com/jnr/jnr-constants</li>
-								<li>[24] http://github.com/jnr/jnr-enxio</li>
-								<li>[25] http://github.com/jnr/jnr-ffi</li>
-								<li>[26] http://github.com/jnr/jnr-netdb</li>
-								<li>[27] http://github.com/jnr/jnr-posix</li>
-								<li>[28] https://www.eclipse.org/legal/epl-2.0/</li>
-								<li>[29] http://www.gnu.org/copyleft/gpl.html</li>
-								<li>[30] http://www.gnu.org/licenses/lgpl.html</li>
-								<li>[31] http://github.com/jnr/jnr-unixsocket</li>
-								<li>[32] http://github.com/jnr/jnr-x86asm</li>
-								<li>[33] http://nexus.sonatype.org/oss-repository-hosting.html/backport9</li>
-								<li>[34] http://maven.apache.org</li>
-								<li>[35] https://github.com/headius/options</li>
-								<li>[36] https://www.joda.org/joda-time/</li>
-								<li>[37] https://github.com/qmx/jitescript</li>
-								<li>[38] https://github.com/crac/org.crac</li>
-								<li>[39] https://opensource.org/licenses/BSD-2-Clause</li>
-								<li>[40] https://github.com/jruby/dirgra</li>
-								<li>[41] http://www.eclipse.org/legal/epl-v10.html</li>
-								<li>[42] https://github.com/jruby/jruby/jruby-base</li>
-								<li>[43] https://github.com/jruby/jruby/jruby-stdlib</li>
-								<li>[44] http://www.jcraft.com/jzlib/</li>
-								<li>[45] http://www.jcraft.com/jzlib/LICENSE.txt</li>
-								<li>[46] http://nexus.sonatype.org/oss-repository-hosting.html/jcodings</li>
-								<li>[47] http://nexus.sonatype.org/oss-repository-hosting.html/joni</li>
-								<li>[48] http://asm.ow2.io/</li>
-								<li>[49] https://asm.ow2.io/license.html</li>
-								<li>[50] https://github.com/IKE-Network/ike-docs</li>
+								<li>[1] bom.json</li>
+								<li>[2] licenses.html</li>
+								<li>[3] built-with.html</li>
+								<li>[4] bom.xml</li>
+								<li>[5] https://github.com/IKE-Network/ike-issues/issues/341</li>
 								</ul>
 							</div>
+<div class="date">Date: <strong>2026-05-10 09:10:58 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -2297,7 +584,7 @@
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>Koncept AsciiDoc Extension 11</strong>
+			<strong>Koncept AsciiDoc Extension 12</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-05-10">2026-05-10</time></strong>
 		</p>

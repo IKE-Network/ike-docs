@@ -8,7 +8,6 @@
 
 - [IKE Documentation Resources](https://github.com/IKE-Network/ike-docs/index.html.md)
 - [Project Summary](https://github.com/IKE-Network/ike-docs/summary.html.md)
-- [Project Dependencies](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
 - [Maven Coordinates](https://github.com/IKE-Network/ike-docs/dependency-info.html.md)
 - [Project Plugins](https://github.com/IKE-Network/ike-docs/plugins.html.md)
 - [Project Plugin Management](https://github.com/IKE-Network/ike-docs/plugin-management.html.md)
@@ -17,5 +16,6 @@
 
 ## Other
 
+- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
 - [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
 - [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)

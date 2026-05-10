@@ -7,7 +7,6 @@
 
 - [IKE DocBook XSL Stylesheets](https://github.com/IKE-Network/ike-docbook-xsl/index.html.md)
 - [Project Summary](https://github.com/IKE-Network/ike-docbook-xsl/summary.html.md)
-- [Project Dependencies](https://github.com/IKE-Network/ike-docbook-xsl/dependencies.html.md)
 - [Maven Coordinates](https://github.com/IKE-Network/ike-docbook-xsl/dependency-info.html.md)
 - [Project Plugins](https://github.com/IKE-Network/ike-docbook-xsl/plugins.html.md)
 - [Project Plugin Management](https://github.com/IKE-Network/ike-docbook-xsl/plugin-management.html.md)
@@ -16,5 +15,6 @@
 
 ## Other
 
+- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docbook-xsl/dependencies.html.md)
 - [Licenses (SPDX)](https://github.com/IKE-Network/ike-docbook-xsl/licenses.html.md)
 - [Built With](https://github.com/IKE-Network/ike-docbook-xsl/built-with.html.md)
