@@ -38,7 +38,15 @@ rules:
     action: allow
 
   # ── Common test dependencies ─────────────────────────────────────
+  # Test deps are blocked from auto-upgrade by default — they're
+  # rarely the right thing to bump silently in a release cycle, and
+  # the resolver tends to pick latest-including-RC (the JUnit 6.x
+  # release candidates regularly cause spurious "ready" entries that
+  # need manual revert in versions-upgrade-publish).
+  # Bump these explicitly when a major-version migration is intended.
   - match: "org.junit.jupiter:*"
-    action: allow
+    action: block
+    reason: "Manual bump only — resolver picks RC versions"
   - match: "org.assertj:assertj-core"
-    action: allow
+    action: block
+    reason: "Manual bump only"
