@@ -95,7 +95,7 @@ The following is a list of provided dependencies for this project. These depende
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:koncept-asciidoc-extension:jar:9 ** 
+- network.ike.docs:koncept-asciidoc-extension:jar:10 ** 
   
   | Koncept AsciiDoc Extension |
   | --- |

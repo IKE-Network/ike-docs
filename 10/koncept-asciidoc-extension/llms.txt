@@ -1,0 +1,18 @@
+# Koncept AsciiDoc Extension
+
+> AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
+> with SVG badge rendering and auto-generated Referenced Koncepts glossary
+> with description logic axiom display.
+
+## Reports
+
+- [Koncept AsciiDoc Extension](https://github.com/IKE-Network/ike-docs/index.html.md)
+- [Project Summary](https://github.com/IKE-Network/ike-docs/summary.html.md)
+- [Project Dependencies](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
+- [Project Information](https://github.com/IKE-Network/ike-docs/project-info.html.md)
+- [Generated Reports](https://github.com/IKE-Network/ike-docs/project-reports.html.md)
+
+## Other
+
+- [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
+- [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)

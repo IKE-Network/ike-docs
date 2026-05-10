@@ -24,7 +24,7 @@ No transitive dependencies are required for this project.
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:minimal-fonts:pom:9 ** 
+- network.ike.docs:minimal-fonts:pom:10 ** 
   
   | IKE Minimal Fonts |
   | --- |

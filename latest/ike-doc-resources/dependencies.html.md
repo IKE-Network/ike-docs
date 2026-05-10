@@ -23,7 +23,7 @@ No transitive dependencies are required for this project.
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:ike-doc-resources:jar:9 ** 
+- network.ike.docs:ike-doc-resources:jar:10 ** 
   
   | IKE Documentation Resources |
   | --- |

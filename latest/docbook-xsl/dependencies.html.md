@@ -25,7 +25,7 @@ No transitive dependencies are required for this project.
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:docbook-xsl:jar:9 ** 
+- network.ike.docs:docbook-xsl:jar:10 ** 
   
   | IKE DocBook XSL Stylesheets |
   | --- |
