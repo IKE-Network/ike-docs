@@ -424,6 +424,19 @@
                             <version>25.0.2</version>
                             <type>pom</type>
                         </dependency>
+                        <!-- Doxia AsciiDoc parser — without this, the
+                             maven-site-plugin ignores src/site/asciidoc/*.adoc
+                             at site:site time. Adding it lets authored
+                             .adoc files (index, getting-started,
+                             THIRD_PARTY_NOTICES) render alongside the
+                             auto-generated reports. Version pinned to
+                             match the asciidoctor-maven release line; bump
+                             in lockstep. -->
+                        <dependency>
+                            <groupId>org.asciidoctor</groupId>
+                            <artifactId>asciidoctor-parser-doxia-module</artifactId>
+                            <version>${asciidoctor-maven-plugin.version}</version>
+                        </dependency>
                     </dependencies>
                     <configuration>
                         <generatedSiteDirectory>${project.build.directory}/generated-site</generatedSiteDirectory>
