@@ -1,0 +1,147 @@
+# IKE Docs — Built With supplement
+# ──────────────────────────────────────────────────────────────────
+# Curated narrative covering components that mechanical reports
+# (bom.json, licenses.html) can't see. Read by ike:built-with
+# (ike-issues#336).
+
+schema: 1
+
+sections:
+
+  - heading: AsciiDoc rendering toolchain
+    components:
+      - name: AsciidoctorJ
+        url: https://asciidoctor.org/
+        license: MIT
+        role: >
+          The Java entry-point for the Asciidoctor renderer.
+          ike-doc-maven-plugin invokes it via the official Maven
+          plugin to convert .adoc source to HTML, DocBook, and
+          XHTML.
+      - name: AsciidoctorJ PDF
+        url: https://github.com/asciidoctor/asciidoctorj-pdf
+        license: MIT
+        role: >
+          Direct PDF rendering of AsciiDoc. The prawn profile in
+          ike-parent activates this renderer; output is post-
+          processed for page-break and font handling.
+      - name: AsciidoctorJ Diagram
+        url: https://github.com/asciidoctor/asciidoctorj-diagram
+        license: MIT
+        role: >
+          Inline diagram rendering. Used together with the Kroki
+          extension to support PlantUML, Graphviz, Mermaid, and
+          similar formats inside AsciiDoc source.
+      - name: Asciidoctor Maven Plugin
+        url: https://github.com/asciidoctor/asciidoctor-maven-plugin
+        license: MIT
+        role: >
+          The Maven plugin wrapper that drives AsciidoctorJ from
+          the build.
+      - name: Asciidoctor Parser Doxia Module
+        url: https://github.com/asciidoctor/asciidoctor-doxia
+        license: MIT
+        role: >
+          Lets maven-site-plugin natively render
+          src/site/asciidoc/*.adoc alongside the auto-generated
+          reports. (Replaced an earlier pre-render step in #310.)
+      - name: JRuby
+        url: https://www.jruby.org/
+        license: EPL-2.0 OR GPL-2.0-only OR LGPL-2.1-only
+        role: >
+          Embedded Ruby runtime that Asciidoctor itself runs on.
+          Pulled in transitively by AsciidoctorJ.
+      - name: Koncept AsciiDoc Extension
+        url: https://github.com/koncept-asciidoc/koncept-asciidoc-extension
+        license: MIT
+        role: >
+          In-house extension (vendored in this reactor as
+          koncept-asciidoc-extension) that adds Koncept macros to
+          AsciiDoc source.
+
+  - heading: Diagram rendering
+    components:
+      - name: Kroki (PlantUML, Graphviz, Mermaid, BlockDiag, etc. backends)
+        url: https://kroki.io/
+        license: MIT
+        role: >
+          External HTTP service that renders diagram blocks. The
+          IKE Network runs a private Kroki instance at
+          kroki.komet.sh; documents that contain diagram blocks
+          call it at render time. Each backend has its own license
+          — PlantUML (GPL-3.0), Graphviz (CPL-1.0), Mermaid (MIT),
+          etc. Diagrams render server-side; the rendered SVG/PNG
+          is embedded in the output.
+
+  - heading: External PDF renderers (runtime, not bundled)
+    components:
+      - name: Prince XML
+        url: https://www.princexml.com/
+        license: Commercial (out of SPDX scope); free for personal/non-commercial use
+        role: >
+          High-quality CSS-Paged-Media renderer used by the
+          pdf-prince profile.
+      - name: Antenna House Formatter
+        url: https://www.antennahouse.com/
+        license: Commercial (out of SPDX scope)
+        role: XSL-FO renderer used by the pdf-ah profile.
+      - name: WeasyPrint
+        url: https://weasyprint.org/
+        license: BSD-3-Clause
+        role: >
+          CSS-Paged-Media renderer (Python) used by the
+          pdf-weasy profile.
+      - name: Apache FOP
+        url: https://xmlgraphics.apache.org/fop/
+        license: Apache-2.0
+        role: XSL-FO renderer used by the pdf-fop profile.
+      - name: RenderX XEP
+        url: http://www.renderx.com/
+        license: Commercial (out of SPDX scope); free personal license available
+        role: XSL-FO renderer used by the pdf-xep profile.
+
+  - heading: DocBook toolchain
+    components:
+      - name: DocBook XSL Stylesheets 1.0
+        url: https://github.com/docbook/xslt10-stylesheets
+        license: MIT
+        role: >
+          XSL transformation rules from DocBook → HTML/XSL-FO/etc.
+          Wrapped by the ike-docs:docbook-xsl module which
+          repackages a curated subset for IKE consumers.
+      - name: Saxon-HE
+        url: https://www.saxonica.com/products/products.xml
+        license: MPL-2.0
+        role: >
+          XSLT 2.0/3.0 processor used to apply DocBook XSL
+          transformations.
+
+  - heading: Fonts (embedded in rendered PDFs and bundled in classified artifacts)
+    components:
+      - name: Noto Serif, Noto Sans, Noto Sans Mono, Noto Math, Noto Sans Symbols
+        url: https://fonts.google.com/noto
+        license: OFL-1.1
+        role: >
+          Default body, sans-serif, monospace, math, and symbol
+          typefaces. Distributed via ike-docs:minimal-fonts as a
+          classified artifact consumed by all PDF and printable
+          HTML renderers. The full SIL Open Font License 1.1
+          text is included in the minimal-fonts artifact and
+          reproduced in any rendered PDF that embeds these fonts.
+
+  - heading: Frontend assets (bundled in rendered HTML)
+    components:
+      - name: Font Awesome (free tier — icons, fonts, JS)
+        url: https://fontawesome.com/
+        license: CC-BY-4.0 AND OFL-1.1 AND MIT
+        role: >
+          Icon set used in rendered HTML. Sentry skin pulls icons
+          through the <i class="fa-..."> API. Different files under
+          different licenses — icons CC-BY-4.0; fonts OFL-1.1;
+          JS MIT.
+      - name: Prism
+        url: https://prismjs.com/
+        license: MIT
+        role: >
+          Syntax highlighter for code blocks in rendered HTML.
+          Embedded in the AsciiDoc pipeline output.
