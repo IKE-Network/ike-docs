@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/built-with.html
 
 # Built With
 
-Open-source software that `docbook-xsl` 8 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `docbook-xsl` 9 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
@@ -72,8 +72,8 @@ Direct dependencies of this module, grouped by SPDX expression. Generated from `
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 3 |
-| **Total** | **3** |
+| `Apache-2.0` | 4 |
+| **Total** | **4** |
 
 For full per-component detail (group, artifact, version, hashes, transitive deps), see [bom.json](bom.json)[1] or [licenses.html](licenses.html)[2].
 

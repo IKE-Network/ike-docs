@@ -27,5 +27,5 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | minimal-fonts |
-| Version | 8 |
+| Version | 9 |
 | Type | pom |

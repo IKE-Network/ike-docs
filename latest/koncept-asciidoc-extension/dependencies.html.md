@@ -30,7 +30,8 @@ The following is a list of provided dependencies for this project. These depende
 
 | GroupId | ArtifactId | Version | Classifier | Type | Licenses |
 | --- | --- | --- | --- | --- | --- |
-| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[8] | 147 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[4] |
+| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[8] | 148 | built-with | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[4] |
+| network.ike.tooling | [ike-build-standards](https://ike.network/ike-tooling/ike-build-standards/)[8] | 148 | site-theme | zip | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[4] |
 | org.asciidoctor | [asciidoctorj](https://github.com/asciidoctor/asciidoctorj)[9] | 3.0.1 | - | jar | [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)[2] |
 | org.jruby | [jruby](https://github.com/jruby/jruby/jruby-artifacts/jruby)[10] | 10.0.3.0 | - | jar | [GPL-2.0](http://www.gnu.org/licenses/gpl-2.0-standalone.html)[11][LGPL-2.1](http://www.gnu.org/licenses/lgpl-2.1-standalone.html)[12][EPL-2.0](http://www.eclipse.org/legal/epl-v20.html)[13] |
 | org.slf4j | [slf4j-api](http://www.slf4j.org)[14] | 2.0.12 | - | jar | [MIT License](http://www.opensource.org/licenses/mit-license.php)[15] |
@@ -94,7 +95,7 @@ The following is a list of provided dependencies for this project. These depende
 
 ## [Dependency Tree](#dependency-tree)
 
-- network.ike.docs:koncept-asciidoc-extension:jar:8 ** 
+- network.ike.docs:koncept-asciidoc-extension:jar:9 ** 
   
   | Koncept AsciiDoc Extension |
   | --- |
@@ -331,7 +332,12 @@ The following is a list of provided dependencies for this project. These depende
             | Apache Log4j Plugins |
             | --- |
             | **Description: **Log4j Plugin Support **URL: **[https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/](https://logging.apache.org/log4j/3.x/log4j/log4j-plugins/)[17] **Project Licenses: **[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[4] |
-    - network.ike.tooling:ike-build-standards:zip:site-theme:147 (provided) ** 
+    - network.ike.tooling:ike-build-standards:zip:site-theme:148 (provided) ** 
+      
+      | IKE Build Standards |
+      | --- |
+      | **Description: **Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact. **URL: **[https://ike.network/ike-tooling/ike-build-standards/](https://ike.network/ike-tooling/ike-build-standards/)[8] **Project Licenses: **[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)[4] |
+    - network.ike.tooling:ike-build-standards:zip:built-with:148 (provided) ** 
       
       | IKE Build Standards |
       | --- |
@@ -392,7 +398,8 @@ The following is a list of provided dependencies for this project. These depende
 | options-1.6.jar | 14.9 kB | 21 | 10 | 3 | 1.8 | Yes |
 | joda-time-2.14.0.jar | 639.8 kB | 770 | 248 | 7 | 1.5 | Yes |
 | jitescript-0.4.1.jar | 23 kB | 20 | 9 | 2 | 1.6 | Yes |
-| ike-build-standards-147-site-theme.zip | 3.4 kB | - | - | - | - | - |
+| ike-build-standards-148-built-with.zip | 3.5 kB | - | - | - | - | - |
+| ike-build-standards-148-site-theme.zip | 3.4 kB | - | - | - | - | - |
 | log4j-api-3.0.0-beta2.jar | 354.8 kB | 241 | 213 | 11 | 17 | Yes |
 | log4j-core-3.0.0-beta2.jar | 1.5 MB | 976 | 907 | 44 | 17 | Yes |
 | log4j-plugins-3.0.0-beta2.jar | 205.9 kB | 186 | 156 | 14 | 17 | Yes |
@@ -428,7 +435,7 @@ The following is a list of provided dependencies for this project. These depende
 | snakeyaml-2.2.jar | 334.4 kB | 278 | - | - | - | - |
 |    • Root | - | 270 | 229 | 23 | 1.7 | Yes |
 |    • Versioned | - | 8 | 3 | 2 | 9 | Yes |
-| 45 | 41.7 MB | 18349 | 12086 | 427 | 21 | 40 |
+| 46 | 41.7 MB | 18349 | 12086 | 427 | 21 | 40 |
 | compile: 1 | compile: 334.4 kB | compile: 278 | compile: 229 | compile: 23 | 21 | compile: 1 |
-| provided: 32 | provided: 37.9 MB | provided: 15670 | provided: 9719 | provided: 272 | provided: 28 |
+| provided: 33 | provided: 37.9 MB | provided: 15670 | provided: 9719 | provided: 272 | provided: 28 |
 | test: 12 | test: 3.4 MB | test: 2401 | test: 2138 | test: 132 | 17 | test: 11 |
