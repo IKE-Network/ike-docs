@@ -4,14 +4,24 @@
 :toc: preamble
 :toclevels: 3
 
-This document acknowledges third-party open-source software that
-`ike-docs` depends on, links against, ships within classified
-artifacts, or invokes at document-render time. The Maven
-`licenses.html` and `dependencies.html` reports cover declared
-`<dependencies>` mechanically; this document covers the rest — the
-AsciiDoc rendering chain, embedded fonts, DocBook XSL toolchain,
-diagram rendering, and frontend assets bundled into the rendered
-HTML.
+This page is the curated companion to two mechanical inventories
+that ship alongside it:
+
+* link:bom.json[Software Bill of Materials (CycloneDX, JSON)] —
+  full transitive dependency graph with SPDX-normalized licenses
+  and artifact hashes. Ingestible by Dependency-Track, Trivy,
+  Snyk, GitHub's dependency graph, etc. Also reachable as a Maven
+  artifact with `<classifier>cyclonedx</classifier>`.
+* link:dependencies.html[Maven dependencies report] — auto-generated
+  HTML browse of declared dependencies, with verbatim per-license
+  text from each dependency's POM.
+
+The curated content below covers what neither sees — the AsciiDoc
+rendering chain, embedded fonts, DocBook XSL toolchain, diagram
+rendering, external PDF renderers, and frontend assets bundled into
+rendered HTML. License identifiers below are SPDX form
+(`Apache-2.0`, `MIT`, `EPL-2.0`, expressions with `OR` / `AND` /
+`WITH`) so they're unambiguous and grep-friendly.
 
 For corresponding notices in the rest of the IKE platform see:
 
@@ -26,40 +36,40 @@ For corresponding notices in the rest of the IKE platform see:
 | Component | License | Role
 
 | https://asciidoctor.org/[AsciidoctorJ]
-| MIT
+| `MIT`
 | The Java entry-point for the Asciidoctor renderer. `ike-doc-maven-plugin`
   invokes it via the official Maven plugin to convert `.adoc` source
   to HTML, DocBook, and XHTML.
 
 | https://github.com/asciidoctor/asciidoctorj-pdf[AsciidoctorJ PDF]
-| MIT
+| `MIT`
 | Direct PDF rendering of AsciiDoc. The `prawn` profile in
   `ike-parent` activates this renderer; output is post-processed for
   page-break and font handling.
 
 | https://github.com/asciidoctor/asciidoctorj-diagram[AsciidoctorJ Diagram]
-| MIT
+| `MIT`
 | Inline diagram rendering. Used together with the Kroki extension
   to support PlantUML, Graphviz, Mermaid, and similar formats inside
   AsciiDoc source.
 
 | https://github.com/asciidoctor/asciidoctor-maven-plugin[Asciidoctor Maven Plugin]
-| MIT
+| `MIT`
 | The Maven plugin wrapper that drives AsciidoctorJ from the build.
 
 | https://github.com/asciidoctor/asciidoctor-doxia[Asciidoctor Parser Doxia Module]
-| MIT
+| `MIT`
 | Lets `maven-site-plugin` natively render `src/site/asciidoc/*.adoc`
   alongside the auto-generated reports. (Replaced an earlier
   pre-render step in #310.)
 
 | https://www.jruby.org/[JRuby]
-| EPL 2.0 / GPL 2.0 / LGPL 2.1 (multi-licensed at consumer's choice)
+| `EPL-2.0 OR GPL-2.0-only OR LGPL-2.1-only`
 | The embedded Ruby runtime that Asciidoctor itself runs on. Pulled
   in transitively by AsciidoctorJ.
 
 | https://github.com/koncept-asciidoc/koncept-asciidoc-extension[Koncept AsciiDoc Extension]
-| MIT
+| `MIT`
 | In-house extension (vendored in this reactor as
   `koncept-asciidoc-extension`) that adds Koncept macros to
   AsciiDoc source.
@@ -71,7 +81,7 @@ For corresponding notices in the rest of the IKE platform see:
 | Component | License | Role
 
 | https://kroki.io/[Kroki] (PlantUML, Graphviz, Mermaid, BlockDiag, etc. backends)
-| MIT (Kroki orchestrator)
+| `MIT` (Kroki orchestrator; per-backend licenses noted below)
 | External HTTP service that renders diagram blocks. The IKE Network
   runs a private Kroki instance at `kroki.komet.sh`; documents that
   contain diagram blocks call it at render time. Each backend has
@@ -90,28 +100,28 @@ or redistribute these binaries; consumers install them directly.
 | Component | License | Role
 
 | https://www.princexml.com/[Prince XML]
-| Commercial; free for personal/non-commercial use
+| Commercial (out of SPDX scope); free for personal/non-commercial use
 | High-quality CSS-Paged-Media renderer used by the `pdf-prince`
   profile.
 
 | https://www.antennahouse.com/[Antenna House Formatter]
-| Commercial
+| Commercial (out of SPDX scope)
 | XSL-FO renderer used by the `pdf-ah` profile.
 
 | https://weasyprint.org/[WeasyPrint]
-| BSD-3-Clause
+| `BSD-3-Clause`
 | CSS-Paged-Media renderer (Python) used by the `pdf-weasy` profile.
 
 | https://xmlgraphics.apache.org/fop/[Apache FOP]
-| Apache 2.0
+| `Apache-2.0`
 | XSL-FO renderer used by the `pdf-fop` profile.
 
 | http://www.renderx.com/[RenderX XEP]
-| Commercial; free personal license available
+| Commercial (out of SPDX scope); free personal license available
 | XSL-FO renderer used by the `pdf-xep` profile.
 
 | https://github.com/asciidoctor/asciidoctorj-pdf[AsciidoctorJ PDF (Prawn)]
-| MIT
+| `MIT`
 | The default profile (`pdf` / `prawn`); listed above.
   Included here for completeness — this one IS bundled and runs
   in-process.
@@ -123,13 +133,13 @@ or redistribute these binaries; consumers install them directly.
 | Component | License | Role
 
 | https://github.com/docbook/xslt10-stylesheets[DocBook XSL Stylesheets 1.0]
-| MIT
+| `MIT`
 | XSL transformation rules from DocBook → HTML/XSL-FO/etc. Wrapped
   by the `ike-docs:docbook-xsl` module which repackages a curated
   subset for IKE consumers.
 
 | https://www.saxonica.com/products/products.xml[Saxon-HE]
-| MPL 2.0
+| `MPL-2.0`
 | XSLT 2.0/3.0 processor used to apply DocBook XSL transformations.
 |===
 
@@ -139,7 +149,7 @@ or redistribute these binaries; consumers install them directly.
 | Component | License | Role
 
 | https://fonts.google.com/noto[Noto Serif, Noto Sans, Noto Sans Mono, Noto Math, Noto Sans Symbols]
-| https://scripts.sil.org/OFL[SIL Open Font License 1.1]
+| `OFL-1.1`
 | Default body, sans-serif, monospace, math, and symbol typefaces.
   Distributed via `ike-docs:minimal-fonts` as a classified artifact
   consumed by all PDF and printable HTML renderers.
@@ -155,30 +165,36 @@ embeds these fonts.
 | Component | License | Role
 
 | https://fontawesome.com/[Font Awesome] (free tier — icons, fonts, JS)
-| icons: CC-BY 4.0; fonts: SIL OFL 1.1; JS: MIT
+| `CC-BY-4.0 AND OFL-1.1 AND MIT` (icons under CC-BY-4.0; fonts under OFL-1.1; JS under MIT — different files, different licenses)
 | Icon set used in rendered HTML. Sentry skin pulls icons through
   the `<i class="fa-...">` API.
 
 | https://prismjs.com/[Prism]
-| MIT
+| `MIT`
 | Syntax highlighter for code blocks in rendered HTML. Embedded in
   the AsciiDoc pipeline output.
 |===
 
 == Verification
 
-* `mvn site` populates `target/site/licenses.html` from declared
-  `<dependencies>`. AsciidoctorJ family, JRuby, and the test
-  frameworks appear there.
-* `mvn site` populates `target/site/plugins.html` and
+* `mvn package` produces `target/bom.json` and `target/bom.xml`
+  (CycloneDX 1.6 format) with SPDX-normalized licenses. AsciidoctorJ
+  family, JRuby, Saxon-HE, and the rest of the declared deps appear
+  there with canonical SPDX identifiers.
+* `mvn site` populates `target/site/licenses.html`,
+  `target/site/dependencies.html`, `target/site/plugins.html`, and
   `target/site/plugin-management.html` from declared
-  `<build><plugins>` and `<build><pluginManagement>`.
-* This curated document complements those mechanical reports for
-  the runtime renderers, fonts, frontend assets, and external
-  services that aren't visible to `licenses.html`.
+  `<dependencies>`, `<build><plugins>`, and `<build><pluginManagement>`.
+* The same `mvn site` run copies `bom.json` and `bom.xml` into
+  `target/site/` so they're reachable from the published Maven Site.
+* This curated document complements those mechanical inventories
+  for the runtime renderers, fonts, frontend assets, and external
+  services that aren't visible to `licenses.html` or the SBOM
+  (e.g., the Sentry skin, Kroki, the Noto font texts inside
+  `minimal-fonts`).
 
 == Related
 
 * link:index.html[ike-docs site index]
-* https://github.com/IKE-Network/ike-issues/issues/331[ike-issues#331] — the
-  issue tracking comprehensive third-party attribution work.
+* https://github.com/IKE-Network/ike-issues/issues/331[ike-issues#331] — comprehensive third-party attribution (closed; this page's curated content).
+* https://github.com/IKE-Network/ike-issues/issues/333[ike-issues#333] — SBOM via CycloneDX + SPDX normalization (the mechanical inventory linked at the top of this page).

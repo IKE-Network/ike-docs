@@ -1,22 +1,31 @@
 # Third-Party Notices — IKE Docs
 
-The canonical, rendered version of this document lives at:
+Three layers of attribution ship with each release:
 
-- **Current release:** https://ike.network/ike-docs/THIRD_PARTY_NOTICES.html
-- **Versioned:** https://ike.network/ike-docs/<version>/THIRD_PARTY_NOTICES.html
-- **Latest:** https://ike.network/ike-docs/latest/THIRD_PARTY_NOTICES.html
+1. **Software Bill of Materials (CycloneDX, machine-readable):**
+   - https://ike.network/ike-docs/bom.json
+   - https://ike.network/ike-docs/bom.xml
+   - Full transitive dependency graph, SPDX-normalized licenses, artifact hashes.
+   - Also reachable as a Maven artifact with `<classifier>cyclonedx</classifier>`.
 
-The source AsciiDoc lives at
-[`src/site/asciidoc/THIRD_PARTY_NOTICES.adoc`](src/site/asciidoc/THIRD_PARTY_NOTICES.adoc).
+2. **Maven Site dependency report (HTML, human-browseable):**
+   - https://ike.network/ike-docs/dependencies.html
+   - https://ike.network/ike-docs/licenses.html
+
+3. **Curated Third-Party Notices (this document):**
+   - **Current release:** https://ike.network/ike-docs/THIRD_PARTY_NOTICES.html
+   - **Versioned:** https://ike.network/ike-docs/&lt;version&gt;/THIRD_PARTY_NOTICES.html
+   - **Latest:** https://ike.network/ike-docs/latest/THIRD_PARTY_NOTICES.html
+   - The source AsciiDoc lives at [`src/site/asciidoc/THIRD_PARTY_NOTICES.adoc`](src/site/asciidoc/THIRD_PARTY_NOTICES.adoc).
 
 ## What's covered
 
-This document acknowledges third-party open-source software that
-`ike-docs` depends on, links against, ships within classified
-artifacts, or invokes at document-render time. It covers the
-AsciiDoc rendering chain, embedded fonts, DocBook XSL toolchain,
-diagram rendering, external PDF renderers, and frontend assets
-bundled into rendered HTML.
+The curated document acknowledges third-party open-source software
+that mechanical reports either don't reach or under-report: the
+AsciiDoc rendering chain, Kroki diagram service, external PDF
+renderers (Prince, Antenna House, WeasyPrint, FOP, XEP), DocBook
+XSL toolchain, embedded Noto fonts, and frontend assets (Font
+Awesome, Prism) bundled into rendered HTML.
 
 For corresponding notices in the rest of the IKE platform see:
 
