@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:819dc48e-7cc3-3426-bbc3-f2d3fc00870c",
+  "serialNumber" : "urn:uuid:498beb23-7bf6-38e9-bd9e-fb1e587d00fd",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-docs@16?type=pom",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-docs@17?type=pom",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-docs",
-      "version" : "16",
+      "version" : "17",
       "description" : "Documentation plumbing for the IKE Network. Hosts the ike-doc-maven-plugin (ike-doc packaging, AsciiDoc/render pipeline, PDF dispatch), the Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc resources, and the semantic linebreak reformatter. Split from ike-pipeline to resolve the extensions=true reactor-load cycle. See IKE-Network/ike-issues#216.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-docs@16?type=pom",
+      "purl" : "pkg:maven/network.ike.docs/ike-docs@17?type=pom",
       "externalReferences" : [
         {
           "type" : "website",
@@ -100,45 +100,45 @@
   "components" : [
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=site-theme&type=zip",
+      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=site-theme&type=zip",
       "publisher" : "IKE Network",
       "group" : "network.ike.tooling",
       "name" : "ike-build-standards",
-      "version" : "154",
+      "version" : "155",
       "description" : "Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "0bade9378854388ea475687c0c744f75"
+          "content" : "be4542e06b2f742eb95e222319e66a5d"
         },
         {
           "alg" : "SHA-1",
-          "content" : "fef310cbd4abb28fdc6999ff2c486f185529be72"
+          "content" : "614c6a585c096b42b4b4169fef9d1ee8daffae23"
         },
         {
           "alg" : "SHA-256",
-          "content" : "f057337878f3d5cc52036e2fb4f8b41076ee8d1152203cec525c993cb6ef8c14"
+          "content" : "bf9c24139d9c020d7785ffac15c2a96e944ee2c75ebfba01c4eae5406424ca0c"
         },
         {
           "alg" : "SHA-512",
-          "content" : "b3551dbd2042375f86065526616a18b021ea55674d2196ac1f725fdb9f9a2799ea010a149c22c321b025a26ccf21cfca5da7a1c28a145c1ad1d5c0e2153aa873"
+          "content" : "213063f7b10c58f74435a2d9def322edab9e144880ed1abe5f1a8d6ae7082bae056166c7805682f640336155f2fdfbfe56209fd6f974ca98d8f60f856827a3eb"
         },
         {
           "alg" : "SHA-384",
-          "content" : "4ddca995b82cc1b02f9dd60138a437a3ef69ed916a3309d86093f436a9a9d601865e0c2c39c17a77652b505fdd184b4f"
+          "content" : "4174b1fc883d74df62e37bee61ac7f08bb6918a8dbad5c3dd0c3cb8c1eee283c23fe7a3e6a99a88cd66604f106ff85aa"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "31b2eb77e5938b03a5769576c69843c9f732ae32273eecdf097f9540816418f04514e8d38d753b8ca4699d1d3ea59ef0"
+          "content" : "9374e138f2540946559f71320e6ab77c8fab08327fda146009ad987bd2e33ae11ea9d95c231d1ab659638ebbab31a02c"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "aeee0ffb25e5ad7c5e203625ab93e32566aa8d0eadfd287c77f04302138737fc"
+          "content" : "555a89e738b974e93cf659046ded223983b57deca73dee3aa7af762163937d49"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "081d260e9a1fdb058c75dfaeb7740fc99602ea7be92f3d0f91a119b9ad639529e9cb872acf73a8e91fb004301443003c7328960a392ad8d03c8f4b1b1a01126d"
+          "content" : "ec61cd27fccdc37505cb306955d5fd502cc687c50c90ac1de1e994fd377453ac68904176398d6688ed59166841193cc5cb05fa41b7474521eb338765f5857df7"
         }
       ],
       "licenses" : [
@@ -148,7 +148,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=site-theme&type=zip",
+      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=site-theme&type=zip",
       "externalReferences" : [
         {
           "type" : "website",
@@ -162,45 +162,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=built-with&type=zip",
+      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=built-with&type=zip",
       "publisher" : "IKE Network",
       "group" : "network.ike.tooling",
       "name" : "ike-build-standards",
-      "version" : "154",
+      "version" : "155",
       "description" : "Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "cd492bff07087b6481d1fe999735a134"
+          "content" : "a97b4fe8b8673946bad000c35e41b8ac"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3692757f4a2bc6205d408be9e7b9cc1c2eb5c22c"
+          "content" : "683abd08c952052ea303724c52786fe9bda1d7be"
         },
         {
           "alg" : "SHA-256",
-          "content" : "d610ba70597de631efb41255f15f688da0ca76596bed5951749cb5444736742a"
+          "content" : "905f1bfca2bd15ca5c279d3537c11194dda3ed67ce3249583fc1b3bda7a1263f"
         },
         {
           "alg" : "SHA-512",
-          "content" : "65588032f1a6d388792b8c30b44d6c1a329c12067e1fb79173eaa824814371b526dfa323e2b6e9e7034715fb76dca86b01053f56211f3909b0b058283178a853"
+          "content" : "196dea29d1638775ffd61f1c72e2fbde224be0de74fdea68e11727db38403116cd5c457c7aa18688e295819243cdbd26dfa1209a7405e7ff43d11d93dc1dbacd"
         },
         {
           "alg" : "SHA-384",
-          "content" : "9928e1d6b7514643eefdb29b99fcef0dd747c4630559f84bf30ed09574d833386235a5cdf204a42dcec00b1c76c44ec3"
+          "content" : "53506f5660fda45d9b297eb8bf8f25671dfdbc9d6199d71e721ea1d59c2ac3129e948283fb3d500f3678c278ddebca0d"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "16e4f8402893921d885364b84ef92c5af2022ca63c34ad9299bea7dd2e04a699e071b21a719d0dab89e313f9dfc09c49"
+          "content" : "d2ff8b5d624be0aa2c9a2ad62644ea3490a92d61fba872bb33db523e6c12bac280a14294920b9cdaaa1ffe9eb7b40714"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ca06bd710024462d18eea38b0b671ae2a902435fa9bc65d1a4cd043fa2e91c50"
+          "content" : "a292226558f6fd31e3a6ab681d684fa61dd5ae0017c12327b09073d56e979ceb"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "56c8e81891cb3a7b08da28efd3cc147f9275e84891c4f6990e165350d4f4cd5efae5e7951425c0f387d19a600c05adc2878a91b8373e4cdab93bd4229a9fc6bb"
+          "content" : "b79932cd6d8a7633f1f301651db61868e00809627082a7d9123b6d1473cfb79f658d36499357b7a5b94208cc1255bf63d82274ddf3819cb7c4cef03c9f031c69"
         }
       ],
       "licenses" : [
@@ -210,7 +210,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=built-with&type=zip",
+      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=built-with&type=zip",
       "externalReferences" : [
         {
           "type" : "website",
@@ -225,18 +225,18 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-docs@16?type=pom",
+      "ref" : "pkg:maven/network.ike.docs/ike-docs@17?type=pom",
       "dependsOn" : [
-        "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=site-theme&type=zip",
-        "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=built-with&type=zip"
+        "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=site-theme&type=zip",
+        "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=built-with&type=zip"
       ]
     },
     {
-      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=site-theme&type=zip",
+      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=site-theme&type=zip",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@154?classifier=built-with&type=zip",
+      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@155?classifier=built-with&type=zip",
       "dependsOn" : [ ]
     }
   ]
