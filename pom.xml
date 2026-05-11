@@ -23,7 +23,7 @@
 
     <groupId>network.ike.docs</groupId>
     <artifactId>ike-docs</artifactId>
-    <version>17</version>
+    <version>18-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>IKE Docs</name>
