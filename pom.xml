@@ -63,19 +63,16 @@
             <id>ike-snapshots</id>
             <url>${deploy.snapshot.url}</url>
         </snapshotRepository>
-        <site>
-            <id>ike-site</id>
-            <url>${site.deploy.url}</url>
-        </site>
+        <!-- No <site>: scpexe://proxy site-deploy retired in #304.
+             Sites publish to GitHub Pages via
+             ReleaseSupport.publishProjectSiteToGhPages. -->
     </distributionManagement>
 
     <!-- ════════════════════════════════════════════════════════════════ -->
     <!-- Properties — merged from ike-parent + java-parent + root.       -->
     <!-- ════════════════════════════════════════════════════════════════ -->
     <properties>
-        <!-- Site deployment URL — override with -Dsite.deploy.url=... for
-             versioned deployments (release, snapshot, checkpoint). -->
-        <site.deploy.url>scpexe://proxy/srv/ike-site/${project.artifactId}</site.deploy.url>
+        <!-- No site.deploy.url: scpexe://proxy retired in #304. -->
 
         <!-- Nexus deploy URLs. Developer releases deploy to ike-staging.
              TeamCity promotes to ike-releases after verification.
