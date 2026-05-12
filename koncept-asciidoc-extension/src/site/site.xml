@@ -22,7 +22,7 @@
     </custom>
 
     <body>
-        <breadcrumbs>
+        <breadcrumbs combine.self="override">
             <item name="IKE" href="https://ike.network/"/>
             <item name="IKE Docs" href="../index.html"/>
             <item name="Koncept Extension" href="index.html"/>
