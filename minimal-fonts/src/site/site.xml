@@ -20,7 +20,7 @@
     </custom>
 
     <body>
-        <breadcrumbs combine.self="override">
+        <breadcrumbs>
             <item name="IKE" href="https://ike.network/"/>
             <item name="IKE Docs" href="../index.html"/>
             <item name="Minimal Fonts" href="index.html"/>
