@@ -84,7 +84,7 @@
         <deploy.staging.url>https://nexus.tinkar.org/repository/ike-staging/</deploy.staging.url>
 
         <!-- IKE Tooling (ike-maven-plugin, ike-build-standards) -->
-        <ike-tooling.version>164</ike-tooling.version>
+        <ike-tooling.version>165</ike-tooling.version>
 
         <!-- Build Configuration -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
