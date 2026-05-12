@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `minimal-fonts` 21, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `minimal-fonts` 22, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -21,9 +21,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 
 | Group | Artifact | Version |
 | --- | --- | --- |
-| `network.ike.tooling` | `ike-build-standards` | `158` |
-| `network.ike.tooling` | `ike-build-standards` | `158` |
-| `network.ike.tooling` | `ike-build-standards` | `158` |
+| `network.ike.tooling` | `ike-build-standards` | `164` |
+| `network.ike.tooling` | `ike-build-standards` | `164` |
+| `network.ike.tooling` | `ike-build-standards` | `164` |
 
 ## [#see-also](#see-also)See also
 

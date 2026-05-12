@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 
 # Built With
 
-Open-source software that `ike-docs` 21 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `ike-docs` 22 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
