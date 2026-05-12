@@ -49,7 +49,7 @@
     <distributionManagement>
         <site>
             <id>ike-site</id>
-            <url>scpexe://proxy/srv/ike-site/ike-docs/${project.artifactId}</url>
+            <url>https://ike.network/ike-docs/${project.artifactId}/</url>
         </site>
     </distributionManagement>
 
