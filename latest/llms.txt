@@ -10,13 +10,13 @@
 ## Other
 
 - [Workspace Developer Getting Started](https://github.com/IKE-Network/ike-docs/workspace-getting-started.html.md)
-- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
 - [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
 
 ## Documentation
 
 - [Getting Started](https://github.com/IKE-Network/ike-docs/getting-started.html.md)
 - [IKE Documentation Pipeline](https://github.com/IKE-Network/ike-docs/index.html.md)
+- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
 - [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)
 
 ## Reports

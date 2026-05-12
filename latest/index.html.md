@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-10
-date_modified: 2026-05-10
+date_published: 2026-05-11
+date_modified: 2026-05-11
 canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 ---
 
 # IKE Documentation Pipeline
 
-`ike-docs` is the documentation-plumbing reactor for the IKE Community. It produces the artifacts that doc-only and hybrid (Java-plus-docs) consumers exercise through `ike-parent` (which lives in `ike-platform`): the `idoc:*` Maven plugin, the Koncept AsciiDoc extension, fonts, DocBook XSL stylesheets, shared rendering resources, and a semantic linebreak reformatter.
+`ike-docs` is the documentation-plumbing reactor for the IKE Network. It produces the artifacts that doc-only and hybrid (Java-plus-docs) consumers exercise through `ike-parent` (which lives in `ike-platform`): the `idoc:*` Maven plugin, the Koncept AsciiDoc extension, fonts, DocBook XSL stylesheets, shared rendering resources, and a semantic linebreak reformatter.
 
 Split from the archived `ike-pipeline` monolith in `IKE-Network/ike-issues#216`; custom-packaging machinery further retired in `IKE-Network/ike-issues#321` in favor of a classifier-canonical doc shape.
 
