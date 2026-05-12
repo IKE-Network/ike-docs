@@ -6,7 +6,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<title>Licenses (SPDX) &ndash; $site.name</title>
+	<title>Licenses (SPDX) &ndash; IKE Doc Maven Plugin</title>
 
 	<meta name="keywords" content="AsciiDoc,documentation pipeline,Maven,PDF,IKE Network,knowledge engineering" />
 	<meta name="generator" content="Maven Site Plugin, Doxia Site Renderer 2.0.0, Skin sentry-maven-skin 7.0.00, from asciidoc" />
@@ -60,6 +60,7 @@
 			<ul class="nav navbar-nav">
 <li><a href="../../index.html">IKE</a></li>
 <li><a href="../index.html">IKE Docs</a></li>
+<li><a href="https://ike.network/">IKE</a></li>
 <li><a href="index.html">IKE Doc Maven Plugin</a></li>
 			</ul>
 		</div>
@@ -82,18 +83,19 @@
 					<ol class="breadcrumb hidden-xs">
 <li><a href="../../index.html">IKE</a></li>
 <li><a href="../index.html">IKE Docs</a></li>
+<li><a href="https://ike.network/">IKE</a></li>
 <li><a href="index.html">IKE Doc Maven Plugin</a></li>
 						</ol>
-					<div class="header-title">$site.name</div>
+					<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">20</span>
+							<span class="version">21</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
-						<div class="header-title">$site.name</div>
+						<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
-							Version <strong>20</strong>
+							Version <strong>21</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -137,6 +139,17 @@
 		<div class="row display-flex">
 
 			<nav class="left-menu hidden-xs col-sm-4 col-md-3" role="navigation">
+		<h5 class="text-uppercase">Parent Project</h5>
+
+<ul class="nav nav-pills nav-stacked animate">
+<li><a href="../index.html"><i class="fas fa-file-alt"></i> IKE Docs</a></li>
+</ul>
+		<h5 class="text-uppercase">Reports</h5>
+
+<ul class="nav nav-pills nav-stacked animate">
+<li><a href="project-info.html"><i class="fas fa-folder"></i> Project Information <span class="badge">6</span></a></li>
+<li><a href="project-reports.html"><i class="fas fa-folder"></i> Project Reports <span class="badge">2</span></a></li>
+</ul>
 			</nav>
 
 			<main class="main-content col-xs-12 col-sm-8 col-md-9">
@@ -147,7 +160,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 20
+							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 21
 							</h3>
 						</div>
 						<div class="parents hidden-xs">
@@ -171,7 +184,7 @@
 								</ul>
 						</div>
 <h1 id="licenses-spdx">Licenses (SPDX)</h1>
-<p>Licenses for declared dependencies of <code>ike-doc-maven-plugin</code> 20, grouped by SPDX expression. Rendered from <code><a href="bom.json">bom.json</a><sup class="visible-print-inline">[1]</sup></code> (CycloneDX) at <code>pre-site</code> phase by <code>ike:render-spdx-licenses</code> (ike-issues#335).</p>
+<p>Licenses for declared dependencies of <code>ike-doc-maven-plugin</code> 21, grouped by SPDX expression. Rendered from <code><a href="bom.json">bom.json</a><sup class="visible-print-inline">[1]</sup></code> (CycloneDX) at <code>pre-site</code> phase by <code>ike:render-spdx-licenses</code> (ike-issues#335).</p>
 <div>
  <h2 id="summary"><a href="#summary"></a><a id="summary"></a>Summary</h2>
  <table class="bodyTable table table-striped table-hover" style="background: #FFFFFF">
@@ -377,7 +390,7 @@
    <tr class="a">
     <td style="text-align: left;"><code>network.ike.docs</code></td>
     <td><code>koncept-asciidoc-extension</code></td>
-    <td><code>20</code></td>
+    <td><code>21</code></td>
    </tr>
    <tr class="b">
     <td style="text-align: left;"><code>network.ike.tooling</code></td>
@@ -870,7 +883,7 @@
 								<li>[10] dependency-info.html</li>
 								</ul>
 							</div>
-<div class="date">Date: <strong>2026-05-11 19:40:16 -0700</strong></div>
+<div class="date">Date: <strong>2026-05-11 22:40:00 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -949,7 +962,7 @@
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>$site.name 20</strong>
+			<strong>IKE Doc Maven Plugin 21</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-05-12">2026-05-12</time></strong>
 		</p>
@@ -989,6 +1002,125 @@
 	<script>
 angular.module("sentry.site").constant("RELATIVE_ROOT", ".");
 angular.module("sentry.site").constant("SITE_MENU", [
+{
+	path: "../index.html",
+	title: "IKE Docs",
+	parents: [{ title: "Parent Project" }]
+},
+{
+	path: "/project-info.html",
+	title: "Project Information",
+	parents: [{ title: "Reports" }]
+},
+{
+	path: "index.html",
+	title: "About",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "summary.html",
+	title: "Summary",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "dependency-info.html",
+	title: "Maven Coordinates",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "plugins.html",
+	title: "Plugins",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "plugin-management.html",
+	title: "Plugin Management",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "distribution-management.html",
+	title: "Distribution Management",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "/project-reports.html",
+	title: "Project Reports",
+	parents: [{ title: "Reports" }]
+},
+{
+	path: "apidocs/index.html",
+	title: "Javadoc",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-reports.html",
+			title: "Project Reports"
+		}
+	]
+},
+{
+	path: "jacoco/index.html",
+	title: "JaCoCo",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-reports.html",
+			title: "Project Reports"
+		}
+	]
+},
 ]);
 
 	</script>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:1d5ddba4-97f0-3986-b5dc-a736ac22a2a0" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:430f1597-7d36-351e-ad53-012385068551" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@20?type=maven-plugin">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@21?type=maven-plugin">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>ike-doc-maven-plugin</name>
-      <version>20</version>
+      <version>21</version>
       <description>Maven plugin (prefix idoc:) driving the IKE documentation pipeline:
         AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook
         post-processing, breadcrumb injection, and ike-doc packaging.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/ike-doc-maven-plugin@20?type=maven-plugin</purl>
+      <purl>pkg:maven/network.ike.docs/ike-doc-maven-plugin@21?type=maven-plugin</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -3079,31 +3079,31 @@ writes to specify Java code for type-checking by the Checker Framework.</descrip
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@20?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@21?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-asciidoc-extension</name>
-      <version>20</version>
+      <version>21</version>
       <description>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
         with SVG badge rendering and auto-generated Referenced Koncepts glossary
         with description logic axiom display.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">804764a6a50298af6ef56b5b4f611496</hash>
-        <hash alg="SHA-1">47e9f9f0cad6a508ba5af79856d5277b65e43b15</hash>
-        <hash alg="SHA-256">0561fc13a110b5f6388742b96af36fc9b154786ce1c5299c5a3714c2dafeb44d</hash>
-        <hash alg="SHA-512">aa1a2f92bc11bea3c7821a985374fb9bfb539b9789efb31e8f8d5306d00c68325e57a9f6da3fe99cde98483d2f5af39cf6de329f0a3fbfcf7fba6cca761efa26</hash>
-        <hash alg="SHA-384">60fa2dd85e60a816752348d6f1c92cefd06eaf3878484c9aa86035ab6b71fb82cab5bc91ad1baf4dbb64ea54fecf6071</hash>
-        <hash alg="SHA3-384">8310df90181436dd20c1b48cc3dd451a6ff7f4165400463d59178f3222be15878432f9599b9787a7e81b3b9f97db99d0</hash>
-        <hash alg="SHA3-256">89579b9930db1388ad9d837142ef83ceea0953f04e7ee1691c14c7e58f5ddeb7</hash>
-        <hash alg="SHA3-512">35a0efd908cbbef1f312edb31ef4df698fc423f8058118001340415a262f15f76df16b5d571819c427da0e096e1364d1b36736f42cec0f7094c3e42c0d6f4a8b</hash>
+        <hash alg="MD5">c2de081d9d2963330a4a2189753a5732</hash>
+        <hash alg="SHA-1">cc1a2b028378f87c2bdbc2e090fcaace93fd1e8a</hash>
+        <hash alg="SHA-256">8cfc8d32feb2da3a5372ed2179a1ee5e84722135ae59895d617613bea3d50e5c</hash>
+        <hash alg="SHA-512">646edc111d77f44e84498d360d479c87edfee3b63a2222276a775a01497a7de142000b39618136e20d97b8e56cbbd593e07759813245e69f5d34efe5161bdfd2</hash>
+        <hash alg="SHA-384">bff59da982d2cd878d84801eaeee234f428f722819a22857a7abf7b15d3009489b89e57bf2f976c85e6f476237d1c274</hash>
+        <hash alg="SHA3-384">bc9c7b9346edad42f857c1a211dc4c5ac5b71133a337e1ddeec5cd824d531ddc596ae2b80ea1aa3047632a1f974cad09</hash>
+        <hash alg="SHA3-256">ca9be94ce56ace19c2940284f5fe05f7c4453ae9968507e61ea6f302473f933e</hash>
+        <hash alg="SHA3-512">1d2337b977ce23d27cba220b3d9299ec2df43728e6d18ef2cf14410e79b8d74f92c6e4c54e75ba43f9f1ce7d8f1fadb731683649a35c86f2285a15dd056109d3</hash>
       </hashes>
       <licenses>
         <license>
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@20?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@21?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -3251,7 +3251,7 @@ writes to specify Java code for type-checking by the Checker Framework.</descrip
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@20?type=maven-plugin">
+    <dependency ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@21?type=maven-plugin">
       <dependency ref="pkg:maven/network.ike.tooling/ike-maven-plugin-support@158?type=jar"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@158?classifier=claude&amp;type=zip"/>
       <dependency ref="pkg:maven/org.apache.maven/maven-api-core@4.0.0-rc-5?type=jar"/>
@@ -3261,7 +3261,7 @@ writes to specify Java code for type-checking by the Checker Framework.</descrip
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-pdf@2.3.23?type=jar"/>
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram@2.3.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
-      <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@20?type=jar"/>
+      <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@21?type=jar"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@158?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@158?classifier=built-with&amp;type=zip"/>
     </dependency>
@@ -3519,7 +3519,7 @@ writes to specify Java code for type-checking by the Checker Framework.</descrip
     </dependency>
     <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram-batik@1.17?type=jar"/>
     <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram-ditaamini@1.0.3?type=jar"/>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@20?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@21?type=jar">
       <dependency ref="pkg:maven/org.yaml/snakeyaml@2.2?type=jar"/>
     </dependency>
     <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@158?classifier=site-theme&amp;type=zip"/>

@@ -6,7 +6,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<title>Project Summary &ndash; $site.name</title>
+	<title>Project Summary &ndash; IKE Doc Maven Plugin</title>
 
 	<meta name="keywords" content="AsciiDoc,documentation pipeline,Maven,PDF,IKE Network,knowledge engineering" />
 	<meta name="generator" content="Maven Site Plugin, Doxia Site Renderer 2.0.0, Skin sentry-maven-skin 7.0.00, with org.apache.maven.plugins:maven-project-info-reports-plugin:3.9.0:summary" />
@@ -60,6 +60,7 @@
 			<ul class="nav navbar-nav">
 <li><a href="../../index.html">IKE</a></li>
 <li><a href="../index.html">IKE Docs</a></li>
+<li><a href="https://ike.network/">IKE</a></li>
 <li><a href="index.html">IKE Doc Maven Plugin</a></li>
 			</ul>
 		</div>
@@ -82,18 +83,19 @@
 					<ol class="breadcrumb hidden-xs">
 <li><a href="../../index.html">IKE</a></li>
 <li><a href="../index.html">IKE Docs</a></li>
+<li><a href="https://ike.network/">IKE</a></li>
 <li><a href="index.html">IKE Doc Maven Plugin</a></li>
 						</ol>
-					<div class="header-title">$site.name</div>
+					<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">20</span>
+							<span class="version">21</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
-						<div class="header-title">$site.name</div>
+						<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
-							Version <strong>20</strong>
+							Version <strong>21</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -137,6 +139,26 @@
 		<div class="row display-flex">
 
 			<nav class="left-menu hidden-xs col-sm-4 col-md-3" role="navigation">
+		<h5 class="text-uppercase">Parent Project</h5>
+
+<ul class="nav nav-pills nav-stacked animate">
+<li><a href="../index.html"><i class="fas fa-file-alt"></i> IKE Docs</a></li>
+</ul>
+		<h5 class="text-uppercase">Reports</h5>
+
+<ul class="nav nav-pills nav-stacked animate">
+<li><a href="project-info.html"><i ng-class="hideSubItems ? 'fas fa-folder' : 'fas fa-folder-open'"></i> Project Information <span class="badge">6</span></a></li>
+
+<ul class="nav nav-pills nav-stacked animate">
+<li><a href="index.html"><i class="fas fa-home"></i> About</a></li>
+<li class="active"><a href="summary.html" ng-click="hideSubItems = !hideSubItems"><i class="fas fa-file-alt"></i> Summary</a></li>
+<li><a href="dependency-info.html"><i class="fas fa-file-alt"></i> Maven Coordinates</a></li>
+<li><a href="plugins.html"><i class="fas fa-file-alt"></i> Plugins</a></li>
+<li><a href="plugin-management.html"><i class="fas fa-file-alt"></i> Plugin Management</a></li>
+<li><a href="distribution-management.html"><i class="fas fa-file-alt"></i> Distribution Management</a></li>
+</ul>
+<li><a href="project-reports.html"><i class="fas fa-folder"></i> Project Reports <span class="badge">2</span></a></li>
+</ul>
 			</nav>
 
 			<main class="main-content col-xs-12 col-sm-8 col-md-9">
@@ -147,7 +169,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 20
+							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 21
 							</h3>
 						</div>
 						<div class="parents hidden-xs">
@@ -159,7 +181,9 @@
 										</a>
 									</li>
 								<!-- menus and items -->
-									</ol>
+										<li>Reports</li>
+									<li><a href="project-info.html">Project Information</a></li>
+														</ol>
 							</div>
 						<div class="parents-xs visible-xs">
 								<ul class="list-group">
@@ -168,7 +192,12 @@
 										<i class="fas fa-home"></i>Home
 									</a>
 									<!-- menus and items -->
-								</ul>
+										<li class="list-group-item"><i class="fas fa-level-up-alt fa-flip-horizontal"></i>Reports</li>
+									<a class="list-group-item" href="project-info.html">
+										<i class="fas fa-level-up-alt fa-flip-horizontal"></i>Project Information
+										<span class="badge">6</span>
+									</a>
+													</ul>
 						</div>
 <section>
  <a id="project-summary"></a>
@@ -242,7 +271,7 @@
     </tr>
     <tr class="b">
      <td>Version</td>
-     <td>20</td>
+     <td>21</td>
     </tr>
     <tr class="a">
      <td>Type</td>
@@ -351,7 +380,7 @@
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>$site.name 20</strong>
+			<strong>IKE Doc Maven Plugin 21</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-05-12">2026-05-12</time></strong>
 		</p>
@@ -391,6 +420,125 @@
 	<script>
 angular.module("sentry.site").constant("RELATIVE_ROOT", ".");
 angular.module("sentry.site").constant("SITE_MENU", [
+{
+	path: "../index.html",
+	title: "IKE Docs",
+	parents: [{ title: "Parent Project" }]
+},
+{
+	path: "/project-info.html",
+	title: "Project Information",
+	parents: [{ title: "Reports" }]
+},
+{
+	path: "index.html",
+	title: "About",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "summary.html",
+	title: "Summary",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "dependency-info.html",
+	title: "Maven Coordinates",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "plugins.html",
+	title: "Plugins",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "plugin-management.html",
+	title: "Plugin Management",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "distribution-management.html",
+	title: "Distribution Management",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-info.html",
+			title: "Project Information"
+		}
+	]
+},
+{
+	path: "/project-reports.html",
+	title: "Project Reports",
+	parents: [{ title: "Reports" }]
+},
+{
+	path: "apidocs/index.html",
+	title: "Javadoc",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-reports.html",
+			title: "Project Reports"
+		}
+	]
+},
+{
+	path: "jacoco/index.html",
+	title: "JaCoCo",
+	parents: [
+		{
+			title: "Reports"
+		},
+		{
+			path: "project-reports.html",
+			title: "Project Reports"
+		}
+	]
+},
 ]);
 
 	</script>
