@@ -7,7 +7,7 @@
 :toclevels: 3
 
 `ike-docs` is the documentation-plumbing reactor for the IKE
-Community.
+Network.
 It produces the artifacts that doc-only and hybrid (Java-plus-docs)
 consumers exercise through `ike-parent` (which lives in
 `ike-platform`):
