@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IdocGoal.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">IdocGoal.java</span></div><h1>IdocGoal.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import network.ike.plugin.support.GoalRef;
+import org.apache.maven.api.plugin.Mojo;
+
+import java.util.Optional;
+
+/**
+ * Compile-time identity for every {@code idoc:*} goal in this plugin. Each
+ * value wraps the bare goal name, the mojo class that implements it, and
+ * a short human description.
+ *
+ * &lt;p&gt;Parallels {@code network.ike.plugin.IkeGoal} (ike-maven-plugin) and
+ * {@code network.ike.plugin.ws.WsGoal} (ike-workspace-maven-plugin). All
+ * three implement {@link GoalRef} so a shared {@code GoalReport} writer
+ * can address goals across plugins without stringly-typed coupling.
+ *
+ * &lt;p&gt;Introduced by ike-issues #215, which split the asciidoc/render
+ * mojos out of {@code ike-maven-plugin} to dissolve the reverse-dep
+ * cycle on {@code koncept-asciidoc-extension}.
+ */
+<span class="fc" id="L22">public enum IdocGoal implements GoalRef {</span>
+
+    /** {@code idoc:adocstudio} — edit the project in AsciiDocFX. */
+<span class="fc" id="L25">    ADOCSTUDIO(&quot;adocstudio&quot;, AdocStudioMojo.class,</span>
+            &quot;Edit the project in AsciiDocFX.&quot;),
+    /** {@code idoc:asciidoc} — render AsciiDoc to HTML, DocBook, and Prawn PDF. */
+<span class="fc" id="L28">    ASCIIDOC(&quot;asciidoc&quot;, AsciidocMojo.class,</span>
+            &quot;Render AsciiDoc to HTML, DocBook, and Prawn PDF.&quot;),
+    /** {@code idoc:copy-default-pdf} — copy the default-renderer PDF to the site. */
+<span class="fc" id="L31">    COPY_DEFAULT_PDF(&quot;copy-default-pdf&quot;, CopyDefaultPdfMojo.class,</span>
+            &quot;Copy the project's default-renderer PDF to the site.&quot;),
+    /** {@code idoc:fix-svg} — post-process SVGs for PDF renderer compatibility. */
+<span class="fc" id="L34">    FIX_SVG(&quot;fix-svg&quot;, FixSvgMojo.class,</span>
+            &quot;Post-process generated SVGs to work in all PDF renderers.&quot;),
+    /** {@code idoc:inject-breadcrumb} — inject breadcrumbs into rendered HTML. */
+<span class="fc" id="L37">    INJECT_BREADCRUMB(&quot;inject-breadcrumb&quot;, InjectBreadcrumbMojo.class,</span>
+            &quot;Inject breadcrumb navigation into rendered HTML.&quot;),
+    /** {@code idoc:lint-site} — lint src/site/site.xml for IKE theme/breadcrumb drift (#319). */
+<span class="fc" id="L40">    LINT_SITE(&quot;lint-site&quot;, LintSiteMojo.class,</span>
+            &quot;Lint src/site/site.xml for IKE Network theme + &quot;
+                    + &quot;breadcrumb conventions: &lt;bodyClass&gt; drift &quot;
+                    + &quot;(Forest vs Horizon), stale breadcrumb names &quot;
+                    + &quot;(IKE Pipeline post-#216), and skin GAV drift.&quot;),
+    /** {@code idoc:package-doc} — package rendered docs as an ike-doc artifact. */
+<span class="fc" id="L46">    PACKAGE_DOC(&quot;package-doc&quot;, PackageDocMojo.class,</span>
+            &quot;Package rendered docs as an ike-doc artifact.&quot;),
+    /** {@code idoc:patch-docbook} — apply local patches to DocBook XSL output. */
+<span class="fc" id="L49">    PATCH_DOCBOOK(&quot;patch-docbook&quot;, PatchDocbookMojo.class,</span>
+            &quot;Apply local patches to the DocBook XSL output.&quot;),
+    /** {@code idoc:prepare-renderer-output} — prepare per-renderer output dirs. */
+<span class="fc" id="L52">    PREPARE_RENDERER_OUTPUT(&quot;prepare-renderer-output&quot;, PrepareRendererOutputMojo.class,</span>
+            &quot;Prepare per-renderer output directories.&quot;),
+    /** {@code idoc:render-pdf} — render AsciiDoc to PDF via a configured renderer. */
+<span class="fc" id="L55">    RENDER_PDF(&quot;render-pdf&quot;, RenderPdfMojo.class,</span>
+            &quot;Render AsciiDoc to PDF via a configured renderer.&quot;),
+    /** {@code idoc:scan-logs} — scan renderer logs for warnings and errors. */
+<span class="fc" id="L58">    SCAN_LOGS(&quot;scan-logs&quot;, ScanRendererLogsMojo.class,</span>
+            &quot;Scan renderer logs for warnings and errors.&quot;);
+
+    /** Shared {@code idoc:} prefix for all goals in this plugin. */
+    public static final String PLUGIN_PREFIX = &quot;idoc&quot;;
+
+    private final String goalName;
+    private final Class&lt;? extends Mojo&gt; mojoClass;
+    private final String description;
+
+    IdocGoal(String goalName,
+             Class&lt;? extends Mojo&gt; mojoClass,
+<span class="fc" id="L70">             String description) {</span>
+<span class="fc" id="L71">        this.goalName = goalName;</span>
+<span class="fc" id="L72">        this.mojoClass = mojoClass;</span>
+<span class="fc" id="L73">        this.description = description;</span>
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * The bare goal name as it appears in {@code @Mojo(name = ...)}.
+     *
+     * @return the bare goal name
+     */
+    @Override
+    public String goalName() {
+<span class="fc" id="L83">        return goalName;</span>
+    }
+
+    /**
+     * The {@code idoc} plugin prefix — shared by every goal in this enum.
+     *
+     * @return {@link #PLUGIN_PREFIX}
+     */
+    @Override
+    public String pluginPrefix() {
+<span class="nc" id="L93">        return PLUGIN_PREFIX;</span>
+    }
+
+    /**
+     * The fully-qualified goal invocation, e.g. {@code &quot;idoc:render-pdf&quot;}.
+     *
+     * @return the fully-qualified goal invocation
+     */
+    @Override
+    public String qualified() {
+<span class="nc" id="L103">        return PLUGIN_PREFIX + &quot;:&quot; + goalName;</span>
+    }
+
+    /**
+     * The mojo class that implements this goal.
+     *
+     * @return the mojo class
+     */
+    public Class&lt;? extends Mojo&gt; mojoClass() {
+<span class="fc" id="L112">        return mojoClass;</span>
+    }
+
+    /**
+     * One-line human description of what this goal does.
+     *
+     * @return the human description
+     */
+    @Override
+    public String description() {
+<span class="nc" id="L122">        return description;</span>
+    }
+
+    /**
+     * Look up a goal by its bare name (e.g. {@code &quot;render-pdf&quot;}).
+     *
+     * @param goalName the bare goal name, without the {@code idoc:} prefix
+     * @return the matching goal, or empty if none
+     */
+    public static Optional&lt;IdocGoal&gt; byName(String goalName) {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (IdocGoal g : values()) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (g.goalName.equals(goalName)) return Optional.of(g);</span>
+        }
+<span class="nc" id="L135">        return Optional.empty();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
