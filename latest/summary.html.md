@@ -27,5 +27,5 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-docs |
-| Version | 29 |
+| Version | 30 |
 | Type | pom |
