@@ -38,7 +38,7 @@ for each module.
 ## Release Position
 
 ```
-ike-tooling  →  ike-docs  →  ike-platform  →  { doc-example, example-project }  →  ike-example-ws
+ike-tooling  →  ike-docs  →  ike-platform  →  { doc-example, example-project, ike-example-its }  →  ike-example-ws
 ```
 
 `ike-docs` releases **before** `ike-platform` because `ike-platform`'s
