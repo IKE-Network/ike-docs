@@ -58,9 +58,31 @@ custom type in favor of a classifier-canonical doc shape. See
 [`ike-doc-maven-plugin/src/site/asciidoc/index.adoc`](ike-doc-maven-plugin/src/site/asciidoc/index.adoc)
 for the full design rationale.
 
+## Doc as Code + LLM-Friendly
+
+`ike-docs` follows the IKE Network's doc-as-code philosophy:
+build conventions, documentation standards, and AI-assistant
+guidance live as versioned Markdown files in
+[`ike-build-standards`](https://github.com/IKE-Network/ike-tooling/tree/main/ike-build-standards#readme)
+and are unpacked into every consumer's `.claude/standards/` at
+the `validate` phase. When a developer — or Claude itself —
+opens an IKE project, the agent reads the standards from
+`.claude/standards/` and applies them automatically; contributors
+don't have to memorize the conventions.
+
+The standards most directly relevant to `ike-docs` are
+[`IKE-DOC.md`](https://github.com/IKE-Network/ike-tooling/blob/main/ike-build-standards/src/main/standards/IKE-DOC.md)
+(module shapes, classifier-canonical attachment),
+[`IKE-DIAGRAMS.md`](https://github.com/IKE-Network/ike-tooling/blob/main/ike-build-standards/src/main/standards/IKE-DIAGRAMS.md)
+(PlantUML / GraphViz authoring), and
+[`IKE-ASCIIDOC-FRAGMENT.md`](https://github.com/IKE-Network/ike-tooling/blob/main/ike-build-standards/src/main/standards/IKE-ASCIIDOC-FRAGMENT.md)
+(fragment-style topic authoring). See the
+[full inventory](https://github.com/IKE-Network/ike-tooling/tree/main/ike-build-standards#readme).
+
 ## Links
 
 - **Documentation:** [`https://ike.network/ike-docs/`](https://ike.network/ike-docs/)
+- **Build standards:** [`ike-build-standards`](https://ike.network/ike-tooling/ike-build-standards/)
 - **Issues:** [`IKE-Network/ike-issues`](https://github.com/IKE-Network/ike-issues) (cross-project tracker)
 - **Source:** [`IKE-Network/ike-docs`](https://github.com/IKE-Network/ike-docs)
 
