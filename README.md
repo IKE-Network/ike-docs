@@ -1,5 +1,9 @@
 # IKE Docs
 
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Documentation](https://img.shields.io/badge/docs-ike.network%2Fike--docs-blue)](https://ike.network/ike-docs/)
+[![IKE Network](https://img.shields.io/badge/IKE-Network-green)](https://ike.network/)
+
 Documentation plumbing for the IKE Network. Provides the
 `ike-doc-maven-plugin` (`idoc:*` render and packaging goals), the
 Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc
@@ -54,6 +58,13 @@ custom type in favor of a classifier-canonical doc shape. See
 [`ike-doc-maven-plugin/src/site/asciidoc/index.adoc`](ike-doc-maven-plugin/src/site/asciidoc/index.adoc)
 for the full design rationale.
 
+## Links
+
+- **Documentation:** [`https://ike.network/ike-docs/`](https://ike.network/ike-docs/)
+- **Issues:** [`IKE-Network/ike-issues`](https://github.com/IKE-Network/ike-issues) (cross-project tracker)
+- **Source:** [`IKE-Network/ike-docs`](https://github.com/IKE-Network/ike-docs)
+
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0. See the [project pom.xml](pom.xml) or
+[apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0).
