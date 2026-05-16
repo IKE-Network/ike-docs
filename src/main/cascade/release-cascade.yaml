@@ -1,0 +1,28 @@
+# release-cascade.yaml — ike-docs's edges in the IKE release cascade
+# (IKE-Network/ike-issues#420).
+#
+# The cascade is a loosely-coupled distributed system: every
+# foundation repo version-controls this file in its own git tree and
+# declares ONLY its own edges. No project authors the global ordering
+# — the full graph (ike-tooling → ike-docs → ike-platform) is
+# assembled by traversing these per-project files.
+#
+#   upstream   — projects this repo consumes; each names the
+#                ${X.version} property the cascade aligns to the
+#                upstream's latest release before a release here.
+#   downstream — foundation projects that consume this repo; the
+#                cascade executor walks forward to each after a
+#                release here.
+
+schema: 1
+
+upstream:
+  - groupId: network.ike.tooling
+    artifactId: ike-tooling
+    version-property: ike-tooling.version
+    url: https://github.com/IKE-Network/ike-tooling.git
+
+downstream:
+  - groupId: network.ike.platform
+    artifactId: ike-platform
+    url: https://github.com/IKE-Network/ike-platform.git
