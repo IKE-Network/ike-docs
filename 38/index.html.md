@@ -1,0 +1,190 @@
+---
+date_published: 2026-05-15
+date_modified: 2026-05-15
+canonical_url: https://github.com/IKE-Network/ike-docs/index.html
+---
+
+# IKE Documentation Pipeline
+
+`ike-docs` is the documentation-plumbing reactor for the IKE Network. It produces the artifacts that doc-only and hybrid (Java-plus-docs) consumers exercise through `ike-parent` (which lives in `ike-platform`): the `idoc:*` Maven plugin, the Koncept AsciiDoc extension, fonts, DocBook XSL stylesheets, shared rendering resources, and a semantic linebreak reformatter.
+
+Split from the archived `ike-pipeline` monolith in `IKE-Network/ike-issues#216`; custom-packaging machinery further retired in `IKE-Network/ike-issues#321` in favor of a classifier-canonical doc shape.
+
+## [#module-architecture](#module-architecture)Module Architecture
+
+```
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 40
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+skinparam rectangle {
+    BackgroundColor<<infra>> #E3F2FD
+    BorderColor<<infra>> #1565C0
+    BackgroundColor<<plugin>> #FFF3E0
+    BorderColor<<plugin>> #E65100
+    BackgroundColor<<tool>> #E8F5E9
+    BorderColor<<tool>> #2E7D32
+}
+
+rectangle "ike-doc-resources\n//Themes, CSS, assembly descriptors//" <<infra>> as DR
+rectangle "minimal-fonts\n//Noto font subset (zip)//" <<infra>> as MF
+rectangle "docbook-xsl\n//DocBook XSL 1.79.2 + IKE FO//" <<infra>> as DX
+
+rectangle "koncept-asciidoc-extension\n//k:Name[] macro + glossary//" <<plugin>> as KE
+rectangle "ike-doc-maven-plugin\n//idoc:* render goals//" <<plugin>> as DP
+
+rectangle "semantic-linebreak\n//CLI sentence-per-line tool//" <<tool>> as SL
+
+DP ..> KE : SPI extension dep
+DP ..> DR : unpacks for renders
+DP ..> MF : unpacks fonts
+DP ..> DX : unpacks XSL
+
+legend right
+  | Color | Role |
+  |<#E3F2FD>| Infrastructure resource |
+  |<#FFF3E0>| Maven plugin / extension |
+  |<#E8F5E9>| Standalone tool |
+endlegend
+
+@enduml
+```
+
+`ike-doc-maven-plugin` is the consumer-facing entry point — external doc projects declare it (or rather, declare it indirectly through `ike-parent’s `<pluginManagement>`) and invoke `idoc:*` goals. The other modules are infrastructure artifacts the plugin unpacks at build time, plus a standalone CLI tool.
+
+The reactor itself is not consumed as an aggregator — `ike-parent` lives in `ike-platform`, not here, so external projects do not inherit from `ike-docs/pom.xml`. This reactor exists only to coordinate the build and release cadence of the ike-docs artifacts.
+
+## [#rendering-pipelines](#rendering-pipelines)Rendering Pipelines
+
+All renderers start from the same AsciiDoc source. The pipeline splits into three families based on how intermediate formats reach the final PDF.
+
+```
+@startuml
+!theme plain
+skinparam activityBackgroundColor #FFFFFF
+skinparam activityBorderColor #333333
+skinparam arrowColor #555555
+skinparam defaultFontSize 11
+
+start
+
+:AsciiDoc Source\n(.adoc files);
+
+fork
+    :AsciidoctorJ\nHTML5 backend;
+    :HTML5 output;
+    note right: Browsable, TOC sidebar\nKoncept glossary appended
+    stop
+
+fork again
+    :AsciidoctorJ\nPDF backend (Prawn);
+    :PDF;
+    note right: Built-in, free\nJRuby + Prawn
+    stop
+
+fork again
+    :AsciidoctorJ\nHTML5 backend;
+    :Print-ready HTML;
+    fork
+        :Prince XML;
+        :PDF;
+        note right: CSS Paged Media\nPDF/UA-1, $495+
+        stop
+    fork again
+        :Antenna House;
+        :PDF;
+        note right: CSS mode\nPDF/UA-1, $560+
+        stop
+    fork again
+        :WeasyPrint;
+        :PDF;
+        note right: Open source\nPython, free
+        stop
+    end fork
+
+fork again
+    :AsciidoctorJ\nDocBook 5 backend;
+    :DocBook XML;
+    :Saxon-HE + DocBook XSL;
+    :XSL-FO;
+    fork
+        :RenderX XEP;
+        :PDF;
+        note right: Free personal license
+        stop
+    fork again
+        :Apache FOP;
+        :PDF;
+        note right: Apache 2.0, free\nPure Java
+        stop
+    end fork
+
+end fork
+
+@enduml
+```
+
+Render selection is property-driven: every backend is gated by a `-Dike.pdf.<name>=true` toggle. Multiple backends activate concurrently; consumers compare output across renderers without rebuilding.
+
+## [#quick-start](#quick-start)Quick Start
+
+Build the entire reactor with HTML output (default):
+
+```
+mvn clean verify
+```
+
+Build with the Prawn PDF backend:
+
+```
+mvn clean verify -Dike.pdf.prawn
+```
+
+Build a single module:
+
+```
+mvn clean install -pl ike-doc-maven-plugin -am
+```
+
+For consumer-side authoring (a project inheriting `ike-parent` that uses these artifacts), see the [Getting Started](getting-started.html)[1] guide.
+
+## [#module-inventory](#module-inventory)Module Inventory
+
+| Module | Purpose | Packaging |
+| --- | --- | --- |
+| `ike-doc-resources` | Shared doc-build resources: Asciidoctor themes, FO/CSS print templates, assembly descriptors (including the `adoc.xml` source-classifier descriptor consumed by `ike-parent’s `doc-pipeline` profile), shared docinfo. | `jar` |
+| `minimal-fonts` | Noto font subset (NotoSerif, NotoSans, NotoSansMono, math, symbols) packaged as a zip artifact for consistent PDF rendering across machines. | `pom` (zip) |
+| `docbook-xsl` | DocBook XSL 1.79.2 stylesheets plus IKE’s FO customization layer. Enables the DocBook → XSL-FO → XEP/FOP rendering family. | `jar` |
+| `koncept-asciidoc-extension` | AsciidoctorJ SPI extension providing the `k:Name[]` inline macro for formally identified terminology concepts. Renders SVG badges (HTML/PDF), DocBook phrases (XSL-FO), or plain text (Prawn). Auto-generates a glossary section with definitions, description-logic axioms, SNOMED CT identifiers, and OWL IRIs. | `jar` |
+| `ike-doc-maven-plugin` | The `idoc:*` goal prefix — AsciiDoc rendering, multi-renderer PDF wrappers, DocBook XSL patching, breadcrumb injection, renderer log scanning. Regular Maven plugin (no `<extensions>true</extensions>`). [Plugin reference](ike-doc-maven-plugin/index.html)[2]. | `maven-plugin` |
+| `semantic-linebreak` | Standalone CLI: reformats AsciiDoc prose to one-sentence-per- line (semantic linefeed). Cleaner git diffs, easier review. | `jar` |
+
+## [#release-position](#release-position)Release Position
+
+```
+ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, example-project } -> ike-example-ws
+                                                                              -> ike-lab-documents
+```
+
+`ike-docs` releases after `ike-tooling` (which provides `ike-maven-plugin` for release orchestration) and before `ike-platform` (which declares `ike-doc-maven-plugin` and the other ike-docs artifacts in `ike-parent’s `<pluginManagement>`/`<dependencyManagement>`).
+
+## [#key-design-decisions](#key-design-decisions)Key Design Decisions
+
+Property-driven renderer toggles Every PDF backend is a thin profile that flips an `ike.skip.*` property from `true` to `false`. Renderers compose: activate several at once with `-Dike.pdf.prawn -Dike.pdf.prince`. The configuration lives in `ike-parent` (in `ike-platform`), which inheriting projects pick up automatically. Artifact-based resource sharing The infrastructure modules (`ike-doc-resources`, `minimal-fonts`, `docbook-xsl`) are packaged as deployable Maven artifacts and unpacked into each consumer’s `target/` at build time. No checked-in copies; everything is regenerated per build. Classifier-canonical doc artifacts Doc payloads ship as `<classifier>adoc</classifier><type>zip</type>` attachments on `<packaging>pom</packaging>` (doc-only) or `<packaging>jar</packaging>` (hybrid) primaries. This replaces the retired `<packaging>ike-doc</packaging>` custom type; see `dev-classifier-canonical-doc-shape` in `ike-lab-documents/topics/` and `IKE-Network/ike-issues#321` for the full design rationale. Koncept markup The `k:ConceptName[]` inline macro renders as an SVG badge linking to an auto-generated glossary section. Definitions are sourced from YAML files and include natural-language definitions, description-logic axioms, SNOMED CT identifiers, and OWL IRIs. Semantic linebreaks The `semantic-linebreak` tool reformats AsciiDoc prose to one-sentence-per-line. This produces cleaner `git diff` output and makes sentence-level review practical.  
+
+## [#resources](#resources)Resources
+
+| Resource | URL |
+| --- | --- |
+| GitHub | [https://github.com/IKE-Network/ike-docs](https://github.com/IKE-Network/ike-docs)[3] |
+| Issues | [https://github.com/IKE-Network/ike-issues](https://github.com/IKE-Network/ike-issues)[4] |
+| Nexus Artifacts | [https://nexus.tinkar.org](https://nexus.tinkar.org)[5] |
+| IKE Network | [https://ike.network](https://ike.network)[6] |
+
+## [#license](#license)License
+
+Copyright 2025 IKE Network. Licensed under the Apache License, Version 2.0.
