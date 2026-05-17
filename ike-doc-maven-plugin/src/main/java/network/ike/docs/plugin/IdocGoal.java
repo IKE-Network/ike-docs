@@ -30,6 +30,9 @@ public enum IdocGoal implements GoalRef {
     /** {@code idoc:copy-default-pdf} — copy the default-renderer PDF to the site. */
     COPY_DEFAULT_PDF("copy-default-pdf", CopyDefaultPdfMojo.class,
             "Copy the project's default-renderer PDF to the site."),
+    /** {@code idoc:copy-docs} — copy rendered docs into the site. */
+    COPY_DOCS("copy-docs", CopyDocsToSiteMojo.class,
+            "Copy rendered HTML docs and assets into the Maven site."),
     /** {@code idoc:fix-svg} — post-process SVGs for PDF renderer compatibility. */
     FIX_SVG("fix-svg", FixSvgMojo.class,
             "Post-process generated SVGs to work in all PDF renderers."),
