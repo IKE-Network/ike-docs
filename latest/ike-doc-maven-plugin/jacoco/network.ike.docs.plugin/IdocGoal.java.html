@@ -30,32 +30,35 @@ import java.util.Optional;
     /** {@code idoc:copy-default-pdf} — copy the default-renderer PDF to the site. */
 <span class="fc" id="L31">    COPY_DEFAULT_PDF(&quot;copy-default-pdf&quot;, CopyDefaultPdfMojo.class,</span>
             &quot;Copy the project's default-renderer PDF to the site.&quot;),
+    /** {@code idoc:copy-docs} — copy rendered docs into the site. */
+<span class="fc" id="L34">    COPY_DOCS(&quot;copy-docs&quot;, CopyDocsToSiteMojo.class,</span>
+            &quot;Copy rendered HTML docs and assets into the Maven site.&quot;),
     /** {@code idoc:fix-svg} — post-process SVGs for PDF renderer compatibility. */
-<span class="fc" id="L34">    FIX_SVG(&quot;fix-svg&quot;, FixSvgMojo.class,</span>
+<span class="fc" id="L37">    FIX_SVG(&quot;fix-svg&quot;, FixSvgMojo.class,</span>
             &quot;Post-process generated SVGs to work in all PDF renderers.&quot;),
     /** {@code idoc:inject-breadcrumb} — inject breadcrumbs into rendered HTML. */
-<span class="fc" id="L37">    INJECT_BREADCRUMB(&quot;inject-breadcrumb&quot;, InjectBreadcrumbMojo.class,</span>
+<span class="fc" id="L40">    INJECT_BREADCRUMB(&quot;inject-breadcrumb&quot;, InjectBreadcrumbMojo.class,</span>
             &quot;Inject breadcrumb navigation into rendered HTML.&quot;),
     /** {@code idoc:lint-site} — lint src/site/site.xml for IKE theme/breadcrumb drift (#319). */
-<span class="fc" id="L40">    LINT_SITE(&quot;lint-site&quot;, LintSiteMojo.class,</span>
+<span class="fc" id="L43">    LINT_SITE(&quot;lint-site&quot;, LintSiteMojo.class,</span>
             &quot;Lint src/site/site.xml for IKE Network theme + &quot;
                     + &quot;breadcrumb conventions: &lt;bodyClass&gt; drift &quot;
                     + &quot;(Forest vs Horizon), stale breadcrumb names &quot;
                     + &quot;(IKE Pipeline post-#216), and skin GAV drift.&quot;),
     /** {@code idoc:package-doc} — package rendered docs as an ike-doc artifact. */
-<span class="fc" id="L46">    PACKAGE_DOC(&quot;package-doc&quot;, PackageDocMojo.class,</span>
+<span class="fc" id="L49">    PACKAGE_DOC(&quot;package-doc&quot;, PackageDocMojo.class,</span>
             &quot;Package rendered docs as an ike-doc artifact.&quot;),
     /** {@code idoc:patch-docbook} — apply local patches to DocBook XSL output. */
-<span class="fc" id="L49">    PATCH_DOCBOOK(&quot;patch-docbook&quot;, PatchDocbookMojo.class,</span>
+<span class="fc" id="L52">    PATCH_DOCBOOK(&quot;patch-docbook&quot;, PatchDocbookMojo.class,</span>
             &quot;Apply local patches to the DocBook XSL output.&quot;),
     /** {@code idoc:prepare-renderer-output} — prepare per-renderer output dirs. */
-<span class="fc" id="L52">    PREPARE_RENDERER_OUTPUT(&quot;prepare-renderer-output&quot;, PrepareRendererOutputMojo.class,</span>
+<span class="fc" id="L55">    PREPARE_RENDERER_OUTPUT(&quot;prepare-renderer-output&quot;, PrepareRendererOutputMojo.class,</span>
             &quot;Prepare per-renderer output directories.&quot;),
     /** {@code idoc:render-pdf} — render AsciiDoc to PDF via a configured renderer. */
-<span class="fc" id="L55">    RENDER_PDF(&quot;render-pdf&quot;, RenderPdfMojo.class,</span>
+<span class="fc" id="L58">    RENDER_PDF(&quot;render-pdf&quot;, RenderPdfMojo.class,</span>
             &quot;Render AsciiDoc to PDF via a configured renderer.&quot;),
     /** {@code idoc:scan-logs} — scan renderer logs for warnings and errors. */
-<span class="fc" id="L58">    SCAN_LOGS(&quot;scan-logs&quot;, ScanRendererLogsMojo.class,</span>
+<span class="fc" id="L61">    SCAN_LOGS(&quot;scan-logs&quot;, ScanRendererLogsMojo.class,</span>
             &quot;Scan renderer logs for warnings and errors.&quot;);
 
     /** Shared {@code idoc:} prefix for all goals in this plugin. */
@@ -67,11 +70,11 @@ import java.util.Optional;
 
     IdocGoal(String goalName,
              Class&lt;? extends Mojo&gt; mojoClass,
-<span class="fc" id="L70">             String description) {</span>
-<span class="fc" id="L71">        this.goalName = goalName;</span>
-<span class="fc" id="L72">        this.mojoClass = mojoClass;</span>
-<span class="fc" id="L73">        this.description = description;</span>
-<span class="fc" id="L74">    }</span>
+<span class="fc" id="L73">             String description) {</span>
+<span class="fc" id="L74">        this.goalName = goalName;</span>
+<span class="fc" id="L75">        this.mojoClass = mojoClass;</span>
+<span class="fc" id="L76">        this.description = description;</span>
+<span class="fc" id="L77">    }</span>
 
     /**
      * The bare goal name as it appears in {@code @Mojo(name = ...)}.
@@ -80,7 +83,7 @@ import java.util.Optional;
      */
     @Override
     public String goalName() {
-<span class="fc" id="L83">        return goalName;</span>
+<span class="fc" id="L86">        return goalName;</span>
     }
 
     /**
@@ -90,7 +93,7 @@ import java.util.Optional;
      */
     @Override
     public String pluginPrefix() {
-<span class="nc" id="L93">        return PLUGIN_PREFIX;</span>
+<span class="nc" id="L96">        return PLUGIN_PREFIX;</span>
     }
 
     /**
@@ -100,7 +103,7 @@ import java.util.Optional;
      */
     @Override
     public String qualified() {
-<span class="nc" id="L103">        return PLUGIN_PREFIX + &quot;:&quot; + goalName;</span>
+<span class="nc" id="L106">        return PLUGIN_PREFIX + &quot;:&quot; + goalName;</span>
     }
 
     /**
@@ -109,7 +112,7 @@ import java.util.Optional;
      * @return the mojo class
      */
     public Class&lt;? extends Mojo&gt; mojoClass() {
-<span class="fc" id="L112">        return mojoClass;</span>
+<span class="fc" id="L115">        return mojoClass;</span>
     }
 
     /**
@@ -119,7 +122,7 @@ import java.util.Optional;
      */
     @Override
     public String description() {
-<span class="nc" id="L122">        return description;</span>
+<span class="nc" id="L125">        return description;</span>
     }
 
     /**
@@ -129,10 +132,10 @@ import java.util.Optional;
      * @return the matching goal, or empty if none
      */
     public static Optional&lt;IdocGoal&gt; byName(String goalName) {
-<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (IdocGoal g : values()) {</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (g.goalName.equals(goalName)) return Optional.of(g);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        for (IdocGoal g : values()) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (g.goalName.equals(goalName)) return Optional.of(g);</span>
         }
-<span class="nc" id="L135">        return Optional.empty();</span>
+<span class="nc" id="L138">        return Optional.empty();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
