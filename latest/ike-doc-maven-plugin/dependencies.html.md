@@ -1,18 +1,18 @@
 ---
-date_published: 2026-05-15
-date_modified: 2026-05-15
+date_published: 2026-05-16
+date_modified: 2026-05-16
 canonical_url: https://github.com/IKE-Network/ike-docs/dependencies.html
 ---
 
 # Dependencies (SBOM)
 
-Full transitive dependency graph for `ike-doc-maven-plugin` 38, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
+Full transitive dependency graph for `ike-doc-maven-plugin` 39, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
 
 ## [#summary](#summary)Summary
 
-| Total components | 85 |
+| Total components | 49 |
 | --- | --- |
-| Distinct license expressions | 12 |
+| Distinct license expressions | 9 |
 
 ## [#components](#components)Components
 
@@ -20,14 +20,6 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 
 | Group | Artifact | Version | License | Type |
 | --- | --- | --- | --- | --- |
-| `com.fasterxml.jackson.core` | `jackson-annotations` | `2.21` | `Apache-2.0` | library |
-| `com.fasterxml.jackson.core` | `jackson-core` | `2.21.2` | `Apache-2.0` | library |
-| `com.fasterxml.jackson.core` | `jackson-databind` | `2.21.2` | `Apache-2.0` | library |
-| `com.fasterxml.jackson.dataformat` | `jackson-dataformat-smile` | `2.21.2` | `Apache-2.0` | library |
-| `com.fasterxml.jackson.datatype` | `jackson-datatype-jsr310` | `2.21.2` | `Apache-2.0` | library |
-| `com.fasterxml.jackson.module` | `jackson-module-parameter-names` | `2.21.2` | `Apache-2.0` | library |
-| `com.fasterxml.woodstox` | `woodstox-core` | `7.1.1` | `Apache-2.0` | library |
-| `com.github.ben-manes.caffeine` | `caffeine` | `2.9.3` | `Apache-2.0` | library |
 | `com.github.jnr` | `jffi` | `1.3.14` | `Apache-2.0 OR GNU Lesser General Public License version 3` | library |
 | `com.github.jnr` | `jffi` | `1.3.14` | `Apache-2.0 OR GNU Lesser General Public License version 3` | library |
 | `com.github.jnr` | `jnr-a64asm` | `1.0.0` | `Apache-2.0` | library |
@@ -38,40 +30,24 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 | `com.github.jnr` | `jnr-posix` | `3.1.21` | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | library |
 | `com.github.jnr` | `jnr-unixsocket` | `0.38.24` | `Apache-2.0` | library |
 | `com.github.jnr` | `jnr-x86asm` | `1.0.2` | `MIT` | library |
-| `com.google.errorprone` | `error_prone_annotations` | `2.10.0` | `Apache-2.0` | library |
-| `com.googlecode.javaewah` | `JavaEWAH` | `1.1.13` | `Apache-2.0` | library |
 | `com.headius` | `backport9` | `1.13` | `Apache-2.0` | library |
 | `com.headius` | `invokebinder` | `1.14` | `Apache-2.0` | library |
 | `com.headius` | `options` | `1.6` | `Apache-2.0` | library |
-| `com.univocity` | `univocity-parsers` | `2.9.1` | `Apache-2.0` | library |
-| `io.github.classgraph` | `classgraph` | `4.8.184` | `MIT` | library |
-| `io.micrometer` | `micrometer-core` | `1.9.17` | `Apache-2.0` | library |
-| `io.moderne` | `jsonrpc` | `1.0.5` | `Apache-2.0` | library |
-| `io.quarkus.gizmo` | `gizmo` | `1.0.11.Final` | `Apache-2.0` | library |
 | `joda-time` | `joda-time` | `2.14.0` | `Apache-2.0` | library |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` | `Apache-2.0` | library |
-| `net.java.dev.jna` | `jna` | `5.18.1` | `Apache-2.0 OR LGPL-2.1-or-later` | library |
-| `net.java.dev.jna` | `jna-platform` | `5.18.1` | `Apache-2.0 OR LGPL-2.1-or-later` | library |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `38` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `180` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `180` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `180` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-maven-plugin-support` | `180` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-workspace-model` | `180` | `Apache-2.0` | library |
-| `org.antlr` | `antlr4-runtime` | `4.13.2` | `BSD-3-Clause` | library |
-| `org.apache.commons` | `commons-lang3` | `3.20.0` | `Apache-2.0` | library |
-| `org.apache.commons` | `commons-text` | `1.15.0` | `Apache-2.0` | library |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `39` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `182` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `182` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `182` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-maven-plugin-support` | `182` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-annotations` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-core` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-di` | `4.0.0-rc-5` | `Apache-2.0` | library |
-| `org.apache.maven` | `maven-api-metadata` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-model` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-plugin` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-settings` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-toolchain` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-xml` | `4.0.0-rc-5` | `Apache-2.0` | library |
-| `org.apache.maven` | `maven-support` | `4.0.0-rc-5` | `Apache-2.0` | library |
-| `org.apache.maven` | `maven-xml` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj` | `3.0.1` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj-api` | `3.0.1` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj-diagram` | `2.3.1` | `Apache-2.0` | library |
@@ -79,12 +55,7 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 | `org.asciidoctor` | `asciidoctorj-diagram-ditaamini` | `1.0.3` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj-diagram-plantuml` | `1.2024.5` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj-pdf` | `2.3.23` | `Apache-2.0` | library |
-| `org.checkerframework` | `checker-qual` | `3.19.0` | `MIT` | library |
-| `org.codehaus.woodstox` | `stax2-api` | `4.2.2` | `BSD-2-Clause` | library |
 | `org.crac` | `crac` | `1.5.0` | `BSD-2-Clause` | library |
-| `org.hdrhistogram` | `HdrHistogram` | `2.1.12` | `BSD-2-Clause OR CC0-1.0` | library |
-| `org.jboss` | `jandex` | `2.4.2.Final` | `Apache-2.0` | library |
-| `org.jetbrains` | `annotations` | `26.1.0` | `Apache-2.0` | library |
 | `org.jruby` | `dirgra` | `0.5` | `EPL-1.0` | library |
 | `org.jruby` | `jruby` | `10.0.3.0` | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | library |
 | `org.jruby` | `jruby-base` | `10.0.3.0` | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | library |
@@ -92,13 +63,6 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 | `org.jruby` | `jzlib` | `1.1.5` | `BSD-4-Clause` | library |
 | `org.jruby.jcodings` | `jcodings` | `1.0.63` | `MIT` | library |
 | `org.jruby.joni` | `joni` | `2.2.6` | `MIT` | library |
-| `org.jspecify` | `jspecify` | `1.0.0` | `Apache-2.0` | library |
-| `org.latencyutils` | `LatencyUtils` | `2.0.3` | `CC0-1.0` | library |
-| `org.objenesis` | `objenesis` | `3.5` | `Apache-2.0` | library |
-| `org.openrewrite` | `rewrite-core` | `8.79.2` | `Apache-2.0` | library |
-| `org.openrewrite` | `rewrite-xml` | `8.79.2` | `Apache-2.0` | library |
-| `org.openrewrite.tools` | `java-object-diff` | `1.0.1` | `Apache-2.0` | library |
-| `org.openrewrite.tools` | `jgit` | `1.4.1` | `Apache-2.0` | library |
 | `org.ow2.asm` | `asm` | `9.7.1` | `BSD-3-Clause` | library |
 | `org.ow2.asm` | `asm-analysis` | `9.7.1` | `BSD-3-Clause` | library |
 | `org.ow2.asm` | `asm-commons` | `9.7.1` | `BSD-3-Clause` | library |
@@ -110,7 +74,7 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 
 - [Software Bill of Materials (CycloneDX, JSON)](bom.json)[1] — raw machine-readable form. Includes purls, hashes, and dependency-graph edges that this page summarizes.
 - [bom.xml](bom.xml)[4] — same content in XML.
-- As a Maven artifact: pull `ike-doc-maven-plugin:​38` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
+- As a Maven artifact: pull `ike-doc-maven-plugin:​39` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
 
 ## [#see-also](#see-also)See also
 

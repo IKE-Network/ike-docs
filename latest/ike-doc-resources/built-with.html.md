@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-15
-date_modified: 2026-05-15
+date_published: 2026-05-16
+date_modified: 2026-05-16
 canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 ---
 
 # Built With
 
-Open-source software that `ike-doc-resources` 38 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `ike-doc-resources` 39 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
