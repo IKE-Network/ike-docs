@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | koncept-asciidoc-extension |
-| Version | 39 |
+| Version | 40 |
 | Type | jar |
 | Java Version | 25 |
