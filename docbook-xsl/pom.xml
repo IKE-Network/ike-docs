@@ -186,6 +186,17 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+
+            <!-- patch-docbook moved from ike-maven-plugin (ike:) to
+                 ike-doc-maven-plugin (idoc:) — doc-pipeline plugin
+                 consolidation, IKE-Network/ike-issues#437. -->
+            <plugin>
+                <groupId>network.ike.docs</groupId>
+                <artifactId>ike-doc-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
                     <execution>
                         <id>patch-docbook-xsl</id>
                         <phase>generate-resources</phase>

@@ -222,21 +222,13 @@
                     <artifactId>ike-maven-plugin</artifactId>
                     <version>${ike-tooling.version}</version>
                     <executions>
-                        <!-- Render site AsciiDoc at pre-site so Doxia picks up
-                             the HTML body fragments from generated-site/.
-                             Replaces asciidoctor-converter-doxia-module. -->
-                        <execution>
-                            <id>render-site-content</id>
-                            <phase>pre-site</phase>
-                            <goals><goal>asciidoc</goal></goals>
-                            <configuration>
-                                <sourceDirectory>${project.basedir}/src/site/asciidoc</sourceDirectory>
-                                <outputDirectory>${project.build.directory}/generated-site</outputDirectory>
-                                <skipPrawn>true</skipPrawn>
-                                <skipDocbook>true</skipDocbook>
-                                <skipHtmlSingle>true</skipHtmlSingle>
-                            </configuration>
-                        </execution>
+                        <!-- render-site-content (ike:asciidoc) removed —
+                             maven-site-plugin's asciidoctor-parser-doxia-module
+                             renders src/site/asciidoc/ natively at site:site.
+                             Completes the #310 cleanup for ike-docs (the same
+                             execution was removed from ike-tooling and
+                             ike-platform there; the two render paths clashed
+                             on identical outputs). IKE-Network/ike-issues#437. -->
                         <!-- SPDX-grouped licenses.adoc generation
                              (ike-issues#335). Reads target/bom.json
                              and writes target/generated-site/asciidoc/
@@ -288,6 +280,17 @@
                             <goals><goal>render-sbom-viewer</goal></goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- IKE Doc Maven Plugin — the idoc: doc-rendering
+                     pipeline. Version-managed here; the doc-pipeline
+                     profile below declares the executions. Plugin-management
+                     only — no active binding — so it adds no reactor edge
+                     (IKE-Network/ike-issues#437). -->
+                <plugin>
+                    <groupId>network.ike.docs</groupId>
+                    <artifactId>ike-doc-maven-plugin</artifactId>
+                    <version>${project.version}</version>
                 </plugin>
                 <!-- ike-workspace-maven-plugin lives in ike-platform now.
                      Consumers that want ws: goals declare the dependency
@@ -1513,10 +1516,13 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                         </executions>
                     </plugin>
 
-                    <!-- ── IKE build-time goals ──────────────────────────────── -->
+                    <!-- ── IKE doc-rendering pipeline (idoc:) ────────────────── -->
+                    <!-- AsciiDoctorJ rendering goals moved from ike-maven-plugin
+                         (ike:) to ike-doc-maven-plugin (idoc:) — doc-pipeline
+                         plugin consolidation, IKE-Network/ike-issues#437. -->
                     <plugin>
-                        <groupId>network.ike.tooling</groupId>
-                        <artifactId>ike-maven-plugin</artifactId>
+                        <groupId>network.ike.docs</groupId>
+                        <artifactId>ike-doc-maven-plugin</artifactId>
                         <executions>
                             <!-- ── fix-svg (prepare-package) ─────────────────── -->
                             <execution>
@@ -1623,29 +1629,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                 </configuration>
                             </execution>
 
-                            <!-- ── rename + copy-default-pdf (verify) ────────── -->
-                            <!-- Replaces exec-maven-plugin calls to mv, mkdir,  -->
-                            <!-- and bash cp with cross-platform Java goals.     -->
-                            <execution>
-                                <id>rename-html-single</id>
-                                <phase>verify</phase>
-                                <goals><goal>rename</goal></goals>
-                                <configuration>
-                                    <skip>${ike.skip.html-single}</skip>
-                                    <source>${asciidoc.output.directory}/html-single/${pdf.source.document}.html</source>
-                                    <target>${asciidoc.output.directory}/html-single/${ike.document.name}.html</target>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>rename-prawn-pdf</id>
-                                <phase>verify</phase>
-                                <goals><goal>rename</goal></goals>
-                                <configuration>
-                                    <skip>${ike.skip.prawn}</skip>
-                                    <source>${asciidoc.output.directory}/pdf-prawn/${pdf.source.document}.pdf</source>
-                                    <target>${asciidoc.output.directory}/pdf-prawn/${ike.document.name}.pdf</target>
-                                </configuration>
-                            </execution>
+                            <!-- ── copy-default-pdf (verify) ─────────────────── -->
                             <execution>
                                 <id>copy-default-pdf</id>
                                 <phase>verify</phase>
@@ -1673,6 +1657,37 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                     <skip>${ike.skip.html}</skip>
                                     <generatedDocsDir>${asciidoc.output.directory}/html</generatedDocsDir>
                                     <siteDir>${project.reporting.outputDirectory}</siteDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- ── IKE build-time goals (ike:) ───────────────────────── -->
+                    <!-- rename is a generic utility goal, not part of the
+                         doc-rendering pipeline — it stays in ike-maven-plugin
+                         (IKE-Network/ike-issues#437). -->
+                    <plugin>
+                        <groupId>network.ike.tooling</groupId>
+                        <artifactId>ike-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>rename-html-single</id>
+                                <phase>verify</phase>
+                                <goals><goal>rename</goal></goals>
+                                <configuration>
+                                    <skip>${ike.skip.html-single}</skip>
+                                    <source>${asciidoc.output.directory}/html-single/${pdf.source.document}.html</source>
+                                    <target>${asciidoc.output.directory}/html-single/${ike.document.name}.html</target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>rename-prawn-pdf</id>
+                                <phase>verify</phase>
+                                <goals><goal>rename</goal></goals>
+                                <configuration>
+                                    <skip>${ike.skip.prawn}</skip>
+                                    <source>${asciidoc.output.directory}/pdf-prawn/${pdf.source.document}.pdf</source>
+                                    <target>${asciidoc.output.directory}/pdf-prawn/${ike.document.name}.pdf</target>
                                 </configuration>
                             </execution>
                         </executions>
