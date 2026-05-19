@@ -1782,14 +1782,14 @@
         with description logic axiom display.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">ad13c5916b486bd37b693b4eb19c5016</hash>
-        <hash alg="SHA-1">38897dc9a20feb154503c5da8f88122520606418</hash>
-        <hash alg="SHA-256">b5e666bf56bf5fb25ff65d8dba1ff7a61692e6a92b1d1dd032427844f438e909</hash>
-        <hash alg="SHA-512">d434926ff48da2b259b98b9b2b038393d08d9cfecf912f98cc66db94d623dafa9dfab522ffbfbefbac7c1f09a1871ee05852ea8b6c9f32d0b35f882b1be5aca1</hash>
-        <hash alg="SHA-384">9a470c2aa6644030664bb4ca508b413d0dddb9aadab2aeb57cd68dbb24f66aaf532b52903e06ca44f5f466dd46c518ce</hash>
-        <hash alg="SHA3-384">b296b95257fe21554923ba6fb96bdf675030bb51baa4ea032c4dba06c95f62bd12ad7e8ac9eef7aee008a0ee8b2eb811</hash>
-        <hash alg="SHA3-256">3b37c1d811716ec1d46fe5ea965abf3bec6b7da29b8b186d9fcf4e6c4cbe2044</hash>
-        <hash alg="SHA3-512">eb1d3b8c53580d38390ea9e3f57e7f3bcdb1a740a5920efceaf541e131435ef0f82549e41a225f3fcc7b36ef1bc0d9cfddb9690dd5c05f62861aa41de3127700</hash>
+        <hash alg="MD5">b73480b5ccf1eab52fd1246a7aef4013</hash>
+        <hash alg="SHA-1">534834cc9ced3170e7278b06a27f5204c60f27b4</hash>
+        <hash alg="SHA-256">c341194b1fdcdadfd9300bffce10733193422290a60e1db35d72a594bb51878a</hash>
+        <hash alg="SHA-512">c7cfda53d52a4d195802841371de520082c8453f376db45ec0f329e3b557a023ddd49d144bd88a8f56fd1dbdac2baf44623229fe51fc3fe9358e066f5231db64</hash>
+        <hash alg="SHA-384">5447371838bdc378a4771f323c5e1799427376bdd1cf701134a236a4939ca4efaa4a168a79a28972b17d5228968d7fc9</hash>
+        <hash alg="SHA3-384">cdad283a87d495a5a2c4a2b7d9fafe6aa5246a88426ab520bdcf2a955a4a349ae2f3811629d893140f2d025c9eaa2978</hash>
+        <hash alg="SHA3-256">c6cf6ce3e9ff4890ff1a01919e3580c1c4845c998b4948479ac7f3bbc57150fd</hash>
+        <hash alg="SHA3-512">7fae4284ee8bdd864b1be37b6210ed284341f98038b63b43d12381f3a5d27ea48755090f0943449eac692cbd965b55f622e6a62fa5f55f31fa22ae7006db1951</hash>
       </hashes>
       <licenses>
         <license>
