@@ -6,6 +6,8 @@
 :toc:
 :toclevels: 3
 
+image:https://img.shields.io/maven-central/v/network.ike.docs/ike-docs[Maven Central,link=https://central.sonatype.com/artifact/network.ike.docs/ike-docs]
+
 `ike-docs` is the documentation-plumbing reactor for the IKE
 Network.
 It produces the artifacts that doc-only and hybrid (Java-plus-docs)
@@ -278,6 +280,21 @@ Semantic linebreaks::
 The `semantic-linebreak` tool reformats AsciiDoc prose to
 one-sentence-per-line. This produces cleaner `git diff` output
 and makes sentence-level review practical.
+
+== The IKE foundation
+
+`ike-docs` is one of four foundation projects published to Maven
+Central. Together they form the parent-inheritance forest that every
+IKE project builds on:
+
+* link:https://ike.network/ike-base-parent/[ike-base-parent] — Tier 0
+  foundation parent POM; shared publishing metadata and signing config.
+* link:https://ike.network/ike-tooling/[ike-tooling] — Maven plugins for
+  release orchestration and workspace management.
+* link:https://ike.network/ike-docs/[ike-docs] — the AsciiDoc
+  documentation pipeline and `idoc:*` plugin.
+* link:https://ike.network/ike-platform/[ike-platform] — the
+  consumer-facing `ike-parent`, the BOM, and the `ws:*` plugin.
 
 == Resources
 
