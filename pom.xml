@@ -51,6 +51,13 @@
         <url>https://ike.network</url>
     </organization>
 
+    <scm>
+        <connection>scm:git:https://github.com/IKE-Network/ike-docs.git</connection>
+        <developerConnection>scm:git:git@github.com:IKE-Network/ike-docs.git</developerConnection>
+        <url>https://github.com/IKE-Network/ike-docs</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
         <repository>
             <!-- Developer releases go to ike-staging.
