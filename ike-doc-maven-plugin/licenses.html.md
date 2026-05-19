@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 44, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 45-SNAPSHOT, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -40,7 +40,7 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `com.headius` | `options` | `1.6` |
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `44` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `45-SNAPSHOT` |
 | `network.ike.tooling` | `ike-build-standards` | `188` |
 | `network.ike.tooling` | `ike-build-standards` | `188` |
 | `network.ike.tooling` | `ike-build-standards` | `188` |
