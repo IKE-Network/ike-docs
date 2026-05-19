@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:f3af6ae4-f318-39c8-aa09-1f77d7f44e77" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:ccaefaf0-08b7-341c-8f18-4d66de96ae02" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/docbook-xsl@45-SNAPSHOT?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/docbook-xsl@45?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>docbook-xsl</name>
-      <version>45-SNAPSHOT</version>
+      <version>45</version>
       <description>DocBook XSL 1.79.2 stylesheets with IKE FO customization layer.
         Ready-to-use artifact for the AsciiDoc → DocBook5 → XSL-FO → PDF pipeline.</description>
       <licenses>
@@ -44,7 +44,7 @@
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/docbook-xsl@45-SNAPSHOT?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/docbook-xsl@45?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docbook-xsl</url>
@@ -214,7 +214,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/docbook-xsl@45-SNAPSHOT?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/docbook-xsl@45?type=jar">
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=claude&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=config&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=site-theme&amp;type=zip"/>

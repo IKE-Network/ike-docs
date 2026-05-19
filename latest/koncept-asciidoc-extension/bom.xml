@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:5d80a78c-1a36-3804-9aa8-6518ce6def0a" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:9e951f21-bb6e-3509-a96a-efba2b31fd29" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@45-SNAPSHOT?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@45?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-asciidoc-extension</name>
-      <version>45-SNAPSHOT</version>
+      <version>45</version>
       <description>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
         with SVG badge rendering and auto-generated Referenced Koncepts glossary
         with description logic axiom display.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@45-SNAPSHOT?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@45?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -1293,7 +1293,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@45-SNAPSHOT?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@45?type=jar">
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
       <dependency ref="pkg:maven/org.yaml/snakeyaml@2.2?type=jar"/>

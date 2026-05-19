@@ -12,6 +12,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <plugin>
   <groupId>network.ike.docs</groupId>
   <artifactId>ike-doc-maven-plugin</artifactId>
-  <version>45-SNAPSHOT</version>
+  <version>45</version>
 </plugin>
 ```
