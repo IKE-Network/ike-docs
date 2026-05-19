@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:7e01461b-88f7-3c4a-b40c-a273053b051b",
+  "serialNumber" : "urn:uuid:fa74ac8e-2113-3589-817a-c6b8f3859c28",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@43?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@44?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "43",
+      "version" : "44",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@43?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@44?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -79,6 +79,10 @@
         {
           "type" : "distribution-intake",
           "url" : "https://nexus.tinkar.org/repository/ike-staging/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/IKE-Network/ike-docs/koncept-asciidoc-extension"
         }
       ]
     },
@@ -2269,45 +2273,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=site-theme&type=zip",
+      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=site-theme&type=zip",
       "publisher" : "IKE Network",
       "group" : "network.ike.tooling",
       "name" : "ike-build-standards",
-      "version" : "184",
+      "version" : "188",
       "description" : "Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "193431d253ec1d5ea989b436733ff969"
+          "content" : "3cec2af997d5f020c6ee85b5d9b593ae"
         },
         {
           "alg" : "SHA-1",
-          "content" : "c327d0757b37841ac134361d77e41f7a4757ecc2"
+          "content" : "a4d5cb67d7a00701b68601fbc366a44976f3e434"
         },
         {
           "alg" : "SHA-256",
-          "content" : "8de08f894f85f10c598caf0049065b04b00f918db142cbe976d08a1694fe79f0"
+          "content" : "23eae2f0e23a045e00a027969d182303658f890cd121099e5e454bdf742e52d5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "382ed10e8cf58d2a3e9e2b49c21e3551c0a0bc9e45e04e3413c5c9ed9222a0f746acfb892ffe86b62c93dcabda49e73f88579ed38afdebbce2962cd296684010"
+          "content" : "fb285e416f454b0caf28aa7c5ff2f36bb9013132a911dab64fec19c4e335c9138881d0de41d37487397a52b7206f064980513fed5130fd0cf486cf263d6e1525"
         },
         {
           "alg" : "SHA-384",
-          "content" : "28733bf3223b18d7500e4e18b3fdc835da690cc1d4755b5da841007a557e89754e4415752cc5629f052096bd336bc608"
+          "content" : "40134ffd54e4afb8ef9d871cc03e35cc2ccaa2e4c72e66ce66b419b30467e065dc11bfe0dc885ffec14e2f211c0f4013"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "2604a24814a1abdac7a6787d7bc105b4e2ee105e5fe64a14b4630b82a7d4f23f4d7da2a409163f977e7c77f2b27d211f"
+          "content" : "adc1b1e1011f33d140c936ab22fc9cb738cc79c3549f7872cb27fe06598062031c2baf6f7bb1825e4887b10e3ab36ebb"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "44ae354abc6c7cb2ca9b786704b432822a9d46f722e80b867933637829aa815e"
+          "content" : "b8ad82395ee49f3b0999958495d4dc8fa173b238f281cc52e33bccffafcfa9ab"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "98e1cfab39bc534764b52635e95072f6c63b3b3b681649011a3f9dabce7cc2dab80366d8cf80da5c0972a4fbc4adaf44dea90b4ea50581be6e824b7379095f2d"
+          "content" : "636c2a793494e959d1508c847a6482636709786944fe08aa7e533237eef295939ccc8e1fa5021f147c88f1017154d908111fcf9451df23da99004d34c2a89073"
         }
       ],
       "licenses" : [
@@ -2317,7 +2321,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=site-theme&type=zip",
+      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=site-theme&type=zip",
       "externalReferences" : [
         {
           "type" : "website",
@@ -2326,50 +2330,54 @@
         {
           "type" : "distribution-intake",
           "url" : "https://nexus.tinkar.org/repository/ike-staging/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/IKE-Network/ike-tooling/ike-build-standards"
         }
       ]
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=built-with&type=zip",
+      "bom-ref" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=built-with&type=zip",
       "publisher" : "IKE Network",
       "group" : "network.ike.tooling",
       "name" : "ike-build-standards",
-      "version" : "184",
+      "version" : "188",
       "description" : "Versioned Claude instruction files for IKE projects. Modular standards (Maven, Java, IKE-specific) distributed as a classified Maven artifact.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "eea3111177b816c623e3641ab50d8026"
+          "content" : "58906ae9041fd8f04fc2f8278d756a91"
         },
         {
           "alg" : "SHA-1",
-          "content" : "1dbc8ace987e17ddd18162c1fa6355db6e8fd1d3"
+          "content" : "b1cdf9583710dee92cd3197e5fa0f735d0623d16"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c4390b39fbf5d905413e5d07f43752fa6ba3ff431531fb78b26c5402c4b5dca7"
+          "content" : "4e66f4e194a501fedb4e1182ce0486866b7d19e9b50a80027dda1d3d5af4ebee"
         },
         {
           "alg" : "SHA-512",
-          "content" : "8786fa8327645c6f2850c683bc631b053ace0f5983f090dacbe7f67cbf4ab97a7338c8db3a1b9b2c446645ca8f10a263f0182a7a6de5323b067bde0e4e882382"
+          "content" : "84e2165ba9c5a3c4d679113b0d995317aa8acf26e208b37f5bf0afa9ac972082f2d563131d972584483376812254ac61d7e1c02977e70d71d1670f6b82300d56"
         },
         {
           "alg" : "SHA-384",
-          "content" : "7e2e8fb2de4486a8801b70c31ef4f561a8d5fa95bca625935a3ba387f2fda9b0c48ae6e2d4aa3ea61dad6c542255b9fc"
+          "content" : "0e7dcf1f7eb02144c8c885c95285f8ae1127a2747c25c5250de1e27bbb5fc1e8a0258e20def593669f7e5a43d0d62bc0"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "68fdd17ff4e714034e748dcdda29672db33dd823811310b618578808c8b4a4c8f4615ebbb3d9095fa1d6dfd00c8c4459"
+          "content" : "49add793c5435aa168b3306ba9a33b44c7ad50aa9ab62872e86b87f4778327fe23f3cf56558b897f1aaae773c9337c3d"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "5c8e8d4be1af4b4d6d634803ed91c226839758ab56ee5bec774441e2e462054c"
+          "content" : "8fa0f621a2b1d8f1e872aeff72bcf94721b5faa36130a044dcf5b4fa94cd6ab7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8fe8961adc378f9cb4318c3eeac34b920b6f78b346672e7ba1109cb4e63eedda7f20c0a51e60a69f2d58656932b053b8e165d12dc359df9834abcde08a73865e"
+          "content" : "a491207668bfbb6d959b4e5ed901282d55540b943a40a9c49a06e0e546219762a10e8eebd84be07181e020a32478173b1f041f79fe7b678a12b27bff7c5c3278"
         }
       ],
       "licenses" : [
@@ -2379,7 +2387,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=built-with&type=zip",
+      "purl" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=built-with&type=zip",
       "externalReferences" : [
         {
           "type" : "website",
@@ -2388,20 +2396,24 @@
         {
           "type" : "distribution-intake",
           "url" : "https://nexus.tinkar.org/repository/ike-staging/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/IKE-Network/ike-tooling/ike-build-standards"
         }
       ]
     }
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@43?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@44?type=jar",
       "dependsOn" : [
         "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
         "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.12?type=jar",
-        "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=site-theme&type=zip",
-        "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=built-with&type=zip"
+        "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=site-theme&type=zip",
+        "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=built-with&type=zip"
       ]
     },
     {
@@ -2592,11 +2604,11 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=site-theme&type=zip",
+      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=site-theme&type=zip",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@184?classifier=built-with&type=zip",
+      "ref" : "pkg:maven/network.ike.tooling/ike-build-standards@188?classifier=built-with&type=zip",
       "dependsOn" : [ ]
     }
   ]

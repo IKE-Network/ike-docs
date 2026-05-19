@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-16
-date_modified: 2026-05-16
+date_published: 2026-05-18
+date_modified: 2026-05-18
 canonical_url: https://github.com/IKE-Network/ike-docs/plugins.html
 ---
 
@@ -8,7 +8,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/plugins.html
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[1] | 184 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[1] | 188 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[2] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[3] | 3.13.0 |
 | org.apache.maven.plugins | [maven-dependency-plugin](https://maven.apache.org/plugins/maven-dependency-plugin/)[4] | 3.9.0 |
@@ -21,11 +21,12 @@ canonical_url: https://github.com/IKE-Network/ike-docs/plugins.html
 | org.apache.maven.plugins | [maven-surefire-plugin](https://maven.apache.org/surefire/maven-surefire-plugin/)[11] | 3.5.2 |
 | org.cyclonedx | [cyclonedx-maven-plugin](https://github.com/CycloneDX/cyclonedx-maven-plugin)[12] | 2.9.0 |
 | org.jacoco | [jacoco-maven-plugin](https://www.jacoco.org/jacoco/trunk/doc/maven.html)[13] | 0.8.14 |
+| org.jreleaser | [jreleaser-maven-plugin](https://github.com/jreleaser/jreleaser)[14] | 1.24.0 |
 
 # Project Report Plugins
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| org.apache.maven.plugins | [maven-javadoc-plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)[14] | 3.11.2 |
-| org.apache.maven.plugins | [maven-project-info-reports-plugin](https://maven.apache.org/plugins/maven-project-info-reports-plugin/)[15] | 3.9.0 |
+| org.apache.maven.plugins | [maven-javadoc-plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/)[15] | 3.11.2 |
+| org.apache.maven.plugins | [maven-project-info-reports-plugin](https://maven.apache.org/plugins/maven-project-info-reports-plugin/)[16] | 3.9.0 |
 | org.jacoco | [jacoco-maven-plugin](https://www.jacoco.org/jacoco/trunk/doc/maven.html)[13] | 0.8.14 |
