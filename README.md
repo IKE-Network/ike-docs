@@ -1,5 +1,6 @@
 # IKE Docs
 
+[![Maven Central](https://img.shields.io/maven-central/v/network.ike.docs/ike-docs)](https://central.sonatype.com/artifact/network.ike.docs/ike-docs)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Documentation](https://img.shields.io/badge/docs-ike.network%2Fike--docs-blue)](https://ike.network/ike-docs/)
 [![IKE Network](https://img.shields.io/badge/IKE-Network-green)](https://ike.network/)
