@@ -92,6 +92,10 @@
     <!-- Properties — merged from ike-parent + java-parent + root.       -->
     <!-- ════════════════════════════════════════════════════════════════ -->
     <properties>
+        <!-- Opt in to Maven Central publishing via ike:release-publish
+             (ReleaseDraftMojo; IKE-Network/ike-issues#445). -->
+        <ike.publishToCentral>true</ike.publishToCentral>
+
         <!-- No site.deploy.url: scpexe://proxy retired in #304. -->
 
         <!-- Nexus deploy URLs. Developer releases deploy to ike-staging.
