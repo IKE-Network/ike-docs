@@ -27,7 +27,7 @@
     <parent>
         <groupId>network.ike</groupId>
         <artifactId>ike-base-parent</artifactId>
-        <version>1</version>
+        <version>3</version>
     </parent>
 
     <groupId>network.ike.docs</groupId>
@@ -68,18 +68,11 @@
     </scm>
 
     <distributionManagement>
-        <repository>
-            <!-- Developer releases go to ike-staging.
-                 TeamCity promotes to ike-releases after verification.
-                 ike-public group aggregates both for resolution. -->
-            <id>ike-staging</id>
-            <url>${deploy.staging.url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>ike-snapshots</id>
-            <url>${deploy.snapshot.url}</url>
-        </snapshotRepository>
-        <!-- <site> URL for site:stage relative-path computation.
+        <!-- <repository>/<snapshotRepository> are inherited from
+             ike-base-parent v3 (#461). Only the project-specific
+             <site> stays here per the inheritance-override rule.
+
+             <site> URL for site:stage relative-path computation.
              Actual content publish goes through
              publishProjectSiteToGhPages (#304: scpexe deploy retired). -->
         <site>
@@ -92,9 +85,9 @@
     <!-- Properties — merged from ike-parent + java-parent + root.       -->
     <!-- ════════════════════════════════════════════════════════════════ -->
     <properties>
-        <!-- Opt in to Maven Central publishing via ike:release-publish
-             (ReleaseDraftMojo; IKE-Network/ike-issues#445). -->
-        <ike.publishToCentral>true</ike.publishToCentral>
+        <!-- ike.publishToCentral inherited from ike-base-parent v3
+             (defaults to true). Override with -Dike.publishToCentral=false
+             for an internal-only release. -->
 
         <!-- No site.deploy.url: scpexe://proxy retired in #304. -->
 
@@ -104,7 +97,10 @@
         <deploy.staging.url>https://nexus.tinkar.org/repository/ike-staging/</deploy.staging.url>
 
         <!-- IKE Tooling (ike-maven-plugin, ike-build-standards) -->
-        <ike-tooling.version>189</ike-tooling.version>
+        <!-- Mirrored in src/main/cascade/release-cascade.yaml as an
+             upstream edge. Bumped by ike:release-publish before
+             release; keep both in sync (#463). -->
+        <ike-tooling.version>190</ike-tooling.version>
 
         <!-- Build Configuration -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -2012,27 +2008,9 @@ IKE projects require Java 21+ (JRuby 10 baseline).
             </properties>
         </profile>
 
-        <!-- ── GPG Signing ──────────────────────────────────── -->
-        <profile>
-            <id>signArtifacts</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!-- `signArtifacts` profile inherited from ike-base-parent v3
+             (#461) — was previously duplicated here with identical
+             maven-gpg-plugin/BC-signer configuration. -->
 
         <!-- ── Platform Classifier Profiles ─────────────────────── -->
         <profile>
@@ -2113,22 +2091,10 @@ IKE projects require Java 21+ (JRuby 10 baseline).
             </properties>
         </profile>
 
-        <!-- ── Release (from java-parent) ─────────────────────────────── -->
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!-- `release` profile (sources + javadoc jars for Central)
+             inherited from ike-base-parent v3 (#461) — was previously
+             duplicated here with identical maven-source-plugin and
+             maven-javadoc-plugin configuration. -->
     </profiles>
 
     <!-- Subproject order follows build-dependency order:
