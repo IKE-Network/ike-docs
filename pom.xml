@@ -306,7 +306,7 @@
                 <plugin>
                     <groupId>network.ike.docs</groupId>
                     <artifactId>ike-doc-maven-plugin</artifactId>
-                    <version>48</version>
+                    <version>${project.version}</version>
                 </plugin>
                 <!-- ike-workspace-maven-plugin lives in ike-platform now.
                      Consumers that want ws: goals declare the dependency
@@ -775,7 +775,7 @@
                 <plugin>
                     <groupId>network.ike.docs</groupId>
                     <artifactId>semantic-linebreak</artifactId>
-                    <version>48</version>
+                    <version>${project.version}</version>
                 </plugin>
 
                 <!-- Build Helper Plugin — attach classified PDF artifacts -->
@@ -888,7 +888,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                         <dependency>
                             <groupId>network.ike.docs</groupId>
                             <artifactId>koncept-asciidoc-extension</artifactId>
-                            <version>48</version>
+                            <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>
