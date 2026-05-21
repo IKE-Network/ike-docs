@@ -100,7 +100,7 @@
         <!-- Mirrored in src/main/cascade/release-cascade.yaml as an
              upstream edge. Bumped by ike:release-publish before
              release; keep both in sync (#463). -->
-        <ike-tooling.version>194</ike-tooling.version>
+        <ike-tooling.version>195</ike-tooling.version>
 
         <!-- Build Configuration -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
