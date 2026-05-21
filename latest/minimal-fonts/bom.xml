@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:b636f1b3-dd9c-3fa5-a943-092c9c2e761a" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:719d229f-bf60-379a-b02b-1f07bb6faa24" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/minimal-fonts@49?type=pom">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/minimal-fonts@50-SNAPSHOT?type=pom">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>minimal-fonts</name>
-      <version>49</version>
+      <version>50-SNAPSHOT</version>
       <description>Minimal Noto font subset for IKE documentation (~4MB)</description>
       <licenses>
         <license>
@@ -39,7 +39,7 @@
           <url>http://scripts.sil.org/cms/scripts/page.php?item_id=OFL_web</url>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/minimal-fonts@49?type=pom</purl>
+      <purl>pkg:maven/network.ike.docs/minimal-fonts@50-SNAPSHOT?type=pom</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-minimal-fonts</url>
@@ -172,7 +172,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/minimal-fonts@49?type=pom">
+    <dependency ref="pkg:maven/network.ike.docs/minimal-fonts@50-SNAPSHOT?type=pom">
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@193?classifier=claude&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@193?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@193?classifier=built-with&amp;type=zip"/>

@@ -92,13 +92,13 @@
 					<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">49</span>
+							<span class="version">50-SNAPSHOT</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
 						<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
-							Version <strong>49</strong>
+							Version <strong>50-SNAPSHOT</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -183,7 +183,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Docs 49
+							<h3><small>IKE Docs</small><br/>							IKE Docs 50-SNAPSHOT
 							</h3>
 						</div>
 								<div class="home-xs visible-xs">
@@ -411,8 +411,8 @@ end fork
 <div>
  <h2 id="release-position"><a href="#release-position"></a><a id="release-position"></a>Release Position</h2>
  <div class="source">
-  <pre class="prettyprint" copy-to-clipboard=""><code>ike-tooling -&gt; [ike-docs] -&gt; ike-platform -&gt; { doc-example, example-project } -&gt; ike-example-ws
-                                                                              -&gt; ike-lab-documents</code></pre>
+  <pre class="prettyprint" copy-to-clipboard=""><code>ike-tooling -&gt; [ike-docs] -&gt; ike-platform -&gt; { doc-example, project-example, integration-tests-example } -&gt; workspace-example
+                                                                                                        -&gt; ike-lab-documents</code></pre>
  </div>
  <p><code>ike-docs</code> releases after <code>ike-tooling</code> (which provides <code>ike-maven-plugin</code> for release orchestration) and before <code>ike-platform</code> (which declares <code>ike-doc-maven-plugin</code> and the other ike-docs artifacts in <code>ike-parent’s `&lt;pluginManagement&gt;</code>/<code>&lt;dependencyManagement&gt;</code>).</p>
 </div>
@@ -511,7 +511,7 @@ end fork
 								</ul>
 							</div>
 <div class="authors">Author: <strong>IKE Network</strong></div>
-<div class="date">Date: <strong>2026-05-20 18:21:01 -0700</strong></div>
+<div class="date">Date: <strong>2026-05-20 20:22:52 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -590,7 +590,7 @@ end fork
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>IKE Documentation Pipeline 49</strong>
+			<strong>IKE Documentation Pipeline 50-SNAPSHOT</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-05-21">2026-05-21</time></strong>
 		</p>

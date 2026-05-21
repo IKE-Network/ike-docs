@@ -168,8 +168,8 @@ For consumer-side authoring (a project inheriting `ike-parent` that uses these a
 ## [#release-position](#release-position)Release Position
 
 ```
-ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, example-project } -> ike-example-ws
-                                                                              -> ike-lab-documents
+ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-example
+                                                                                                        -> ike-lab-documents
 ```
 
 `ike-docs` releases after `ike-tooling` (which provides `ike-maven-plugin` for release orchestration) and before `ike-platform` (which declares `ike-doc-maven-plugin` and the other ike-docs artifacts in `ike-parent’s `<pluginManagement>`/`<dependencyManagement>`).
