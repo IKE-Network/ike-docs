@@ -6,13 +6,13 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `koncept-asciidoc-extension` 50-SNAPSHOT, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `koncept-asciidoc-extension` 50, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 16 |
+| `Apache-2.0` | 17 |
 | `Apache-2.0 OR GNU Lesser General Public License version 3` | 2 |
 | `BSD-2-Clause` | 1 |
 | `BSD-3-Clause` | 5 |
@@ -21,7 +21,7 @@ Licenses for declared dependencies of `koncept-asciidoc-extension` 50-SNAPSHOT, 
 | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | 1 |
 | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | 3 |
 | `MIT` | 4 |
-| **Total** | **34** |
+| **Total** | **35** |
 
 ## [#apache-2-0](#apache-2-0)Apache-2.0
 
@@ -40,8 +40,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `com.headius` | `options` | `1.6` |
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
-| `network.ike.tooling` | `ike-build-standards` | `193` |
-| `network.ike.tooling` | `ike-build-standards` | `193` |
+| `network.ike` | `ike-base-parent` | `5` |
+| `network.ike.tooling` | `ike-build-standards` | `194` |
+| `network.ike.tooling` | `ike-build-standards` | `194` |
 | `org.asciidoctor` | `asciidoctorj` | `3.0.1` |
 | `org.asciidoctor` | `asciidoctorj-api` | `3.0.1` |
 | `org.yaml` | `snakeyaml` | `2.2` |

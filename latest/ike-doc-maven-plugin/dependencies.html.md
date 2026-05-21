@@ -6,11 +6,11 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependencies.html
 
 # Dependencies (SBOM)
 
-Full transitive dependency graph for `ike-doc-maven-plugin` 50-SNAPSHOT, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
+Full transitive dependency graph for `ike-doc-maven-plugin` 50, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
 
 ## [#summary](#summary)Summary
 
-| Total components | 49 |
+| Total components | 50 |
 | --- | --- |
 | Distinct license expressions | 9 |
 
@@ -35,11 +35,12 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 | `com.headius` | `options` | `1.6` | `Apache-2.0` | library |
 | `joda-time` | `joda-time` | `2.14.0` | `Apache-2.0` | library |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` | `Apache-2.0` | library |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `50-SNAPSHOT` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `193` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `193` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `193` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-maven-plugin-support` | `193` | `Apache-2.0` | library |
+| `network.ike` | `ike-base-parent` | `5` | `Apache-2.0` | library |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `50` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `194` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `194` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `194` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-maven-plugin-support` | `194` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-annotations` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-core` | `4.0.0-rc-5` | `Apache-2.0` | library |
 | `org.apache.maven` | `maven-api-di` | `4.0.0-rc-5` | `Apache-2.0` | library |
@@ -74,7 +75,7 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 
 - [Software Bill of Materials (CycloneDX, JSON)](bom.json)[1] — raw machine-readable form. Includes purls, hashes, and dependency-graph edges that this page summarizes.
 - [bom.xml](bom.xml)[4] — same content in XML.
-- As a Maven artifact: pull `ike-doc-maven-plugin:​50-SNAPSHOT` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
+- As a Maven artifact: pull `ike-doc-maven-plugin:​50` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
 
 ## [#see-also](#see-also)See also
 
