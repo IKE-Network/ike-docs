@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-19
-date_modified: 2026-05-19
+date_published: 2026-05-20
+date_modified: 2026-05-20
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.html
 ---
 
@@ -12,7 +12,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>minimal-fonts</artifactId>
-  <version>48</version>
+  <version>49</version>
   <type>pom</type>
 </dependency>
 ```
@@ -20,7 +20,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="minimal-fonts" rev="48">
+<dependency org="network.ike.docs" name="minimal-fonts" rev="49">
   <artifact name="minimal-fonts" type="pom" />
 </dependency>
 ```
@@ -29,24 +29,24 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='minimal-fonts', version='48')
+@Grab(group='network.ike.docs', module='minimal-fonts', version='49')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:minimal-fonts:48'
+implementation 'network.ike.docs:minimal-fonts:49'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "minimal-fonts" % "48"
+libraryDependencies += "network.ike.docs" % "minimal-fonts" % "49"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/minimal-fonts "48"]
+[network.ike.docs/minimal-fonts "49"]
 ```

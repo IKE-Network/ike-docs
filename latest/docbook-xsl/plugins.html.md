@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-19
-date_modified: 2026-05-19
+date_published: 2026-05-20
+date_modified: 2026-05-20
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/plugins.html
 ---
 
@@ -8,8 +8,8 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/plugins.html
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 48 |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 191 |
+| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 49 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 193 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[3] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[4] | 3.13.0 |
 | org.apache.maven.plugins | [maven-dependency-plugin](https://maven.apache.org/plugins/maven-dependency-plugin/)[5] | 3.9.0 |

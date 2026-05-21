@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-19
-date_modified: 2026-05-19
+date_published: 2026-05-20
+date_modified: 2026-05-20
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/plugin-management.html
 ---
 
@@ -8,9 +8,9 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/plugin-managemen
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 48 |
-| network.ike.docs | [semantic-linebreak](https://github.com/IKE-Network/ike-docs)[1] | 48 |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 191 |
+| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 49 |
+| network.ike.docs | [semantic-linebreak](https://github.com/IKE-Network/ike-docs)[1] | 49 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 193 |
 | org.apache.maven.plugins | [maven-assembly-plugin](https://maven.apache.org/plugins/maven-assembly-plugin/)[3] | 3.7.1 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[4] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[5] | 3.14.0 |
