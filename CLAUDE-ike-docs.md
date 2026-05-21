@@ -42,7 +42,7 @@ to a task you are performing.
 
 This is **IKE Docs** — a Maven 4 reactor that hosts the IKE
 documentation plumbing. It produces the artifacts that external doc
-projects (e.g., `ike-lab-documents`, `doc-example`, `example-project`)
+projects (e.g., `ike-lab-documents`, `doc-example`, `project-example`)
 consume through `ike-parent` (which lives in `ike-platform`).
 
 Split from the archived `ike-pipeline` repo to resolve a fundamental
@@ -125,7 +125,7 @@ mvn install -DskipTests
 ## Release Cascade Position
 
 ```
-ike-tooling → [ike-docs] → ike-platform → { doc-example, example-project } → ike-example-ws
+ike-tooling → [ike-docs] → ike-platform → { doc-example, project-example, integration-tests-example } → workspace-example
 ```
 
 `ike-docs` must release before `ike-platform`. `ike-platform`'s

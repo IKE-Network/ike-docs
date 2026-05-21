@@ -236,8 +236,8 @@ link:getting-started.html[Getting Started] guide.
 
 [source]
 ----
-ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, example-project } -> ike-example-ws
-                                                                              -> ike-lab-documents
+ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-example
+                                                                                                        -> ike-lab-documents
 ----
 
 `ike-docs` releases after `ike-tooling` (which provides
