@@ -283,7 +283,14 @@ public class SemanticLineBreaker {
      */
     int processFile(Asciidoctor asciidoctor, Path inPath,
                     String outputPath) throws IOException {
-        List<String> sourceLines = Files.readAllLines(inPath);
+        // Read the raw content first so the file's original
+        // trailing-newline state survives. Files.readAllLines()
+        // discards line terminators, so a String.join("\n", ...)
+        // rebuilt from it can never recover whether the file ended
+        // in a newline. See IKE-Network/ike-issues#503.
+        String rawSource = Files.readString(inPath);
+        boolean hadTrailingNewline = rawSource.endsWith("\n");
+        List<String> sourceLines = rawSource.lines().toList();
         String source = String.join("\n", sourceLines);
 
         Options options = Options.builder()
@@ -366,7 +373,7 @@ public class SemanticLineBreaker {
 
         // ── Write output ────────────────────────────────────────────────
         String output = String.join("\n", result);
-        if (source.endsWith("\n")) {
+        if (hadTrailingNewline) {
             output += "\n";
         }
 
