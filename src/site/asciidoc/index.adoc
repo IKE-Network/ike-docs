@@ -236,7 +236,7 @@ link:getting-started.html[Getting Started] guide.
 
 [source]
 ----
-ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-example
+ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-reactor-example
                                                                                                         -> ike-lab-documents
 ----
 

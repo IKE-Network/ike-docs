@@ -125,7 +125,7 @@ mvn install -DskipTests
 ## Release Cascade Position
 
 ```
-ike-tooling → [ike-docs] → ike-platform → { doc-example, project-example, integration-tests-example } → workspace-example
+ike-tooling → [ike-docs] → ike-platform → { doc-example, project-example, integration-tests-example } → workspace-reactor-example
 ```
 
 `ike-docs` must release before `ike-platform`. `ike-platform`'s
