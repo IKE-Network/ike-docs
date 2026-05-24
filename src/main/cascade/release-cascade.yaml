@@ -7,9 +7,11 @@
 # — the full graph (ike-tooling → ike-docs → ike-platform) is
 # assembled by traversing these per-project files.
 #
-#   upstream   — projects this repo consumes; each names the
-#                ${X.version} property the cascade aligns to the
-#                upstream's latest release before a release here.
+#   upstream   — projects this repo consumes. The canonical ${G·A}
+#                version pin (U+00B7) that the cascade aligns to the
+#                upstream's latest release is derived mechanically
+#                from each upstream's coordinates — no version-property
+#                field is needed (IKE-Network/ike-issues#496).
 #   downstream — foundation projects that consume this repo; the
 #                cascade executor walks forward to each after a
 #                release here.
@@ -19,11 +21,6 @@ schema: 1
 upstream:
   - groupId: network.ike.tooling
     artifactId: ike-tooling
-    # Canonical ${G·A} pin name, not the ike-tooling.version alias —
-    # alignUpstreamProperties skips properties whose value contains
-    # ${, so the alias indirection silently no-ops. See
-    # IKE-Network/ike-issues#507.
-    version-property: network.ike.tooling·ike-tooling
     url: https://github.com/IKE-Network/ike-tooling.git
 
 downstream:
