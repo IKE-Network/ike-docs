@@ -19,7 +19,11 @@ schema: 1
 upstream:
   - groupId: network.ike.tooling
     artifactId: ike-tooling
-    version-property: ike-tooling.version
+    # Canonical ${G·A} pin name, not the ike-tooling.version alias —
+    # alignUpstreamProperties skips properties whose value contains
+    # ${, so the alias indirection silently no-ops. See
+    # IKE-Network/ike-issues#507.
+    version-property: network.ike.tooling·ike-tooling
     url: https://github.com/IKE-Network/ike-tooling.git
 
 downstream:
