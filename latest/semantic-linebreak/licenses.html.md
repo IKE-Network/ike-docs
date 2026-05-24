@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `semantic-linebreak` 55, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `semantic-linebreak` 56, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -42,9 +42,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `8` |
-| `network.ike.tooling` | `ike-build-standards` | `201` |
-| `network.ike.tooling` | `ike-build-standards` | `201` |
-| `network.ike.tooling` | `ike-build-standards` | `201` |
+| `network.ike.tooling` | `ike-build-standards` | `207` |
+| `network.ike.tooling` | `ike-build-standards` | `207` |
+| `network.ike.tooling` | `ike-build-standards` | `207` |
 | `org.apache.maven` | `maven-artifact` | `3.9.9` |
 | `org.apache.maven` | `maven-model` | `3.9.9` |
 | `org.apache.maven` | `maven-plugin-api` | `3.9.9` |
