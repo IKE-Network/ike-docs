@@ -1,0 +1,28 @@
+# IKE Documentation Pipeline
+
+> Documentation plumbing for the IKE Network. Hosts the
+> ike-doc-maven-plugin (ike-doc packaging, AsciiDoc/render
+> pipeline, PDF dispatch), the Koncept AsciiDoc extension,
+> DocBook XSL + fonts, shared doc resources, and the semantic
+> linebreak reformatter. Split from ike-pipeline to resolve the
+> extensions=true reactor-load cycle. See IKE-Network/ike-issues#216.
+
+## Documentation
+
+- [Getting Started](https://github.com/IKE-Network/ike-docs/getting-started.html.md)
+- [IKE Documentation Pipeline](https://github.com/IKE-Network/ike-docs/index.html.md)
+- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
+- [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)
+
+## Other
+
+- [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
+
+## Reports
+
+- [Project Summary](https://github.com/IKE-Network/ike-docs/summary.html.md)
+- [Maven Coordinates](https://github.com/IKE-Network/ike-docs/dependency-info.html.md)
+- [Project Plugins](https://github.com/IKE-Network/ike-docs/plugins.html.md)
+- [Project Plugin Management](https://github.com/IKE-Network/ike-docs/plugin-management.html.md)
+- [Project Distribution Management](https://github.com/IKE-Network/ike-docs/distribution-management.html.md)
+- [Project Information](https://github.com/IKE-Network/ike-docs/project-info.html.md)
