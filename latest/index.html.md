@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-20
-date_modified: 2026-05-20
+date_published: 2026-05-22
+date_modified: 2026-05-22
 canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 ---
 
@@ -168,7 +168,7 @@ For consumer-side authoring (a project inheriting `ike-parent` that uses these a
 ## [#release-position](#release-position)Release Position
 
 ```
-ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-example
+ike-tooling -> [ike-docs] -> ike-platform -> { doc-example, project-example, integration-tests-example } -> workspace-reactor-example
                                                                                                         -> ike-lab-documents
 ```
 

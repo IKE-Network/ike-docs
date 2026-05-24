@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:a7a94cec-30b3-3b8f-9971-1b69ee202599",
+  "serialNumber" : "urn:uuid:49078086-33e7-337d-b0e0-82580447d29d",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/semantic-linebreak@52?type=maven-plugin",
+      "bom-ref" : "pkg:maven/network.ike.docs/semantic-linebreak@53?type=maven-plugin",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "semantic-linebreak",
-      "version" : "52",
+      "version" : "53",
       "description" : "Maven plugin that reformats AsciiDoc prose to one-sentence-per-line using AsciidoctorJ AST parsing",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/semantic-linebreak@52?type=maven-plugin",
+      "purl" : "pkg:maven/network.ike.docs/semantic-linebreak@53?type=maven-plugin",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3182,7 +3182,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/semantic-linebreak@52?type=maven-plugin",
+      "ref" : "pkg:maven/network.ike.docs/semantic-linebreak@53?type=maven-plugin",
       "dependsOn" : [
         "pkg:maven/org.apache.maven/maven-plugin-api@3.9.9?type=jar",
         "pkg:maven/org.apache.maven.plugin-tools/maven-plugin-annotations@3.15.1?type=jar",

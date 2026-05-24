@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:b3872de2-fd09-3198-a1a7-8afef175c2d4",
+  "serialNumber" : "urn:uuid:a4428742-3aa3-3797-b3a9-3cf166f3983a",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@52?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@53?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "52",
+      "version" : "53",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@52?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@53?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -2472,7 +2472,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@52?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@53?type=jar",
       "dependsOn" : [
         "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
