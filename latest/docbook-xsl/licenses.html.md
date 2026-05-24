@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-22
-date_modified: 2026-05-22
+date_published: 2026-05-23
+date_modified: 2026-05-23
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `docbook-xsl` 53, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `docbook-xsl` 54, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -21,11 +21,11 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 
 | Group | Artifact | Version |
 | --- | --- | --- |
-| `network.ike` | `ike-base-parent` | `5` |
-| `network.ike.tooling` | `ike-build-standards` | `198` |
-| `network.ike.tooling` | `ike-build-standards` | `198` |
-| `network.ike.tooling` | `ike-build-standards` | `198` |
-| `network.ike.tooling` | `ike-build-standards` | `198` |
+| `network.ike` | `ike-base-parent` | `7` |
+| `network.ike.tooling` | `ike-build-standards` | `200` |
+| `network.ike.tooling` | `ike-build-standards` | `200` |
+| `network.ike.tooling` | `ike-build-standards` | `200` |
+| `network.ike.tooling` | `ike-build-standards` | `200` |
 
 ## [#see-also](#see-also)See also
 

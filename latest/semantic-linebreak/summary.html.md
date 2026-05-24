@@ -1,6 +1,6 @@
 ---
-date_published: 2026-05-22
-date_modified: 2026-05-22
+date_published: 2026-05-23
+date_modified: 2026-05-23
 canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 ---
 
@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | semantic-linebreak |
-| Version | 53 |
+| Version | 54 |
 | Type | maven-plugin |
 | Java Version | 25 |

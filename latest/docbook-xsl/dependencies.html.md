@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-22
-date_modified: 2026-05-22
+date_published: 2026-05-23
+date_modified: 2026-05-23
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/dependencies.html
 ---
 
 # Dependencies (SBOM)
 
-Full transitive dependency graph for `docbook-xsl` 53, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
+Full transitive dependency graph for `docbook-xsl` 54, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
 
 ## [#summary](#summary)Summary
 
@@ -20,17 +20,17 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 
 | Group | Artifact | Version | License | Type |
 | --- | --- | --- | --- | --- |
-| `network.ike` | `ike-base-parent` | `5` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `198` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `198` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `198` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `198` | `Apache-2.0` | library |
+| `network.ike` | `ike-base-parent` | `7` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `200` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `200` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `200` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `200` | `Apache-2.0` | library |
 
 ## [#download](#download)Download
 
 - [Software Bill of Materials (CycloneDX, JSON)](bom.json)[1] — raw machine-readable form. Includes purls, hashes, and dependency-graph edges that this page summarizes.
 - [bom.xml](bom.xml)[4] — same content in XML.
-- As a Maven artifact: pull `docbook-xsl:​53` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
+- As a Maven artifact: pull `docbook-xsl:​54` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
 
 ## [#see-also](#see-also)See also
 

@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-22
-date_modified: 2026-05-22
+date_published: 2026-05-23
+date_modified: 2026-05-23
 canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 ---
 
 # Built With
 
-Open-source software that `ike-doc-maven-plugin` 53 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `ike-doc-maven-plugin` 54 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
