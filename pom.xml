@@ -32,7 +32,7 @@
 
     <groupId>network.ike.docs</groupId>
     <artifactId>ike-docs</artifactId>
-    <version>62-SNAPSHOT</version>
+    <version>62</version>
     <packaging>pom</packaging>
 
     <name>IKE Docs</name>
@@ -115,7 +115,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Reproducible builds — maven-release-plugin updates automatically -->
-        <project.build.outputTimestamp>2026-05-25T18:49:47Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-05-25T19:42:20Z</project.build.outputTimestamp>
 
         <!-- ── Java Configuration (from java-parent) ─────────────────── -->
         <java.version>25</java.version>
@@ -315,7 +315,7 @@
                 <plugin>
                     <groupId>network.ike.docs</groupId>
                     <artifactId>ike-doc-maven-plugin</artifactId>
-                    <version>${project.version}</version>
+                    <version>62</version>
                 </plugin>
                 <!-- ike-workspace-maven-plugin lives in ike-platform now.
                      Consumers that want ws: goals declare the dependency
@@ -792,7 +792,7 @@
                 <plugin>
                     <groupId>network.ike.docs</groupId>
                     <artifactId>semantic-linebreak</artifactId>
-                    <version>${project.version}</version>
+                    <version>62</version>
                 </plugin>
 
                 <!-- Build Helper Plugin — attach classified PDF artifacts -->
@@ -905,7 +905,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                         <dependency>
                             <groupId>network.ike.docs</groupId>
                             <artifactId>koncept-asciidoc-extension</artifactId>
-                            <version>${project.version}</version>
+                            <version>62</version>
                         </dependency>
                     </dependencies>
                     <configuration>
