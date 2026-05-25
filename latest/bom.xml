@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:470a0413-180a-315c-933e-0bc943dde92e" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:134e57cd-d8de-331a-9b9d-355b6f5b663c" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-docs@58?type=pom">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-docs@59?type=pom">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>ike-docs</name>
-      <version>58</version>
+      <version>59</version>
       <description>Documentation plumbing for the IKE Network. Hosts the
         ike-doc-maven-plugin (ike-doc packaging, AsciiDoc/render
         pipeline, PDF dispatch), the Koncept AsciiDoc extension,
@@ -43,7 +43,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/ike-docs@58?type=pom</purl>
+      <purl>pkg:maven/network.ike.docs/ike-docs@59?type=pom</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -177,7 +177,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/ike-docs@58?type=pom">
+    <dependency ref="pkg:maven/network.ike.docs/ike-docs@59?type=pom">
       <dependency ref="pkg:maven/network.ike/ike-base-parent@8?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@209?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@209?classifier=built-with&amp;type=zip"/>

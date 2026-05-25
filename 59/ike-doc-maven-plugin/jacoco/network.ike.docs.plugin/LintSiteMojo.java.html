@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LintSiteMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">LintSiteMojo.java</span></div><h1>LintSiteMojo.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Lint {@code src/site/site.xml} for IKE Network theme + breadcrumb
+ * conventions (ike-issues#319).
+ *
+ * &lt;p&gt;The shared site assets ({@code site.css}, {@code ike-logo.svg})
+ * are consolidated in {@code ike-doc-resources} (#318). The
+ * per-project {@code site.xml} legitimately stays local — breadcrumbs
+ * and menus genuinely vary — but it carries a small set of
+ * conventions that have drifted in the past:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;b&gt;{@code &lt;bodyClass&gt;}&lt;/b&gt; must be {@code sentry-green}
+ *       (Forest theme) for ike.network consumers, {@code sentry-purple}
+ *       (Horizon) for knowledge.design. The 5 ike-docs submodules
+ *       shipped with {@code sentry-purple} after {@code ike-platform}
+ *       and {@code ike-tooling} switched to {@code sentry-green}
+ *       (per #307), producing a purple banner at
+ *       https://ike.network/ike-docs/ike-doc-resources/.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;Breadcrumb leading item&lt;/b&gt; — those same 5 files carried a
+ *       stale {@code &lt;item name=&quot;IKE Pipeline&quot; href=&quot;../index.html&quot;/&gt;}
+ *       from before the ike-pipeline → ike-docs/ike-platform repo
+ *       split (#216).&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;{@code &lt;skin&gt;} GAV&lt;/b&gt; — drift here is silent until you
+ *       upgrade.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;The ike.network ↔ knowledge.design boundary means a single
+ * global enforcement isn't right; the expected {@code bodyClass} is
+ * per-deployment. Set the deployment target via the
+ * {@code ike.site.deployment} property (defaults to {@code ike-network}).
+ *
+ * &lt;p&gt;When {@code src/site/site.xml} doesn't exist, this goal is a
+ * silent no-op — modules without a custom site descriptor inherit
+ * from the parent and don't need linting.
+ *
+ * &lt;p&gt;Skip with {@code -Dike.skip.lint-site=true}.
+ *
+ * @see &lt;a href=&quot;https://github.com/IKE-Network/ike-issues/issues/319&quot;&gt;ike-issues#319&lt;/a&gt;
+ */
+@Mojo(name = &quot;lint-site&quot;, defaultPhase = &quot;validate&quot;)
+public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
+
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.plugin.Log log;
+
+    /**
+     * Access the Maven logger.
+     *
+     * @return the logger
+     */
+<span class="nc" id="L66">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+
+    /**
+     * Path to the project's site descriptor. Default is the
+     * conventional location; override for non-standard layouts.
+     */
+    @Parameter(property = &quot;ike.lint-site.path&quot;,
+               defaultValue = &quot;${project.basedir}/src/site/site.xml&quot;)
+    File siteXml;
+
+    /**
+     * Deployment target — controls the expected {@code &lt;bodyClass&gt;}.
+     *
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@code ike-network} (default) → expects {@code sentry-green}&lt;/li&gt;
+     *   &lt;li&gt;{@code knowledge-design} → expects {@code sentry-purple}&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * Override in projects deployed to knowledge.design with
+     * {@code -Dike.site.deployment=knowledge-design}.
+     */
+    @Parameter(property = &quot;ike.site.deployment&quot;,
+               defaultValue = &quot;ike-network&quot;)
+    String deployment;
+
+    /**
+     * Expected {@code &lt;skin&gt;} groupId. Drift here causes silent skin
+     * changes when the project's pluginManagement-inherited version
+     * is older than the locally-declared one.
+     */
+    @Parameter(property = &quot;ike.lint-site.skin-group&quot;,
+               defaultValue = &quot;org.sentrysoftware.maven&quot;)
+    String expectedSkinGroup;
+
+    /**
+     * Expected {@code &lt;skin&gt;} artifactId.
+     */
+    @Parameter(property = &quot;ike.lint-site.skin-artifact&quot;,
+               defaultValue = &quot;sentry-maven-skin&quot;)
+    String expectedSkinArtifact;
+
+    /**
+     * Skip linting entirely. Use sparingly — the conventions checked
+     * here have all caused production-site drift at least once.
+     */
+    @Parameter(property = &quot;ike.skip.lint-site&quot;, defaultValue = &quot;false&quot;)
+    boolean skip;
+
+    /** Creates this goal instance. */
+<span class="nc" id="L115">    public LintSiteMojo() {}</span>
+
+    @Override
+    public void execute() throws MojoException {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L120">            getLog().info(&quot;idoc:lint-site skipped &quot;</span>
+                    + &quot;(-Dike.skip.lint-site=true)&quot;);
+<span class="nc" id="L122">            return;</span>
+        }
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (!siteXml.isFile()) {</span>
+<span class="nc" id="L126">            getLog().debug(&quot;idoc:lint-site: no site.xml at &quot;</span>
+                    + siteXml + &quot; — module inherits from parent. Skipping.&quot;);
+<span class="nc" id="L128">            return;</span>
+        }
+
+        String content;
+        try {
+<span class="nc" id="L133">            content = Files.readString(siteXml.toPath(),</span>
+                    StandardCharsets.UTF_8);
+<span class="nc" id="L135">        } catch (IOException e) {</span>
+<span class="nc" id="L136">            throw new MojoException(</span>
+<span class="nc" id="L137">                    &quot;Could not read &quot; + siteXml + &quot;: &quot; + e.getMessage(),</span>
+                    e);
+<span class="nc" id="L139">        }</span>
+
+<span class="nc" id="L141">        List&lt;String&gt; problems = lint(content, deployment,</span>
+                expectedSkinGroup, expectedSkinArtifact);
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (problems.isEmpty()) {</span>
+<span class="nc" id="L145">            getLog().debug(&quot;idoc:lint-site: &quot; + siteXml</span>
+                    + &quot; — all checks passed.&quot;);
+<span class="nc" id="L147">            return;</span>
+        }
+
+<span class="nc" id="L150">        StringBuilder msg = new StringBuilder();</span>
+<span class="nc" id="L151">        msg.append(&quot;idoc:lint-site found &quot;).append(problems.size())</span>
+<span class="nc" id="L152">                .append(&quot; problem(s) in &quot;).append(siteXml).append(&quot;:\n&quot;);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        for (String p : problems) {</span>
+<span class="nc" id="L154">            msg.append(&quot;  ✗ &quot;).append(p).append(&quot;\n&quot;);</span>
+<span class="nc" id="L155">        }</span>
+<span class="nc" id="L156">        msg.append(&quot;\n  Fix the site.xml and re-run, or skip with &quot;</span>
+                + &quot;-Dike.skip.lint-site=true (not recommended — these &quot;
+                + &quot;conventions have all caused production drift).&quot;);
+<span class="nc" id="L159">        throw new MojoException(msg.toString());</span>
+    }
+
+    /**
+     * Apply all site.xml lint rules to the given content. Pure
+     * function for testability — does no I/O.
+     *
+     * @param siteXmlContent     raw site.xml as a string
+     * @param deployment         deployment target
+     *                           ({@code ike-network} or
+     *                           {@code knowledge-design})
+     * @param expectedSkinGroup  expected {@code &lt;skin&gt;} groupId
+     * @param expectedSkinArtifact expected {@code &lt;skin&gt;} artifactId
+     * @return list of problem messages; empty if all checks passed
+     */
+    public static List&lt;String&gt; lint(String siteXmlContent,
+                                     String deployment,
+                                     String expectedSkinGroup,
+                                     String expectedSkinArtifact) {
+<span class="fc" id="L178">        List&lt;String&gt; problems = new ArrayList&lt;&gt;();</span>
+
+        // ── Check 1: &lt;bodyClass&gt; ─────────────────────────────────
+<span class="fc" id="L181">        String expectedBodyClass = expectedBodyClassFor(deployment);</span>
+<span class="fc" id="L182">        Matcher bodyClassMatcher = Pattern.compile(</span>
+                &quot;&lt;bodyClass&gt;\\s*([^&lt;]+?)\\s*&lt;/bodyClass&gt;&quot;)
+<span class="fc" id="L184">                .matcher(siteXmlContent);</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if (bodyClassMatcher.find()) {</span>
+<span class="fc" id="L186">            String actual = bodyClassMatcher.group(1).trim();</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (!actual.equals(expectedBodyClass)) {</span>
+<span class="fc" id="L188">                problems.add(&quot;&lt;bodyClass&gt;: expected '&quot; + expectedBodyClass</span>
+                        + &quot;' (deployment=&quot; + deployment + &quot;), found '&quot;
+                        + actual + &quot;'&quot;);
+            }
+<span class="fc" id="L192">        } else {</span>
+<span class="fc" id="L193">            problems.add(&quot;&lt;bodyClass&gt;: missing — expected '&quot;</span>
+                    + expectedBodyClass + &quot;' (deployment=&quot;
+                    + deployment + &quot;)&quot;);
+        }
+
+        // ── Check 2: breadcrumb deny-list ─────────────────────────
+        // Stale labels left over from repo splits or rebrands. The
+        // pattern matches &lt;item name=&quot;X&quot; ...&gt; inside the &lt;body&gt; /
+        // &lt;breadcrumbs&gt; region but we don't need fine-grained
+        // anchoring — any item with one of these names is wrong
+        // regardless of location.
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (String denyName : STALE_BREADCRUMB_NAMES) {</span>
+<span class="fc" id="L205">            Pattern denyPattern = Pattern.compile(</span>
+                    &quot;&lt;item\\s+[^&gt;]*name=[\&quot;']&quot;
+<span class="fc" id="L207">                            + Pattern.quote(denyName) + &quot;[\&quot;']&quot;);</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">            if (denyPattern.matcher(siteXmlContent).find()) {</span>
+<span class="fc" id="L209">                problems.add(&quot;breadcrumb: stale name '&quot; + denyName</span>
+                        + &quot;' (left over from a pre-split layout; &quot;
+                        + &quot;see #216 for the ike-pipeline → &quot;
+                        + &quot;ike-docs/ike-platform rename)&quot;);
+            }
+<span class="fc" id="L214">        }</span>
+
+        // ── Check 3: &lt;skin&gt; GAV ──────────────────────────────────
+<span class="fc" id="L217">        Matcher skinGroupMatcher = Pattern.compile(</span>
+                &quot;&lt;skin&gt;\\s*&lt;groupId&gt;\\s*([^&lt;]+?)\\s*&lt;/groupId&gt;&quot;)
+<span class="fc" id="L219">                .matcher(siteXmlContent);</span>
+<span class="fc" id="L220">        Matcher skinArtifactMatcher = Pattern.compile(</span>
+                &quot;&lt;skin&gt;\\s*&lt;groupId&gt;[^&lt;]+&lt;/groupId&gt;\\s*&quot;
+                        + &quot;&lt;artifactId&gt;\\s*([^&lt;]+?)\\s*&lt;/artifactId&gt;&quot;)
+<span class="fc" id="L223">                .matcher(siteXmlContent);</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if (!skinGroupMatcher.find()</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                || !skinGroupMatcher.group(1).trim().equals(expectedSkinGroup)) {</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">            String actual = skinGroupMatcher.reset().find()</span>
+<span class="pc" id="L227">                    ? skinGroupMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
+<span class="fc" id="L228">            problems.add(&quot;&lt;skin&gt;/&lt;groupId&gt;: expected '&quot; + expectedSkinGroup</span>
+                    + &quot;', found '&quot; + actual + &quot;'&quot;);
+        }
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (!skinArtifactMatcher.find()</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">                || !skinArtifactMatcher.group(1).trim().equals(expectedSkinArtifact)) {</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            String actual = skinArtifactMatcher.reset().find()</span>
+<span class="pc" id="L234">                    ? skinArtifactMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
+<span class="fc" id="L235">            problems.add(&quot;&lt;skin&gt;/&lt;artifactId&gt;: expected '&quot;</span>
+                    + expectedSkinArtifact + &quot;', found '&quot; + actual + &quot;'&quot;);
+        }
+
+<span class="fc" id="L239">        return problems;</span>
+    }
+
+    /**
+     * Return the expected {@code &lt;bodyClass&gt;} for a deployment target.
+     *
+     * @param deployment one of {@code ike-network} or
+     *                   {@code knowledge-design}
+     * @return the expected {@code bodyClass} string
+     */
+    public static String expectedBodyClassFor(String deployment) {
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (&quot;knowledge-design&quot;.equals(deployment)) {</span>
+<span class="fc" id="L251">            return &quot;sentry-purple&quot;;</span>
+        }
+        // Default + explicit ike-network → Forest theme.
+<span class="fc" id="L254">        return &quot;sentry-green&quot;;</span>
+    }
+
+    /**
+     * Breadcrumb names that are known-stale and should never appear
+     * in a current IKE site descriptor. Extend this list when a
+     * rebrand or split retires a label.
+     */
+<span class="fc" id="L262">    static final List&lt;String&gt; STALE_BREADCRUMB_NAMES = List.of(</span>
+            &quot;IKE Pipeline&quot;  // #216 ike-pipeline → ike-docs/ike-platform
+    );
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

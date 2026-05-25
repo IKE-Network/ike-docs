@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:de547d9f-af57-3ea4-90ee-b7257d87e1c6",
+  "serialNumber" : "urn:uuid:81f8883e-b6c3-3c7f-bd2f-50e276ded3c1",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/minimal-fonts@58?type=pom",
+      "bom-ref" : "pkg:maven/network.ike.docs/minimal-fonts@59?type=pom",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "minimal-fonts",
-      "version" : "58",
+      "version" : "59",
       "description" : "Minimal Noto font subset for IKE documentation (~4MB)",
       "licenses" : [
         {
@@ -71,7 +71,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/minimal-fonts@58?type=pom",
+      "purl" : "pkg:maven/network.ike.docs/minimal-fonts@59?type=pom",
       "externalReferences" : [
         {
           "type" : "website",
@@ -370,7 +370,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/minimal-fonts@58?type=pom",
+      "ref" : "pkg:maven/network.ike.docs/minimal-fonts@59?type=pom",
       "dependsOn" : [
         "pkg:maven/network.ike.tooling/ike-build-standards@209?classifier=claude&type=zip",
         "pkg:maven/network.ike/ike-base-parent@8?classifier=site-theme&type=zip",
