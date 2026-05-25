@@ -759,11 +759,19 @@
                         <additionalOptions>
                             <additionalOption>--enable-preview</additionalOption>
                         </additionalOptions>
+                        <!-- Cross-module {@link} / @see resolution to
+                             sibling apidocs trees and to the JDK.
+                             IKE-Network/ike-issues#517. -->
+                        <links>
+                            <link>https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/</link>
+                            <link>https://ike.network/ike-docs/ike-doc-maven-plugin/apidocs/</link>
+                            <link>https://ike.network/ike-docs/semantic-linebreak/apidocs/</link>
+                        </links>
                         <!-- Breadcrumb navigation back to project site -->
                         <top>
                             <![CDATA[
                             <div style="padding:4px 10px;background:#f8f8f8;border-bottom:1px solid #ddd;font-family:sans-serif;font-size:13px">
-                                <a href="${project.url}">IKE Pipeline</a> &#x203A;
+                                <a href="https://ike.network/">IKE Network</a> &#x203A;
                                 <a href="../index.html">${project.name}</a> &#x203A;
                                 API Docs
                             </div>
