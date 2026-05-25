@@ -108,7 +108,7 @@
              literal value here, and existing ${ike-tooling.version}
              references keep resolving via the one-line indirection.
              See IKE-Network/ike-issues#470, #496. -->
-        <network.ike.tooling·ike-tooling>207</network.ike.tooling·ike-tooling>
+        <network.ike.tooling·ike-tooling>208</network.ike.tooling·ike-tooling>
         <ike-tooling.version>${network.ike.tooling·ike-tooling}</ike-tooling.version>
 
         <!-- Build Configuration -->
