@@ -1,16 +1,16 @@
 ---
 date_published: 2026-05-24
 date_modified: 2026-05-24
-canonical_url: https://github.com/IKE-Network/ike-docs/plugin-management.html
+canonical_url: https://ike.network/ike-docs/plugin-management.html
 ---
 
 # Project Plugin Management
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 59 |
-| network.ike.docs | [semantic-linebreak](https://github.com/IKE-Network/ike-docs)[1] | 59 |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 209 |
+| network.ike.docs | [ike-doc-maven-plugin](https://github.com/IKE-Network/ike-docs)[1] | 60 |
+| network.ike.docs | [semantic-linebreak](https://github.com/IKE-Network/ike-docs)[1] | 60 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 210 |
 | org.apache.maven.plugins | [maven-assembly-plugin](https://maven.apache.org/plugins/maven-assembly-plugin/)[3] | 3.7.1 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[4] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[5] | 3.14.0 |

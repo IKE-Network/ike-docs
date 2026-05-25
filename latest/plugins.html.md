@@ -1,14 +1,14 @@
 ---
 date_published: 2026-05-24
 date_modified: 2026-05-24
-canonical_url: https://github.com/IKE-Network/ike-docs/plugins.html
+canonical_url: https://ike.network/ike-docs/plugins.html
 ---
 
 # Project Build Plugins
 
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[1] | 209 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[1] | 210 |
 | org.apache.maven.plugins | [maven-assembly-plugin](https://maven.apache.org/plugins/maven-assembly-plugin/)[2] | 3.7.1 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[3] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[4] | 3.14.0 |

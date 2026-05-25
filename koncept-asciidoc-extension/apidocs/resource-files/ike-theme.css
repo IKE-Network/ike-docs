@@ -1,13 +1,7 @@
-/* IKE Theme Override for Javadoc Reports */
-/* Overrides the Java 25 default stylesheet's :root */
-/* custom properties to the sentry-green palette.    */
-/*                                                   */
-/*   Verdant  #4A7D84  navbar / table header band    */
-/*   Twilight #273B36  body text / dark accents      */
-/*   Mist     #B7E4D2  reserved for future use       */
-/*   Cloud    #E6EBE7  subnav / table-header tint    */
-/*   Sea      #3A6065  link color (darker Verdant)   */
-/*   Accent   #FFA351  selected / active links       */
+/* IKE Theme Override for Javadoc Reports                  */
+/* Overrides the Java 25 default stylesheet's :root        */
+/* custom properties to the sentry-green palette.          */
+/* Palette source: network.ike.plugin.IkePalette.          */
 
 :root {
     --navbar-background-color: #4A7D84;

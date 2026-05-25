@@ -9,20 +9,20 @@
 
 ## Documentation
 
-- [Getting Started](https://github.com/IKE-Network/ike-docs/getting-started.html.md)
-- [IKE Documentation Pipeline](https://github.com/IKE-Network/ike-docs/index.html.md)
-- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
-- [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)
+- [Getting Started](https://ike.network/ike-docs/getting-started.html.md)
+- [IKE Documentation Pipeline](https://ike.network/ike-docs/index.html.md)
+- [Dependencies (SBOM)](https://ike.network/ike-docs/dependencies.html.md)
+- [Built With](https://ike.network/ike-docs/built-with.html.md)
 
 ## Other
 
-- [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
+- [Licenses (SPDX)](https://ike.network/ike-docs/licenses.html.md)
 
 ## Reports
 
-- [Project Summary](https://github.com/IKE-Network/ike-docs/summary.html.md)
-- [Maven Coordinates](https://github.com/IKE-Network/ike-docs/dependency-info.html.md)
-- [Project Plugins](https://github.com/IKE-Network/ike-docs/plugins.html.md)
-- [Project Plugin Management](https://github.com/IKE-Network/ike-docs/plugin-management.html.md)
-- [Project Distribution Management](https://github.com/IKE-Network/ike-docs/distribution-management.html.md)
-- [Project Information](https://github.com/IKE-Network/ike-docs/project-info.html.md)
+- [Project Summary](https://ike.network/ike-docs/summary.html.md)
+- [Maven Coordinates](https://ike.network/ike-docs/dependency-info.html.md)
+- [Project Plugins](https://ike.network/ike-docs/plugins.html.md)
+- [Project Plugin Management](https://ike.network/ike-docs/plugin-management.html.md)
+- [Project Distribution Management](https://ike.network/ike-docs/distribution-management.html.md)
+- [Project Information](https://ike.network/ike-docs/project-info.html.md)

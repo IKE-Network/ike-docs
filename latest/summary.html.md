@@ -1,7 +1,7 @@
 ---
 date_published: 2026-05-24
 date_modified: 2026-05-24
-canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
+canonical_url: https://ike.network/ike-docs/summary.html
 ---
 
 # Project Summary
@@ -12,7 +12,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | Name | IKE Docs |
 | Description | Documentation plumbing for the IKE Network. Hosts the ike-doc-maven-plugin (ike-doc packaging, AsciiDoc/render pipeline, PDF dispatch), the Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc resources, and the semantic linebreak reformatter. Split from ike-pipeline to resolve the extensions=true reactor-load cycle. See IKE-Network/ike-issues#216. |
-| Homepage | [https://github.com/IKE-Network/ike-docs](https://github.com/IKE-Network/ike-docs)[1] |
+| Homepage | [https://ike.network/ike-docs/](https://ike.network/ike-docs/)[1] |
 
 ## [Project Organization](#project-organization)
 
@@ -27,5 +27,5 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-docs |
-| Version | 59 |
+| Version | 60 |
 | Type | pom |
