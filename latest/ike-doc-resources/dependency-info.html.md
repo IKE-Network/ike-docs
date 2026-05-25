@@ -12,14 +12,14 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>ike-doc-resources</artifactId>
-  <version>61</version>
+  <version>62</version>
 </dependency>
 ```
 
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="ike-doc-resources" rev="61">
+<dependency org="network.ike.docs" name="ike-doc-resources" rev="62">
   <artifact name="ike-doc-resources" type="jar" />
 </dependency>
 ```
@@ -28,24 +28,24 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='ike-doc-resources', version='61')
+@Grab(group='network.ike.docs', module='ike-doc-resources', version='62')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:ike-doc-resources:61'
+implementation 'network.ike.docs:ike-doc-resources:62'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "ike-doc-resources" % "61"
+libraryDependencies += "network.ike.docs" % "ike-doc-resources" % "62"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/ike-doc-resources "61"]
+[network.ike.docs/ike-doc-resources "62"]
 ```

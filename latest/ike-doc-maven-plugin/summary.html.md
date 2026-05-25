@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-doc-maven-plugin |
-| Version | 61 |
+| Version | 62 |
 | Type | maven-plugin |
 | Java Version | 25 |

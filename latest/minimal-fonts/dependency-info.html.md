@@ -12,7 +12,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>minimal-fonts</artifactId>
-  <version>61</version>
+  <version>62</version>
   <type>pom</type>
 </dependency>
 ```
@@ -20,7 +20,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="minimal-fonts" rev="61">
+<dependency org="network.ike.docs" name="minimal-fonts" rev="62">
   <artifact name="minimal-fonts" type="pom" />
 </dependency>
 ```
@@ -29,24 +29,24 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/dependency-info.
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='minimal-fonts', version='61')
+@Grab(group='network.ike.docs', module='minimal-fonts', version='62')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:minimal-fonts:61'
+implementation 'network.ike.docs:minimal-fonts:62'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "minimal-fonts" % "61"
+libraryDependencies += "network.ike.docs" % "minimal-fonts" % "62"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/minimal-fonts "61"]
+[network.ike.docs/minimal-fonts "62"]
 ```
