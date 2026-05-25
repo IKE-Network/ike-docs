@@ -32,7 +32,7 @@
 
     <groupId>network.ike.docs</groupId>
     <artifactId>ike-docs</artifactId>
-    <version>57</version>
+    <version>58-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>IKE Docs</name>
