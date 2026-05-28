@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:c5342454-233c-3faa-8b6f-11a84ae80132",
+  "serialNumber" : "urn:uuid:d490b1a7-cafa-3e5e-a57c-450ebe46af57",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-resources@66?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-resources@67?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-doc-resources",
-      "version" : "66",
+      "version" : "67",
       "description" : "Shared build resources for the IKE documentation pipeline: assembly descriptors, PDF themes, renderer configurations, SVGO configs, and AsciiDoc shared docinfo.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-doc-resources@66?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/ike-doc-resources@67?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -303,7 +303,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-doc-resources@66?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/ike-doc-resources@67?type=jar",
       "dependsOn" : [
         "pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&type=zip",

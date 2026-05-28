@@ -91,13 +91,13 @@
 					<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">66</span>
+							<span class="version">67</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
 						<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
-							Version <strong>66</strong>
+							Version <strong>67</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -158,6 +158,7 @@
 <li><a href="koncept-asciidoc-extension/index.html"><i class="fas fa-file-alt"></i> Koncept AsciiDoc Extension</a></li>
 <li><a href="ike-doc-maven-plugin/index.html"><i class="fas fa-file-alt"></i> IKE Doc Maven Plugin</a></li>
 <li><a href="semantic-linebreak/index.html"><i class="fas fa-file-alt"></i> Semantic Linebreak</a></li>
+<li><a href="../ike-doc-ingest/ike-doc-ingest/index.html"><i class="fas fa-file-alt"></i> IKE Doc Ingest</a></li>
 </ul>
 		<h5 class="text-uppercase">Reports</h5>
 
@@ -182,7 +183,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Docs 66
+							<h3><small>IKE Docs</small><br/>							IKE Docs 67
 							</h3>
 						</div>
 								<div class="home-xs visible-xs">
@@ -220,6 +221,9 @@
 												</a>
 												<a class="list-group-item" href="semantic-linebreak/index.html">
 													<i class="fas fa-file-alt"></i>Semantic Linebreak
+												</a>
+												<a class="list-group-item" href="../ike-doc-ingest/ike-doc-ingest/index.html">
+													<i class="fas fa-file-alt"></i>IKE Doc Ingest
 												</a>
 										<li class="list-group-item"><i class="fas fa-folder-open"></i>Reports</li>
 												<a class="list-group-item" href="project-info.html">
@@ -510,7 +514,7 @@ end fork
 								</ul>
 							</div>
 <div class="authors">Author: <strong>IKE Network</strong></div>
-<div class="date">Date: <strong>2026-05-28 12:17:59 -0700</strong></div>
+<div class="date">Date: <strong>2026-05-28 16:02:44 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -589,7 +593,7 @@ end fork
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>IKE Documentation Pipeline 66</strong>
+			<strong>IKE Documentation Pipeline 67</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-05-28">2026-05-28</time></strong>
 		</p>
@@ -676,6 +680,11 @@ angular.module("sentry.site").constant("SITE_MENU", [
 {
 	path: "semantic-linebreak/index.html",
 	title: "Semantic Linebreak",
+	parents: [{ title: "Modules" }]
+},
+{
+	path: "../ike-doc-ingest/ike-doc-ingest/index.html",
+	title: "IKE Doc Ingest",
 	parents: [{ title: "Modules" }]
 },
 {

@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:60b00d43-932e-327a-afa2-309c69b31b60",
+  "serialNumber" : "urn:uuid:52030697-4335-34b4-90ac-1fd59b92a6a6",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-docs@66?type=pom",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-docs@67?type=pom",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-docs",
-      "version" : "66",
+      "version" : "67",
       "description" : "Documentation plumbing for the IKE Network. Hosts the ike-doc-maven-plugin (ike-doc packaging, AsciiDoc/render pipeline, PDF dispatch), the Koncept AsciiDoc extension, DocBook XSL + fonts, shared doc resources, and the semantic linebreak reformatter. Split from ike-pipeline to resolve the extensions=true reactor-load cycle. See IKE-Network/ike-issues#216.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-docs@66?type=pom",
+      "purl" : "pkg:maven/network.ike.docs/ike-docs@67?type=pom",
       "externalReferences" : [
         {
           "type" : "website",
@@ -303,7 +303,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-docs@66?type=pom",
+      "ref" : "pkg:maven/network.ike.docs/ike-docs@67?type=pom",
       "dependsOn" : [
         "pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&type=zip",
