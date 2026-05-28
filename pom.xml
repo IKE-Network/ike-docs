@@ -2125,6 +2125,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
         <subproject>koncept-asciidoc-extension</subproject>
         <subproject>ike-doc-maven-plugin</subproject>
         <subproject>semantic-linebreak</subproject>
+        <subproject>ike-doc-ingest</subproject>
     </subprojects>
 
 </project>
