@@ -25,10 +25,15 @@ import java.util.regex.Pattern;
  *
  * &lt;ul&gt;
  *   &lt;li&gt;&lt;b&gt;{@code &lt;bodyClass&gt;}&lt;/b&gt; must be {@code sentry-green}
- *       (Forest theme) for ike.network consumers, {@code sentry-purple}
- *       (Horizon) for knowledge.design. The 5 ike-docs submodules
- *       shipped with {@code sentry-purple} after {@code ike-platform}
- *       and {@code ike-tooling} switched to {@code sentry-green}
+ *       (Forest theme) for ike.network foundation consumers,
+ *       {@code sentry-orange} (Sunset) for ike.network worked-example
+ *       projects, and {@code sentry-purple} (Horizon) for
+ *       knowledge.design. The example-vs-foundation split visually
+ *       reinforces that examples are not published to Maven Central
+ *       and exist to be read and copied rather than depended on (per
+ *       #545/#546). The 5 ike-docs submodules shipped with
+ *       {@code sentry-purple} after {@code ike-platform} and
+ *       {@code ike-tooling} switched to {@code sentry-green}
  *       (per #307), producing a purple banner at
  *       https://ike.network/ike-docs/ike-doc-resources/.&lt;/li&gt;
  *   &lt;li&gt;&lt;b&gt;Breadcrumb leading item&lt;/b&gt; — those same 5 files carried a
@@ -63,7 +68,7 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
      *
      * @return the logger
      */
-<span class="nc" id="L66">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+<span class="nc" id="L71">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
 
     /**
      * Path to the project's site descriptor. Default is the
@@ -77,11 +82,18 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
      * Deployment target — controls the expected {@code &lt;bodyClass&gt;}.
      *
      * &lt;ul&gt;
-     *   &lt;li&gt;{@code ike-network} (default) → expects {@code sentry-green}&lt;/li&gt;
+     *   &lt;li&gt;{@code ike-network} (default) → expects {@code sentry-green}
+     *       (foundation libraries published to Maven Central)&lt;/li&gt;
+     *   &lt;li&gt;{@code ike-network-example} → expects {@code sentry-orange}
+     *       (worked-example projects under ike.network, deliberately
+     *       not published to Maven Central; read-and-copy rather than
+     *       depend on)&lt;/li&gt;
      *   &lt;li&gt;{@code knowledge-design} → expects {@code sentry-purple}&lt;/li&gt;
      * &lt;/ul&gt;
      *
-     * Override in projects deployed to knowledge.design with
+     * Override in worked-example projects with
+     * {@code -Dike.site.deployment=ike-network-example} (or set in the
+     * POM's {@code &lt;properties&gt;}), and in knowledge.design projects with
      * {@code -Dike.site.deployment=knowledge-design}.
      */
     @Parameter(property = &quot;ike.site.deployment&quot;,
@@ -112,51 +124,51 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
     boolean skip;
 
     /** Creates this goal instance. */
-<span class="nc" id="L115">    public LintSiteMojo() {}</span>
+<span class="nc" id="L127">    public LintSiteMojo() {}</span>
 
     @Override
     public void execute() throws MojoException {
-<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (skip) {</span>
-<span class="nc" id="L120">            getLog().info(&quot;idoc:lint-site skipped &quot;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L132">            getLog().info(&quot;idoc:lint-site skipped &quot;</span>
                     + &quot;(-Dike.skip.lint-site=true)&quot;);
-<span class="nc" id="L122">            return;</span>
+<span class="nc" id="L134">            return;</span>
         }
 
-<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (!siteXml.isFile()) {</span>
-<span class="nc" id="L126">            getLog().debug(&quot;idoc:lint-site: no site.xml at &quot;</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (!siteXml.isFile()) {</span>
+<span class="nc" id="L138">            getLog().debug(&quot;idoc:lint-site: no site.xml at &quot;</span>
                     + siteXml + &quot; — module inherits from parent. Skipping.&quot;);
-<span class="nc" id="L128">            return;</span>
+<span class="nc" id="L140">            return;</span>
         }
 
         String content;
         try {
-<span class="nc" id="L133">            content = Files.readString(siteXml.toPath(),</span>
+<span class="nc" id="L145">            content = Files.readString(siteXml.toPath(),</span>
                     StandardCharsets.UTF_8);
-<span class="nc" id="L135">        } catch (IOException e) {</span>
-<span class="nc" id="L136">            throw new MojoException(</span>
-<span class="nc" id="L137">                    &quot;Could not read &quot; + siteXml + &quot;: &quot; + e.getMessage(),</span>
+<span class="nc" id="L147">        } catch (IOException e) {</span>
+<span class="nc" id="L148">            throw new MojoException(</span>
+<span class="nc" id="L149">                    &quot;Could not read &quot; + siteXml + &quot;: &quot; + e.getMessage(),</span>
                     e);
-<span class="nc" id="L139">        }</span>
+<span class="nc" id="L151">        }</span>
 
-<span class="nc" id="L141">        List&lt;String&gt; problems = lint(content, deployment,</span>
+<span class="nc" id="L153">        List&lt;String&gt; problems = lint(content, deployment,</span>
                 expectedSkinGroup, expectedSkinArtifact);
 
-<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (problems.isEmpty()) {</span>
-<span class="nc" id="L145">            getLog().debug(&quot;idoc:lint-site: &quot; + siteXml</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (problems.isEmpty()) {</span>
+<span class="nc" id="L157">            getLog().debug(&quot;idoc:lint-site: &quot; + siteXml</span>
                     + &quot; — all checks passed.&quot;);
-<span class="nc" id="L147">            return;</span>
+<span class="nc" id="L159">            return;</span>
         }
 
-<span class="nc" id="L150">        StringBuilder msg = new StringBuilder();</span>
-<span class="nc" id="L151">        msg.append(&quot;idoc:lint-site found &quot;).append(problems.size())</span>
-<span class="nc" id="L152">                .append(&quot; problem(s) in &quot;).append(siteXml).append(&quot;:\n&quot;);</span>
-<span class="nc bnc" id="L153" title="All 2 branches missed.">        for (String p : problems) {</span>
-<span class="nc" id="L154">            msg.append(&quot;  ✗ &quot;).append(p).append(&quot;\n&quot;);</span>
-<span class="nc" id="L155">        }</span>
-<span class="nc" id="L156">        msg.append(&quot;\n  Fix the site.xml and re-run, or skip with &quot;</span>
+<span class="nc" id="L162">        StringBuilder msg = new StringBuilder();</span>
+<span class="nc" id="L163">        msg.append(&quot;idoc:lint-site found &quot;).append(problems.size())</span>
+<span class="nc" id="L164">                .append(&quot; problem(s) in &quot;).append(siteXml).append(&quot;:\n&quot;);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        for (String p : problems) {</span>
+<span class="nc" id="L166">            msg.append(&quot;  ✗ &quot;).append(p).append(&quot;\n&quot;);</span>
+<span class="nc" id="L167">        }</span>
+<span class="nc" id="L168">        msg.append(&quot;\n  Fix the site.xml and re-run, or skip with &quot;</span>
                 + &quot;-Dike.skip.lint-site=true (not recommended — these &quot;
                 + &quot;conventions have all caused production drift).&quot;);
-<span class="nc" id="L159">        throw new MojoException(msg.toString());</span>
+<span class="nc" id="L171">        throw new MojoException(msg.toString());</span>
     }
 
     /**
@@ -175,22 +187,22 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
                                      String deployment,
                                      String expectedSkinGroup,
                                      String expectedSkinArtifact) {
-<span class="fc" id="L178">        List&lt;String&gt; problems = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L190">        List&lt;String&gt; problems = new ArrayList&lt;&gt;();</span>
 
         // ── Check 1: &lt;bodyClass&gt; ─────────────────────────────────
-<span class="fc" id="L181">        String expectedBodyClass = expectedBodyClassFor(deployment);</span>
-<span class="fc" id="L182">        Matcher bodyClassMatcher = Pattern.compile(</span>
+<span class="fc" id="L193">        String expectedBodyClass = expectedBodyClassFor(deployment);</span>
+<span class="fc" id="L194">        Matcher bodyClassMatcher = Pattern.compile(</span>
                 &quot;&lt;bodyClass&gt;\\s*([^&lt;]+?)\\s*&lt;/bodyClass&gt;&quot;)
-<span class="fc" id="L184">                .matcher(siteXmlContent);</span>
-<span class="fc bfc" id="L185" title="All 2 branches covered.">        if (bodyClassMatcher.find()) {</span>
-<span class="fc" id="L186">            String actual = bodyClassMatcher.group(1).trim();</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (!actual.equals(expectedBodyClass)) {</span>
-<span class="fc" id="L188">                problems.add(&quot;&lt;bodyClass&gt;: expected '&quot; + expectedBodyClass</span>
+<span class="fc" id="L196">                .matcher(siteXmlContent);</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if (bodyClassMatcher.find()) {</span>
+<span class="fc" id="L198">            String actual = bodyClassMatcher.group(1).trim();</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">            if (!actual.equals(expectedBodyClass)) {</span>
+<span class="fc" id="L200">                problems.add(&quot;&lt;bodyClass&gt;: expected '&quot; + expectedBodyClass</span>
                         + &quot;' (deployment=&quot; + deployment + &quot;), found '&quot;
                         + actual + &quot;'&quot;);
             }
-<span class="fc" id="L192">        } else {</span>
-<span class="fc" id="L193">            problems.add(&quot;&lt;bodyClass&gt;: missing — expected '&quot;</span>
+<span class="fc" id="L204">        } else {</span>
+<span class="fc" id="L205">            problems.add(&quot;&lt;bodyClass&gt;: missing — expected '&quot;</span>
                     + expectedBodyClass + &quot;' (deployment=&quot;
                     + deployment + &quot;)&quot;);
         }
@@ -201,57 +213,61 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
         // &lt;breadcrumbs&gt; region but we don't need fine-grained
         // anchoring — any item with one of these names is wrong
         // regardless of location.
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (String denyName : STALE_BREADCRUMB_NAMES) {</span>
-<span class="fc" id="L205">            Pattern denyPattern = Pattern.compile(</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        for (String denyName : STALE_BREADCRUMB_NAMES) {</span>
+<span class="fc" id="L217">            Pattern denyPattern = Pattern.compile(</span>
                     &quot;&lt;item\\s+[^&gt;]*name=[\&quot;']&quot;
-<span class="fc" id="L207">                            + Pattern.quote(denyName) + &quot;[\&quot;']&quot;);</span>
-<span class="fc bfc" id="L208" title="All 2 branches covered.">            if (denyPattern.matcher(siteXmlContent).find()) {</span>
-<span class="fc" id="L209">                problems.add(&quot;breadcrumb: stale name '&quot; + denyName</span>
+<span class="fc" id="L219">                            + Pattern.quote(denyName) + &quot;[\&quot;']&quot;);</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            if (denyPattern.matcher(siteXmlContent).find()) {</span>
+<span class="fc" id="L221">                problems.add(&quot;breadcrumb: stale name '&quot; + denyName</span>
                         + &quot;' (left over from a pre-split layout; &quot;
                         + &quot;see #216 for the ike-pipeline → &quot;
                         + &quot;ike-docs/ike-platform rename)&quot;);
             }
-<span class="fc" id="L214">        }</span>
+<span class="fc" id="L226">        }</span>
 
         // ── Check 3: &lt;skin&gt; GAV ──────────────────────────────────
-<span class="fc" id="L217">        Matcher skinGroupMatcher = Pattern.compile(</span>
+<span class="fc" id="L229">        Matcher skinGroupMatcher = Pattern.compile(</span>
                 &quot;&lt;skin&gt;\\s*&lt;groupId&gt;\\s*([^&lt;]+?)\\s*&lt;/groupId&gt;&quot;)
-<span class="fc" id="L219">                .matcher(siteXmlContent);</span>
-<span class="fc" id="L220">        Matcher skinArtifactMatcher = Pattern.compile(</span>
+<span class="fc" id="L231">                .matcher(siteXmlContent);</span>
+<span class="fc" id="L232">        Matcher skinArtifactMatcher = Pattern.compile(</span>
                 &quot;&lt;skin&gt;\\s*&lt;groupId&gt;[^&lt;]+&lt;/groupId&gt;\\s*&quot;
                         + &quot;&lt;artifactId&gt;\\s*([^&lt;]+?)\\s*&lt;/artifactId&gt;&quot;)
-<span class="fc" id="L223">                .matcher(siteXmlContent);</span>
-<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if (!skinGroupMatcher.find()</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">                || !skinGroupMatcher.group(1).trim().equals(expectedSkinGroup)) {</span>
-<span class="pc bpc" id="L226" title="1 of 2 branches missed.">            String actual = skinGroupMatcher.reset().find()</span>
-<span class="pc" id="L227">                    ? skinGroupMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
-<span class="fc" id="L228">            problems.add(&quot;&lt;skin&gt;/&lt;groupId&gt;: expected '&quot; + expectedSkinGroup</span>
+<span class="fc" id="L235">                .matcher(siteXmlContent);</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if (!skinGroupMatcher.find()</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">                || !skinGroupMatcher.group(1).trim().equals(expectedSkinGroup)) {</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">            String actual = skinGroupMatcher.reset().find()</span>
+<span class="pc" id="L239">                    ? skinGroupMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
+<span class="fc" id="L240">            problems.add(&quot;&lt;skin&gt;/&lt;groupId&gt;: expected '&quot; + expectedSkinGroup</span>
                     + &quot;', found '&quot; + actual + &quot;'&quot;);
         }
-<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (!skinArtifactMatcher.find()</span>
-<span class="fc bfc" id="L232" title="All 2 branches covered.">                || !skinArtifactMatcher.group(1).trim().equals(expectedSkinArtifact)) {</span>
-<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            String actual = skinArtifactMatcher.reset().find()</span>
-<span class="pc" id="L234">                    ? skinArtifactMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
-<span class="fc" id="L235">            problems.add(&quot;&lt;skin&gt;/&lt;artifactId&gt;: expected '&quot;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (!skinArtifactMatcher.find()</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">                || !skinArtifactMatcher.group(1).trim().equals(expectedSkinArtifact)) {</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">            String actual = skinArtifactMatcher.reset().find()</span>
+<span class="pc" id="L246">                    ? skinArtifactMatcher.group(1).trim() : &quot;(missing)&quot;;</span>
+<span class="fc" id="L247">            problems.add(&quot;&lt;skin&gt;/&lt;artifactId&gt;: expected '&quot;</span>
                     + expectedSkinArtifact + &quot;', found '&quot; + actual + &quot;'&quot;);
         }
 
-<span class="fc" id="L239">        return problems;</span>
+<span class="fc" id="L251">        return problems;</span>
     }
 
     /**
      * Return the expected {@code &lt;bodyClass&gt;} for a deployment target.
      *
-     * @param deployment one of {@code ike-network} or
+     * @param deployment one of {@code ike-network},
+     *                   {@code ike-network-example}, or
      *                   {@code knowledge-design}
      * @return the expected {@code bodyClass} string
      */
     public static String expectedBodyClassFor(String deployment) {
-<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (&quot;knowledge-design&quot;.equals(deployment)) {</span>
-<span class="fc" id="L251">            return &quot;sentry-purple&quot;;</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        if (&quot;knowledge-design&quot;.equals(deployment)) {</span>
+<span class="fc" id="L264">            return &quot;sentry-purple&quot;;</span>
+        }
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        if (&quot;ike-network-example&quot;.equals(deployment)) {</span>
+<span class="fc" id="L267">            return &quot;sentry-orange&quot;;</span>
         }
         // Default + explicit ike-network → Forest theme.
-<span class="fc" id="L254">        return &quot;sentry-green&quot;;</span>
+<span class="fc" id="L270">        return &quot;sentry-green&quot;;</span>
     }
 
     /**
@@ -259,7 +275,7 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
      * in a current IKE site descriptor. Extend this list when a
      * rebrand or split retires a label.
      */
-<span class="fc" id="L262">    static final List&lt;String&gt; STALE_BREADCRUMB_NAMES = List.of(</span>
+<span class="fc" id="L278">    static final List&lt;String&gt; STALE_BREADCRUMB_NAMES = List.of(</span>
             &quot;IKE Pipeline&quot;  // #216 ike-pipeline → ike-docs/ike-platform
     );
 }

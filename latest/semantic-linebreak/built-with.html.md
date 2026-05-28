@@ -1,12 +1,12 @@
 ---
-date_published: 2026-05-25
-date_modified: 2026-05-25
+date_published: 2026-05-27
+date_modified: 2026-05-27
 canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 ---
 
 # Built With
 
-Open-source software that `semantic-linebreak` 65 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `semantic-linebreak` 66 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
