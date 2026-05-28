@@ -33,6 +33,12 @@ class LintSiteMojoTest {
     }
 
     @Test
+    void expectedBodyClassFor_ikeNetworkExample_returnsOrange() {
+        assertThat(LintSiteMojo.expectedBodyClassFor("ike-network-example"))
+                .isEqualTo("sentry-orange");
+    }
+
+    @Test
     void expectedBodyClassFor_unknown_defaultsToGreen() {
         // ike-network is the primary deployment, default to its
         // expected class.
@@ -60,6 +66,29 @@ class LintSiteMojoTest {
         assertThat(LintSiteMojo.lint(site, "knowledge-design",
                 DEFAULT_GROUP, DEFAULT_ARTIFACT))
                 .isEmpty();
+    }
+
+    @Test
+    void lint_correctOrangeBodyClass_noProblems() {
+        String site = wellFormedSite("sentry-orange",
+                "doc-example", DEFAULT_GROUP, DEFAULT_ARTIFACT);
+        assertThat(LintSiteMojo.lint(site, "ike-network-example",
+                DEFAULT_GROUP, DEFAULT_ARTIFACT))
+                .isEmpty();
+    }
+
+    @Test
+    void lint_greenOnIkeNetworkExample_reportsBodyClassDrift() {
+        String site = wellFormedSite("sentry-green",
+                "doc-example", DEFAULT_GROUP, DEFAULT_ARTIFACT);
+        List<String> problems = LintSiteMojo.lint(site, "ike-network-example",
+                DEFAULT_GROUP, DEFAULT_ARTIFACT);
+
+        assertThat(problems).hasSize(1);
+        assertThat(problems.get(0))
+                .contains("<bodyClass>")
+                .contains("expected 'sentry-orange'")
+                .contains("found 'sentry-green'");
     }
 
     @Test

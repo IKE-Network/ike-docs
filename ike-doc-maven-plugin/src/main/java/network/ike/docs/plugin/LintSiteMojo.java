@@ -25,10 +25,15 @@ import java.util.regex.Pattern;
  *
  * <ul>
  *   <li><b>{@code <bodyClass>}</b> must be {@code sentry-green}
- *       (Forest theme) for ike.network consumers, {@code sentry-purple}
- *       (Horizon) for knowledge.design. The 5 ike-docs submodules
- *       shipped with {@code sentry-purple} after {@code ike-platform}
- *       and {@code ike-tooling} switched to {@code sentry-green}
+ *       (Forest theme) for ike.network foundation consumers,
+ *       {@code sentry-orange} (Sunset) for ike.network worked-example
+ *       projects, and {@code sentry-purple} (Horizon) for
+ *       knowledge.design. The example-vs-foundation split visually
+ *       reinforces that examples are not published to Maven Central
+ *       and exist to be read and copied rather than depended on (per
+ *       #545/#546). The 5 ike-docs submodules shipped with
+ *       {@code sentry-purple} after {@code ike-platform} and
+ *       {@code ike-tooling} switched to {@code sentry-green}
  *       (per #307), producing a purple banner at
  *       https://ike.network/ike-docs/ike-doc-resources/.</li>
  *   <li><b>Breadcrumb leading item</b> — those same 5 files carried a
@@ -77,11 +82,18 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
      * Deployment target — controls the expected {@code <bodyClass>}.
      *
      * <ul>
-     *   <li>{@code ike-network} (default) → expects {@code sentry-green}</li>
+     *   <li>{@code ike-network} (default) → expects {@code sentry-green}
+     *       (foundation libraries published to Maven Central)</li>
+     *   <li>{@code ike-network-example} → expects {@code sentry-orange}
+     *       (worked-example projects under ike.network, deliberately
+     *       not published to Maven Central; read-and-copy rather than
+     *       depend on)</li>
      *   <li>{@code knowledge-design} → expects {@code sentry-purple}</li>
      * </ul>
      *
-     * Override in projects deployed to knowledge.design with
+     * Override in worked-example projects with
+     * {@code -Dike.site.deployment=ike-network-example} (or set in the
+     * POM's {@code <properties>}), and in knowledge.design projects with
      * {@code -Dike.site.deployment=knowledge-design}.
      */
     @Parameter(property = "ike.site.deployment",
@@ -242,13 +254,17 @@ public class LintSiteMojo implements org.apache.maven.api.plugin.Mojo {
     /**
      * Return the expected {@code <bodyClass>} for a deployment target.
      *
-     * @param deployment one of {@code ike-network} or
+     * @param deployment one of {@code ike-network},
+     *                   {@code ike-network-example}, or
      *                   {@code knowledge-design}
      * @return the expected {@code bodyClass} string
      */
     public static String expectedBodyClassFor(String deployment) {
         if ("knowledge-design".equals(deployment)) {
             return "sentry-purple";
+        }
+        if ("ike-network-example".equals(deployment)) {
+            return "sentry-orange";
         }
         // Default + explicit ike-network → Forest theme.
         return "sentry-green";
