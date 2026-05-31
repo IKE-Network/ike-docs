@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:d9e2bce3-f619-3959-ad0b-1ab9d133ee6e",
+  "serialNumber" : "urn:uuid:bf658ad5-ac2e-3342-9215-1f44f0a4408a",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@67?type=maven-plugin",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-doc-maven-plugin",
-      "version" : "67",
+      "version" : "68",
       "description" : "Maven plugin (prefix idoc:) driving the IKE documentation pipeline: AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook post-processing, breadcrumb injection, and ike-doc packaging.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@67?type=maven-plugin",
+      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3258,45 +3258,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@67?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "67",
+      "version" : "68",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "305f8938aaf2f40fe47168aaca43f3fd"
+          "content" : "514294ac9c454661fe2e51e2db2b227d"
         },
         {
           "alg" : "SHA-1",
-          "content" : "6ae94cda653a4adaab83c801a0ba82ababf1479b"
+          "content" : "ee2a514aab611ff0d390e0427fbe91895a15acba"
         },
         {
           "alg" : "SHA-256",
-          "content" : "0361d05c83a24b0866ec1b4247be7ae870d78363197bf530b4ae2d979f07c98d"
+          "content" : "8eb0d356d19c9fb9e271915244ecdd29ff1116b5d9fced42b208e5c4175baf5d"
         },
         {
           "alg" : "SHA-512",
-          "content" : "deb82f2c3e7b741de2372ead343c4bcd90e6fadaaefc3d19caaf353a0c019f89548c7d47a179e450886bf9ddd8dcecc259b77ca8e8e203bf33c29f7d794d22db"
+          "content" : "1d52c7977f59a9a6429feb4ed5d1116903699ef1c5710141cda0713f54ec7adca5d7cdf7144a89427b6d551d044faee96209269dcc3350547b58b6675320904c"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f91364f16af91a868d39415282d1016214fd191f2bcae4d8ba6f8ecb6b75c987bfa44437c7305b51c54816a2ab1e2cdc"
+          "content" : "7bfba62613ad7269e9218e597ee9eab3dca2d2c885f7409a85528daa5207b92bfb5a8932b54319cafd2318421a98e640"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "02ce7029a64ed5c429d405345ec7cc9772780ade7dc139b4ee77958de1b033991cc840c90426ad71f17bc7e7d342a5ab"
+          "content" : "fe67dac22b6e3f8f2248c83e1413ede33c463e081ebf3afdef3447dcfce46a3b5a4fdbb9f1ea51e0425861b70c27b8c5"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "60e64a45e9c28faec3fa567b8ef614aba9799fd9ea9f38738a442c6b88811888"
+          "content" : "eb6ffac72ebaccf644ca033c4485a7b3d7ab58c6c52f8c4630d38ea69507155a"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "2d924bb9be02ba62b456d3aaf611b33409dfb9621edfb0db5b47c14192f0636eeb80796814a5221d628a455d5f4b45a5f4da95f9388ea6f0c964229ecac7f0e9"
+          "content" : "7fdc362e1a2e7aa2d0d7cc9504c12ff7c1a29a8178ec0be1d7cf3dd17cadcb8868b478c30c0a126411e3b8afcd507b3a8db6de5967f2718ecaebf71eb5a935f1"
         }
       ],
       "licenses" : [
@@ -3306,7 +3306,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@67?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3592,7 +3592,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@67?type=maven-plugin",
+      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
       "dependsOn" : [
         "pkg:maven/network.ike.tooling/ike-maven-plugin-support@217?type=jar",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=claude&type=zip",
@@ -3603,7 +3603,7 @@
         "pkg:maven/org.asciidoctor/asciidoctorj-pdf@2.3.23?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj-diagram@2.3.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
-        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@67?type=jar",
+        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
         "pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=built-with&type=zip"
@@ -3876,7 +3876,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@67?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
       "dependsOn" : [
         "pkg:maven/org.yaml/snakeyaml@2.2?type=jar"
       ]
