@@ -195,7 +195,7 @@
             <plugin>
                 <groupId>network.ike.docs</groupId>
                 <artifactId>ike-doc-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>68</version>
                 <executions>
                     <execution>
                         <id>patch-docbook-xsl</id>
