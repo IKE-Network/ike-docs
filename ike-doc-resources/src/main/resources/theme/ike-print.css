@@ -115,7 +115,9 @@
 
 @page {
     size: letter portrait;
-    margin: 1in 1in 1in 1in !important;
+    /* Not !important: lets master-folios.css set a duplex binding margin
+       on @page chapter for the loose-leaf variant. */
+    margin: 1in 1in 1in 1in;
 
     /* Running footer: document title on left, page number on right */
     @bottom-left {

@@ -23,6 +23,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .inlineMacro(KonceptInlineMacro.class);
 
+        // Tag [preface]/[appendix] etc. with front-/back-matter roles so the
+        // loose-leaf print stylesheet can route them (chapter numbering
+        // excludes them, keeping composite folios aligned with section
+        // numbers). AST-only treeprocessor — safe for all backends, including
+        // Prawn. See dev-pdf-loose-leaf-variant; IKE-Network/ike-issues#558.
+        asciidoctor.javaExtensionRegistry()
+                .treeprocessor(FrontBackMatterTreeprocessor.class);
+
         // The glossary Postprocessor is NOT registered here because it is
         // incompatible with the asciidoctorj-pdf (Prawn) backend. The PDF
         // converter returns a Ruby object instead of a String, causing a

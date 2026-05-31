@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Render PDF from intermediate files using an external renderer.
@@ -99,6 +100,18 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
     private File stylesheet;
 
     /**
+     * Ordered print stylesheets for CSS renderers. When non-empty these
+     * are applied in order and take the place of {@link #stylesheet}, each
+     * becoming a separate {@code --style} (prince), {@code -css} (ah), or
+     * {@code --stylesheet} (weasyprint) argument — letting one render layer
+     * an overlay on top of the base stylesheet (e.g. the loose-leaf variant
+     * passes {@code ike-print.css} then {@code master-folios.css}). If
+     * empty, {@link #stylesheet} is used.
+     */
+    @Parameter
+    private List<File> stylesheets;
+
+    /**
      * PDF profile for CSS renderers.
      * Prince uses {@code PDF/UA-1}, AH uses {@code @PDF/UA-1}.
      */
@@ -126,6 +139,25 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
      */
     @Parameter
     private List<String> documents;
+
+    /**
+     * Restrict rendering to HTML documents whose {@code <body>} element
+     * carries this CSS class. Gates a variant by Asciidoctor doctype — e.g.
+     * {@code book} renders only book-doctype documents (whose body is
+     * {@code <body class="book">}), skipping articles. Ignored for FO
+     * renderers. If unset, no filtering is applied.
+     */
+    @Parameter
+    private String bodyClassFilter;
+
+    /**
+     * Suffix inserted before the {@code .pdf} extension of each output
+     * file, so a second render of the same inputs produces sibling files
+     * without collision — e.g. {@code -loose-leaf} turns {@code guide.pdf}
+     * into {@code guide-loose-leaf.pdf}. Empty by default.
+     */
+    @Parameter
+    private String outputSuffix;
 
     /** Log file for renderer output. */
     @Parameter
@@ -161,7 +193,8 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         int rendered = 0;
         for (Path input : inputs) {
             String baseName = stripExtension(input.getFileName().toString());
-            Path output = outputDir.toPath().resolve(baseName + ".pdf");
+            String suffix = (outputSuffix != null) ? outputSuffix : "";
+            Path output = outputDir.toPath().resolve(baseName + suffix + ".pdf");
 
             List<String> command = buildCommand(
                     type, resolvedExecutable, input, output);
@@ -231,9 +264,9 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         cmd.add(exe);
         cmd.add("--silent");
         cmd.add(input.toString());
-        if (stylesheet != null) {
+        for (File css : effectiveStylesheets()) {
             cmd.add("--style");
-            cmd.add(stylesheet.toString());
+            cmd.add(css.toString());
         }
         cmd.add("--output");
         cmd.add(output.toString());
@@ -248,9 +281,9 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         var cmd = new ArrayList<String>();
         cmd.add(exe);
         cmd.add("-cssmode");
-        if (stylesheet != null) {
+        for (File css : effectiveStylesheets()) {
             cmd.add("-css");
-            cmd.add(stylesheet.toString());
+            cmd.add(css.toString());
         }
         cmd.add("-d");
         cmd.add(input.toString());
@@ -269,9 +302,9 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         cmd.add(exe);
         cmd.add(input.toString());
         cmd.add(output.toString());
-        if (stylesheet != null) {
+        for (File css : effectiveStylesheets()) {
             cmd.add("--stylesheet");
-            cmd.add(stylesheet.toString());
+            cmd.add(css.toString());
         }
         return cmd;
     }
@@ -314,6 +347,19 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         cmd.add("-pdf");
         cmd.add(output.toString());
         return cmd;
+    }
+
+    /**
+     * The ordered stylesheets to apply for CSS renderers.
+     *
+     * @return {@link #stylesheets} when non-empty, otherwise the single
+     *         {@link #stylesheet} (or an empty list when neither is set)
+     */
+    private List<File> effectiveStylesheets() {
+        if (stylesheets != null && !stylesheets.isEmpty()) {
+            return stylesheets;
+        }
+        return (stylesheet != null) ? List.of(stylesheet) : List.of();
     }
 
     // ── Process invocation ───────────────────────────────────────────
@@ -394,6 +440,19 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
             }
         }
 
+        if (bodyClassFilter != null && !bodyClassFilter.isEmpty()
+                && type.isCssBased()) {
+            result.removeIf(file -> {
+                if (htmlBodyHasClass(file, bodyClassFilter)) {
+                    return false;
+                }
+                getLog().info("render-pdf [" + renderer + "]: skipping "
+                        + file.getFileName() + " — <body> class is not '"
+                        + bodyClassFilter + "'");
+                return true;
+            });
+        }
+
         return result;
     }
 
@@ -451,5 +510,38 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
     static String stripExtension(String filename) {
         int dot = filename.lastIndexOf('.');
         return (dot > 0) ? filename.substring(0, dot) : filename;
+    }
+
+    /** Matches the {@code class} attribute of the HTML {@code <body>} element. */
+    private static final Pattern BODY_CLASS = Pattern.compile(
+            "<body\\b[^>]*\\bclass\\s*=\\s*[\"']([^\"']*)[\"']",
+            Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Test whether an HTML file's {@code <body>} element carries a given
+     * CSS class token.
+     *
+     * @param html          the HTML file to inspect
+     * @param requiredClass the class token to look for (e.g. {@code book})
+     * @return {@code true} if the {@code <body>} class list contains the
+     *         token; {@code false} if it does not, or the file cannot be read
+     */
+    private boolean htmlBodyHasClass(Path html, String requiredClass) {
+        try {
+            var matcher = BODY_CLASS.matcher(Files.readString(html));
+            if (matcher.find()) {
+                for (String token : matcher.group(1).trim().split("\\s+")) {
+                    if (token.equals(requiredClass)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            getLog().warn("render-pdf [" + renderer + "]: could not read "
+                    + html.getFileName() + " for body-class filter: "
+                    + e.getMessage());
+            return false;
+        }
     }
 }

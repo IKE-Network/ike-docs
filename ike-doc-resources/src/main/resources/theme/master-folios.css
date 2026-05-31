@@ -1,0 +1,104 @@
+/*
+ * master-folios.css — Loose-Leaf Folio Overlay
+ * ───────────────────────────────────────────────────────────────────────
+ * Applied ON TOP of ike-print.css for the loose-leaf Prince output ONLY:
+ *   prince --style ike-print.css --style master-folios.css ...
+ *
+ * Per the design invariant this file carries NOTHING but:
+ *   (1) chapter-local page numbering, with [preface]/[appendix] routed to
+ *       front/back matter (relies on the front-matter/back-matter classes
+ *       added by FrontBackMatterTreeprocessor at render time)
+ *   (2) the duplex binding-edge geometry            [documented exception]
+ * Everything else — typography, running-head text, the colophon/title/TOC
+ * front-matter schemes — is inherited unchanged from ike-print.css, so the
+ * loose-leaf and universal PDFs differ only in folios and binding margin.
+ * If this file grows beyond (1) and (2), something leaked from the base.
+ *
+ * DOUBLE-SIDED (duplex): the binding margin is on the INSIDE edge and
+ * alternates (left on recto, right on verso); folios and running heads
+ * mirror to the OUTSIDE. Each section starts on a recto so it occupies
+ * whole leaves and stays independently swappable in the disc binder.
+ *
+ * Design: dev-pdf-loose-leaf-variant ; IKE-Network/ike-issues#558
+ */
+
+/* (1) Section numbering ─────────────────────────────────────────────── */
+
+/* Reset the chapter/appendix counters; the page counter is NOT reset here
+ * so it continues the roman front-matter sequence into a [preface]. The
+ * first numbered chapter restarts it at arabic 1. */
+#content { counter-reset: chapter 0 appendix 0; }
+
+/* Numbered chapters: own page group, chapter-local page counter, recto
+ * start. [preface]/[appendix] are tagged front-/back-matter by the build
+ * and excluded here, so composite chapter numbers match the section
+ * numbers the reader sees (e.g. "8. Integration" → 8-1, not 9-1). */
+.book #content > .sect1:not(.front-matter):not(.back-matter) {
+    page: chapter; prince-page-group: start; break-before: right;
+    counter-increment: chapter; counter-reset: page 1;
+}
+.book #content > .sect1:not(.front-matter):not(.back-matter) > h2 {
+    string-set: chapter-title content(), chapnum counter(chapter);
+}
+
+/* [appendix] & friends: composite letter folios (A-1, B-1, …), reusing the
+ * chapter page scheme — chapnum is the appendix letter. */
+.book #content > .sect1.back-matter {
+    page: chapter; prince-page-group: start; break-before: right;
+    counter-increment: appendix; counter-reset: page 1;
+}
+.book #content > .sect1.back-matter > h2 {
+    string-set: chapter-title content(), chapnum counter(appendix, upper-alpha);
+}
+
+/* [preface] & friends: roman front matter; page counter continues, no
+ * chapter increment. */
+.book #content > .sect1.front-matter {
+    page: front-matter; break-before: right;
+}
+
+/* (2) Duplex binding geometry — inside (binding) edge wide, alternating. */
+@page chapter      { margin-inside: 1.25in; margin-outside: 0.75in; }
+@page front-matter { margin-inside: 1.25in; margin-outside: 0.75in; }
+
+/* (3) Folios on the OUTSIDE bottom corner; running heads mirrored. */
+@page chapter:right {
+    @top-left     { content: none; }
+    @top-right    { content: string(chapter-title); }
+    @bottom-left  { content: string(doc-title); }
+    @bottom-right { content: string(chapnum) "-" counter(page); }
+}
+@page chapter:left {
+    @top-left     { content: string(chapter-title); }
+    @top-right    { content: none; }
+    @bottom-left  { content: string(chapnum) "-" counter(page); }
+    @bottom-right { content: string(doc-title); }
+}
+@page front-matter:right {
+    @top-left     { content: none; }
+    @top-right    { content: string(chapter-title); }
+    @bottom-left  { content: string(doc-title); }
+    @bottom-right { content: counter(page, lower-roman); }
+}
+@page front-matter:left {
+    @top-left     { content: string(chapter-title); }
+    @top-right    { content: none; }
+    @bottom-left  { content: counter(page, lower-roman); }
+    @bottom-right { content: string(doc-title); }
+}
+
+/* Blank padding versos carry no marks. */
+@page chapter:blank {
+    @top-left { content: none; }  @top-right { content: none; }
+    @bottom-left { content: none; }  @bottom-right { content: none; }
+}
+@page front-matter:blank {
+    @top-left { content: none; }  @top-right { content: none; }
+    @bottom-left { content: none; }  @bottom-right { content: none; }
+}
+
+/* TOC locators chapter-relative (N-page) to match the folio. */
+#toc a[href^="#"]::after {
+    content: leader('.') target-counter(attr(href), chapter)
+             "-" target-counter(attr(href), page);
+}
