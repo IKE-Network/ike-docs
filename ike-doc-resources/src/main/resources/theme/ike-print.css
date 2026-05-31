@@ -365,6 +365,11 @@ thead {
     page-break-after: always;
 }
 
+/* Start the TOC on a recto. The embedded asciidoctor print stylesheet sets
+ * `body.book #toc { page-break-before: always }` (specificity 1,1,1), which
+ * silently outranks a plain `#toc` recto-force — so match that specificity. */
+body.book #toc { page-break-before: right !important; }
+
 #toc a::after {
     /* Show page numbers in TOC — Prince and AH Formatter support target-counter */
     content: leader('.') target-counter(attr(href), page);
