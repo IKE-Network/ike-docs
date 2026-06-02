@@ -19,6 +19,29 @@ a.koncept-ref:hover svg {
     filter: brightness(0.85);
 }
 
+/* Inline identicon reference (html5 / CSS-PDF backends) */
+a.koncept-identicon-ref {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+img.koncept-identicon {
+    height: 1.1em;
+    width: 1.1em;
+    vertical-align: -0.2em;
+    margin-right: 0.2em;
+    border-radius: 2px;
+    image-rendering: pixelated; /* keep LifeHash cells crisp at small sizes */
+}
+
+a.koncept-identicon-ref .koncept-label {
+    color: #2a5a8a;
+}
+
+a.koncept-identicon-ref:hover .koncept-label {
+    text-decoration: underline;
+}
+
 /* Glossary section */
 .koncept-glossary-section {
     margin-top: 2em;

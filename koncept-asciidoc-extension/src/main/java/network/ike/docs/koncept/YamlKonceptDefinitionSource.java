@@ -30,7 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *   definition: Narrowing of the aortic valve orifice.
  *   axiom: "≡ StenosisOfValve ⊓ ∃hasMorphology.Stenosis ⊓ ∃findingSite.AorticValve"
  *   sctid: "60573004"
+ *   uuids: ["60573004-derived-or-datastore-uuid"]
  * </pre>
+ * <p>
+ * The optional {@code uuids} field carries the concept's Tinkar PublicId
+ * UUIDs (a YAML list, or a single scalar) in datastore order. When present
+ * it determines the Komet identicon; when absent the identicon is derived
+ * from {@code sctid}.
  */
 public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
 
@@ -112,6 +118,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .axiom(stringField(fields, "axiom"))
                     .sctid(stringField(fields, "sctid"))
                     .iri(stringField(fields, "iri"))
+                    .uuids(stringListField(fields, "uuids"))
                     .build();
 
             defs.put(identifier, def);
@@ -124,5 +131,28 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
     private static String stringField(Map<String, Object> map, String key) {
         Object val = map.get(key);
         return val != null ? val.toString().strip() : null;
+    }
+
+    /**
+     * Reads a field that may be a YAML list or a single scalar into a list of
+     * trimmed strings. Returns {@code null} when the field is absent or empty
+     * so the builder can apply its default.
+     */
+    private static List<String> stringListField(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) {
+            return null;
+        }
+        if (val instanceof List<?> list) {
+            List<String> out = new ArrayList<>(list.size());
+            for (Object o : list) {
+                if (o != null && !o.toString().isBlank()) {
+                    out.add(o.toString().strip());
+                }
+            }
+            return out.isEmpty() ? null : out;
+        }
+        String s = val.toString().strip();
+        return s.isEmpty() ? null : List.of(s);
     }
 }

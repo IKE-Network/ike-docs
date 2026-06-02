@@ -26,13 +26,16 @@ class KonceptExtensionIntegrationTest {
     }
 
     @Test
-    void singleKonceptReference_rendersInlineBadge() {
+    void singleKonceptReference_rendersIdenticon() {
         String adoc = "The patient has k:HeartFailure[].";
         String html = convert(adoc);
 
-        assertTrue(html.contains("koncept-badge"), "Should contain SVG badge");
+        assertTrue(html.contains("koncept-identicon"),
+                "Should render the Komet identicon image");
+        assertTrue(html.contains("src=\"data:image/png;base64,"),
+                "Identicon should be embedded as a data URI PNG");
         assertTrue(html.contains("href=\"#koncept-HeartFailure\""),
-                "Badge should link to glossary anchor");
+                "Identicon should link to glossary anchor");
         assertTrue(html.contains("Heart Failure"),
                 "Should split camelCase for display label");
     }
@@ -43,6 +46,16 @@ class KonceptExtensionIntegrationTest {
         String html = convert(adoc);
 
         assertTrue(html.contains("CHF"), "Should use explicit label");
+    }
+
+    @Test
+    void unknownKoncept_fallsBackToBadge() {
+        String adoc = "The patient has k:UnknownCondition[].";
+        String html = convert(adoc);
+
+        // No definition → no PublicId → no identicon → SVG text badge.
+        assertTrue(html.contains("koncept-badge"),
+                "Koncept without a resolvable identicon should fall back to the SVG badge");
     }
 
     @Test

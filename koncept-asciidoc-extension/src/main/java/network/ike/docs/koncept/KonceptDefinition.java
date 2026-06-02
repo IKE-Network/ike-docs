@@ -1,5 +1,7 @@
 package network.ike.docs.koncept;
 
+import java.util.List;
+
 /**
  * Immutable definition of a Koncept, including natural language definition,
  * description logic axiom, and optional terminology identifiers.
@@ -10,6 +12,9 @@ package network.ike.docs.koncept;
  * @param axiom        Description logic axiom string using Unicode DL symbols
  * @param sctid        Optional SNOMED CT concept identifier
  * @param iri          Optional OWL IRI for the concept
+ * @param uuids        Optional explicit Tinkar PublicId UUIDs, in datastore
+ *                     order, used to compute the Komet identicon; when absent
+ *                     the identicon is derived from {@code sctid}
  */
 public record KonceptDefinition(
         String identifier,
@@ -17,7 +22,8 @@ public record KonceptDefinition(
         String definition,
         String axiom,
         String sctid,
-        String iri
+        String iri,
+        List<String> uuids
 ) {
 
     /**
@@ -31,6 +37,7 @@ public record KonceptDefinition(
         private String axiom;
         private String sctid;
         private String iri;
+        private List<String> uuids;
 
         /** Creates a new empty builder. */
         public Builder() {
@@ -103,6 +110,18 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets the explicit Tinkar PublicId UUIDs (in datastore order) used
+         * to compute the Komet identicon.
+         *
+         * @param uuids the UUID strings to set
+         * @return this builder
+         */
+        public Builder uuids(List<String> uuids) {
+            this.uuids = uuids;
+            return this;
+        }
+
+        /**
          * Builds an immutable {@link KonceptDefinition} from this builder's state.
          *
          * @return the constructed definition
@@ -116,7 +135,8 @@ public record KonceptDefinition(
                 // Default: split camelCase
                 label = identifier.replaceAll("([a-z])([A-Z])", "$1 $2");
             }
-            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri);
+            List<String> uuidList = uuids != null ? List.copyOf(uuids) : List.of();
+            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri, uuidList);
         }
     }
 
