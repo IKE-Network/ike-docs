@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:bf658ad5-ac2e-3342-9215-1f44f0a4408a",
+  "serialNumber" : "urn:uuid:5923d04a-b1d6-3807-941f-749ae0f532e1",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@69?type=maven-plugin",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-doc-maven-plugin",
-      "version" : "68",
+      "version" : "69",
       "description" : "Maven plugin (prefix idoc:) driving the IKE documentation pipeline: AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook post-processing, breadcrumb injection, and ike-doc packaging.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
+      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@69?type=maven-plugin",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3258,45 +3258,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "68",
+      "version" : "69",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "514294ac9c454661fe2e51e2db2b227d"
+          "content" : "99c4e37bad592f950fda78f033190a06"
         },
         {
           "alg" : "SHA-1",
-          "content" : "ee2a514aab611ff0d390e0427fbe91895a15acba"
+          "content" : "afd0d590b09b2b4316abb05d375d215ab0182785"
         },
         {
           "alg" : "SHA-256",
-          "content" : "8eb0d356d19c9fb9e271915244ecdd29ff1116b5d9fced42b208e5c4175baf5d"
+          "content" : "5f663f94e0a1992a1b5f113aff64bb03e7c08f83f0dff006966566a4ef86afd7"
         },
         {
           "alg" : "SHA-512",
-          "content" : "1d52c7977f59a9a6429feb4ed5d1116903699ef1c5710141cda0713f54ec7adca5d7cdf7144a89427b6d551d044faee96209269dcc3350547b58b6675320904c"
+          "content" : "a7264a9eb0182c66326d5a63f5302cbffc75259d72e32b741ad2efa6792a6d1d05d1a31898ba480ed50040f7b5d822d738cfaeb8a1aa55dd085e002d30a21a2e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "7bfba62613ad7269e9218e597ee9eab3dca2d2c885f7409a85528daa5207b92bfb5a8932b54319cafd2318421a98e640"
+          "content" : "97778ffcfbfa5427b7ae86bf51c0a3ffab45af7a46158fea179bb6aa5ff37fe0ef564c6625786c303a82aa14a8cf992c"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "fe67dac22b6e3f8f2248c83e1413ede33c463e081ebf3afdef3447dcfce46a3b5a4fdbb9f1ea51e0425861b70c27b8c5"
+          "content" : "f46802c36c4e456dbcee882ac308ac8dec1c213d6ef2faba79abf29469c5f3be4d6a8e77b9ccea5f577ce9bb72a94346"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "eb6ffac72ebaccf644ca033c4485a7b3d7ab58c6c52f8c4630d38ea69507155a"
+          "content" : "35b2102d38e112db22f7212f55d40e3d5d1a9377515dc8f6b54c333ee949c3f3"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "7fdc362e1a2e7aa2d0d7cc9504c12ff7c1a29a8178ec0be1d7cf3dd17cadcb8868b478c30c0a126411e3b8afcd507b3a8db6de5967f2718ecaebf71eb5a935f1"
+          "content" : "d06f311a4a4b5d610ce479be346fb8040fcedff9e56c86272c2accdbea775722acd28978f1d614369571011895d5804ae234410416fc7c8ca5d79277d6d422b7"
         }
       ],
       "licenses" : [
@@ -3306,7 +3306,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3388,6 +3388,67 @@
         {
           "type" : "vcs",
           "url" : "https://bitbucket.org/snakeyaml/snakeyaml/src"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar",
+      "group" : "com.sparrowwallet",
+      "name" : "toucan",
+      "version" : "0.9.0",
+      "description" : "Java implementation of Lifehash",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "db408b908d3bc0019d68b19ab25531b2"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "1df67d776cfe19906748b422c9a031c64dcbe457"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "33da0e148a177cdde62a9a26a9fa7a41de52e8fa08395cabba01dc336ea26fa8"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "2d02d99f5495769de77325da9c978172b53d701bf039658f8dca1fb463c652c965c349bdb4b470664f350e9104e1b1196cadf8eeb4678e6df45d9c7b4022ba10"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "4c232d6145f45bd99653bd27805d06e229c304eee29ffa1dbed1b3c7e11adb6a29ccfc67dcbdd4eb2f9dab9b0133584a"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "77d7ab0ba1d8c990eadc73b93ad5a6ef37e88bebfc62290021a37c3c88678d21123916062ba86e6dc1710562b87e3afc"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "24c4624590145e8c455804c7a298a1226739ed5bbd2539b5867c92f601b07019"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "fa1c645fe9eb987d99584fdb99fc29a1788f685fc6229dd0f18c3be06ad0a3da3eb6860c5493826c1a90111c50febe50a2b425edab09c9583e71af25bd966ea9"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/sparrowwallet/toucan"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/sparrowwallet/toucan"
         }
       ]
     },
@@ -3592,7 +3653,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@68?type=maven-plugin",
+      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@69?type=maven-plugin",
       "dependsOn" : [
         "pkg:maven/network.ike.tooling/ike-maven-plugin-support@217?type=jar",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=claude&type=zip",
@@ -3603,7 +3664,7 @@
         "pkg:maven/org.asciidoctor/asciidoctorj-pdf@2.3.23?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj-diagram@2.3.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
-        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
+        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar",
         "pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=built-with&type=zip"
@@ -3876,13 +3937,18 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.yaml/snakeyaml@2.2?type=jar"
+        "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
+        "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"
       ]
     },
     {
       "ref" : "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar",
       "dependsOn" : [ ]
     },
     {

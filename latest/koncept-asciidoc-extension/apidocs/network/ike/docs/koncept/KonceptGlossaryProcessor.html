@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 68</div>
+<div class="about-language"><b>Koncept Extension</b> 69</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -101,7 +101,8 @@ The glossary is built from the koncept registry populated by
 <a href="KonceptInlineMacro.html" title="class in network.ike.docs.koncept"><code>KonceptInlineMacro</code></a> during document conversion. Each referenced
 koncept gets a single glossary entry containing:
 <ul>
-  <li>An anchor target matching the inline SVG badge links</li>
+  <li>An anchor target matching the inline identicon links</li>
+  <li>The concept's Komet identicon (when a PublicId resolves)</li>
   <li>Natural language definition</li>
   <li>Description logic axiom in Unicode notation</li>
   <li>Optional SNOMED CT identifier</li>
@@ -111,13 +112,8 @@ koncept gets a single glossary entry containing:
 The colophon describes the rendering pipeline used to produce the document,
 including the AsciiDoc backend, build timestamp, and document version.
 <p>
-Definitions are resolved via <a href="KonceptDefinitionSource.html" title="interface in network.ike.docs.koncept"><code>KonceptDefinitionSource</code></a>. The source
-is configured by document attributes:
-<ul>
-  <li><code>:koncept-definitions-file:</code> — filesystem path to YAML</li>
-  <li><code>:koncept-definitions-classpath:</code> — classpath resource path</li>
-  <li>Default: <code>/koncepts.yml</code> on classpath</li>
-</ul></div>
+Definitions are resolved via <a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/KonceptDefinitions.html#forDocument(org.asciidoctor.ast.Document)" title="class or interface in network.ike.docs.koncept" class="external-link"><code>KonceptDefinitions.forDocument(Document)</code></a>, the
+same source the inline macro uses, so the YAML is parsed once per document.</div>
 </div>
 </section>
 <section class="summary">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:ef47806a-1b60-30dd-943e-0802999ca5f4" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:4764787c-232d-3fec-a66d-572e1dd3152f" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-asciidoc-extension</name>
-      <version>68</version>
+      <version>69</version>
       <description>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
         with SVG badge rendering and auto-generated Referenced Koncepts glossary
         with description logic axiom display.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -1217,6 +1217,37 @@
         </reference>
       </externalReferences>
     </component>
+    <component type="library" bom-ref="pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar">
+      <group>com.sparrowwallet</group>
+      <name>toucan</name>
+      <version>0.9.0</version>
+      <description>Java implementation of Lifehash</description>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="MD5">db408b908d3bc0019d68b19ab25531b2</hash>
+        <hash alg="SHA-1">1df67d776cfe19906748b422c9a031c64dcbe457</hash>
+        <hash alg="SHA-256">33da0e148a177cdde62a9a26a9fa7a41de52e8fa08395cabba01dc336ea26fa8</hash>
+        <hash alg="SHA-512">2d02d99f5495769de77325da9c978172b53d701bf039658f8dca1fb463c652c965c349bdb4b470664f350e9104e1b1196cadf8eeb4678e6df45d9c7b4022ba10</hash>
+        <hash alg="SHA-384">4c232d6145f45bd99653bd27805d06e229c304eee29ffa1dbed1b3c7e11adb6a29ccfc67dcbdd4eb2f9dab9b0133584a</hash>
+        <hash alg="SHA3-384">77d7ab0ba1d8c990eadc73b93ad5a6ef37e88bebfc62290021a37c3c88678d21123916062ba86e6dc1710562b87e3afc</hash>
+        <hash alg="SHA3-256">24c4624590145e8c455804c7a298a1226739ed5bbd2539b5867c92f601b07019</hash>
+        <hash alg="SHA3-512">fa1c645fe9eb987d99584fdb99fc29a1788f685fc6229dd0f18c3be06ad0a3da3eb6860c5493826c1a90111c50febe50a2b425edab09c9583e71af25bd966ea9</hash>
+      </hashes>
+      <licenses>
+        <license>
+          <id>Apache-2.0</id>
+        </license>
+      </licenses>
+      <purl>pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar</purl>
+      <externalReferences>
+        <reference type="website">
+          <url>https://github.com/sparrowwallet/toucan</url>
+        </reference>
+        <reference type="vcs">
+          <url>https://github.com/sparrowwallet/toucan</url>
+        </reference>
+      </externalReferences>
+    </component>
     <component type="library" bom-ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip">
       <publisher>IKE Network</publisher>
       <group>network.ike</group>
@@ -1331,11 +1362,12 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@68?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@69?type=jar">
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
       <dependency ref="pkg:maven/org.yaml/snakeyaml@2.2?type=jar"/>
       <dependency ref="pkg:maven/org.slf4j/slf4j-api@2.0.12?type=jar"/>
+      <dependency ref="pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"/>
       <dependency ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=built-with&amp;type=zip"/>
@@ -1431,6 +1463,7 @@
     <dependency ref="pkg:maven/org.jruby/jruby-stdlib@10.0.3.0?type=jar"/>
     <dependency ref="pkg:maven/org.yaml/snakeyaml@2.2?type=jar"/>
     <dependency ref="pkg:maven/org.slf4j/slf4j-api@2.0.12?type=jar"/>
+    <dependency ref="pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"/>
     <dependency ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip"/>
     <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=site-theme&amp;type=zip"/>
     <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@217?classifier=built-with&amp;type=zip"/>

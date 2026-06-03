@@ -1,18 +1,18 @@
 ---
-date_published: 2026-05-30
-date_modified: 2026-05-30
+date_published: 2026-06-02
+date_modified: 2026-06-02
 canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 68, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 69, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 33 |
+| `Apache-2.0` | 34 |
 | `Apache-2.0 OR GNU Lesser General Public License version 3` | 2 |
 | `BSD-2-Clause` | 1 |
 | `BSD-3-Clause` | 5 |
@@ -21,7 +21,7 @@ Licenses for declared dependencies of `ike-doc-maven-plugin` 68, grouped by SPDX
 | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | 1 |
 | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | 3 |
 | `MIT` | 3 |
-| **Total** | **50** |
+| **Total** | **51** |
 
 ## [#apache-2-0](#apache-2-0)Apache-2.0
 
@@ -38,10 +38,11 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `com.headius` | `backport9` | `1.13` |
 | `com.headius` | `invokebinder` | `1.14` |
 | `com.headius` | `options` | `1.6` |
+| `com.sparrowwallet` | `toucan` | `0.9.0` |
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `68` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `69` |
 | `network.ike.tooling` | `ike-build-standards` | `217` |
 | `network.ike.tooling` | `ike-build-standards` | `217` |
 | `network.ike.tooling` | `ike-build-standards` | `217` |

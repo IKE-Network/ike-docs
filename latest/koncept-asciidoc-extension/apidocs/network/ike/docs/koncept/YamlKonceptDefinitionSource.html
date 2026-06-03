@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 68</div>
+<div class="about-language"><b>Koncept Extension</b> 69</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -101,7 +101,13 @@ AorticStenosis:
   definition: Narrowing of the aortic valve orifice.
   axiom: "≡ StenosisOfValve ⊓ ∃hasMorphology.Stenosis ⊓ ∃findingSite.AorticValve"
   sctid: "60573004"
-</pre></div>
+  uuids: ["60573004-derived-or-datastore-uuid"]
+</pre>
+<p>
+The optional <code>uuids</code> field carries the concept's Tinkar PublicId
+UUIDs (a YAML list, or a single scalar) in datastore order. When present
+it determines the Komet identicon; when absent the identicon is derived
+from <code>sctid</code>.</div>
 </div>
 </section>
 <section class="summary">
