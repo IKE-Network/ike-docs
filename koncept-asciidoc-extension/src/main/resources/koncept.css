@@ -42,6 +42,14 @@ a.koncept-identicon-ref:hover .koncept-label {
     text-decoration: underline;
 }
 
+/* Larger identicon in the Referenced Koncepts glossary */
+img.koncept-glossary-icon {
+    height: 1.4em;
+    width: 1.4em;
+    vertical-align: -0.35em;
+    margin-right: 0.4em;
+}
+
 /* Glossary section */
 .koncept-glossary-section {
     margin-top: 2em;

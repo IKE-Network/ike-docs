@@ -5,6 +5,7 @@ import org.asciidoctor.extension.Postprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -22,7 +23,8 @@ import java.util.ArrayList;
  * {@link KonceptInlineMacro} during document conversion. Each referenced
  * koncept gets a single glossary entry containing:
  * <ul>
- *   <li>An anchor target matching the inline SVG badge links</li>
+ *   <li>An anchor target matching the inline identicon links</li>
+ *   <li>The concept's Komet identicon (when a PublicId resolves)</li>
  *   <li>Natural language definition</li>
  *   <li>Description logic axiom in Unicode notation</li>
  *   <li>Optional SNOMED CT identifier</li>
@@ -32,13 +34,8 @@ import java.util.ArrayList;
  * The colophon describes the rendering pipeline used to produce the document,
  * including the AsciiDoc backend, build timestamp, and document version.
  * <p>
- * Definitions are resolved via {@link KonceptDefinitionSource}. The source
- * is configured by document attributes:
- * <ul>
- *   <li>{@code :koncept-definitions-file:} — filesystem path to YAML</li>
- *   <li>{@code :koncept-definitions-classpath:} — classpath resource path</li>
- *   <li>Default: {@code /koncepts.yml} on classpath</li>
- * </ul>
+ * Definitions are resolved via {@link KonceptDefinitions#forDocument}, the
+ * same source the inline macro uses, so the YAML is parsed once per document.
  */
 public class KonceptGlossaryProcessor extends Postprocessor {
 
@@ -47,10 +44,6 @@ public class KonceptGlossaryProcessor extends Postprocessor {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(KonceptGlossaryProcessor.class);
-
-    private static final String DEFAULT_CLASSPATH_RESOURCE = "/koncepts.yml";
-    private static final String ATTR_DEFS_FILE = "koncept-definitions-file";
-    private static final String ATTR_DEFS_CLASSPATH = "koncept-definitions-classpath";
 
     @Override
     public String process(Document document, String output) {
@@ -104,37 +97,41 @@ public class KonceptGlossaryProcessor extends Postprocessor {
     }
 
     /**
-     * Determine which definition source to use based on document attributes.
-     * <p>
-     * Always loads the pipeline's classpath {@code /koncepts.yml} as the base.
-     * If a project-local file is specified via {@code :koncept-definitions-file:},
-     * its definitions are layered on top — overriding any classpath entries
-     * with the same identifier. This allows child projects to add
-     * domain-specific concepts without modifying the pipeline.
+     * Determine which definition source to use. Delegates to
+     * {@link KonceptDefinitions#forDocument}, which loads the classpath
+     * {@code /koncepts.yml} base plus any {@code :koncept-definitions-file:}
+     * overlay and caches the result per document — shared with the inline macro.
      */
     private KonceptDefinitionSource resolveDefinitionSource(Document document) {
-        // Always load the pipeline base from classpath
-        KonceptDefinitionSource base;
-        Object cpPath = document.getAttribute(ATTR_DEFS_CLASSPATH);
-        if (cpPath != null && !cpPath.toString().isBlank()) {
-            LOG.debug("Loading base koncept definitions from classpath: {}", cpPath);
-            base = KonceptDefinitionSource.fromClasspath(cpPath.toString());
-        } else {
-            LOG.debug("Loading base koncept definitions from default classpath: {}",
-                    DEFAULT_CLASSPATH_RESOURCE);
-            base = KonceptDefinitionSource.fromClasspath(DEFAULT_CLASSPATH_RESOURCE);
-        }
+        return KonceptDefinitions.forDocument(document);
+    }
 
-        // Check for project-local file overlay
-        Object filePath = document.getAttribute(ATTR_DEFS_FILE);
-        if (filePath != null && !filePath.toString().isBlank()) {
-            LOG.debug("Loading project koncept definitions from file: {}", filePath);
-            KonceptDefinitionSource overlay = KonceptDefinitionSource.fromFile(filePath.toString());
-            // Overlay takes priority (listed first)
-            return new CompositeKonceptDefinitionSource(List.of(overlay, base));
-        }
+    /**
+     * Build an HTML {@code <img>} for the koncept's identicon, or an empty
+     * string when no PublicId resolves.
+     */
+    private String htmlIdenticonImg(Optional<KonceptDefinition> defOpt) {
+        return KonceptIdentity.idString(defOpt.orElse(null))
+                .map(idString -> "<img class=\"koncept-identicon koncept-glossary-icon\" src=\""
+                        + IdenticonRenderer.dataUri(idString)
+                        + "\" alt=\"\" width=\"24\" height=\"24\"/> ")
+                .orElse("");
+    }
 
-        return base;
+    /**
+     * Build a DocBook {@code <inlinemediaobject>} for the koncept's identicon,
+     * or an empty string when no PublicId resolves.
+     */
+    private String docbookIdenticonImg(Optional<KonceptDefinition> defOpt) {
+        return KonceptIdentity.idString(defOpt.orElse(null))
+                .map(idString -> {
+                    String uri = new File(IdenticonRenderer.pngFile(idString)).toURI().toString();
+                    return "<inlinemediaobject><imageobject><imagedata fileref=\""
+                            + escapeXml(uri) + "\" format=\"PNG\""
+                            + " contentwidth=\"16pt\" contentdepth=\"16pt\"/></imageobject>"
+                            + "</inlinemediaobject> ";
+                })
+                .orElse("");
     }
 
     /**
@@ -159,6 +156,7 @@ public class KonceptGlossaryProcessor extends Postprocessor {
                     .orElse(KonceptInlineMacro.splitCamelCase(id));
 
             html.append("  <dt id=\"koncept-").append(escapeHtml(id)).append("\">");
+            html.append(htmlIdenticonImg(defOpt));
             html.append("<strong>").append(escapeHtml(label)).append("</strong>");
 
             // Show reference count
@@ -238,7 +236,8 @@ public class KonceptGlossaryProcessor extends Postprocessor {
                     .orElse(KonceptInlineMacro.splitCamelCase(id));
 
             db.append("  <glossentry xml:id=\"koncept-").append(escapeXml(id)).append("\">\n");
-            db.append("    <glossterm>").append(escapeXml(label)).append("</glossterm>\n");
+            db.append("    <glossterm>").append(docbookIdenticonImg(defOpt))
+              .append(escapeXml(label)).append("</glossterm>\n");
             db.append("    <glossdef>\n");
 
             if (defOpt.isPresent()) {
@@ -272,13 +271,13 @@ public class KonceptGlossaryProcessor extends Postprocessor {
      */
     private static String describePipeline(String backend, String renderer) {
         return switch (renderer) {
-            case "prawn"      -> "AsciiDoc \u2192 PDF (asciidoctorj-pdf / Prawn)";
-            case "prince"     -> "AsciiDoc \u2192 HTML5 \u2192 PDF (Prince XML)";
-            case "ah"         -> "AsciiDoc \u2192 HTML5 \u2192 PDF (Antenna House)";
-            case "weasyprint" -> "AsciiDoc \u2192 HTML5 \u2192 PDF (WeasyPrint)";
-            case "xep"        -> "AsciiDoc \u2192 DocBook 5 \u2192 XSL-FO (Saxon-HE + DocBook XSL) \u2192 PDF (RenderX XEP)";
-            case "fop"        -> "AsciiDoc \u2192 DocBook 5 \u2192 XSL-FO (Saxon-HE + DocBook XSL) \u2192 PDF (Apache FOP)";
-            default           -> "AsciiDoc \u2192 " + backend;
+            case "prawn"      -> "AsciiDoc → PDF (asciidoctorj-pdf / Prawn)";
+            case "prince"     -> "AsciiDoc → HTML5 → PDF (Prince XML)";
+            case "ah"         -> "AsciiDoc → HTML5 → PDF (Antenna House)";
+            case "weasyprint" -> "AsciiDoc → HTML5 → PDF (WeasyPrint)";
+            case "xep"        -> "AsciiDoc → DocBook 5 → XSL-FO (Saxon-HE + DocBook XSL) → PDF (RenderX XEP)";
+            case "fop"        -> "AsciiDoc → DocBook 5 → XSL-FO (Saxon-HE + DocBook XSL) → PDF (Apache FOP)";
+            default           -> "AsciiDoc → " + backend;
         };
     }
 

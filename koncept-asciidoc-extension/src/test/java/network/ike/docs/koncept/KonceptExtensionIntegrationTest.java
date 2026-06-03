@@ -92,6 +92,15 @@ class KonceptExtensionIntegrationTest {
     }
 
     @Test
+    void glossaryShowsIdenticon() {
+        String adoc = "Patient presents with k:HeartFailure[].";
+        String html = convert(adoc);
+
+        assertTrue(html.contains("koncept-glossary-icon"),
+                "Glossary entry should display the concept's identicon");
+    }
+
+    @Test
     void unknownKoncept_showsMissingDefinition() {
         String adoc = "The patient has k:UnknownCondition[].";
         String html = convert(adoc);
