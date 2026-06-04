@@ -129,10 +129,25 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      */
     private String renderHtmlIdenticon(String target, String label, String idString) {
         String dataUri = IdenticonRenderer.dataUri(idString);
+        // Self-contained inline styles — no dependency on koncept.css, which
+        // consuming documents may not link. A soft rounded "chip" rendered with
+        // display:inline (NOT inline-block) so its vertical padding extends the
+        // tint visually but never changes the line box height — lines holding a
+        // koncept stay the same height as the rest of the paragraph. The chip
+        // holds the identicon (0.9em, balanced against small caps) and a
+        // small-caps IKE-blue label. white-space:nowrap + box-decoration-break
+        // keep it a single intact pill.
         return """
-            <a href="#koncept-%s" class="koncept-ref koncept-identicon-ref" title="%s">\
+            <a href="#koncept-%s" class="koncept-ref koncept-identicon-ref" title="%s" \
+            style="text-decoration:none;white-space:nowrap;">\
+            <span class="koncept-chip" style="display:inline;background:#e9eff6;\
+            border-radius:0.5em;padding:0.12em 0.45em;\
+            -webkit-box-decoration-break:clone;box-decoration-break:clone;">\
             <img class="koncept-identicon" src="%s" alt="%s identicon" \
-            width="18" height="18"/><span class="koncept-label">%s</span></a>\
+            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
+            image-rendering:pixelated;margin-right:0.3em;"/>\
+            <span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
+            letter-spacing:0.02em;">%s</span></span></a>\
             """.formatted(
                 escapeXml(target), escapeXml(label), dataUri,
                 escapeXml(label), escapeXml(label)).strip();

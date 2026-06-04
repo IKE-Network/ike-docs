@@ -19,35 +19,48 @@ a.koncept-ref:hover svg {
     filter: brightness(0.85);
 }
 
-/* Inline identicon reference (html5 / CSS-PDF backends) */
+/* Inline identicon reference (html5 / CSS-PDF backends).
+   NOTE: the extension emits these as self-contained inline styles, so the
+   reference renders correctly even without this stylesheet. These rules mirror
+   the emitted styles for consistency when koncept.css IS linked. */
 a.koncept-identicon-ref {
     text-decoration: none;
     white-space: nowrap;
 }
 
+/* Soft rounded chip. display:inline (NOT inline-block) so vertical padding
+   extends the tint without changing the line box height. */
+.koncept-chip {
+    display: inline;
+    background: #e9eff6;
+    border-radius: 0.5em;
+    padding: 0.12em 0.45em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
 img.koncept-identicon {
-    height: 1.1em;
-    width: 1.1em;
-    vertical-align: -0.2em;
-    margin-right: 0.2em;
+    height: 0.9em;
+    width: 0.9em;
+    vertical-align: -0.12em;
+    margin-right: 0.3em;
     border-radius: 2px;
     image-rendering: pixelated; /* keep LifeHash cells crisp at small sizes */
 }
 
 a.koncept-identicon-ref .koncept-label {
     color: #2a5a8a;
-}
-
-a.koncept-identicon-ref:hover .koncept-label {
-    text-decoration: underline;
+    font-variant: small-caps;
+    letter-spacing: 0.02em;
 }
 
 /* Larger identicon in the Referenced Koncepts glossary */
 img.koncept-glossary-icon {
-    height: 1.4em;
-    width: 1.4em;
-    vertical-align: -0.35em;
+    height: 1.3em;
+    width: 1.3em;
+    vertical-align: -0.3em;
     margin-right: 0.4em;
+    border-radius: 3px;
 }
 
 /* Glossary section */

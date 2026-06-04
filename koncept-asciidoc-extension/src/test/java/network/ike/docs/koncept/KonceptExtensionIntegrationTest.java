@@ -38,6 +38,10 @@ class KonceptExtensionIntegrationTest {
                 "Identicon should link to glossary anchor");
         assertTrue(html.contains("Heart Failure"),
                 "Should split camelCase for display label");
+        assertTrue(html.contains("koncept-chip"),
+                "Reference should be wrapped in the self-contained soft chip");
+        assertTrue(html.contains("font-variant:small-caps"),
+                "Label should carry the small-caps inline style (no koncept.css needed)");
     }
 
     @Test

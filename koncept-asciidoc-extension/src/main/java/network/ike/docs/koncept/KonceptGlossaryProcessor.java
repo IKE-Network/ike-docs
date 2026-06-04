@@ -111,10 +111,13 @@ public class KonceptGlossaryProcessor extends Postprocessor {
      * string when no PublicId resolves.
      */
     private String htmlIdenticonImg(Optional<KonceptDefinition> defOpt) {
+        // Self-contained inline styles (no koncept.css dependency); a larger
+        // identicon than the inline chip, sized in em so it tracks the term.
         return KonceptIdentity.idString(defOpt.orElse(null))
                 .map(idString -> "<img class=\"koncept-identicon koncept-glossary-icon\" src=\""
                         + IdenticonRenderer.dataUri(idString)
-                        + "\" alt=\"\" width=\"24\" height=\"24\"/> ")
+                        + "\" alt=\"\" style=\"height:1.3em;width:1.3em;vertical-align:-0.3em;"
+                        + "border-radius:3px;image-rendering:pixelated;margin-right:0.4em;\"/> ")
                 .orElse("");
     }
 
