@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-02
-date_modified: 2026-06-02
+date_published: 2026-06-03
+date_modified: 2026-06-03
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/distribution-management.html
 ---
 
