@@ -57,9 +57,14 @@
     page: front-matter; break-before: right;
 }
 
-/* (2) Duplex binding geometry — inside (binding) edge wide, alternating. */
-@page chapter      { margin-inside: 1.25in; margin-outside: 0.75in; }
-@page front-matter { margin-inside: 1.25in; margin-outside: 0.75in; }
+/* (2) Duplex binding geometry — inside (binding) edge wide, alternating.
+ * !important so these logical-margin longhands override the base
+ * `@page { margin: 1in ... !important }` shorthand from ike-print.css
+ * (that shorthand carries !important to defeat the asciidoctor inline
+ * `@page{margin:1.25cm .75cm}`; without matching !important here the
+ * physical shorthand would clobber the binding-edge geometry). */
+@page chapter      { margin-inside: 1.25in !important; margin-outside: 0.75in !important; }
+@page front-matter { margin-inside: 1.25in !important; margin-outside: 0.75in !important; }
 
 /* (3) Folios on the OUTSIDE bottom corner; running heads mirrored. */
 @page chapter:right {

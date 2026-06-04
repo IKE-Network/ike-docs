@@ -115,9 +115,16 @@
 
 @page {
     size: letter portrait;
-    /* Not !important: lets master-folios.css set a duplex binding margin
-       on @page chapter for the loose-leaf variant. */
-    margin: 1in 1in 1in 1in;
+    /* !important is required: the asciidoctor HTML5 backend embeds an inline
+       `@page { margin: 1.25cm .75cm }` in the generated HTML <style> block,
+       which otherwise wins the cascade and squeezes the side margins to
+       ~0.3in regardless of this stylesheet. The loose-leaf overlay
+       (master-folios.css) targets the more specific `@page chapter` /
+       `@page front-matter` selectors with the margin-inside/margin-outside
+       longhands — distinct properties that are unaffected by !important on
+       this universal `margin` shorthand — so the duplex binding geometry
+       still applies. ~1in margins all around (letter, US convention). */
+    margin: 1in 1in 1in 1in !important;
 
     /* Running footer: document title on left, page number on right */
     @bottom-left {
