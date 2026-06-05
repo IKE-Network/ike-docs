@@ -1308,6 +1308,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
                                         </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
+                                        </extension>
                                     </extensions>
                                     <attributes>
                                         <toc>left</toc>
@@ -1331,6 +1337,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                     <extensions>
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
+                                        </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
                                         </extension>
                                     </extensions>
                                     <attributes>
@@ -1378,6 +1390,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
                                         </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
+                                        </extension>
                                     </extensions>
                                     <attributes>
                                         <toc>auto</toc>
@@ -1400,6 +1418,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                     <extensions>
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
+                                        </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
                                         </extension>
                                     </extensions>
                                     <attributes>
@@ -1424,6 +1448,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
                                         </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
+                                        </extension>
                                     </extensions>
                                     <attributes>
                                         <toc>auto</toc>
@@ -1447,6 +1477,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
                                         </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
+                                        </extension>
                                     </extensions>
                                     <attributes>
                                         <doctype>book</doctype>
@@ -1468,6 +1504,12 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                     <extensions>
                                         <extension>
                                             <className>network.ike.docs.koncept.KonceptGlossaryProcessor</className>
+                                        </extension>
+                                        <extension>
+                                            <!-- Strips empty index-term paragraphs (html5 only; self-guards
+                                                 by backend) so headings keep with their first real block in
+                                                 CSS Paged Media. See IKE-Network/ike-issues. -->
+                                            <className>network.ike.docs.koncept.EmptyParagraphPostprocessor</className>
                                         </extension>
                                     </extensions>
                                     <attributes>
