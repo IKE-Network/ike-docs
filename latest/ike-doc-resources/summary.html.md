@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-04
-date_modified: 2026-06-04
+date_published: 2026-06-06
+date_modified: 2026-06-06
 canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 ---
 
@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-doc-resources |
-| Version | 72 |
+| Version | 73 |
 | Type | jar |
 | Java Version | 25 |
