@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | docbook-xsl |
-| Version | 74 |
+| Version | 75-SNAPSHOT |
 | Type | jar |
 | Java Version | 25 |

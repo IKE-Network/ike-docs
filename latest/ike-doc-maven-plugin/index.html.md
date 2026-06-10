@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 
 # IKE Doc Maven Plugin
 
-The `ike-doc-maven-plugin` provides the `idoc:*` goal prefix — AsciiDoc rendering, multi-renderer PDF wrappers (Prince, Apache FOP, RenderX XEP, Antenna House, WeasyPrint), DocBook XSL patching, breadcrumb injection for site navigation, and renderer log scanning.
+The `ike-doc-maven-plugin` provides the `idoc:*` goal prefix — AsciiDoc rendering, multi-renderer PDF wrappers (Prince, Apache FOP, RenderX XEP, Antenna House, WeasyPrint), DocBook XSL patching, breadcrumb injection for site navigation, renderer log scanning, and doc-diff review packets (`idoc:diff`).
 
 | Coordinate | Value |
 | --- | --- |
@@ -32,6 +32,7 @@ What this means for plugin consumers: nothing changes about how you **invoke** `
 | --- | --- |
 | `idoc:asciidoc` | Render AsciiDoc sources via AsciidoctorJ — the heart of the doc pipeline. Handles IKE-specific renderer profiles (Prawn / Prince / AH / WeasyPrint / XEP / FOP / DocBook / single-page HTML). |
 | `idoc:render-pdf` | Wrapper around the five external PDF renderers (Prince, AH, FOP, WeasyPrint, XEP). Selects the active renderer per `-Dike.pdf.<name>=true` toggles set by the `doc-pipeline` profile. |
+| `idoc:diff` | Generate and render a **review packet**: every changed AsciiDoc topic between two refs (or a ref and the working tree), marked inline with insertion/deletion roles. See [Review packets](#review-packets-idocdiff) below. |
 | `idoc:adocstudio` | Generate Adoc Studio sidecar projects for assembly modules. |
 | `idoc:patch-docbook` | Patch the stock DocBook XSL 1.79.2 stylesheets to suppress two known Saxon warnings. Applied during the `docbook-xsl` artifact build. |
 | `idoc:fix-svg` | Remove bare `<rect/>` elements that Mermaid emits as artifacts in generated HTML — they cause rendering glitches in some browsers. |
@@ -41,6 +42,23 @@ What this means for plugin consumers: nothing changes about how you **invoke** `
 | `idoc:scan-logs` | Scan renderer log files (`renderer-*.log`) for error patterns and print a summary. Used after multi-renderer runs to flag failures fast. |
 | `idoc:package-doc` | Zip `src/docs/asciidoc/` and assign as primary artifact. Originally bound to the `<package>` phase of the retired `ike-doc` lifecycle; superseded by `maven-assembly-plugin’s `adoc` classifier execution in `ike-parent’s `doc-pipeline` profile. Retained at present pending a final decision in the open question on [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3]; may be removed in a follow-up. |
 
+## [#review-packets-idoc-diff](#review-packets-idoc-diff)Review packets (`idoc:diff`)
+
+Reviewing documentation changes offers two bad currencies: `git diff` is source-true but contextless; rendered books carry context but no deltas. `idoc:diff` closes the gap — a generated, renderable **review packet** in which every changed topic appears as its own chapter with word-level `[.diff-ins]`/`[.diff-del]` markup in place, deletions struck through, insertions highlighted, and non-prose changes (attributes, index terms, table and diagram interiors) reported in a per-topic change-summary note. Changed diagrams render alongside their source delta and previous rendering.
+
+```
+mvn idoc:diff                                    # HEAD vs working tree
+mvn idoc:diff -Dike.diff.from=v1.2.3             # tag vs working tree
+mvn idoc:diff -Dike.diff.from=A -Dike.diff.to=B  # any two commits
+mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt
+```
+
+The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an **assembly** module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise).
+
+Changes are first-class, named entities: author a `changes.yaml` beside the module pom (or at the repository root) with an id, title, one-line description, issue refs, and touched files per change — or, for commit-to-commit comparisons, let the goal derive entities by grouping the range’s commits on their `Refs:`/`Fixes:` trailers. The entities project into a Record of Changes, a Change Glossary, and an index-driven Change Index. Each change boundary also carries a STAMP endnote — Status (Active/Inactive), Time, Author, Module (topic domain), Path (branch) — collapsed per paragraph and tabulated in a Stamp Register.
+
+Design note: `dev-doc-diff-pipeline` in `ike-lab-documents/topics/`; epic [ike-issues#648](https://github.com/IKE-Network/ike-issues/issues/648)[4].
+
 ## [#design-rationale](#design-rationale)Design rationale
 
 This plugin’s shape — regular plugin, no extensions, no custom packaging — is the result of a deliberate architectural decision documented in [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3] and the `dev-classifier-canonical-doc-shape` topic in `ike-lab-documents/topics/`. Brief summary, since the issue will eventually close and this page is what surviving teams will land on:
@@ -49,7 +67,7 @@ This plugin’s shape — regular plugin, no extensions, no custom packaging —
 
 A plugin with `<extensions>true</extensions>` is loaded into the build extension realm at **project-load time** — during Maven’s “Scanning for projects” phase, before the Model Builder runs property interpolation. This means the plugin’s `<version>` in the POM cannot be a `${property}`; it must be a literal string.
 
-For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[4] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
+For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[5] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
 
 ### [#why-no-packagingike-doc-packaging](#why-no-packagingike-doc-packaging)Why no `<packaging>ike-doc</packaging>`
 
@@ -75,13 +93,13 @@ The classifier-canonical shape **is** fully Maven-canonical — every artifact d
 ### [#tracking](#tracking)Tracking
 
 - [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3] — primary tracking issue (umbrella); subsumes #220, #236, #320.
-- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[5] — repo split that established the cross-repo boundary the extension realm was working around.
+- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[6] — repo split that established the cross-repo boundary the extension realm was working around.
 - Design note: `dev-classifier-canonical-doc-shape` in `ike-lab-documents/topics/` (full Socratic discovery captured for posterity).
 
 ## [#see-also](#see-also)See also
 
 - [ike:* plugin in ike-tooling](https://ike.network/ike-tooling/ike-maven-plugin/)[2] — single-repo release orchestration.
 - [ws:* plugin in ike-platform](https://ike.network/ike-platform/ike-workspace-maven-plugin/)[1] — workspace-spanning goals.
-- [ike-docs reactor home](https://ike.network/ike-docs/)[6].
-- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[7].
-- [Issue tracker](https://github.com/IKE-Network/ike-issues)[8].
+- [ike-docs reactor home](https://ike.network/ike-docs/)[7].
+- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[8].
+- [Issue tracker](https://github.com/IKE-Network/ike-issues)[9].

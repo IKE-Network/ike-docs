@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-09
-date_modified: 2026-06-09
+date_published: 2026-06-02
+date_modified: 2026-06-02
 canonical_url: https://ike.network/ike-docs/release-notes.html
 ---
 
