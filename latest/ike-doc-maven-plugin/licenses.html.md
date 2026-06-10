@@ -1,27 +1,27 @@
 ---
-date_published: 2026-06-06
-date_modified: 2026-06-06
+date_published: 2026-06-09
+date_modified: 2026-06-09
 canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 73, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 74, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 34 |
+| `Apache-2.0` | 38 |
 | `Apache-2.0 OR GNU Lesser General Public License version 3` | 2 |
 | `BSD-2-Clause` | 1 |
-| `BSD-3-Clause` | 5 |
+| `BSD-3-Clause` | 6 |
 | `BSD-4-Clause` | 1 |
 | `EPL-1.0` | 1 |
 | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | 1 |
 | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | 3 |
-| `MIT` | 3 |
-| **Total** | **51** |
+| `MIT` | 4 |
+| **Total** | **57** |
 
 ## [#apache-2-0](#apache-2-0)Apache-2.0
 
@@ -35,14 +35,18 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `com.github.jnr` | `jnr-ffi` | `2.2.18` |
 | `com.github.jnr` | `jnr-netdb` | `1.2.0` |
 | `com.github.jnr` | `jnr-unixsocket` | `0.38.24` |
+| `com.googlecode.javaewah` | `JavaEWAH` | `1.2.3` |
 | `com.headius` | `backport9` | `1.13` |
 | `com.headius` | `invokebinder` | `1.14` |
 | `com.headius` | `options` | `1.6` |
 | `com.sparrowwallet` | `toucan` | `0.9.0` |
+| `commons-codec` | `commons-codec` | `1.17.1` |
+| `io.github.java-diff-utils` | `java-diff-utils` | `4.12` |
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `73` |
+| `network.ike.docs` | `ike-doc-resources` | `74` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `74` |
 | `network.ike.tooling` | `ike-build-standards` | `220` |
 | `network.ike.tooling` | `ike-build-standards` | `220` |
 | `network.ike.tooling` | `ike-build-standards` | `220` |
@@ -62,7 +66,7 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `org.asciidoctor` | `asciidoctorj-diagram-ditaamini` | `1.0.3` |
 | `org.asciidoctor` | `asciidoctorj-diagram-plantuml` | `1.2024.5` |
 | `org.asciidoctor` | `asciidoctorj-pdf` | `2.3.23` |
-| `org.yaml` | `snakeyaml` | `2.2` |
+| `org.yaml` | `snakeyaml` | `2.3` |
 
 ## [#apache-2-0-or-gnu-lesser-general-public-license-ve](#apache-2-0-or-gnu-lesser-general-public-license-ve)Apache-2.0 OR GNU Lesser General Public License version 3
 
@@ -85,6 +89,7 @@ Reference: [BSD-3-Clause on spdx.org](https://spdx.org/licenses/BSD-3-Clause.htm
 
 | Group | Artifact | Version |
 | --- | --- | --- |
+| `org.eclipse.jgit` | `org.eclipse.jgit` | `7.1.0.202411261347-r` |
 | `org.ow2.asm` | `asm` | `9.7.1` |
 | `org.ow2.asm` | `asm-analysis` | `9.7.1` |
 | `org.ow2.asm` | `asm-commons` | `9.7.1` |
@@ -130,6 +135,7 @@ Reference: [MIT on spdx.org](https://spdx.org/licenses/MIT.html)[7]
 | `com.github.jnr` | `jnr-x86asm` | `1.0.2` |
 | `org.jruby.jcodings` | `jcodings` | `1.0.63` |
 | `org.jruby.joni` | `joni` | `2.2.6` |
+| `org.slf4j` | `slf4j-api` | `1.7.36` |
 
 ## [#see-also](#see-also)See also
 

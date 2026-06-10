@@ -1,12 +1,12 @@
 ---
-date_published: 2026-06-06
-date_modified: 2026-06-06
+date_published: 2026-06-09
+date_modified: 2026-06-09
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/built-with.html
 ---
 
 # Built With
 
-Open-source software that `docbook-xsl` 73 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `docbook-xsl` 74 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 

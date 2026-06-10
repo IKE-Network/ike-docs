@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:8ea11894-462f-37bb-9ec8-c238ef30cd42",
+  "serialNumber" : "urn:uuid:b4bfd769-4f3c-3006-99b7-ef35b6abaa09",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@73?type=maven-plugin",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@74?type=maven-plugin",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "ike-doc-maven-plugin",
-      "version" : "73",
+      "version" : "74",
       "description" : "Maven plugin (prefix idoc:) driving the IKE documentation pipeline: AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook post-processing, breadcrumb injection, and ike-doc packaging.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@73?type=maven-plugin",
+      "purl" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@74?type=maven-plugin",
       "externalReferences" : [
         {
           "type" : "website",
@@ -895,6 +895,439 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/apache/maven/tree/maven-4.0.0-rc-5/api/maven-api-plugin"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.eclipse.jgit/org.eclipse.jgit@7.1.0.202411261347-r?type=jar",
+      "publisher" : "Eclipse JGit Project",
+      "group" : "org.eclipse.jgit",
+      "name" : "org.eclipse.jgit",
+      "version" : "7.1.0.202411261347-r",
+      "description" : "Repository access and algorithms",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "16ced27acbb6fb1ec1a54c99cd17b606"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "67609d333b8ba11d5b3a509aca72c1c8ef72e17e"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "e3bf12301899980afd9d5e67923768db2c18975e8af606e98f0d864db90fdab5"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "871771e5bbdcba663689f268cbfa5cf2f7dfb953b2f6643fe2a88db0ffc316fd828a766e7315b162f8d3d9361473a53f9807900c21a4ba239c6b9b677d3bedff"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "a566cffeaa7d6f98301391fe29c035c80ffa78ee1a8f1ad10aa6f7baab0cf8d5b7dee1c41168554b68a87921ee3f5be7"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "d3a97dc642a313016a0e747d3f7f3366f0a40a5ef3747a65bd577cf20f7ada7d0aea570b2f63f4bc9eb37166d5d57d83"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "5502f713d26d084117a431fe71c48acd65e6221b2771688771b8d5eabf1f4ae3"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "d619801e881dcdaa66d96861e7c18608d04bdc76dfe2a5d2928053540e6599aec5d530616041a7aaddebeb163afb5c635befa5480763b8c41c4e7da4d3704c9e"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "BSD-3-Clause",
+            "url" : "https://opensource.org/licenses/BSD-3-Clause"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/org.eclipse.jgit/org.eclipse.jgit@7.1.0.202411261347-r?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://www.eclipse.org/jgit//org.eclipse.jgit"
+        },
+        {
+          "type" : "build-system",
+          "url" : "https://ci.eclipse.org/jgit"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://repo.eclipse.org/content/repositories/jgit-releases/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/eclipse-jgit/jgit/issues"
+        },
+        {
+          "type" : "mailing-list",
+          "url" : "http://dev.eclipse.org/mhonarc/lists/jgit-dev"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://eclipse.gerrithub.io/plugins/gitiles/eclipse-jgit/jgit/org.eclipse.jgit"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/com.googlecode.javaewah/JavaEWAH@1.2.3?type=jar",
+      "group" : "com.googlecode.javaewah",
+      "name" : "JavaEWAH",
+      "version" : "1.2.3",
+      "description" : "The bit array data structure is implemented in Java as the BitSet class. Unfortunately, this fails to scale without compression. JavaEWAH is a word-aligned compressed variant of the Java bitset class. It uses a 64-bit run-length encoding (RLE) compression scheme. The goal of word-aligned compression is not to achieve the best compression, but rather to improve query processing time. Hence, we try to save CPU cycles, maybe at the expense of storage. However, the EWAH scheme we implemented is always more efficient storage-wise than an uncompressed bitmap (implemented in Java as the BitSet class). Unlike some alternatives, javaewah does not rely on a patented scheme.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "8fdeda28c1fb10e67b3d79f86bef5e61"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "13a27c856e0c8808cee9a64032c58eee11c3adc9"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "d65226949713c4c61a784f41c51167e7b0316f93764398ebba9e4336b3d954c2"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "48cd9df9252c58e9ffe4583e68607944bcdf2ad7a3be7b4317467f503c4f56cdbde358ca7c4f34fa620d01615072a42f3a572fc4f1237e266310b7508e79bcac"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "d1fd074f21b8a54a07d3f4579376d7c3ab72f24814ebc9ba92344e9da4721e9bfa3cda3a599137e4ddf2395a3c5b88e4"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "a553864f196f73c139a104170ab79e780046fb5f322072c5494a6590361021f875afd7168f858b0531b61918ab49b94e"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "bab97f3f893af36c36218a151b0c3fece27d47f358cc19e1ca9c22d77942bb76"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "be817b93c7093d44ec8dded565d7e5651772ce38e9c72283c05191b33d0ecb2798cd385395f553500446573ac49dccc21f4ba3067d71eb89e03daa384d0193be"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/com.googlecode.javaewah/JavaEWAH@1.2.3?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/lemire/javaewah"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/lemire/javaewah/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "scm:git:git@github.com:lemire/javaewah.git"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.slf4j/slf4j-api@1.7.36?type=jar",
+      "publisher" : "QOS.ch",
+      "group" : "org.slf4j",
+      "name" : "slf4j-api",
+      "version" : "1.7.36",
+      "description" : "The slf4j API",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "872da51f5de7f3923da4de871d57fd85"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "6c62681a2f655b49963a5983b8b0950a6120ae14"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "f9b033fc019a44f98b16048da7e2b59edd4a6a527ba60e358f65ab88e0afae03a9340f1b3e8a543d49fa542290f499c5594259affa1ff3e6e7bf3b428d4c610b"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "2b14ad035877087157e379d3277dcdcd79e58d6bdb147c47d29e377d75ce53ad42cafbf22f5fb7827c7e946ff4876b9a"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "3bc3110dafb8d5be16a39f3b2671a466463cd99eb39610c0e4719a7bf2d928f2ea213c734887c6926a07c4cca7769e4b"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "ba2608179fcf46e2291a90b9cbb4aa30d718e481f59c350cc21c73b88d826881"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "14c4edcd19702ef607d78826839d8a6d3a39157df54b89a801d3d3cbbe1307131a77671b041c761122730fb1387888c5ec2e46bdd80e1cb07f8f144676441824"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "MIT",
+            "url" : "https://opensource.org/license/mit/"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/org.slf4j/slf4j-api@1.7.36?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "http://www.slf4j.org"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/qos-ch/slf4j/slf4j-api"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+      "publisher" : "The Apache Software Foundation",
+      "group" : "commons-codec",
+      "name" : "commons-codec",
+      "version" : "1.17.1",
+      "description" : "The Apache Commons Codec component contains encoders and decoders for various formats such as Base16, Base32, Base64, digest, and Hexadecimal. In addition to these widely used encoders and decoders, the codec package also maintains a collection of phonetic encoding utilities.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "7b3438ab4c6d91e0066d410947e43f3e"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "973638b7149d333563584137ebf13a691bb60579"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "f9f6cb103f2ddc3c99a9d80ada2ae7bf0685111fd6bffccb72033d1da4e6ff23"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "a7db98db470e6ad338266ff442fbdfbc277ba1d07a591336f7d15dc49fdac884da7dac04d806628b12437f993d8b5e6a4b800a66590ff11936dbf8bedcd8e860"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "ef0b8e0fbea5ee057b2c39114ff862a057d207d4dd6b4fd2f5ca96bfc039e76274f1dd02ddf985f1fa965736a522f5c5"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "ac30c88a6c4bbdfa79cb697cd179627d2addae842e48e2ab167c4f9c5475d05ef4743f58fbed254dd7abc6f3877644fe"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "f3fe1daf04e63f556d72f4f59f149327b65d899d6afe1de770b42faae2e323df"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "29901c3e6394dd87f13a91b5432c678ac144cb6c86271b06c57c73c0480b23a4688d0266e2dd04abf5e1d148a2e80e1215dd87d2cb5ffbf2c023409f4f5f8f86"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "url" : "https://www.apache.org/licenses/LICENSE-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://commons.apache.org/proper/commons-codec/"
+        },
+        {
+          "type" : "build-system",
+          "url" : "https://github.com/apache/commons-parent/actions"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://repository.apache.org/service/local/staging/deploy/maven2"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://issues.apache.org/jira/browse/CODEC"
+        },
+        {
+          "type" : "mailing-list",
+          "url" : "https://mail-archives.apache.org/mod_mbox/commons-user/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/apache/commons-codec"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.github.java-diff-utils/java-diff-utils@4.12?type=jar",
+      "publisher" : "java-diff-utils",
+      "group" : "io.github.java-diff-utils",
+      "name" : "java-diff-utils",
+      "version" : "4.12",
+      "description" : "The DiffUtils library for computing diffs, applying patches, generationg side-by-side view in Java.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "2bab3395dcfe2ea5b092ad646ca899d3"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "1a712a91324d566eef39817fc5c9980eb10c21db"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "9990a2039778f6b4cc94790141c2868864eacee0620c6c459451121a901cd5b5"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "df950eaccfc24641ba7957e42e0bd54024bafe07450cfed8404b8e9efb00931bb96b2518c582310f98508ac550c34d38cde49a220fc9d743bbc52d0fd25feb53"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "2287a30248356425005ecb9f479d2d5ed9c7111cbb825fd248f561dbba1deef5cd4b7d8f5cff5ed69dd23c9d7e40b68f"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "34f34edf4a5372feb838831bcc52fd8002ec96d6ea0edec2dc2b296402e1ca3eb7dbe8727229e291884e2f4cb2b91e9f"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "572502f94af0ac1fb5a4c5b432ad30da85f7d02eaf5c38fc94cea023a0e613d0"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "4fedbb8a44ffbad06f77ce4227f5ff3ddb5acee9b5d3aacb88ed6aa8f8338a24863297deabf26cf834a8db7e87c38a918a54ad55fc751a6d3a97cc1f8838f937"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.github.java-diff-utils/java-diff-utils@4.12?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/java-diff-utils/java-diff-utils/java-diff-utils"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/java-diff-utils/java-diff-utils/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/java-diff-utils/java-diff-utils.git/java-diff-utils"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.yaml/snakeyaml@2.3?type=jar",
+      "group" : "org.yaml",
+      "name" : "snakeyaml",
+      "version" : "2.3",
+      "description" : "YAML 1.1 parser and emitter for Java",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "2a1c2ee8923dcd6bd6d025751af5df37"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "936b36210e27320f920536f695cf1af210c44586"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "63a76fe66b652360bd4c2c107e6f0258daa7d4bb492008ba8c26fcd230ff9146"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "1c9c78f0d102ae49a7c06f9e20c6a79a4fb9a2af962230ee6e136bda0caf10dcbb9deadc1c3ab15f74a4982ec8f8266217115e357329fde5b3f4f1858882de0c"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "77b1d06e83fd51b83b13372d5ef2eb43c5a66f193db857cee947ae4e900e4a4a0c66a8074435984b9a0b007a69cc2b4f"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "550c4e7a119fd690f750317dc0e20ad7bfc7fa28fa0409fc572bc745d51340a60e9e2ce2af97f458daa561155130bb97"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "d1b540ee39c34ab1484be27d2dd56a14aa48f88668905f9ad176932f4b2cd5d6"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "879ccb34343ebd4ac4888091d97f393c5f75cbb066cf8cf1b9b3eb03a3442cb17326c60bd0db1403aa66ed1f0a5a0d548c96dbce74ebc5c3d6d93950f24b417f"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/org.yaml/snakeyaml@2.3?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://bitbucket.org/snakeyaml/snakeyaml"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://bitbucket.org/snakeyaml/snakeyaml/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://bitbucket.org/snakeyaml/snakeyaml/src"
         }
       ]
     },
@@ -3258,45 +3691,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@73?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@74?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "73",
+      "version" : "74",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "d983b89ced83d82eba6e768f2f67f038"
+          "content" : "ff8dd9817682b044daad09d5aa7dfa01"
         },
         {
           "alg" : "SHA-1",
-          "content" : "17b026379e202f2b4f120d9e1c69954096395cd6"
+          "content" : "c7be5d02f960d865399492e2bdf43ca37b4b596e"
         },
         {
           "alg" : "SHA-256",
-          "content" : "a402d18fcaf5861137271c2c985a6fdff862290907754b5d25983eb1077e6024"
+          "content" : "66b5c39e6325f370dbc3f797b263b93cff9db3d84fdc86a235a84d9eedc431ef"
         },
         {
           "alg" : "SHA-512",
-          "content" : "38d370c75a173eeef84931eb795044e332dbb9b1fb56e4a12cc37fb67b56c90d5879a666c2cf79065e9a8013b9e27c097f843e73b90c982b399ca86f6407d3bd"
+          "content" : "a2bd36fa04240446b8522481fe45dcc33446c426d7157a0f71d8fc5c0ab071a315656707fd9a46772e988d7e48073738d055ef1f8db49f876567f42dd4517b4b"
         },
         {
           "alg" : "SHA-384",
-          "content" : "cef3e1089365f7b770b6107689bb55572295c53a95bcde586c8d4b12c5ce1cfaab410b26675c684293cfea34b3e9c437"
+          "content" : "094ba48fe4f075f81c98192b935e87bfe6ffede7a4f64900c64c3b30f20a8356e5d79438ce8d667736c95ebcd70e7ab6"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "fc8d2bcebb58aa90e99217cf890b131f0a4ffb35604e656a78fda32230929f76eb21c8e0d904bc4f3c1e83c864308763"
+          "content" : "86dae00419acfd0df500688f228cf7285780bba871948afd663d88b3b37648abd4c65d2bc0f05456b5566952289f8f51"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "e6b4f901246e65d2494954cd614e8e9d6a0824dc8d7c55b258218d0e7fb70ddd"
+          "content" : "2462359c80d6cabc8c4aa34c66bd4b4c8ffa8b8eb30cc5551455f5f5316d35d1"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "101b819fa9b95b53b38a0b51c90a855e04b6c4c3d387eab63652ee1c7334960439074770172c99fa5f2642097f9b0b60ecf1a11a56c0f42444f94ac1c7780a5b"
+          "content" : "0c295985616b937c8bb46f5f5273574acd6f3467ce6963c12f29c4061bad6ca35e56c5e76a18eb16e1639c923d3bc8261d2fe2adcc43fb6cf7a7e6bdb16dc5cc"
         }
       ],
       "licenses" : [
@@ -3306,7 +3739,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@73?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@74?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3319,75 +3752,6 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/IKE-Network/ike-docs/koncept-asciidoc-extension"
-        }
-      ]
-    },
-    {
-      "type" : "library",
-      "bom-ref" : "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
-      "group" : "org.yaml",
-      "name" : "snakeyaml",
-      "version" : "2.2",
-      "description" : "YAML 1.1 parser and emitter for Java",
-      "scope" : "required",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "d78aacf5f2de5b52f1a327470efd1ad7"
-        },
-        {
-          "alg" : "SHA-1",
-          "content" : "3af797a25458550a16bf89acc8e4ab2b7f2bfce0"
-        },
-        {
-          "alg" : "SHA-256",
-          "content" : "1467931448a0817696ae2805b7b8b20bfb082652bf9c4efaed528930dc49389b"
-        },
-        {
-          "alg" : "SHA-512",
-          "content" : "11547e75cc80bee26f532e2598bc6e4ffa802941496dc0d8ce017f1b15e01ebbb80e91ed17d1047916e32bf2fc58da532bc71a1dfe93afccc277a296d86634ba"
-        },
-        {
-          "alg" : "SHA-384",
-          "content" : "dae0cb1a7ab9ccc75413f46f18ae160e12e91dfef0c17a07ea547a365e9fb422c071aa01579f2a320f15ce6ee4c29038"
-        },
-        {
-          "alg" : "SHA3-384",
-          "content" : "654b418f330fa02f1111a20c27395ec5c7f463907ae44f60057c94da04f81e815cf1c3959f005026381ef79030049694"
-        },
-        {
-          "alg" : "SHA3-256",
-          "content" : "2c4deb8d79876b80b210ef72dc5de2b19607e50fbe3abf09a4324576ca0881fc"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "0d9be5610b2bcb6bb7562ee8bcc0d68f81d3771958ce9299c5e57e8ec952c96906d711587b7f72936328c72fb41687b4f908c4de3070b78cc1f3e257cf4b715e"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "website",
-          "url" : "https://bitbucket.org/snakeyaml/snakeyaml"
-        },
-        {
-          "type" : "distribution-intake",
-          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        },
-        {
-          "type" : "issue-tracker",
-          "url" : "https://bitbucket.org/snakeyaml/snakeyaml/issues"
-        },
-        {
-          "type" : "vcs",
-          "url" : "https://bitbucket.org/snakeyaml/snakeyaml/src"
         }
       ]
     },
@@ -3449,6 +3813,72 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/sparrowwallet/toucan"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/network.ike.docs/ike-doc-resources@74?type=jar",
+      "publisher" : "IKE Network",
+      "group" : "network.ike.docs",
+      "name" : "ike-doc-resources",
+      "version" : "74",
+      "description" : "Shared build resources for the IKE documentation pipeline: assembly descriptors, PDF themes, renderer configurations, SVGO configs, and AsciiDoc shared docinfo.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "788ec5ea62dba1355e4f30ee93ba3eff"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "9788b65f4af3f26faec648365be6c3e54473a6c1"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "ad197cb84b6be40c0c47dc00a97f8efa41f4c3671d4c054fccc7212a5bf962d3"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "1c0fbe7e56ca6e97a582954a7a168eb972fc0bd85dba7dce019a4c8e6ea3dc60d105224628789c3dbbb8c891352e68158b3c48999d4a23476c79ce02c6a726be"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "f0c16de09104b1868d7cc7e9ce0235ba296c84681ab0ae6b6070aa243871485d0261de9e5d410f5b7bdd4833addf9600"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "2e71c0bc1d2f341b8499a76bfccc2765de5b8bc9dd141df54b9fa284047371679a9b11313d2bac9688508e8eb2cb2cf4"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "54a8e0fbb0a0a5838f3ca17a4da1992b4e080c72dd450b3cf0b31da0fa6025c6"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "b997d171ec50afb19b372adda0b71c2a7e9d6ccea05e4f1c0d5093cf227cc40966accc7f91cf44856587ac2793f3671e7a9b0278471a25ac487c00bb42f0eabe"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/network.ike.docs/ike-doc-resources@74?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/IKE-Network/ike-docs"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://nexus.tinkar.org/repository/ike-staging/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/IKE-Network/ike-docs/ike-doc-resources"
         }
       ]
     },
@@ -3653,18 +4083,22 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@73?type=maven-plugin",
+      "ref" : "pkg:maven/network.ike.docs/ike-doc-maven-plugin@74?type=maven-plugin",
       "dependsOn" : [
         "pkg:maven/network.ike.tooling/ike-maven-plugin-support@220?type=jar",
         "pkg:maven/network.ike.tooling/ike-build-standards@220?classifier=claude&type=zip",
         "pkg:maven/org.apache.maven/maven-api-core@4.0.0-rc-5?type=jar",
         "pkg:maven/org.apache.maven/maven-api-di@4.0.0-rc-5?type=jar",
         "pkg:maven/org.apache.maven/maven-api-plugin@4.0.0-rc-5?type=jar",
+        "pkg:maven/org.eclipse.jgit/org.eclipse.jgit@7.1.0.202411261347-r?type=jar",
+        "pkg:maven/io.github.java-diff-utils/java-diff-utils@4.12?type=jar",
+        "pkg:maven/org.yaml/snakeyaml@2.3?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj-pdf@2.3.23?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj-diagram@2.3.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
-        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@73?type=jar",
+        "pkg:maven/network.ike.docs/koncept-asciidoc-extension@74?type=jar",
+        "pkg:maven/network.ike.docs/ike-doc-resources@74?type=jar",
         "pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@220?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@220?classifier=built-with&type=zip"
@@ -3731,6 +4165,34 @@
         "pkg:maven/org.apache.maven/maven-api-annotations@4.0.0-rc-5?type=jar",
         "pkg:maven/org.apache.maven/maven-api-xml@4.0.0-rc-5?type=jar"
       ]
+    },
+    {
+      "ref" : "pkg:maven/org.eclipse.jgit/org.eclipse.jgit@7.1.0.202411261347-r?type=jar",
+      "dependsOn" : [
+        "pkg:maven/com.googlecode.javaewah/JavaEWAH@1.2.3?type=jar",
+        "pkg:maven/org.slf4j/slf4j-api@1.7.36?type=jar",
+        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/com.googlecode.javaewah/JavaEWAH@1.2.3?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/org.slf4j/slf4j-api@1.7.36?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.github.java-diff-utils/java-diff-utils@4.12?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/org.yaml/snakeyaml@2.3?type=jar",
+      "dependsOn" : [ ]
     },
     {
       "ref" : "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
@@ -3937,18 +4399,18 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@73?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@74?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
+        "pkg:maven/org.yaml/snakeyaml@2.3?type=jar",
         "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
+      "ref" : "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/ike-doc-resources@74?type=jar",
       "dependsOn" : [ ]
     },
     {

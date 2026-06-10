@@ -1,12 +1,12 @@
 ---
-date_published: 2026-06-06
-date_modified: 2026-06-06
+date_published: 2026-06-09
+date_modified: 2026-06-09
 canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 ---
 
 # Built With
 
-Open-source software that `ike-doc-maven-plugin` 73 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `ike-doc-maven-plugin` 74 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
@@ -72,16 +72,16 @@ Direct dependencies of this module, grouped by SPDX expression. Generated from `
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 34 |
+| `Apache-2.0` | 38 |
+| `BSD-3-Clause` | 6 |
+| `MIT` | 4 |
 | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | 3 |
-| `BSD-3-Clause` | 5 |
 | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | 1 |
-| `MIT` | 3 |
 | `Apache-2.0 OR GNU Lesser General Public License version 3` | 2 |
 | `EPL-1.0` | 1 |
 | `BSD-4-Clause` | 1 |
 | `BSD-2-Clause` | 1 |
-| **Total** | **51** |
+| **Total** | **57** |
 
 For full per-component detail (group, artifact, version, hashes, transitive deps), see [bom.json](bom.json)[1] or [licenses.html](licenses.html)[2].
 

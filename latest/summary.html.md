@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-06
-date_modified: 2026-06-06
+date_published: 2026-06-09
+date_modified: 2026-06-09
 canonical_url: https://ike.network/ike-docs/summary.html
 ---
 
@@ -27,5 +27,5 @@ canonical_url: https://ike.network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-docs |
-| Version | 73 |
+| Version | 74 |
 | Type | pom |

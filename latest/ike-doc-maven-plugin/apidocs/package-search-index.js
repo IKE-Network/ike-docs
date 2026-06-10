@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"network.ike.docs.plugin"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"network.ike.docs.plugin"},{"l":"network.ike.docs.plugin.diff"}];updateSearchResults();
