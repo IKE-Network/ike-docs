@@ -284,3 +284,20 @@ footer:
       content: '{page-number}'
     right:
       content: '{document-title}'
+
+# ── Doc-diff review-packet roles (ike-issues #648/#651) ──────────────
+# Inline marks for idoc:diff review packets: insertions green,
+# deletions red struck-through, metadata notes purple. Carried in the
+# default theme so every doc module renders packets with no per-module
+# setup. Companion rules live in ike-print.css (Prince) and the shared
+# docinfo (HTML preview).
+role:
+  diff-ins:
+    font-color: '1A7F37'
+    background-color: 'E6FFEC'
+  diff-del:
+    font-color: 'CF222E'
+    background-color: 'FFEBE9'
+    text-decoration: line-through
+  diff-meta:
+    font-color: '6E40C9'

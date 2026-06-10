@@ -1,0 +1,16 @@
+# Fallback prawn theme for idoc:diff standalone runs (ike-issues#649).
+# Used when neither an explicit theme nor the unpacked ike-doc-resources
+# fonts are available: stock asciidoctor-pdf typography, IKE diff roles.
+# Branded output comes from running after a pipeline build, which
+# provisions ike-default-theme.yml and the Noto fonts.
+extends: default
+role:
+  diff-ins:
+    font-color: '1A7F37'
+    background-color: 'E6FFEC'
+  diff-del:
+    font-color: 'CF222E'
+    background-color: 'FFEBE9'
+    text-decoration: line-through
+  diff-meta:
+    font-color: '6E40C9'

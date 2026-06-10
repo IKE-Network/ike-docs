@@ -730,3 +730,21 @@ svg {
     max-width: 100%;
     height: auto;
 }
+
+
+/* ── Doc-diff review-packet roles (ike-issues #648/#651) ────────── */
+/* Inline marks for idoc:diff review packets rendered on the Prince   */
+/* path. Prawn equivalents live in ike-default-theme.yml.             */
+
+span.diff-ins {
+    color: #1a7f37;
+    background-color: #e6ffec;
+}
+span.diff-del {
+    color: #cf222e;
+    background-color: #ffebe9;
+    text-decoration: line-through;
+}
+span.diff-meta {
+    color: #6e40c9;
+}

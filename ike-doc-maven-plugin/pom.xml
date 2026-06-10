@@ -121,6 +121,27 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- ── Doc-diff toolchain (idoc:diff — ike-issues #648/#649) ──
+             JGit reads both sides of a comparison (refs, blobs, renames,
+             commit trailers); java-diff-utils computes line and word
+             diffs; SnakeYAML reads the change manifest and topic
+             registry. Typed engine — no subprocess git. -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>7.1.0.202411261347-r</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.java-diff-utils</groupId>
+            <artifactId>java-diff-utils</artifactId>
+            <version>4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.3</version>
+        </dependency>
+
         <!-- ── AsciidoctorJ toolchain (idoc:asciidoc, idoc:render-pdf) ── -->
         <dependency>
             <groupId>org.asciidoctor</groupId>
@@ -156,6 +177,14 @@
         <dependency>
             <groupId>network.ike.docs</groupId>
             <artifactId>koncept-asciidoc-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Shared rendering resources on the plugin classpath so
+             idoc:diff can self-provision the branded prawn theme when a
+             pipeline build hasn't unpacked it (ike-issues#649). -->
+        <dependency>
+            <groupId>network.ike.docs</groupId>
+            <artifactId>ike-doc-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
 

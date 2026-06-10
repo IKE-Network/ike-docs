@@ -30,6 +30,12 @@ public enum IdocGoal implements GoalRef {
     /** {@code idoc:copy-default-pdf} — copy the default-renderer PDF to the site. */
     COPY_DEFAULT_PDF("copy-default-pdf", CopyDefaultPdfMojo.class,
             "Copy the project's default-renderer PDF to the site."),
+    /** {@code idoc:diff} — generate and render a doc-diff review packet (#648). */
+    DIFF("diff", DocDiffMojo.class,
+            "Generate and render a review packet: changed topics between "
+                    + "two refs (or a ref and the working tree) marked with "
+                    + "diff roles, plus record of changes, change glossary, "
+                    + "change index, and registry delta."),
     /** {@code idoc:copy-docs} — copy rendered docs into the site. */
     COPY_DOCS("copy-docs", CopyDocsToSiteMojo.class,
             "Copy rendered HTML docs and assets into the Maven site."),
