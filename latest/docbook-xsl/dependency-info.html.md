@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-09
-date_modified: 2026-06-09
+date_published: 2026-06-15
+date_modified: 2026-06-15
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/dependency-info.html
 ---
 
@@ -12,14 +12,14 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/dependency-info.ht
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>docbook-xsl</artifactId>
-  <version>75-SNAPSHOT</version>
+  <version>75</version>
 </dependency>
 ```
 
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="docbook-xsl" rev="75-SNAPSHOT">
+<dependency org="network.ike.docs" name="docbook-xsl" rev="75">
   <artifact name="docbook-xsl" type="jar" />
 </dependency>
 ```
@@ -28,24 +28,24 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/dependency-info.ht
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='docbook-xsl', version='75-SNAPSHOT')
+@Grab(group='network.ike.docs', module='docbook-xsl', version='75')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:docbook-xsl:75-SNAPSHOT'
+implementation 'network.ike.docs:docbook-xsl:75'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "docbook-xsl" % "75-SNAPSHOT"
+libraryDependencies += "network.ike.docs" % "docbook-xsl" % "75"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/docbook-xsl "75-SNAPSHOT"]
+[network.ike.docs/docbook-xsl "75"]
 ```
