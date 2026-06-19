@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependencies.html
 
 # Dependencies (SBOM)
 
-Full transitive dependency graph for `koncept-asciidoc-extension` 76, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
+Full transitive dependency graph for `koncept-asciidoc-extension` 77, generated from [bom.json](bom.json)[1] (CycloneDX 1.6) at build time. Same SBOM source as the SPDX-grouped [licenses.html](licenses.html)[2] and the curated [built-with.html](built-with.html)[3] — three views of the same data.
 
 ## [#summary](#summary)Summary
 
@@ -37,8 +37,8 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 | `joda-time` | `joda-time` | `2.14.0` | `Apache-2.0` | library |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` | `Apache-2.0` | library |
 | `network.ike` | `ike-base-parent` | `15` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `222` | `Apache-2.0` | library |
-| `network.ike.tooling` | `ike-build-standards` | `222` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `223` | `Apache-2.0` | library |
+| `network.ike.tooling` | `ike-build-standards` | `223` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj` | `3.0.1` | `Apache-2.0` | library |
 | `org.asciidoctor` | `asciidoctorj-api` | `3.0.1` | `Apache-2.0` | library |
 | `org.crac` | `crac` | `1.5.0` | `BSD-2-Clause` | library |
@@ -61,7 +61,7 @@ Sorted by group, artifact, version. Click [bom.json](bom.json)[1] for the raw ma
 
 - [Software Bill of Materials (CycloneDX, JSON)](bom.json)[1] — raw machine-readable form. Includes purls, hashes, and dependency-graph edges that this page summarizes.
 - [bom.xml](bom.xml)[4] — same content in XML.
-- As a Maven artifact: pull `koncept-asciidoc-extension:​76` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
+- As a Maven artifact: pull `koncept-asciidoc-extension:​77` with `<classifier>cyclonedx</classifier><type>json</type>` from Nexus / Maven Central.
 
 ## [#see-also](#see-also)See also
 

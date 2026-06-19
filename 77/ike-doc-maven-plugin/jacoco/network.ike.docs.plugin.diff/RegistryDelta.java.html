@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistryDelta.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">RegistryDelta.java</span></div><h1>RegistryDelta.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * Entry-keyed delta of the IKE topic registry between the two sides of
+ * a doc-diff comparison, rendered as an AsciiDoc partial
+ * (ike-issues#650).
+ *
+ * &lt;p&gt;Always keyed by entry id, never by line: the registry is YAML and
+ * ids are its stable keys. Output is condensed for review —
+ * {@code summary}/{@code notes} changes are flagged as rewritten rather
+ * than reproduced, list fields report added/removed items, scalars
+ * report old → new. Covers the per-domain files, the root index counts,
+ * and assembly topic-ref membership.
+ */
+public final class RegistryDelta {
+
+    private final GitSource git;
+    private final String fromRef;
+    private final String toRef;
+
+    /**
+     * Create a delta generator over one comparison.
+     *
+     * @param git     the repository access
+     * @param fromRef the from-side ref
+     * @param toRef   the to-side ref (may be {@link GitSource#WORKTREE})
+     */
+<span class="nc" id="L37">    public RegistryDelta(GitSource git, String fromRef, String toRef) {</span>
+<span class="nc" id="L38">        this.git = git;</span>
+<span class="nc" id="L39">        this.fromRef = fromRef;</span>
+<span class="nc" id="L40">        this.toRef = toRef;</span>
+<span class="nc" id="L41">    }</span>
+
+    /**
+     * Render the delta as an AsciiDoc partial with a level-1 title.
+     *
+     * @param rootRegistry repository-relative path of the thin root
+     *                     index ({@code …/topic-registry.yaml})
+     * @param registryDir  repository-relative directory of the
+     *                     per-domain files ({@code …/topic-registry})
+     * @return the partial's text, or an empty string when nothing in
+     *         the registry changed
+     * @throws IOException on repository access failure
+     */
+    public String render(String rootRegistry, String registryDir) throws IOException {
+<span class="nc" id="L55">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L56">        sb.append(&quot;[[registry-delta]]\n= Registry Delta\n\n&quot;)</span>
+<span class="nc" id="L57">          .append(&quot;Entry-level changes to the topic registry, &quot;)</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">          .append(fromRef).append(&quot; vs &quot;).append(toRef.equals(GitSource.WORKTREE)</span>
+<span class="nc" id="L59">                  ? &quot;working tree&quot; : toRef).append(&quot;.\n&quot;)</span>
+<span class="nc" id="L60">          .append(&quot;Summary and notes fields are flagged as rewritten, not reproduced.\n\n&quot;);</span>
+<span class="nc" id="L61">        boolean any = false;</span>
+
+<span class="nc" id="L63">        Set&lt;String&gt; files = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L64">        files.addAll(git.listYaml(fromRef, registryDir));</span>
+<span class="nc" id="L65">        files.addAll(git.listYaml(toRef, registryDir));</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        for (String path : files) {</span>
+<span class="nc" id="L67">            String name = path.substring(path.lastIndexOf('/') + 1);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (name.equals(&quot;assemblies.yaml&quot;)) {</span>
+<span class="nc" id="L69">                continue;</span>
+            }
+<span class="nc" id="L71">            any |= domainDelta(sb, name.replace(&quot;.yaml&quot;, &quot;&quot;), path);</span>
+<span class="nc" id="L72">        }</span>
+<span class="nc" id="L73">        any |= rootDelta(sb, rootRegistry);</span>
+<span class="nc" id="L74">        any |= assembliesDelta(sb, registryDir + &quot;/assemblies.yaml&quot;);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        return any ? sb.toString() : &quot;&quot;;</span>
+    }
+
+    private boolean domainDelta(StringBuilder sb, String domain, String path) throws IOException {
+<span class="nc" id="L79">        Map&lt;String, Map&lt;String, Object&gt;&gt; oldT = RegistryIndex.topicsOf(load(fromRef, path));</span>
+<span class="nc" id="L80">        Map&lt;String, Map&lt;String, Object&gt;&gt; newT = RegistryIndex.topicsOf(load(toRef, path));</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        List&lt;String&gt; added = newT.keySet().stream().filter(k -&gt; !oldT.containsKey(k)).toList();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        List&lt;String&gt; removed = oldT.keySet().stream().filter(k -&gt; !newT.containsKey(k)).toList();</span>
+<span class="nc" id="L83">        List&lt;String&gt; changed = newT.keySet().stream()</span>
+<span class="nc" id="L84">                .filter(oldT::containsKey)</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                .filter(k -&gt; !Objects.equals(oldT.get(k), newT.get(k)))</span>
+<span class="nc" id="L86">                .toList();</span>
+<span class="nc bnc" id="L87" title="All 6 branches missed.">        if (added.isEmpty() &amp;&amp; removed.isEmpty() &amp;&amp; changed.isEmpty()) {</span>
+<span class="nc" id="L88">            return false;</span>
+        }
+<span class="nc" id="L90">        sb.append(&quot;== &quot;).append(domain).append(&quot;\n\n&quot;);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (!added.isEmpty()) {</span>
+<span class="nc" id="L92">            sb.append(&quot;.New entries (&quot;).append(added.size()).append(&quot;)\n&quot;);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            for (String id : added) {</span>
+<span class="nc" id="L94">                Map&lt;String, Object&gt; t = newT.get(id);</span>
+<span class="nc" id="L95">                sb.append(&quot;* `&quot;).append(id).append(&quot;` — &quot;).append(t.get(&quot;title&quot;))</span>
+<span class="nc" id="L96">                  .append(&quot; (&quot;).append(t.get(&quot;type&quot;)).append('/')</span>
+<span class="nc" id="L97">                  .append(t.get(&quot;status&quot;)).append(&quot;)\n&quot;);</span>
+<span class="nc" id="L98">            }</span>
+<span class="nc" id="L99">            sb.append('\n');</span>
+        }
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (!removed.isEmpty()) {</span>
+<span class="nc" id="L102">            sb.append(&quot;.Removed entries (&quot;).append(removed.size()).append(&quot;)\n&quot;);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            for (String id : removed) {</span>
+<span class="nc" id="L104">                sb.append(&quot;* `&quot;).append(id).append(&quot;`\n&quot;);</span>
+<span class="nc" id="L105">            }</span>
+<span class="nc" id="L106">            sb.append('\n');</span>
+        }
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (!changed.isEmpty()) {</span>
+<span class="nc" id="L109">            sb.append(&quot;.Changed entries (&quot;).append(changed.size()).append(&quot;)\n&quot;);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            for (String id : changed) {</span>
+<span class="nc" id="L111">                sb.append(&quot;* `&quot;).append(id).append(&quot;` — &quot;)</span>
+<span class="nc" id="L112">                  .append(fieldDelta(oldT.get(id), newT.get(id))).append('\n');</span>
+<span class="nc" id="L113">            }</span>
+<span class="nc" id="L114">            sb.append('\n');</span>
+        }
+<span class="nc" id="L116">        return true;</span>
+    }
+
+    /**
+     * Describe the field-level differences between two entries in
+     * condensed form.
+     *
+     * @param oldEntry the from-side entry
+     * @param newEntry the to-side entry
+     * @return a semicolon-joined description of changed fields
+     */
+    static String fieldDelta(Map&lt;String, Object&gt; oldEntry, Map&lt;String, Object&gt; newEntry) {
+<span class="nc" id="L128">        Set&lt;String&gt; keys = new LinkedHashSet&lt;&gt;(oldEntry.keySet());</span>
+<span class="nc" id="L129">        keys.addAll(newEntry.keySet());</span>
+<span class="nc" id="L130">        List&lt;String&gt; parts = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (String k : keys) {</span>
+<span class="nc" id="L132">            Object o = oldEntry.get(k);</span>
+<span class="nc" id="L133">            Object n = newEntry.get(k);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            if (Objects.equals(o, n)) {</span>
+<span class="nc" id="L135">                continue;</span>
+            }
+<span class="nc bnc" id="L137" title="All 3 branches missed.">            switch (k) {</span>
+<span class="nc" id="L138">                case &quot;summary&quot;, &quot;notes&quot; -&gt; parts.add(k + &quot; rewritten&quot;);</span>
+                case &quot;related&quot;, &quot;dependencies&quot;, &quot;keywords&quot;, &quot;issues&quot; -&gt; {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    List&lt;?&gt; ol = o instanceof List&lt;?&gt; l ? l : List.of();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                    List&lt;?&gt; nl = n instanceof List&lt;?&gt; l ? l : List.of();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                    List&lt;String&gt; plus = nl.stream().filter(x -&gt; !ol.contains(x))</span>
+<span class="nc" id="L143">                            .map(String::valueOf).toList();</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                    List&lt;String&gt; minus = ol.stream().filter(x -&gt; !nl.contains(x))</span>
+<span class="nc" id="L145">                            .map(String::valueOf).toList();</span>
+<span class="nc" id="L146">                    StringBuilder f = new StringBuilder(k);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">                    if (!plus.isEmpty()) {</span>
+<span class="nc" id="L148">                        f.append(&quot; +[&quot;).append(String.join(&quot;, &quot;, plus)).append(']');</span>
+                    }
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                    if (!minus.isEmpty()) {</span>
+<span class="nc" id="L151">                        f.append(&quot; -[&quot;).append(String.join(&quot;, &quot;, minus)).append(']');</span>
+                    }
+<span class="nc" id="L153">                    parts.add(f.toString());</span>
+<span class="nc" id="L154">                }</span>
+<span class="nc" id="L155">                default -&gt; parts.add(k + &quot;: &quot; + clip(o) + &quot; → &quot; + clip(n));</span>
+            }
+<span class="nc" id="L157">        }</span>
+<span class="nc" id="L158">        return String.join(&quot;; &quot;, parts);</span>
+    }
+
+    private boolean rootDelta(StringBuilder sb, String rootRegistry) throws IOException {
+<span class="nc" id="L162">        Object oldRoot = load(fromRef, rootRegistry);</span>
+<span class="nc" id="L163">        Object newRoot = load(toRef, rootRegistry);</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        if (!(oldRoot instanceof Map&lt;?, ?&gt; om) || !(newRoot instanceof Map&lt;?, ?&gt; nm)) {</span>
+<span class="nc" id="L165">            return false;</span>
+        }
+<span class="nc" id="L167">        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (!Objects.equals(om.get(&quot;topic-count&quot;), nm.get(&quot;topic-count&quot;))) {</span>
+<span class="nc" id="L169">            lines.add(&quot;* total topic-count: &quot; + om.get(&quot;topic-count&quot;)</span>
+<span class="nc" id="L170">                    + &quot; → &quot; + nm.get(&quot;topic-count&quot;));</span>
+        }
+<span class="nc" id="L172">        Map&lt;String, Object&gt; oldCounts = domainCounts(om.get(&quot;domains&quot;));</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        for (Map.Entry&lt;String, Object&gt; e : domainCounts(nm.get(&quot;domains&quot;)).entrySet()) {</span>
+<span class="nc" id="L174">            Object o = oldCounts.get(e.getKey());</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">            if (!Objects.equals(o, e.getValue())) {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                lines.add(&quot;* &quot; + e.getKey() + &quot;: &quot; + (o == null ? &quot;new domain&quot; : o)</span>
+<span class="nc" id="L177">                        + &quot; → &quot; + e.getValue());</span>
+            }
+<span class="nc" id="L179">        }</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (lines.isEmpty()) {</span>
+<span class="nc" id="L181">            return false;</span>
+        }
+<span class="nc" id="L183">        sb.append(&quot;== Root index\n\n&quot;);</span>
+<span class="nc" id="L184">        lines.forEach(l -&gt; sb.append(l).append('\n'));</span>
+<span class="nc" id="L185">        sb.append('\n');</span>
+<span class="nc" id="L186">        return true;</span>
+    }
+
+    private boolean assembliesDelta(StringBuilder sb, String path) throws IOException {
+<span class="nc" id="L190">        Map&lt;String, List&lt;String&gt;&gt; oldRefs = RegistryIndex.assemblyRefsOf(load(fromRef, path));</span>
+<span class="nc" id="L191">        Map&lt;String, List&lt;String&gt;&gt; newRefs = RegistryIndex.assemblyRefsOf(load(toRef, path));</span>
+<span class="nc" id="L192">        Set&lt;String&gt; ids = new LinkedHashSet&lt;&gt;(oldRefs.keySet());</span>
+<span class="nc" id="L193">        ids.addAll(newRefs.keySet());</span>
+<span class="nc" id="L194">        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        for (String id : ids) {</span>
+<span class="nc" id="L196">            List&lt;String&gt; ol = oldRefs.getOrDefault(id, List.of());</span>
+<span class="nc" id="L197">            List&lt;String&gt; nl = newRefs.getOrDefault(id, List.of());</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            List&lt;String&gt; plus = nl.stream().filter(x -&gt; !ol.contains(x)).toList();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            List&lt;String&gt; minus = ol.stream().filter(x -&gt; !nl.contains(x)).toList();</span>
+<span class="nc bnc" id="L200" title="All 4 branches missed.">            if (plus.isEmpty() &amp;&amp; minus.isEmpty()) {</span>
+<span class="nc" id="L201">                continue;</span>
+            }
+<span class="nc" id="L203">            StringBuilder f = new StringBuilder(&quot;* `&quot; + id + &quot;` —&quot;);</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            if (!plus.isEmpty()) {</span>
+<span class="nc" id="L205">                f.append(&quot; +[&quot;).append(String.join(&quot;, &quot;, plus)).append(']');</span>
+            }
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            if (!minus.isEmpty()) {</span>
+<span class="nc" id="L208">                f.append(&quot; -[&quot;).append(String.join(&quot;, &quot;, minus)).append(']');</span>
+            }
+<span class="nc" id="L210">            lines.add(f.toString());</span>
+<span class="nc" id="L211">        }</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (lines.isEmpty()) {</span>
+<span class="nc" id="L213">            return false;</span>
+        }
+<span class="nc" id="L215">        sb.append(&quot;== Assemblies (topic-refs)\n\n&quot;);</span>
+<span class="nc" id="L216">        lines.forEach(l -&gt; sb.append(l).append('\n'));</span>
+<span class="nc" id="L217">        sb.append('\n');</span>
+<span class="nc" id="L218">        return true;</span>
+    }
+
+    private Object load(String ref, String path) throws IOException {
+<span class="nc" id="L222">        return RegistryIndex.parse(git.read(ref, path));</span>
+    }
+
+    private static Map&lt;String, Object&gt; domainCounts(Object domains) {
+<span class="nc" id="L226">        Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        if (domains instanceof List&lt;?&gt; list) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">            for (Object d : list) {</span>
+<span class="nc bnc" id="L229" title="All 4 branches missed.">                if (d instanceof Map&lt;?, ?&gt; dm &amp;&amp; dm.get(&quot;id&quot;) != null) {</span>
+<span class="nc" id="L230">                    out.put(String.valueOf(dm.get(&quot;id&quot;)), dm.get(&quot;topic-count&quot;));</span>
+                }
+<span class="nc" id="L232">            }</span>
+        }
+<span class="nc" id="L234">        return out;</span>
+    }
+
+    private static String clip(Object o) {
+<span class="nc" id="L238">        String s = String.valueOf(o);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        return s.length() &lt;= 40 ? s : s.substring(0, 40);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
