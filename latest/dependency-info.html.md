@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-15
-date_modified: 2026-06-15
+date_published: 2026-06-18
+date_modified: 2026-06-18
 canonical_url: https://ike.network/ike-docs/dependency-info.html
 ---
 
@@ -12,7 +12,7 @@ canonical_url: https://ike.network/ike-docs/dependency-info.html
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>ike-docs</artifactId>
-  <version>75</version>
+  <version>76</version>
   <type>pom</type>
 </dependency>
 ```
@@ -20,7 +20,7 @@ canonical_url: https://ike.network/ike-docs/dependency-info.html
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="ike-docs" rev="75">
+<dependency org="network.ike.docs" name="ike-docs" rev="76">
   <artifact name="ike-docs" type="pom" />
 </dependency>
 ```
@@ -29,24 +29,24 @@ canonical_url: https://ike.network/ike-docs/dependency-info.html
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='ike-docs', version='75')
+@Grab(group='network.ike.docs', module='ike-docs', version='76')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:ike-docs:75'
+implementation 'network.ike.docs:ike-docs:76'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "ike-docs" % "75"
+libraryDependencies += "network.ike.docs" % "ike-docs" % "76"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/ike-docs "75"]
+[network.ike.docs/ike-docs "76"]
 ```
