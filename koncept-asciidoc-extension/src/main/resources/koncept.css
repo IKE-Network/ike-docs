@@ -54,6 +54,18 @@ a.koncept-identicon-ref .koncept-label {
     letter-spacing: 0.02em;
 }
 
+/* Component-kind sigil (ike-issues#638): the leading D/S/P/? letter. The colour is set inline from
+   the kind (data, for cross-medium parity); these rules mirror the emitted styles for consistency
+   when koncept.css IS linked. The stamp kind renders the gray pentagon SVG, not a letter. */
+.koncept-sigil {
+    font-weight: bold;
+    margin-right: 0.25em;
+}
+.koncept-sigil-description { color: #b8860b; }
+.koncept-sigil-semantic    { color: #3b8c2f; }
+.koncept-sigil-pattern     { color: #7a4fb5; }
+.koncept-sigil-unknown     { color: #b00020; }
+
 /* Larger identicon in the Referenced Koncepts glossary */
 img.koncept-glossary-icon {
     height: 1.3em;

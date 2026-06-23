@@ -119,6 +119,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .sctid(stringField(fields, "sctid"))
                     .iri(stringField(fields, "iri"))
                     .uuids(stringListField(fields, "uuids"))
+                    .kind(stringField(fields, "kind"))
                     .build();
 
             defs.put(identifier, def);

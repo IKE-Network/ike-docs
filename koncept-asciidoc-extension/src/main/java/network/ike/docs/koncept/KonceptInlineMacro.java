@@ -8,6 +8,9 @@ import org.asciidoctor.extension.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import network.ike.docs.konceptcore.KonceptKind;
+import network.ike.docs.konceptcore.StampSigilGeometry;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -75,22 +78,38 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
 
         // Determine display label
         // Positional attribute 1 is the content inside brackets: k:Target[label]
-        String label = resolveLabel(target, attributes);
+        String label = resolveLabel(doc, target, attributes);
 
         String backend = doc.getAttribute("backend", "html5").toString();
         Optional<String> idString = resolveIdString(doc, target);
+
+        // The component kind drives the honest sigil (ike-issues#638): concept = bare, a stamp shows
+        // the gray pentagon (no name), every other kind a coloured letter. Absent/unknown → concept.
+        KonceptKind kind = KonceptDefinitions.forDocument(doc).lookup(target)
+                .map(KonceptDefinition::kind)
+                .map(KonceptKind::fromString)
+                .orElse(KonceptKind.CONCEPT);
+
+        // A STAMP is provenance — never an identicon or a name-pill — in EVERY backend, so it must be
+        // decided BEFORE the identicon dispatch (ike-issues#638). Otherwise a stamp that carries an id
+        // (idString present) would fall through to the pdf/docbook identicon paths below and
+        // masquerade as a named concept.
+        if (kind.isStamp()) {
+            return createPhraseNode(parent, "quoted", renderStamp(backend, target, label),
+                    Map.of("subs", ":none"));
+        }
 
         // Prawn PDF: a passthrough <img> is not rendered by the Prawn
         // converter, so return a real inline image node. Fall through to the
         // text badge below when no identicon is available.
         if ("pdf".equals(backend) && idString.isPresent()) {
-            return createIdenticonImageNode(parent, target, label, idString.get());
+            return createIdenticonImageNode(parent, target, label, idString.get(), kind);
         }
 
         String rendered;
         if ("docbook5".equals(backend) || "docbook".equals(backend)) {
             rendered = idString.isPresent()
-                    ? renderDocbookIdenticon(target, label, idString.get())
+                    ? renderDocbookIdenticon(target, label, idString.get(), kind)
                     : renderDocbookBadge(target, label);
         } else if ("pdf".equals(backend)) {
             // Prawn PDF without an identicon: only basic HTML is supported.
@@ -99,8 +118,8 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         } else {
             // html5 and CSS-based PDF backends (Prince, AH, WeasyPrint).
             rendered = idString.isPresent()
-                    ? renderHtmlIdenticon(target, label, idString.get())
-                    : KonceptSvgRenderer.render(target, label);
+                    ? renderHtmlIdenticon(target, label, idString.get(), kind)
+                    : KonceptSvgRenderer.render(target, label, kind);
         }
 
         // Return as inline passthrough (no further substitution)
@@ -127,29 +146,33 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * html5 / CSS-PDF: inline identicon image (data URI) + label, linked to
      * the glossary anchor.
      */
-    private String renderHtmlIdenticon(String target, String label, String idString) {
+    private String renderHtmlIdenticon(String target, String label, String idString, KonceptKind kind) {
         String dataUri = IdenticonRenderer.dataUri(idString);
-        // Self-contained inline styles — no dependency on koncept.css, which
-        // consuming documents may not link. A soft rounded "chip" rendered with
-        // display:inline (NOT inline-block) so its vertical padding extends the
-        // tint visually but never changes the line box height — lines holding a
-        // koncept stay the same height as the rest of the paragraph. The chip
-        // holds the identicon (0.9em, balanced against small caps) and a
-        // small-caps IKE-blue label. white-space:nowrap + box-decoration-break
-        // keep it a single intact pill.
+        // Honest kind sigil (ike-issues#638): a concept stays bare; every other letter kind prepends
+        // its coloured glyph (colour inline, from the kind, for cross-medium parity). Self-contained
+        // inline styles — no dependency on koncept.css, which consuming documents may not link.
+        String sigil = kind.hasLetterGlyph()
+                ? "<span class=\"koncept-sigil koncept-sigil-%s\" "
+                        .formatted(kind.name().toLowerCase(java.util.Locale.ROOT))
+                        + "style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
+                        .formatted(kind.colorHex(), escapeXml(kind.glyph()))
+                : "";
+        // A soft rounded "chip" rendered with display:inline (NOT inline-block) so its vertical
+        // padding extends the tint visually but never changes the line box height. The chip holds the
+        // identicon (0.9em, balanced against small caps) and a small-caps IKE-blue label.
         return """
             <a href="#koncept-%s" class="koncept-ref koncept-identicon-ref" title="%s" \
             style="text-decoration:none;white-space:nowrap;">\
             <span class="koncept-chip" style="display:inline;background:#e9eff6;\
             border-radius:0.5em;padding:0.12em 0.45em;\
             -webkit-box-decoration-break:clone;box-decoration-break:clone;">\
-            <img class="koncept-identicon" src="%s" alt="%s identicon" \
+            %s<img class="koncept-identicon" src="%s" alt="%s identicon" \
             style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
             image-rendering:pixelated;margin-right:0.3em;"/>\
             <span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
             letter-spacing:0.02em;">%s</span></span></a>\
             """.formatted(
-                escapeXml(target), escapeXml(label), dataUri,
+                escapeXml(target), escapeXml(label), sigil, dataUri,
                 escapeXml(label), escapeXml(label)).strip();
     }
 
@@ -158,14 +181,44 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * file (resolved by FOP/XEP), with the label as alt text, linked to the
      * glossary entry.
      */
-    private String renderDocbookIdenticon(String target, String label, String idString) {
+    private String renderDocbookIdenticon(String target, String label, String idString, KonceptKind kind) {
         String uri = new File(IdenticonRenderer.pngFile(idString)).toURI().toString();
+        // Honest kind glyph (ike-issues#638): a non-concept letter kind keeps its glyph as text before
+        // the identicon so it is not silently dropped in FO. The pentagon image is HTML-only; FO/Prawn
+        // carry the letter (the data channel), not necessarily its colour.
+        String glyphPrefix = kind.hasLetterGlyph()
+                ? "<phrase role=\"koncept-sigil\">" + escapeXml(kind.glyph()) + " </phrase>"
+                : "";
         return "<link linkend=\"koncept-" + escapeXml(target) + "\">"
+                + glyphPrefix
                 + "<inlinemediaobject>"
                 + "<imageobject><imagedata fileref=\"" + escapeXml(uri) + "\""
                 + " format=\"PNG\" contentwidth=\"12pt\" contentdepth=\"12pt\"/></imageobject>"
                 + "<textobject><phrase>" + escapeXml(label) + "</phrase></textobject>"
                 + "</inlinemediaobject></link>";
+    }
+
+    /**
+     * A stamp's per-backend rendering — never an identicon or a name-pill (ike-issues#638): on html5
+     * (and CSS-PDF) the locked gray pentagon plus the compact provenance text; on docbook5/FO a gray
+     * phrase; on Prawn gray inline text. The pentagon image is deferred in FO/Prawn, where the
+     * provenance text ({@code status · date-time · author}) carries the meaning.
+     *
+     * @param backend the asciidoctor backend
+     * @param target  the koncept identifier (anchor)
+     * @param label   the compact stamp provenance text
+     * @return the per-backend inline markup for the stamp
+     */
+    private String renderStamp(String backend, String target, String label) {
+        if ("docbook5".equals(backend) || "docbook".equals(backend)) {
+            return "<link linkend=\"koncept-" + escapeXml(target) + "\">"
+                    + "<phrase role=\"koncept-stamp\">⬠ " + escapeXml(label) + "</phrase></link>";
+        }
+        if ("pdf".equals(backend)) {
+            return "<font color=\"" + escapeXml(StampSigilGeometry.COLOR) + "\">⬠</font> "
+                    + "<code>" + escapeXml(label) + "</code>";
+        }
+        return KonceptSvgRenderer.renderStampSigil(target, label);
     }
 
     /** DocBook5 fallback when no identicon is available. */
@@ -181,10 +234,12 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * to the glossary anchor.
      */
     private PhraseNode createIdenticonImageNode(StructuralNode parent, String target,
-                                               String label, String idString) {
+                                               String label, String idString, KonceptKind kind) {
         String absPath = IdenticonRenderer.pngFile(idString);
         Map<String, Object> attrs = new HashMap<>();
-        attrs.put("alt", label);
+        // Prawn renders the identicon image; the letter glyph (a visible sigil only on html5) is
+        // folded into the alt text so the kind is not entirely lost in the PDF (ike-issues#638).
+        attrs.put("alt", kind.hasLetterGlyph() ? kind.glyph() + " " + label : label);
         attrs.put("width", "18");
         attrs.put("link", "#koncept-" + target);
         Map<Object, Object> options = new HashMap<>();
@@ -205,12 +260,19 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * Resolve the display label for this koncept reference.
      * Priority: explicit bracket content > camelCase split of target.
      */
-    private String resolveLabel(String target, Map<String, Object> attributes) {
+    private String resolveLabel(Document doc, String target, Map<String, Object> attributes) {
         Object explicit = attributes.get("1");
         if (explicit != null && !explicit.toString().isBlank()) {
             return explicit.toString().strip();
         }
-        return splitCamelCase(target);
+        // Prefer the koncept's declared label (a stamp's "status · date-time · author" provenance, or
+        // "Heart Failure (en)") over a camelCase split of the identifier; the split is the last resort
+        // for an unregistered reference. KonceptDefinition.build() defaults label to the split when the
+        // yml omits it, so this never regresses a plain concept.
+        return KonceptDefinitions.forDocument(doc).lookup(target)
+                .map(KonceptDefinition::label)
+                .filter(l -> l != null && !l.isBlank())
+                .orElseGet(() -> splitCamelCase(target));
     }
 
     /**

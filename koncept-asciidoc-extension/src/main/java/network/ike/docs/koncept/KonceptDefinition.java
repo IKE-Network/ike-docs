@@ -15,6 +15,9 @@ import java.util.List;
  * @param uuids        Optional explicit Tinkar PublicId UUIDs, in datastore
  *                     order, used to compute the Komet identicon; when absent
  *                     the identicon is derived from {@code sctid}
+ * @param kind         Optional component kind ({@code concept}, {@code description},
+ *                     {@code semantic}, {@code pattern}, {@code stamp}, {@code unknown});
+ *                     {@code null} or absent means {@code concept} (the bare default)
  */
 public record KonceptDefinition(
         String identifier,
@@ -23,7 +26,8 @@ public record KonceptDefinition(
         String axiom,
         String sctid,
         String iri,
-        List<String> uuids
+        List<String> uuids,
+        String kind
 ) {
 
     /**
@@ -38,6 +42,7 @@ public record KonceptDefinition(
         private String sctid;
         private String iri;
         private List<String> uuids;
+        private String kind;
 
         /** Creates a new empty builder. */
         public Builder() {
@@ -122,6 +127,18 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets the component kind ({@code concept}, {@code description}, {@code semantic},
+         * {@code pattern}, {@code stamp}, {@code unknown}); {@code null} or absent means concept.
+         *
+         * @param kind the kind name to set
+         * @return this builder
+         */
+        public Builder kind(String kind) {
+            this.kind = kind;
+            return this;
+        }
+
+        /**
          * Builds an immutable {@link KonceptDefinition} from this builder's state.
          *
          * @return the constructed definition
@@ -136,7 +153,7 @@ public record KonceptDefinition(
                 label = identifier.replaceAll("([a-z])([A-Z])", "$1 $2");
             }
             List<String> uuidList = uuids != null ? List.copyOf(uuids) : List.of();
-            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri, uuidList);
+            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri, uuidList, kind);
         }
     }
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+                             http://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.docs</groupId>
+        <artifactId>ike-docs</artifactId>
+    </parent>
+
+    <artifactId>koncept-core</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Koncept Core</name>
+    <url>https://github.com/IKE-Network/ike-docs</url>
+    <description>
+        Rendering-agnostic Koncept core (ike-issues#623): the shared, JavaFX-free component-kind
+        scheme (KonceptKind) and the locked stamp-sigil pentagon geometry (StampSigilGeometry),
+        consumed by the koncept AsciiDoc extension and — downstream in the release cascade — by Komet.
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Inherits java.version=25 and enable-preview from the parent. -->
+        <junit.version>5.10.2</junit.version>
+    </properties>
+
+    <dependencies>
+        <!-- Test-only: pins the locked stamp-sigil constants (StampSigilGeometryTest). -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

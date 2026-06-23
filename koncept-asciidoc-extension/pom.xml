@@ -48,6 +48,13 @@
     </properties>
 
     <dependencies>
+        <!-- Shared rendering-agnostic Koncept core (#623): KonceptKind + StampSigilGeometry. -->
+        <dependency>
+            <groupId>network.ike.docs</groupId>
+            <artifactId>koncept-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- AsciidoctorJ — provided at runtime by asciidoctor-maven-plugin -->
         <dependency>
             <groupId>org.asciidoctor</groupId>

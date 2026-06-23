@@ -9,6 +9,10 @@
 #   axiom:      Description logic axiom using Unicode DL notation
 #   sctid:      SNOMED CT concept identifier (optional)
 #   iri:        OWL IRI for the concept (optional)
+#   kind:       Component kind — concept (default), description, semantic,
+#               pattern, stamp, unknown. Drives the honest kind sigil
+#               (ike-issues#638): concept is bare; description/semantic/pattern/
+#               unknown prepend a coloured letter; stamp shows the gray pentagon.
 #
 # DL Notation Guide:
 #   ≡  equivalentTo      ⊑  subClassOf
@@ -322,3 +326,26 @@ SystolicBloodPressure:
   axiom: "≡ ObservableEntity ⊓ ∃componentOf.BloodPressure ⊓ ∃inheresIn.ArterialStructure ⊓ ∃hasPhase.Systole"
   sctid: "271649006"
   iri: "http://snomed.info/id/271649006"
+
+# --- Component-kind demos (ike-issues#638): the honest kind sigil across media. ---
+
+# A description semantic — renders the amber "D" sigil before the identicon + label.
+HeartFailurePreferredName:
+  label: Heart Failure (en)
+  definition: >
+    The English preferred-term description of Heart Failure — a description
+    semantic, not the concept it describes.
+  kind: description
+  sctid: "84114007"
+
+# A stamp — renders the gray provenance pentagon (no name-pill, no identicon).
+ExampleStamp:
+  label: Active · 2024-09-30 14:30 · KEC
+  # A stamp has a PublicId — yet it is still rendered as the gray pentagon + provenance text, never
+  # as the identicon a PublicId would otherwise produce (ike-issues#638).
+  uuids:
+    - "a1b2c3d4-0000-4000-8000-000000000001"
+  definition: >
+    A STAMP coordinate (status · time · author · module · path) — provenance,
+    rendered as the five-axis pentagon sigil rather than a name.
+  kind: stamp
