@@ -1,18 +1,18 @@
 ---
-date_published: 2026-06-19
-date_modified: 2026-06-19
+date_published: 2026-06-23
+date_modified: 2026-06-23
 canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 79, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 80, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
 | SPDX Expression | Components |
 | --- | --- |
-| `Apache-2.0` | 38 |
+| `Apache-2.0` | 39 |
 | `Apache-2.0 OR GNU Lesser General Public License version 3` | 2 |
 | `BSD-2-Clause` | 1 |
 | `BSD-3-Clause` | 6 |
@@ -21,7 +21,7 @@ Licenses for declared dependencies of `ike-doc-maven-plugin` 79, grouped by SPDX
 | `EPL-2.0 OR GNU General Public License Version 2 OR GNU Lesser General Public License Version 2.1` | 1 |
 | `EPL-2.0 OR GPL-2.0 OR LGPL-2.1` | 3 |
 | `MIT` | 4 |
-| **Total** | **57** |
+| **Total** | **58** |
 
 ## [#apache-2-0](#apache-2-0)Apache-2.0
 
@@ -45,8 +45,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `ike-doc-resources` | `79` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `79` |
+| `network.ike.docs` | `ike-doc-resources` | `80` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `80` |
+| `network.ike.docs` | `koncept-core` | `80` |
 | `network.ike.tooling` | `ike-build-standards` | `225` |
 | `network.ike.tooling` | `ike-build-standards` | `225` |
 | `network.ike.tooling` | `ike-build-standards` | `225` |

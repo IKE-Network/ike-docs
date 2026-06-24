@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 79</div>
+<div class="about-language"><b>Koncept Extension</b> 80</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -58,7 +58,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
-<li><a href="#render(java.lang.String,java.lang.String)" tabindex="0">render(String, String)</a></li>
+<li><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)" tabindex="0">render(String, String, KonceptKind)</a></li>
+<li><a href="#renderStampSigil(java.lang.String,java.lang.String)" tabindex="0">renderStampSigil(String, String)</a></li>
 </ol>
 </li>
 </ol>
@@ -78,13 +79,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Generates inline SVG badge markup for Koncept references.
 <p>
-The badge renders as a compact, clickable pill that links to the
-glossary anchor for the referenced Koncept. The "K" prefix is
-rendered in a contrasting weight to visually distinguish Koncept
-references from surrounding text.
+The badge renders as a compact, clickable pill that links to the glossary anchor for the
+referenced Koncept. The component-kind sigil (ike-issues#638) leads the badge: a coloured
+letter (<code>D</code>/<code>S</code>/<code>P</code>/<code>?</code>) for description/semantic/pattern/unknown, the
+locked <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a> pentagon for a stamp (no name), and nothing for a bare concept.
 <p>
-SVG is used rather than HTML/CSS to ensure consistent rendering
-across HTML and PDF backends.</div>
+SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and PDF backends.</div>
 </div>
 </section>
 <section class="summary">
@@ -101,10 +101,19 @@ across HTML and PDF backends.</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#render(java.lang.String,java.lang.String)" class="member-name-link">render</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">render</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label,
+ <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Render an inline SVG badge for a Koncept reference.</div>
+<div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSigil(java.lang.String,java.lang.String)" class="member-name-link">renderStampSigil</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
+<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading dots and a centre hub,
+no name.</div>
 </div>
 </div>
 </div>
@@ -124,18 +133,46 @@ across HTML and PDF backends.</div>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="render(java.lang.String,java.lang.String)">
+<section class="detail" id="render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)">
 <h3>render</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">render</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</span></div>
-<div class="block">Render an inline SVG badge for a Koncept reference.</div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label,
+ <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</span></div>
+<div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>target</code> - the CamelCase koncept identifier (used for anchor link)</dd>
+<dd><code>target</code> - the CamelCase koncept identifier (used for the anchor link)</dd>
 <dd><code>label</code> - the human-readable display label</dd>
+<dd><code>kind</code> - the component kind; <code>null</code> is treated as <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
 <dt>Returns:</dt>
 <dd>complete SVG+anchor HTML string suitable for inline passthrough</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="renderStampSigil(java.lang.String,java.lang.String)">
+<h3>renderStampSigil</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">renderStampSigil</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</span></div>
+<div class="block">Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
+<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading dots and a centre hub,
+no name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so the
+pentagon is identical in every medium.
+
+<p>The <code>label</code> is the caller-formatted, verbatim provenance string; this renderer only
+HTML-escapes it and never reformats or re-spells it. In particular the status token within
+<code>label</code> must already be the verbatim closed-vocabulary value (render closed vocabularies
+verbatim).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>target</code> - the CamelCase koncept identifier (used for the anchor link)</dd>
+<dd><code>label</code> - the compact stamp text (<code>status · date-time · author</code>) shown beside the
+              pentagon — provenance, in place of a name</dd>
+<dt>Returns:</dt>
+<dd>complete SVG+anchor HTML string for the stamp pentagon + compact text</dd>
 </dl>
 </div>
 </section>

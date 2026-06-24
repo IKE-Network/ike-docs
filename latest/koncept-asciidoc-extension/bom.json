@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:64c28e4e-c2e4-345c-91a4-7ac00408af4f",
+  "serialNumber" : "urn:uuid:63bdfc8f-b723-365b-95ca-4390bb63063b",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@79?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@80?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "koncept-asciidoc-extension",
-      "version" : "79",
+      "version" : "80",
       "description" : "AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@79?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@80?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -102,6 +102,72 @@
     ]
   },
   "components" : [
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/network.ike.docs/koncept-core@80?type=jar",
+      "publisher" : "IKE Network",
+      "group" : "network.ike.docs",
+      "name" : "koncept-core",
+      "version" : "80",
+      "description" : "Rendering-agnostic Koncept core (ike-issues#623): the shared, JavaFX-free component-kind scheme (KonceptKind) and the locked stamp-sigil pentagon geometry (StampSigilGeometry), consumed by the koncept AsciiDoc extension and — downstream in the release cascade — by Komet.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "17cc3f1dea44dedb4dc5974f5f8b3022"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "7a1b3af71b9e8468c7b2262020a089a88cb4fbdc"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "298e9017c6ce31f767033fda96b9fd4a26e6a425b2daeb55e9bf6b9f7abdec0f"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "500333707ca7b1e4722a0a86f683ee5a5bdcb702d6bd1abb2d1ae0ef96cfd49998600dc28c16c66ac79cd9bb6e4254afe483ce2db21412d0c0600931471e098b"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "56076d5728a252f0683d08c794b703470daa55a183403c77b1442cf2dbfb07ece3628dacab5202d2200014a591b4d526"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "dba0d7c41a6fc4051cc83d9b27ab769e613a26f865d41780aa01f7df82a50274d9703a02679ee80646ef9aad876b204e"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "816afc5620d3f08511e0959f3fbb3285434ae73d041d924dc3b096c67ff0ef47"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "f1d2dee0b34e73eaacccb055a29aa5e8d4578c38206a2ea1cc77c6eb8db6821be2d210bb67f6a3c08ef145f6733d4062acebfa3d50832edb9faba59e90890256"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/network.ike.docs/koncept-core@80?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/IKE-Network/ike-docs"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://nexus.tinkar.org/repository/ike-staging/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/IKE-Network/ike-docs/koncept-core"
+        }
+      ]
+    },
     {
       "type" : "library",
       "bom-ref" : "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
@@ -2533,8 +2599,9 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@79?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/koncept-asciidoc-extension@80?type=jar",
       "dependsOn" : [
+        "pkg:maven/network.ike.docs/koncept-core@80?type=jar",
         "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",
         "pkg:maven/org.yaml/snakeyaml@2.2?type=jar",
@@ -2544,6 +2611,10 @@
         "pkg:maven/network.ike.tooling/ike-build-standards@225?classifier=site-theme&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@225?classifier=built-with&type=zip"
       ]
+    },
+    {
+      "ref" : "pkg:maven/network.ike.docs/koncept-core@80?type=jar",
+      "dependsOn" : [ ]
     },
     {
       "ref" : "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",

@@ -33,7 +33,7 @@ loadScripts(document, 'script');</script>
 <li><a href="search.html">Search</a></li>
 <li><a href="help-doc.html#index">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 79</div>
+<div class="about-language"><b>Koncept Extension</b> 80</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -207,12 +207,21 @@ front- or back-matter page schemes instead of the chapter scheme.</div>
 </dl>
 <h2 class="title" id="I:K">K</h2>
 <dl class="index">
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#kind()" class="member-name-link">kind()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./network/ike/docs/koncept/KonceptDefinition.html#param-kind"><code>kind</code></a> record component.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.Builder.html#kind(java.lang.String)" class="member-name-link">kind(String)</a> - Method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></dt>
+<dd>
+<div class="block">Sets the component kind (<code>concept</code>, <code>description</code>, <code>semantic</code>,
+<code>pattern</code>, <code>stamp</code>, <code>unknown</code>); <code>null</code> or absent means concept.</div>
+</dd>
 <dt><a href="network/ike/docs/koncept/KonceptDefinition.html" class="type-name-link" title="class in network.ike.docs.koncept">KonceptDefinition</a> - Record Class in <a href="network/ike/docs/koncept/package-summary.html">network.ike.docs.koncept</a></dt>
 <dd>
 <div class="block">Immutable definition of a Koncept, including natural language definition,
 description logic axiom, and optional terminology identifiers.</div>
 </dd>
-<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List, String)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>KonceptDefinition</code> record class.</div>
 </dd>
@@ -328,9 +337,15 @@ other backends' output unchanged.</div>
 <dl class="index">
 <dt><a href="network/ike/docs/koncept/KonceptExtensionRegistry.html#register(org.asciidoctor.Asciidoctor)" class="member-name-link">register(Asciidoctor)</a> - Method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptExtensionRegistry.html" title="class in network.ike.docs.koncept">KonceptExtensionRegistry</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html#render(java.lang.String,java.lang.String)" class="member-name-link">render(String, String)</a> - Static method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSvgRenderer.html" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a></dt>
+<dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">render(String, String, KonceptKind)</a> - Static method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSvgRenderer.html" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a></dt>
 <dd>
-<div class="block">Render an inline SVG badge for a Koncept reference.</div>
+<div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html#renderStampSigil(java.lang.String,java.lang.String)" class="member-name-link">renderStampSigil(String, String)</a> - Static method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSvgRenderer.html" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a></dt>
+<dd>
+<div class="block">Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
+<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading dots and a centre hub,
+no name.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>
