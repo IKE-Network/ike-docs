@@ -118,14 +118,15 @@ public final class KonceptSvgRenderer {
      * no name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so the
      * pentagon is identical in every medium.
      *
+     * <p>The {@code label} is the caller-formatted, verbatim provenance string; this renderer only
+     * HTML-escapes it and never reformats or re-spells it. In particular the status token within
+     * {@code label} must already be the verbatim closed-vocabulary value (render closed vocabularies
+     * verbatim).
+     *
      * @param target the CamelCase koncept identifier (used for the anchor link)
      * @param label  the compact stamp text ({@code status · date-time · author}) shown beside the
      *               pentagon — provenance, in place of a name
      * @return complete SVG+anchor HTML string for the stamp pentagon + compact text
-     * @implNote {@code label} is the caller-formatted, verbatim provenance string; the renderer only
-     *           HTML-escapes it and never reformats or re-spells it. In particular the status token
-     *           within {@code label} must already be the verbatim closed-vocabulary value
-     *           (ike-issues feedback: render closed vocabularies verbatim).
      */
     public static String renderStampSigil(String target, String label) {
         double centerX = PADDING_X + STAMP_BOX / 2.0;
