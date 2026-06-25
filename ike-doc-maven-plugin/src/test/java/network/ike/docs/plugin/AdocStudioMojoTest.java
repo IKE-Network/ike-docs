@@ -2,6 +2,7 @@ package network.ike.docs.plugin;
 
 import org.junit.jupiter.api.Test;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +76,7 @@ class AdocStudioMojoTest {
      */
     private String invokeResolveHome(AdocStudioMojo mojo, String path) {
         try {
-            var method = AdocStudioMojo.class
+            Method method = AdocStudioMojo.class
                     .getDeclaredMethod("resolveHome", String.class);
             method.setAccessible(true);
             return (String) method.invoke(mojo, path);

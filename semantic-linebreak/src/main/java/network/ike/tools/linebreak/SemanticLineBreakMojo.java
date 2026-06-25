@@ -89,7 +89,7 @@ public class SemanticLineBreakMojo extends AbstractMojo {
         }
 
         // ── Configure the breaker ──────────────────────────────────────
-        var breaker = new SemanticLineBreaker();
+        SemanticLineBreaker breaker = new SemanticLineBreaker();
         breaker.setSentencesOnly(sentencesOnly);
         breaker.setClauseBreak(clauseBreak);
         breaker.setClauseBreakThreshold(clauseBreakThreshold);

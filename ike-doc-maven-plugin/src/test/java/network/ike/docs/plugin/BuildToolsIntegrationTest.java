@@ -207,7 +207,7 @@ class BuildToolsIntegrationTest {
     /** Inject a Log into a Maven 4 Mojo's private @Inject field. */
     private static void injectLog(Object mojo, org.apache.maven.api.plugin.Log log) {
         try {
-            var field = mojo.getClass().getDeclaredField("log");
+            java.lang.reflect.Field field = mojo.getClass().getDeclaredField("log");
             field.setAccessible(true);
             field.set(mojo, log);
         } catch (ReflectiveOperationException e) {

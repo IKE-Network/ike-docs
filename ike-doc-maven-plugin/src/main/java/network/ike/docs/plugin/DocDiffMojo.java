@@ -20,6 +20,7 @@ import org.asciidoctor.SafeMode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -559,7 +560,7 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
             Path dir = outputDirectory.toPath().resolve(".theme");
             Files.createDirectories(dir);
             Path target = dir.resolve("ike-default-theme.yml");
-            try (var in = DocDiffMojo.class.getResourceAsStream(resource)) {
+            try (InputStream in = DocDiffMojo.class.getResourceAsStream(resource)) {
                 if (in == null) {
                     getLog().warn("idoc:diff: theme resource " + resource
                             + " not on plugin classpath — PDF renders unthemed");

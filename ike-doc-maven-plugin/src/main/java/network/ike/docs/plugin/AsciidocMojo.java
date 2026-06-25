@@ -24,6 +24,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Generate documentation from AsciiDoc sources using AsciidoctorJ.
@@ -497,7 +498,7 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
         // Asciidoctor puts in a <h1> with id="document-title" even in
         // embedded mode if showtitle is set. Failing that, derive from
         // the source filename.
-        var h1 = java.util.regex.Pattern.compile("<h1[^>]*>([^<]+)</h1>")
+        java.util.regex.Matcher h1 = java.util.regex.Pattern.compile("<h1[^>]*>([^<]+)</h1>")
                 .matcher(html);
         if (h1.find()) return h1.group(1);
         // Fall back to filename without extension
@@ -620,7 +621,7 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      * @return list of .adoc files
      */
     static List<File> scanAsciiDocFiles(Path root) {
-        try (var stream = Files.walk(root)) {
+        try (Stream<Path> stream = Files.walk(root)) {
             return stream
                     .filter(p -> p.toString().endsWith(".adoc"))
                     .filter(p -> !p.getFileName().toString().startsWith("_"))

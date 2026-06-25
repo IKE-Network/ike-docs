@@ -126,7 +126,7 @@ public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
      * @throws IOException if an I/O error occurs
      */
     static int zipDirectory(Path sourceDir, Path zipFile) throws IOException {
-        var count = new AtomicInteger();
+        AtomicInteger count = new AtomicInteger();
         try (OutputStream fos = Files.newOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos)) {
 

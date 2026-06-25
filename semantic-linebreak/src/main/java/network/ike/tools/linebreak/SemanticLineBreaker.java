@@ -175,7 +175,7 @@ public class SemanticLineBreaker {
      * @throws IOException if an I/O error occurs while reading or writing files
      */
     public static void main(String[] args) throws IOException {
-        var tool = new SemanticLineBreaker();
+        SemanticLineBreaker tool = new SemanticLineBreaker();
         tool.run(args);
     }
 
@@ -330,7 +330,7 @@ public class SemanticLineBreaker {
             // to the range), reformat only the prose lines, then reinsert
             // the directives at their original relative positions.
 
-            var rawLines = new ArrayList<>(result.subList(start, end + 1));
+            ArrayList<String> rawLines = new ArrayList<>(result.subList(start, end + 1));
             List<int[]> directivePositions = new ArrayList<>(); // [relativeIndex, ...]
             List<String> proseLines = new ArrayList<>();
 

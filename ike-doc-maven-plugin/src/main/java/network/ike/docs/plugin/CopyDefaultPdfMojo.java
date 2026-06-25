@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.stream.Stream;
 
 /**
  * Copy the selected renderer's PDF to the default {@code pdf/} directory.
@@ -85,7 +86,7 @@ public class CopyDefaultPdfMojo implements org.apache.maven.api.plugin.Mojo {
         try {
             // Copy all PDFs from the renderer directory (supports multi-document builds)
             boolean copied = false;
-            try (var stream = Files.list(sourceDir)) {
+            try (Stream<Path> stream = Files.list(sourceDir)) {
                 for (Path source : stream
                         .filter(p -> p.toString().endsWith(".pdf"))
                         .toList()) {

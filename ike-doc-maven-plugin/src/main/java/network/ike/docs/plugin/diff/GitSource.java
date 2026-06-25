@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Read-only access to both sides of a doc-diff comparison
@@ -174,7 +175,7 @@ public final class GitSource implements AutoCloseable {
         if (WORKTREE.equals(ref)) {
             Path d = workTree().resolve(dir);
             if (Files.isDirectory(d)) {
-                try (var stream = Files.list(d)) {
+                try (Stream<Path> stream = Files.list(d)) {
                     stream.filter(p -> p.getFileName().toString().endsWith(".yaml"))
                             .sorted()
                             .forEach(p -> out.add(dir + "/" + p.getFileName()));
@@ -218,7 +219,7 @@ public final class GitSource implements AutoCloseable {
     public String findPath(String ref, String suffix) throws IOException {
         if (WORKTREE.equals(ref)) {
             Path root = workTree();
-            try (var stream = Files.walk(root)) {
+            try (Stream<Path> stream = Files.walk(root)) {
                 return stream
                         .filter(Files::isRegularFile)
                         .map(p -> root.relativize(p).toString().replace(java.io.File.separatorChar, '/'))
@@ -433,7 +434,7 @@ public final class GitSource implements AutoCloseable {
 
     private CanonicalTreeParser treeParser(ObjectId treeId) throws IOException {
         CanonicalTreeParser parser = new CanonicalTreeParser();
-        try (var reader = repo.newObjectReader()) {
+        try (org.eclipse.jgit.lib.ObjectReader reader = repo.newObjectReader()) {
             parser.reset(reader, treeId);
         }
         return parser;

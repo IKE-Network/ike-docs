@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -260,7 +261,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     private List<String> buildPrinceCommand(String exe,
                                             Path input, Path output) {
-        var cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(exe);
         cmd.add("--silent");
         cmd.add(input.toString());
@@ -278,7 +279,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     private List<String> buildAhCommand(String exe,
                                         Path input, Path output) {
-        var cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(exe);
         cmd.add("-cssmode");
         for (File css : effectiveStylesheets()) {
@@ -298,7 +299,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     private List<String> buildWeasyprintCommand(String exe,
                                                 Path input, Path output) {
-        var cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(exe);
         cmd.add(input.toString());
         cmd.add(output.toString());
@@ -311,7 +312,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     private List<String> buildXepCommand(String exe,
                                          Path input, Path output) {
-        var cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(exe);
         if (classpath != null && !classpath.isEmpty()) {
             cmd.add("-classpath");
@@ -330,7 +331,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     private List<String> buildFopCommand(String exe,
                                          Path input, Path output) {
-        var cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(exe);
         if (classpath != null && !classpath.isEmpty()) {
             cmd.add("-classpath");
@@ -376,7 +377,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
             throws IOException, InterruptedException {
         getLog().debug("render-pdf: " + String.join(" ", command));
 
-        var builder = new ProcessBuilder(command);
+        ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
 
         if (logFile != null) {
@@ -411,7 +412,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         }
 
         String ext = type.inputExtension;
-        var result = new ArrayList<Path>();
+        ArrayList<Path> result = new ArrayList<Path>();
 
         if (documents != null && !documents.isEmpty()) {
             // Explicit document list
@@ -492,7 +493,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
         // For external executables, check if on PATH
         try {
-            var check = new ProcessBuilder("which", exe);
+            ProcessBuilder check = new ProcessBuilder("which", exe);
             check.redirectErrorStream(true);
             check.redirectOutput(ProcessBuilder.Redirect.DISCARD);
             int result = check.start().waitFor();
@@ -528,7 +529,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
      */
     private boolean htmlBodyHasClass(Path html, String requiredClass) {
         try {
-            var matcher = BODY_CLASS.matcher(Files.readString(html));
+            Matcher matcher = BODY_CLASS.matcher(Files.readString(html));
             if (matcher.find()) {
                 for (String token : matcher.group(1).trim().split("\\s+")) {
                     if (token.equals(requiredClass)) {
