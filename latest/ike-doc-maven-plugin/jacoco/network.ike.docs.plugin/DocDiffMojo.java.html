@@ -20,6 +20,7 @@ import org.asciidoctor.SafeMode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +91,7 @@ import java.util.Set;
  * @see &lt;a href=&quot;https://github.com/IKE-Network/ike-issues/issues/648&quot;&gt;ike-issues#648&lt;/a&gt;
  */
 @Mojo(name = &quot;diff&quot;)
-<span class="nc" id="L93">public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {</span>
+<span class="nc" id="L94">public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {</span>
 
     private static final String REGISTRY_SUFFIX = &quot;src/docs/asciidoc/topic-registry.yaml&quot;;
 
@@ -102,7 +103,7 @@ import java.util.Set;
      *
      * @return the logger
      */
-<span class="nc" id="L105">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+<span class="nc" id="L106">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
 
     /** The from side: any committish. */
     @Parameter(property = &quot;ike.diff.from&quot;, defaultValue = &quot;HEAD&quot;)
@@ -185,131 +186,131 @@ import java.util.Set;
 
     @Override
     public void execute() throws MojoException {
-<span class="nc bnc" id="L188" title="All 4 branches missed.">        if (sourceDirectory == null || !sourceDirectory.isDirectory()) {</span>
-<span class="nc" id="L189">            getLog().info(&quot;idoc:diff: no src/docs/asciidoc in this module — skipping&quot;);</span>
-<span class="nc" id="L190">            return;</span>
+<span class="nc bnc" id="L189" title="All 4 branches missed.">        if (sourceDirectory == null || !sourceDirectory.isDirectory()) {</span>
+<span class="nc" id="L190">            getLog().info(&quot;idoc:diff: no src/docs/asciidoc in this module — skipping&quot;);</span>
+<span class="nc" id="L191">            return;</span>
         }
-<span class="nc" id="L192">        try (GitSource git = GitSource.open(sourceDirectory.toPath().getParent())) {</span>
-<span class="nc" id="L193">            Path workTree = git.workTree();</span>
-<span class="nc" id="L194">            Path srcAbs = sourceDirectory.toPath().toAbsolutePath().normalize();</span>
-<span class="nc bnc" id="L195" title="All 2 branches missed.">            if (!srcAbs.startsWith(workTree)) {</span>
-<span class="nc" id="L196">                throw new MojoException(&quot;sourceDirectory is outside the git work tree: &quot; + srcAbs);</span>
+<span class="nc" id="L193">        try (GitSource git = GitSource.open(sourceDirectory.toPath().getParent())) {</span>
+<span class="nc" id="L194">            Path workTree = git.workTree();</span>
+<span class="nc" id="L195">            Path srcAbs = sourceDirectory.toPath().toAbsolutePath().normalize();</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if (!srcAbs.startsWith(workTree)) {</span>
+<span class="nc" id="L197">                throw new MojoException(&quot;sourceDirectory is outside the git work tree: &quot; + srcAbs);</span>
             }
-<span class="nc" id="L198">            String srcRel = workTree.relativize(srcAbs).toString().replace(File.separatorChar, '/');</span>
+<span class="nc" id="L199">            String srcRel = workTree.relativize(srcAbs).toString().replace(File.separatorChar, '/');</span>
 
-<span class="nc bnc" id="L200" title="All 2 branches missed.">            boolean corpus = git.read(to, srcRel + &quot;/topic-registry.yaml&quot;) != null;</span>
-<span class="nc bnc" id="L201" title="All 2 branches missed.">            String registryRoot = corpus ? srcRel : discoverRegistryRoot(git);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            boolean corpus = git.read(to, srcRel + &quot;/topic-registry.yaml&quot;) != null;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            String registryRoot = corpus ? srcRel : discoverRegistryRoot(git);</span>
 
-<span class="nc" id="L203">            List&lt;GitSource.Change&gt; own = git.changes(from, to, srcRel + &quot;/&quot;, &quot;.adoc&quot;);</span>
-<span class="nc bnc" id="L204" title="All 4 branches missed.">            String topicsPrefix = (corpus ? srcRel : registryRoot) == null</span>
-<span class="nc" id="L205">                    ? srcRel + &quot;/topics/&quot;</span>
-<span class="nc bnc" id="L206" title="All 2 branches missed.">                    : (corpus ? srcRel : registryRoot) + &quot;/topics/&quot;;</span>
+<span class="nc" id="L204">            List&lt;GitSource.Change&gt; own = git.changes(from, to, srcRel + &quot;/&quot;, &quot;.adoc&quot;);</span>
+<span class="nc bnc" id="L205" title="All 4 branches missed.">            String topicsPrefix = (corpus ? srcRel : registryRoot) == null</span>
+<span class="nc" id="L206">                    ? srcRel + &quot;/topics/&quot;</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                    : (corpus ? srcRel : registryRoot) + &quot;/topics/&quot;;</span>
 
             List&lt;GitSource.Change&gt; markCandidates;
             List&lt;GitSource.Change&gt; scaffoldCandidates;
-<span class="nc" id="L210">            String membershipDelta = null;</span>
-<span class="nc" id="L211">            String packetTitle = title;</span>
+<span class="nc" id="L211">            String membershipDelta = null;</span>
+<span class="nc" id="L212">            String packetTitle = title;</span>
 
-<span class="nc bnc" id="L213" title="All 2 branches missed.">            if (corpus) {</span>
-<span class="nc" id="L214">                markCandidates = own.stream()</span>
-<span class="nc" id="L215">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
-<span class="nc" id="L216">                scaffoldCandidates = own.stream()</span>
-<span class="nc bnc" id="L217" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
-<span class="nc bnc" id="L218" title="All 2 branches missed.">            } else if (registryRoot != null) {</span>
-<span class="nc" id="L219">                RegistryIndex index = RegistryIndex.load(git, to, registryRoot);</span>
-<span class="nc" id="L220">                List&lt;String&gt; refs = index.assemblyRefs(assemblyId);</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">                if (refs == null) {</span>
-<span class="nc" id="L222">                    getLog().warn(&quot;idoc:diff: assembly '&quot; + assemblyId</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (corpus) {</span>
+<span class="nc" id="L215">                markCandidates = own.stream()</span>
+<span class="nc" id="L216">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc" id="L217">                scaffoldCandidates = own.stream()</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            } else if (registryRoot != null) {</span>
+<span class="nc" id="L220">                RegistryIndex index = RegistryIndex.load(git, to, registryRoot);</span>
+<span class="nc" id="L221">                List&lt;String&gt; refs = index.assemblyRefs(assemblyId);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                if (refs == null) {</span>
+<span class="nc" id="L223">                    getLog().warn(&quot;idoc:diff: assembly '&quot; + assemblyId</span>
                             + &quot;' is not registered in &quot; + registryRoot
                             + &quot;/topic-registry/assemblies.yaml — scaffolding-only packet&quot;);
-<span class="nc" id="L225">                    markCandidates = List.of();</span>
+<span class="nc" id="L226">                    markCandidates = List.of();</span>
                 } else {
-<span class="nc" id="L227">                    Set&lt;String&gt; included = new LinkedHashSet&lt;&gt;();</span>
-<span class="nc bnc" id="L228" title="All 2 branches missed.">                    for (String ref : refs) {</span>
-<span class="nc" id="L229">                        String file = index.topicFile(ref);</span>
-<span class="nc bnc" id="L230" title="All 2 branches missed.">                        if (file != null) {</span>
-<span class="nc" id="L231">                            included.add(registryRoot + &quot;/&quot; + file);</span>
+<span class="nc" id="L228">                    Set&lt;String&gt; included = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">                    for (String ref : refs) {</span>
+<span class="nc" id="L230">                        String file = index.topicFile(ref);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                        if (file != null) {</span>
+<span class="nc" id="L232">                            included.add(registryRoot + &quot;/&quot; + file);</span>
                         }
-<span class="nc" id="L233">                    }</span>
-<span class="nc" id="L234">                    markCandidates = git.changes(from, to, topicsPrefix, &quot;.adoc&quot;).stream()</span>
-<span class="nc bnc" id="L235" title="All 2 branches missed.">                            .filter(c -&gt; c.status() != ChangeStatus.DELETED)</span>
-<span class="nc" id="L236">                            .filter(c -&gt; included.contains(c.displayPath()))</span>
-<span class="nc" id="L237">                            .toList();</span>
-<span class="nc" id="L238">                    membershipDelta = RegistryIndex.membershipDelta(</span>
+<span class="nc" id="L234">                    }</span>
+<span class="nc" id="L235">                    markCandidates = git.changes(from, to, topicsPrefix, &quot;.adoc&quot;).stream()</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">                            .filter(c -&gt; c.status() != ChangeStatus.DELETED)</span>
+<span class="nc" id="L237">                            .filter(c -&gt; included.contains(c.displayPath()))</span>
+<span class="nc" id="L238">                            .toList();</span>
+<span class="nc" id="L239">                    membershipDelta = RegistryIndex.membershipDelta(</span>
                             git, from, to, registryRoot, assemblyId);
-<span class="nc" id="L240">                    packetTitle = title + &quot; — &quot; + assemblyId;</span>
+<span class="nc" id="L241">                    packetTitle = title + &quot; — &quot; + assemblyId;</span>
                 }
-<span class="nc" id="L242">                scaffoldCandidates = own;</span>
-<span class="nc" id="L243">            } else {</span>
-<span class="nc" id="L244">                markCandidates = own.stream()</span>
-<span class="nc" id="L245">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
-<span class="nc" id="L246">                scaffoldCandidates = own.stream()</span>
-<span class="nc bnc" id="L247" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc" id="L243">                scaffoldCandidates = own;</span>
+<span class="nc" id="L244">            } else {</span>
+<span class="nc" id="L245">                markCandidates = own.stream()</span>
+<span class="nc" id="L246">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc" id="L247">                scaffoldCandidates = own.stream()</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
             }
 
-<span class="nc bnc" id="L250" title="All 4 branches missed.">            if (topics != null &amp;&amp; !topics.isBlank()) {</span>
-<span class="nc bnc" id="L251" title="All 2 branches missed.">                RegistryIndex index = registryRoot == null</span>
-<span class="nc" id="L252">                        ? null : RegistryIndex.load(git, to, registryRoot);</span>
-<span class="nc" id="L253">                Set&lt;String&gt; wanted = new LinkedHashSet&lt;&gt;();</span>
-<span class="nc bnc" id="L254" title="All 2 branches missed.">                for (String token : topics.split(&quot;,&quot;)) {</span>
-<span class="nc" id="L255">                    String t = token.strip();</span>
-<span class="nc bnc" id="L256" title="All 2 branches missed.">                    String file = index == null ? null : index.topicFile(t);</span>
-<span class="nc bnc" id="L257" title="All 2 branches missed.">                    wanted.add(file != null ? registryRoot + &quot;/&quot; + file : t);</span>
+<span class="nc bnc" id="L251" title="All 4 branches missed.">            if (topics != null &amp;&amp; !topics.isBlank()) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                RegistryIndex index = registryRoot == null</span>
+<span class="nc" id="L253">                        ? null : RegistryIndex.load(git, to, registryRoot);</span>
+<span class="nc" id="L254">                Set&lt;String&gt; wanted = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">                for (String token : topics.split(&quot;,&quot;)) {</span>
+<span class="nc" id="L256">                    String t = token.strip();</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                    String file = index == null ? null : index.topicFile(t);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                    wanted.add(file != null ? registryRoot + &quot;/&quot; + file : t);</span>
                 }
-<span class="nc" id="L259">                markCandidates = markCandidates.stream()</span>
-<span class="nc" id="L260">                        .filter(c -&gt; wanted.stream().anyMatch(</span>
-<span class="nc bnc" id="L261" title="All 4 branches missed.">                                w -&gt; c.displayPath().equals(w) || c.displayPath().endsWith(w)))</span>
-<span class="nc" id="L262">                        .toList();</span>
-<span class="nc" id="L263">                getLog().info(&quot;idoc:diff topic filter active: &quot; + markCandidates.size()</span>
+<span class="nc" id="L260">                markCandidates = markCandidates.stream()</span>
+<span class="nc" id="L261">                        .filter(c -&gt; wanted.stream().anyMatch(</span>
+<span class="nc bnc" id="L262" title="All 4 branches missed.">                                w -&gt; c.displayPath().equals(w) || c.displayPath().endsWith(w)))</span>
+<span class="nc" id="L263">                        .toList();</span>
+<span class="nc" id="L264">                getLog().info(&quot;idoc:diff topic filter active: &quot; + markCandidates.size()</span>
                         + &quot; of the changed topics match &quot; + topics);
             }
 
-<span class="nc" id="L267">            Path diffDir = outputDirectory.toPath().resolve(&quot;asciidoc/_diff&quot;);</span>
-<span class="nc" id="L268">            Files.createDirectories(diffDir);</span>
+<span class="nc" id="L268">            Path diffDir = outputDirectory.toPath().resolve(&quot;asciidoc/_diff&quot;);</span>
+<span class="nc" id="L269">            Files.createDirectories(diffDir);</span>
 
-<span class="nc" id="L270">            ChangeManifest manifest = resolveManifest(git, markCandidates, own);</span>
+<span class="nc" id="L271">            ChangeManifest manifest = resolveManifest(git, markCandidates, own);</span>
 
             // Stamp registry (#656): one stamp per range commit plus one
             // for uncommitted content; suppressed when only one exists.
-<span class="nc bnc" id="L274" title="All 2 branches missed.">            String stampToEnd = GitSource.WORKTREE.equals(to) ? &quot;HEAD&quot; : to;</span>
-<span class="nc" id="L275">            List&lt;GitSource.CommitMeta&gt; rangeCommits = git.commitsBetween(from, stampToEnd);</span>
-<span class="nc" id="L276">            Set&lt;String&gt; rangeIds = new LinkedHashSet&lt;&gt;();</span>
-<span class="nc" id="L277">            rangeCommits.forEach(c -&gt; rangeIds.add(c.id()));</span>
-<span class="nc bnc" id="L278" title="All 2 branches missed.">            boolean hasUncommitted = GitSource.WORKTREE.equals(to)</span>
-<span class="nc bnc" id="L279" title="All 2 branches missed.">                    &amp;&amp; !git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;).isEmpty();</span>
-<span class="nc" id="L280">            StampRegistry stampRegistry = new StampRegistry(rangeCommits, git.branch(),</span>
-<span class="nc" id="L281">                    git.userName(), java.time.LocalDate.now().toString(),</span>
-<span class="nc bnc" id="L282" title="All 2 branches missed.">                    from + &quot;..&quot; + (GitSource.WORKTREE.equals(to) ? &quot;worktree&quot; : to));</span>
-<span class="nc bnc" id="L283" title="All 4 branches missed.">            boolean stampsOn = stamps &amp;&amp; stampRegistry.multipleStampsPossible(hasUncommitted);</span>
-<span class="nc" id="L284">            List&lt;PacketAssembler.TopicEntry&gt; topics = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L285">            List&lt;String&gt; deleted = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L286">            List&lt;PacketAssembler.ScaffoldEntry&gt; scaffolds = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L287">            List&lt;List&lt;String&gt;&gt; anchorsByChange = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L288">            manifest.changes().forEach(c -&gt; anchorsByChange.add(new ArrayList&lt;&gt;()));</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">            String stampToEnd = GitSource.WORKTREE.equals(to) ? &quot;HEAD&quot; : to;</span>
+<span class="nc" id="L276">            List&lt;GitSource.CommitMeta&gt; rangeCommits = git.commitsBetween(from, stampToEnd);</span>
+<span class="nc" id="L277">            Set&lt;String&gt; rangeIds = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L278">            rangeCommits.forEach(c -&gt; rangeIds.add(c.id()));</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            boolean hasUncommitted = GitSource.WORKTREE.equals(to)</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                    &amp;&amp; !git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;).isEmpty();</span>
+<span class="nc" id="L281">            StampRegistry stampRegistry = new StampRegistry(rangeCommits, git.branch(),</span>
+<span class="nc" id="L282">                    git.userName(), java.time.LocalDate.now().toString(),</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">                    from + &quot;..&quot; + (GitSource.WORKTREE.equals(to) ? &quot;worktree&quot; : to));</span>
+<span class="nc bnc" id="L284" title="All 4 branches missed.">            boolean stampsOn = stamps &amp;&amp; stampRegistry.multipleStampsPossible(hasUncommitted);</span>
+<span class="nc" id="L285">            List&lt;PacketAssembler.TopicEntry&gt; topics = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L286">            List&lt;String&gt; deleted = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L287">            List&lt;PacketAssembler.ScaffoldEntry&gt; scaffolds = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L288">            List&lt;List&lt;String&gt;&gt; anchorsByChange = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L289">            manifest.changes().forEach(c -&gt; anchorsByChange.add(new ArrayList&lt;&gt;()));</span>
 
-<span class="nc bnc" id="L290" title="All 2 branches missed.">            for (GitSource.Change c : markCandidates) {</span>
-<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
-<span class="nc" id="L292">                    deleted.add(c.displayPath());</span>
-<span class="nc" id="L293">                    continue;</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">            for (GitSource.Change c : markCandidates) {</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
+<span class="nc" id="L293">                    deleted.add(c.displayPath());</span>
+<span class="nc" id="L294">                    continue;</span>
                 }
-<span class="nc" id="L295">                List&lt;String&gt; newLines = lines(git.read(to, c.newPath()));</span>
-<span class="nc bnc" id="L296" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.status() == ChangeStatus.ADDED</span>
-<span class="nc" id="L297">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
-<span class="nc" id="L298">                AdocDiffMarker.StampSource stampSource = null;</span>
-<span class="nc" id="L299">                String addedStampRef = null;</span>
-<span class="nc bnc" id="L300" title="All 2 branches missed.">                if (stampsOn) {</span>
-<span class="nc" id="L301">                    String domain = domainOf(c.displayPath(), topicsPrefix);</span>
-<span class="nc" id="L302">                    List&lt;String&gt; lineIds = git.blameInRange(to, c.newPath(), rangeIds);</span>
+<span class="nc" id="L296">                List&lt;String&gt; newLines = lines(git.read(to, c.newPath()));</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.status() == ChangeStatus.ADDED</span>
+<span class="nc" id="L298">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
+<span class="nc" id="L299">                AdocDiffMarker.StampSource stampSource = null;</span>
+<span class="nc" id="L300">                String addedStampRef = null;</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                if (stampsOn) {</span>
+<span class="nc" id="L302">                    String domain = domainOf(c.displayPath(), topicsPrefix);</span>
+<span class="nc" id="L303">                    List&lt;String&gt; lineIds = git.blameInRange(to, c.newPath(), rangeIds);</span>
                     // blameInRange speaks precisely: a commit id, UNCOMMITTED,
                     // or null (out of range / indexing gap) — null falls to the
                     // coarse range stamp, never to uncommitted.
-<span class="nc" id="L306">                    boolean rangeEmpty = rangeCommits.isEmpty();</span>
-<span class="nc" id="L307">                    stampSource = new AdocDiffMarker.StampSource() {</span>
+<span class="nc" id="L307">                    boolean rangeEmpty = rangeCommits.isEmpty();</span>
+<span class="nc" id="L308">                    stampSource = new AdocDiffMarker.StampSource() {</span>
                         @Override
                         public String activeRef(int newLineIndex) {
-<span class="nc bnc" id="L310" title="All 4 branches missed.">                            String id = newLineIndex &gt;= 0 &amp;&amp; newLineIndex &lt; lineIds.size()</span>
-<span class="nc" id="L311">                                    ? lineIds.get(newLineIndex) : null;</span>
-<span class="nc" id="L312">                            return stampRegistry.footnote(id,</span>
+<span class="nc bnc" id="L311" title="All 4 branches missed.">                            String id = newLineIndex &gt;= 0 &amp;&amp; newLineIndex &lt; lineIds.size()</span>
+<span class="nc" id="L312">                                    ? lineIds.get(newLineIndex) : null;</span>
+<span class="nc" id="L313">                            return stampRegistry.footnote(id,</span>
                                     StampRegistry.Status.ACTIVE, domain);
                         }
 
@@ -318,84 +319,84 @@ import java.util.Set;
                             // A pure deletion is attributable only coarsely:
                             // to the range when one exists, else to the
                             // working tree.
-<span class="nc" id="L321">                            return stampRegistry.footnote(</span>
-<span class="nc bnc" id="L322" title="All 2 branches missed.">                                    rangeEmpty ? GitSource.UNCOMMITTED : null,</span>
+<span class="nc" id="L322">                            return stampRegistry.footnote(</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                                    rangeEmpty ? GitSource.UNCOMMITTED : null,</span>
                                     StampRegistry.Status.INACTIVE, domain);
                         }
                     };
-<span class="nc bnc" id="L326" title="All 2 branches missed.">                    if (c.status() == ChangeStatus.ADDED) {</span>
-<span class="nc" id="L327">                        addedStampRef = stampRegistry.footnote(</span>
-<span class="nc bnc" id="L328" title="All 2 branches missed.">                                lineIds.isEmpty() ? null : lineIds.get(0),</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                    if (c.status() == ChangeStatus.ADDED) {</span>
+<span class="nc" id="L328">                        addedStampRef = stampRegistry.footnote(</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">                                lineIds.isEmpty() ? null : lineIds.get(0),</span>
                                 StampRegistry.Status.ACTIVE, domain);
                     }
                 }
-<span class="nc bnc" id="L332" title="All 2 branches missed.">                AdocDiffMarker.MarkResult result = c.status() == ChangeStatus.ADDED</span>
-<span class="nc" id="L333">                        ? AdocDiffMarker.markAdded(newLines, from, addedStampRef)</span>
-<span class="nc" id="L334">                        : AdocDiffMarker.mark(oldLines, newLines, stampSource);</span>
-<span class="nc" id="L335">                String outName = c.displayPath().substring(topicsPrefix.length()).replace('/', '-');</span>
-<span class="nc" id="L336">                List&lt;String&gt; owners = ownerTitles(manifest, c.displayPath(), anchorsByChange, result);</span>
-<span class="nc" id="L337">                List&lt;String&gt; marked = PacketAssembler.injectChangeTerms(result.lines(), owners);</span>
-<span class="nc bnc" id="L338" title="All 2 branches missed.">                if (!oldLines.isEmpty()) {</span>
-<span class="nc" id="L339">                    marked = AdocDiffMarker.withDiagramHistory(oldLines, marked);</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                AdocDiffMarker.MarkResult result = c.status() == ChangeStatus.ADDED</span>
+<span class="nc" id="L334">                        ? AdocDiffMarker.markAdded(newLines, from, addedStampRef)</span>
+<span class="nc" id="L335">                        : AdocDiffMarker.mark(oldLines, newLines, stampSource);</span>
+<span class="nc" id="L336">                String outName = c.displayPath().substring(topicsPrefix.length()).replace('/', '-');</span>
+<span class="nc" id="L337">                List&lt;String&gt; owners = ownerTitles(manifest, c.displayPath(), anchorsByChange, result);</span>
+<span class="nc" id="L338">                List&lt;String&gt; marked = PacketAssembler.injectChangeTerms(result.lines(), owners);</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                if (!oldLines.isEmpty()) {</span>
+<span class="nc" id="L340">                    marked = AdocDiffMarker.withDiagramHistory(oldLines, marked);</span>
                 }
-<span class="nc" id="L341">                Files.writeString(diffDir.resolve(outName),</span>
-<span class="nc" id="L342">                        String.join(&quot;\n&quot;, marked) + &quot;\n&quot;, StandardCharsets.UTF_8);</span>
-<span class="nc" id="L343">                topics.add(new PacketAssembler.TopicEntry(c, outName, result));</span>
-<span class="nc" id="L344">                getLog().info(&quot;idoc:diff marked &quot; + c.displayPath() + &quot; (+&quot; + result.insWords()</span>
-<span class="nc" id="L345">                        + &quot;/-&quot; + result.delWords() + &quot;, &quot; + result.notes().size() + &quot; notes)&quot;);</span>
-<span class="nc" id="L346">            }</span>
+<span class="nc" id="L342">                Files.writeString(diffDir.resolve(outName),</span>
+<span class="nc" id="L343">                        String.join(&quot;\n&quot;, marked) + &quot;\n&quot;, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L344">                topics.add(new PacketAssembler.TopicEntry(c, outName, result));</span>
+<span class="nc" id="L345">                getLog().info(&quot;idoc:diff marked &quot; + c.displayPath() + &quot; (+&quot; + result.insWords()</span>
+<span class="nc" id="L346">                        + &quot;/-&quot; + result.delWords() + &quot;, &quot; + result.notes().size() + &quot; notes)&quot;);</span>
+<span class="nc" id="L347">            }</span>
 
-<span class="nc bnc" id="L348" title="All 2 branches missed.">            for (GitSource.Change c : scaffoldCandidates) {</span>
-<span class="nc bnc" id="L349" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
-<span class="nc" id="L350">                    deleted.add(c.displayPath());</span>
-<span class="nc" id="L351">                    continue;</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">            for (GitSource.Change c : scaffoldCandidates) {</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
+<span class="nc" id="L351">                    deleted.add(c.displayPath());</span>
+<span class="nc" id="L352">                    continue;</span>
                 }
-<span class="nc bnc" id="L353" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.oldPath() == null</span>
-<span class="nc" id="L354">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
-<span class="nc" id="L355">                scaffolds.add(new PacketAssembler.ScaffoldEntry(c.displayPath(),</span>
-<span class="nc" id="L356">                        PacketAssembler.unifiedDiff(c.displayPath(), oldLines,</span>
-<span class="nc" id="L357">                                lines(git.read(to, c.newPath())))));</span>
-<span class="nc" id="L358">            }</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.oldPath() == null</span>
+<span class="nc" id="L355">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
+<span class="nc" id="L356">                scaffolds.add(new PacketAssembler.ScaffoldEntry(c.displayPath(),</span>
+<span class="nc" id="L357">                        PacketAssembler.unifiedDiff(c.displayPath(), oldLines,</span>
+<span class="nc" id="L358">                                lines(git.read(to, c.newPath())))));</span>
+<span class="nc" id="L359">            }</span>
 
             boolean hasRegistry;
-<span class="nc bnc" id="L361" title="All 2 branches missed.">            if (corpus) {</span>
-<span class="nc" id="L362">                hasRegistry = writeRegistryDelta(git, srcRel, diffDir);</span>
-<span class="nc bnc" id="L363" title="All 4 branches missed.">            } else if (membershipDelta != null &amp;&amp; !membershipDelta.isEmpty()) {</span>
-<span class="nc" id="L364">                Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;),</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (corpus) {</span>
+<span class="nc" id="L363">                hasRegistry = writeRegistryDelta(git, srcRel, diffDir);</span>
+<span class="nc bnc" id="L364" title="All 4 branches missed.">            } else if (membershipDelta != null &amp;&amp; !membershipDelta.isEmpty()) {</span>
+<span class="nc" id="L365">                Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;),</span>
                         membershipDelta, StandardCharsets.UTF_8);
-<span class="nc" id="L366">                hasRegistry = true;</span>
+<span class="nc" id="L367">                hasRegistry = true;</span>
             } else {
-<span class="nc" id="L368">                hasRegistry = false;</span>
+<span class="nc" id="L369">                hasRegistry = false;</span>
             }
 
-<span class="nc bnc" id="L371" title="All 8 branches missed.">            if (topics.isEmpty() &amp;&amp; deleted.isEmpty() &amp;&amp; scaffolds.isEmpty() &amp;&amp; !hasRegistry) {</span>
-<span class="nc" id="L372">                getLog().info(&quot;idoc:diff: no documentation changes between &quot; + from + &quot; and &quot;</span>
-<span class="nc bnc" id="L373" title="All 2 branches missed.">                        + (GitSource.WORKTREE.equals(to) ? &quot;the working tree&quot; : to)</span>
+<span class="nc bnc" id="L372" title="All 8 branches missed.">            if (topics.isEmpty() &amp;&amp; deleted.isEmpty() &amp;&amp; scaffolds.isEmpty() &amp;&amp; !hasRegistry) {</span>
+<span class="nc" id="L373">                getLog().info(&quot;idoc:diff: no documentation changes between &quot; + from + &quot; and &quot;</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">                        + (GitSource.WORKTREE.equals(to) ? &quot;the working tree&quot; : to)</span>
                         + &quot; for this module — skipping packet&quot;);
-<span class="nc" id="L375">                return;</span>
+<span class="nc" id="L376">                return;</span>
             }
 
-<span class="nc bnc" id="L378" title="All 4 branches missed.">            String singleStampLine = (stamps &amp;&amp; !stampsOn)</span>
-<span class="nc" id="L379">                    ? stampRegistry.singleStampLine(&quot;(packet)&quot;) : null;</span>
-<span class="nc" id="L380">            String master = PacketAssembler.masterDoc(packetTitle, from,</span>
-<span class="nc bnc" id="L381" title="All 2 branches missed.">                    GitSource.WORKTREE.equals(to) ? &quot;working tree&quot; : to,</span>
+<span class="nc bnc" id="L379" title="All 4 branches missed.">            String singleStampLine = (stamps &amp;&amp; !stampsOn)</span>
+<span class="nc" id="L380">                    ? stampRegistry.singleStampLine(&quot;(packet)&quot;) : null;</span>
+<span class="nc" id="L381">            String master = PacketAssembler.masterDoc(packetTitle, from,</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">                    GitSource.WORKTREE.equals(to) ? &quot;working tree&quot; : to,</span>
                     topics, deleted, manifest, anchorsByChange, hasRegistry, scaffolds,
-<span class="nc" id="L383">                    singleStampLine, stampRegistry.usedStamps());</span>
-<span class="nc" id="L384">            Path masterFile = outputDirectory.toPath().resolve(&quot;asciidoc/review-packet.adoc&quot;);</span>
-<span class="nc" id="L385">            Files.writeString(masterFile, master, StandardCharsets.UTF_8);</span>
-<span class="nc" id="L386">            getLog().info(&quot;idoc:diff packet: &quot; + topics.size() + &quot; marked topics, &quot;</span>
-<span class="nc" id="L387">                    + deleted.size() + &quot; deleted, &quot; + scaffolds.size()</span>
-<span class="nc" id="L388">                    + &quot; scaffolding diffs, &quot; + manifest.changes().size() + &quot; change entities&quot;</span>
-<span class="nc bnc" id="L389" title="All 4 branches missed.">                    + (corpus ? &quot; [corpus]&quot; : membershipDelta != null</span>
-<span class="nc" id="L390">                            ? &quot; [assembly &quot; + assemblyId + &quot;]&quot; : &quot;&quot;));</span>
+<span class="nc" id="L384">                    singleStampLine, stampRegistry.usedStamps());</span>
+<span class="nc" id="L385">            Path masterFile = outputDirectory.toPath().resolve(&quot;asciidoc/review-packet.adoc&quot;);</span>
+<span class="nc" id="L386">            Files.writeString(masterFile, master, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L387">            getLog().info(&quot;idoc:diff packet: &quot; + topics.size() + &quot; marked topics, &quot;</span>
+<span class="nc" id="L388">                    + deleted.size() + &quot; deleted, &quot; + scaffolds.size()</span>
+<span class="nc" id="L389">                    + &quot; scaffolding diffs, &quot; + manifest.changes().size() + &quot; change entities&quot;</span>
+<span class="nc bnc" id="L390" title="All 4 branches missed.">                    + (corpus ? &quot; [corpus]&quot; : membershipDelta != null</span>
+<span class="nc" id="L391">                            ? &quot; [assembly &quot; + assemblyId + &quot;]&quot; : &quot;&quot;));</span>
 
-<span class="nc bnc" id="L392" title="All 2 branches missed.">            if (render) {</span>
-<span class="nc" id="L393">                renderPacket(masterFile);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">            if (render) {</span>
+<span class="nc" id="L394">                renderPacket(masterFile);</span>
             }
-<span class="nc bnc" id="L395" title="All 2 branches missed.">        } catch (IOException e) {</span>
-<span class="nc" id="L396">            throw new MojoException(&quot;idoc:diff failed: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L397">        }</span>
-<span class="nc" id="L398">    }</span>
+<span class="nc bnc" id="L396" title="All 2 branches missed.">        } catch (IOException e) {</span>
+<span class="nc" id="L397">            throw new MojoException(&quot;idoc:diff failed: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L398">        }</span>
+<span class="nc" id="L399">    }</span>
 
     /**
      * The topic's domain — the STAMP module analogue — from its path
@@ -407,12 +408,12 @@ import java.util.Set;
      *         path has no domain segment
      */
     private static String domainOf(String displayPath, String topicsPrefix) {
-<span class="nc bnc" id="L410" title="All 2 branches missed.">        if (!displayPath.startsWith(topicsPrefix)) {</span>
-<span class="nc" id="L411">            return &quot;(doc)&quot;;</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        if (!displayPath.startsWith(topicsPrefix)) {</span>
+<span class="nc" id="L412">            return &quot;(doc)&quot;;</span>
         }
-<span class="nc" id="L413">        String rest = displayPath.substring(topicsPrefix.length());</span>
-<span class="nc" id="L414">        int slash = rest.indexOf('/');</span>
-<span class="nc bnc" id="L415" title="All 2 branches missed.">        return slash &gt; 0 ? rest.substring(0, slash) : &quot;(doc)&quot;;</span>
+<span class="nc" id="L414">        String rest = displayPath.substring(topicsPrefix.length());</span>
+<span class="nc" id="L415">        int slash = rest.indexOf('/');</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">        return slash &gt; 0 ? rest.substring(0, slash) : &quot;(doc)&quot;;</span>
     }
 
     /**
@@ -425,116 +426,116 @@ import java.util.Set;
      * @throws IOException on repository access failure
      */
     private String discoverRegistryRoot(GitSource git) throws IOException {
-<span class="nc" id="L428">        String found = git.findPath(to, REGISTRY_SUFFIX);</span>
-<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (found == null) {</span>
-<span class="nc" id="L430">            return null;</span>
+<span class="nc" id="L429">        String found = git.findPath(to, REGISTRY_SUFFIX);</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (found == null) {</span>
+<span class="nc" id="L431">            return null;</span>
         }
-<span class="nc" id="L432">        return found.substring(0, found.length() - &quot;/topic-registry.yaml&quot;.length());</span>
+<span class="nc" id="L433">        return found.substring(0, found.length() - &quot;/topic-registry.yaml&quot;.length());</span>
     }
 
     private ChangeManifest resolveManifest(GitSource git, List&lt;GitSource.Change&gt; marked,
                                            List&lt;GitSource.Change&gt; own) throws IOException {
-<span class="nc bnc" id="L437" title="All 4 branches missed.">        if (changesFile != null &amp;&amp; changesFile.isFile()) {</span>
-<span class="nc" id="L438">            return ChangeManifest.load(changesFile.toPath());</span>
+<span class="nc bnc" id="L438" title="All 4 branches missed.">        if (changesFile != null &amp;&amp; changesFile.isFile()) {</span>
+<span class="nc" id="L439">            return ChangeManifest.load(changesFile.toPath());</span>
         }
-<span class="nc" id="L440">        Path repoManifest = git.workTree().resolve(&quot;changes.yaml&quot;);</span>
-<span class="nc bnc" id="L441" title="All 2 branches missed.">        if (Files.isRegularFile(repoManifest)) {</span>
-<span class="nc" id="L442">            return ChangeManifest.load(repoManifest);</span>
+<span class="nc" id="L441">        Path repoManifest = git.workTree().resolve(&quot;changes.yaml&quot;);</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">        if (Files.isRegularFile(repoManifest)) {</span>
+<span class="nc" id="L443">            return ChangeManifest.load(repoManifest);</span>
         }
-<span class="nc bnc" id="L444" title="All 2 branches missed.">        if (!GitSource.WORKTREE.equals(to)) {</span>
-<span class="nc" id="L445">            return ChangeManifest.derive(git.commitsBetween(from, to));</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">        if (!GitSource.WORKTREE.equals(to)) {</span>
+<span class="nc" id="L446">            return ChangeManifest.derive(git.commitsBetween(from, to));</span>
         }
         // Working-tree review without an authored manifest: derive entities
         // from any committed part of the range (from..HEAD), then append one
         // synthetic entity for the uncommitted remainder (HEAD..WORKTREE).
-<span class="nc" id="L450">        List&lt;GitSource.CommitMeta&gt; committed = git.commitsBetween(from, &quot;HEAD&quot;);</span>
-<span class="nc" id="L451">        Set&lt;String&gt; uncommitted = new LinkedHashSet&lt;&gt;();</span>
-<span class="nc" id="L452">        git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;)</span>
-<span class="nc" id="L453">                .forEach(c -&gt; uncommitted.add(c.displayPath()));</span>
-<span class="nc bnc" id="L454" title="All 4 branches missed.">        if (committed.isEmpty() &amp;&amp; uncommitted.isEmpty()) {</span>
-<span class="nc" id="L455">            Set&lt;String&gt; files = new LinkedHashSet&lt;&gt;();</span>
-<span class="nc" id="L456">            marked.forEach(c -&gt; files.add(c.displayPath()));</span>
-<span class="nc" id="L457">            own.forEach(c -&gt; files.add(c.displayPath()));</span>
-<span class="nc" id="L458">            uncommitted.addAll(files);</span>
+<span class="nc" id="L451">        List&lt;GitSource.CommitMeta&gt; committed = git.commitsBetween(from, &quot;HEAD&quot;);</span>
+<span class="nc" id="L452">        Set&lt;String&gt; uncommitted = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L453">        git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;)</span>
+<span class="nc" id="L454">                .forEach(c -&gt; uncommitted.add(c.displayPath()));</span>
+<span class="nc bnc" id="L455" title="All 4 branches missed.">        if (committed.isEmpty() &amp;&amp; uncommitted.isEmpty()) {</span>
+<span class="nc" id="L456">            Set&lt;String&gt; files = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L457">            marked.forEach(c -&gt; files.add(c.displayPath()));</span>
+<span class="nc" id="L458">            own.forEach(c -&gt; files.add(c.displayPath()));</span>
+<span class="nc" id="L459">            uncommitted.addAll(files);</span>
         }
-<span class="nc" id="L460">        Path yaml = Files.createTempFile(&quot;doc-diff-synthetic&quot;, &quot;.yaml&quot;);</span>
+<span class="nc" id="L461">        Path yaml = Files.createTempFile(&quot;doc-diff-synthetic&quot;, &quot;.yaml&quot;);</span>
         try {
-<span class="nc" id="L462">            StringBuilder sb = new StringBuilder(&quot;changes:\n&quot;);</span>
-<span class="nc bnc" id="L463" title="All 2 branches missed.">            if (!uncommitted.isEmpty()) {</span>
-<span class="nc" id="L464">                sb.append(&quot;  - id: chg-uncommitted\n&quot;)</span>
-<span class="nc" id="L465">                        .append(&quot;    title: \&quot;Uncommitted changes\&quot;\n&quot;)</span>
-<span class="nc" id="L466">                        .append(&quot;    description: &gt;\n&quot;)</span>
-<span class="nc" id="L467">                        .append(&quot;      Working-tree changes not yet committed on top of HEAD.\n&quot;)</span>
-<span class="nc" id="L468">                        .append(&quot;    files:\n&quot;);</span>
-<span class="nc" id="L469">                uncommitted.forEach(f -&gt; sb.append(&quot;      - &quot;).append(f).append('\n'));</span>
+<span class="nc" id="L463">            StringBuilder sb = new StringBuilder(&quot;changes:\n&quot;);</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            if (!uncommitted.isEmpty()) {</span>
+<span class="nc" id="L465">                sb.append(&quot;  - id: chg-uncommitted\n&quot;)</span>
+<span class="nc" id="L466">                        .append(&quot;    title: \&quot;Uncommitted changes\&quot;\n&quot;)</span>
+<span class="nc" id="L467">                        .append(&quot;    description: &gt;\n&quot;)</span>
+<span class="nc" id="L468">                        .append(&quot;      Working-tree changes not yet committed on top of HEAD.\n&quot;)</span>
+<span class="nc" id="L469">                        .append(&quot;    files:\n&quot;);</span>
+<span class="nc" id="L470">                uncommitted.forEach(f -&gt; sb.append(&quot;      - &quot;).append(f).append('\n'));</span>
             }
-<span class="nc" id="L471">            Files.writeString(yaml, sb.toString(), StandardCharsets.UTF_8);</span>
-<span class="nc" id="L472">            ChangeManifest synthetic = ChangeManifest.load(yaml);</span>
-<span class="nc bnc" id="L473" title="All 2 branches missed.">            if (committed.isEmpty()) {</span>
-<span class="nc" id="L474">                return synthetic;</span>
+<span class="nc" id="L472">            Files.writeString(yaml, sb.toString(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L473">            ChangeManifest synthetic = ChangeManifest.load(yaml);</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">            if (committed.isEmpty()) {</span>
+<span class="nc" id="L475">                return synthetic;</span>
             }
-<span class="nc" id="L476">            List&lt;ChangeManifest.ChangeEntity&gt; merged =</span>
-<span class="nc" id="L477">                    new ArrayList&lt;&gt;(ChangeManifest.derive(committed).changes());</span>
-<span class="nc" id="L478">            merged.addAll(synthetic.changes());</span>
-<span class="nc" id="L479">            return ChangeManifest.of(merged);</span>
+<span class="nc" id="L477">            List&lt;ChangeManifest.ChangeEntity&gt; merged =</span>
+<span class="nc" id="L478">                    new ArrayList&lt;&gt;(ChangeManifest.derive(committed).changes());</span>
+<span class="nc" id="L479">            merged.addAll(synthetic.changes());</span>
+<span class="nc" id="L480">            return ChangeManifest.of(merged);</span>
         } finally {
-<span class="nc" id="L481">            Files.deleteIfExists(yaml);</span>
+<span class="nc" id="L482">            Files.deleteIfExists(yaml);</span>
         }
     }
 
     private List&lt;String&gt; ownerTitles(ChangeManifest manifest, String path,
                                      List&lt;List&lt;String&gt;&gt; anchorsByChange,
                                      AdocDiffMarker.MarkResult result) {
-<span class="nc" id="L488">        List&lt;String&gt; owners = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L489">        String anchor = PacketAssembler.anchorOf(result.lines());</span>
-<span class="nc" id="L490">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
-<span class="nc bnc" id="L491" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
-<span class="nc bnc" id="L492" title="All 2 branches missed.">            if (changes.get(i).files().contains(path)) {</span>
-<span class="nc" id="L493">                owners.add(changes.get(i).title());</span>
-<span class="nc bnc" id="L494" title="All 2 branches missed.">                if (anchor != null) {</span>
-<span class="nc" id="L495">                    anchorsByChange.get(i).add(anchor);</span>
+<span class="nc" id="L489">        List&lt;String&gt; owners = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L490">        String anchor = PacketAssembler.anchorOf(result.lines());</span>
+<span class="nc" id="L491">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            if (changes.get(i).files().contains(path)) {</span>
+<span class="nc" id="L494">                owners.add(changes.get(i).title());</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">                if (anchor != null) {</span>
+<span class="nc" id="L496">                    anchorsByChange.get(i).add(anchor);</span>
                 }
             }
         }
-<span class="nc" id="L499">        return owners;</span>
+<span class="nc" id="L500">        return owners;</span>
     }
 
     private boolean writeRegistryDelta(GitSource git, String srcRel, Path diffDir)
             throws IOException {
-<span class="nc" id="L504">        String root = srcRel + &quot;/topic-registry.yaml&quot;;</span>
-<span class="nc bnc" id="L505" title="All 4 branches missed.">        if (git.read(from, root) == null &amp;&amp; git.read(to, root) == null) {</span>
-<span class="nc" id="L506">            return false;</span>
+<span class="nc" id="L505">        String root = srcRel + &quot;/topic-registry.yaml&quot;;</span>
+<span class="nc bnc" id="L506" title="All 4 branches missed.">        if (git.read(from, root) == null &amp;&amp; git.read(to, root) == null) {</span>
+<span class="nc" id="L507">            return false;</span>
         }
-<span class="nc" id="L508">        String delta = new RegistryDelta(git, from, to)</span>
-<span class="nc" id="L509">                .render(root, srcRel + &quot;/topic-registry&quot;);</span>
-<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (delta.isEmpty()) {</span>
-<span class="nc" id="L511">            return false;</span>
+<span class="nc" id="L509">        String delta = new RegistryDelta(git, from, to)</span>
+<span class="nc" id="L510">                .render(root, srcRel + &quot;/topic-registry&quot;);</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">        if (delta.isEmpty()) {</span>
+<span class="nc" id="L512">            return false;</span>
         }
-<span class="nc" id="L513">        Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;), delta, StandardCharsets.UTF_8);</span>
-<span class="nc" id="L514">        return true;</span>
+<span class="nc" id="L514">        Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;), delta, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L515">        return true;</span>
     }
 
     private void renderPacket(Path masterFile) {
-<span class="nc" id="L518">        try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {</span>
-<span class="nc" id="L519">            asciidoctor.registerLogHandler(new AsciidocMojo.MavenLogHandler(getLog()));</span>
-<span class="nc" id="L520">            asciidoctor.requireLibrary(&quot;asciidoctor-diagram&quot;);</span>
-<span class="nc" id="L521">            asciidoctor.javaExtensionRegistry().inlineMacro(KonceptInlineMacro.class);</span>
+<span class="nc" id="L519">        try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {</span>
+<span class="nc" id="L520">            asciidoctor.registerLogHandler(new AsciidocMojo.MavenLogHandler(getLog()));</span>
+<span class="nc" id="L521">            asciidoctor.requireLibrary(&quot;asciidoctor-diagram&quot;);</span>
+<span class="nc" id="L522">            asciidoctor.javaExtensionRegistry().inlineMacro(KonceptInlineMacro.class);</span>
 
-<span class="nc" id="L523">            Path htmlDir = outputDirectory.toPath().resolve(&quot;html&quot;);</span>
-<span class="nc" id="L524">            convert(asciidoctor, masterFile, &quot;html5&quot;, htmlDir, baseAttributes().build());</span>
+<span class="nc" id="L524">            Path htmlDir = outputDirectory.toPath().resolve(&quot;html&quot;);</span>
+<span class="nc" id="L525">            convert(asciidoctor, masterFile, &quot;html5&quot;, htmlDir, baseAttributes().build());</span>
 
-<span class="nc" id="L526">            AttributesBuilder pdfAttrs = baseAttributes();</span>
-<span class="nc" id="L527">            Path theme = resolvePdfTheme();</span>
-<span class="nc bnc" id="L528" title="All 2 branches missed.">            if (theme != null) {</span>
-<span class="nc" id="L529">                pdfAttrs.attribute(&quot;pdf-theme&quot;, theme.toAbsolutePath().toString());</span>
+<span class="nc" id="L527">            AttributesBuilder pdfAttrs = baseAttributes();</span>
+<span class="nc" id="L528">            Path theme = resolvePdfTheme();</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">            if (theme != null) {</span>
+<span class="nc" id="L530">                pdfAttrs.attribute(&quot;pdf-theme&quot;, theme.toAbsolutePath().toString());</span>
             }
-<span class="nc bnc" id="L531" title="All 4 branches missed.">            if (pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory()) {</span>
-<span class="nc" id="L532">                pdfAttrs.attribute(&quot;pdf-fontsdir&quot;, pdfFontsDir.getAbsolutePath());</span>
+<span class="nc bnc" id="L532" title="All 4 branches missed.">            if (pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory()) {</span>
+<span class="nc" id="L533">                pdfAttrs.attribute(&quot;pdf-fontsdir&quot;, pdfFontsDir.getAbsolutePath());</span>
             }
-<span class="nc" id="L534">            Path pdfDir = outputDirectory.toPath().resolve(&quot;pdf&quot;);</span>
-<span class="nc" id="L535">            convert(asciidoctor, masterFile, &quot;pdf&quot;, pdfDir, pdfAttrs.build());</span>
+<span class="nc" id="L535">            Path pdfDir = outputDirectory.toPath().resolve(&quot;pdf&quot;);</span>
+<span class="nc" id="L536">            convert(asciidoctor, masterFile, &quot;pdf&quot;, pdfDir, pdfAttrs.build());</span>
         }
-<span class="nc" id="L537">    }</span>
+<span class="nc" id="L538">    }</span>
 
     /**
      * Resolve the prawn theme for this run, making the goal
@@ -548,77 +549,77 @@ import java.util.Set;
      *         fallback cannot be provisioned
      */
     private Path resolvePdfTheme() {
-<span class="nc bnc" id="L551" title="All 4 branches missed.">        if (pdfTheme != null &amp;&amp; pdfTheme.isFile()) {</span>
-<span class="nc" id="L552">            return pdfTheme.toPath();</span>
+<span class="nc bnc" id="L552" title="All 4 branches missed.">        if (pdfTheme != null &amp;&amp; pdfTheme.isFile()) {</span>
+<span class="nc" id="L553">            return pdfTheme.toPath();</span>
         }
-<span class="nc bnc" id="L554" title="All 4 branches missed.">        boolean fontsAvailable = pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory();</span>
-<span class="nc bnc" id="L555" title="All 2 branches missed.">        String resource = fontsAvailable</span>
-<span class="nc" id="L556">                ? &quot;/theme/ike-default-theme.yml&quot;</span>
-<span class="nc" id="L557">                : &quot;/diff/diff-fallback-theme.yml&quot;;</span>
+<span class="nc bnc" id="L555" title="All 4 branches missed.">        boolean fontsAvailable = pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory();</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">        String resource = fontsAvailable</span>
+<span class="nc" id="L557">                ? &quot;/theme/ike-default-theme.yml&quot;</span>
+<span class="nc" id="L558">                : &quot;/diff/diff-fallback-theme.yml&quot;;</span>
         try {
-<span class="nc" id="L559">            Path dir = outputDirectory.toPath().resolve(&quot;.theme&quot;);</span>
-<span class="nc" id="L560">            Files.createDirectories(dir);</span>
-<span class="nc" id="L561">            Path target = dir.resolve(&quot;ike-default-theme.yml&quot;);</span>
-<span class="nc" id="L562">            try (var in = DocDiffMojo.class.getResourceAsStream(resource)) {</span>
-<span class="nc bnc" id="L563" title="All 2 branches missed.">                if (in == null) {</span>
-<span class="nc" id="L564">                    getLog().warn(&quot;idoc:diff: theme resource &quot; + resource</span>
+<span class="nc" id="L560">            Path dir = outputDirectory.toPath().resolve(&quot;.theme&quot;);</span>
+<span class="nc" id="L561">            Files.createDirectories(dir);</span>
+<span class="nc" id="L562">            Path target = dir.resolve(&quot;ike-default-theme.yml&quot;);</span>
+<span class="nc" id="L563">            try (InputStream in = DocDiffMojo.class.getResourceAsStream(resource)) {</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">                if (in == null) {</span>
+<span class="nc" id="L565">                    getLog().warn(&quot;idoc:diff: theme resource &quot; + resource</span>
                             + &quot; not on plugin classpath — PDF renders unthemed&quot;);
-<span class="nc" id="L566">                    return null;</span>
+<span class="nc" id="L567">                    return null;</span>
                 }
-<span class="nc" id="L568">                Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
-<span class="nc bnc" id="L569" title="All 2 branches missed.">            }</span>
-<span class="nc bnc" id="L570" title="All 2 branches missed.">            getLog().info(&quot;idoc:diff theme: &quot; + (fontsAvailable</span>
-<span class="nc" id="L571">                    ? &quot;branded (self-provisioned from ike-doc-resources)&quot;</span>
-<span class="nc" id="L572">                    : &quot;fallback (stock typography + diff roles; run after a &quot;</span>
+<span class="nc" id="L569">                Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc bnc" id="L570" title="All 2 branches missed.">            }</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">            getLog().info(&quot;idoc:diff theme: &quot; + (fontsAvailable</span>
+<span class="nc" id="L572">                    ? &quot;branded (self-provisioned from ike-doc-resources)&quot;</span>
+<span class="nc" id="L573">                    : &quot;fallback (stock typography + diff roles; run after a &quot;</span>
                             + &quot;pipeline build for branded output)&quot;));
-<span class="nc" id="L574">            return target;</span>
-<span class="nc" id="L575">        } catch (IOException e) {</span>
-<span class="nc" id="L576">            getLog().warn(&quot;idoc:diff: theme provisioning failed — PDF renders unthemed: &quot;</span>
-<span class="nc" id="L577">                    + e.getMessage());</span>
-<span class="nc" id="L578">            return null;</span>
+<span class="nc" id="L575">            return target;</span>
+<span class="nc" id="L576">        } catch (IOException e) {</span>
+<span class="nc" id="L577">            getLog().warn(&quot;idoc:diff: theme provisioning failed — PDF renders unthemed: &quot;</span>
+<span class="nc" id="L578">                    + e.getMessage());</span>
+<span class="nc" id="L579">            return null;</span>
         }
     }
 
     private AttributesBuilder baseAttributes() {
-<span class="nc" id="L583">        return Attributes.builder()</span>
-<span class="nc" id="L584">                .attribute(&quot;toc&quot;, &quot;left&quot;)</span>
-<span class="nc" id="L585">                .attribute(&quot;toclevels&quot;, &quot;1&quot;)</span>
-<span class="nc" id="L586">                .attribute(&quot;icons&quot;, &quot;font&quot;)</span>
-<span class="nc" id="L587">                .attribute(&quot;source-highlighter&quot;, &quot;rouge&quot;)</span>
-<span class="nc" id="L588">                .attribute(&quot;allow-uri-read&quot;, &quot;true&quot;)</span>
+<span class="nc" id="L584">        return Attributes.builder()</span>
+<span class="nc" id="L585">                .attribute(&quot;toc&quot;, &quot;left&quot;)</span>
+<span class="nc" id="L586">                .attribute(&quot;toclevels&quot;, &quot;1&quot;)</span>
+<span class="nc" id="L587">                .attribute(&quot;icons&quot;, &quot;font&quot;)</span>
+<span class="nc" id="L588">                .attribute(&quot;source-highlighter&quot;, &quot;rouge&quot;)</span>
+<span class="nc" id="L589">                .attribute(&quot;allow-uri-read&quot;, &quot;true&quot;)</span>
                 // Diagram rendering — same recipe as the pipeline render
                 // (kroki server, inline SVG, no PlantUML preprocessing).
-<span class="nc" id="L591">                .attribute(&quot;diagram-server-url&quot;, diagramServerUrl)</span>
-<span class="nc" id="L592">                .attribute(&quot;diagram-server-type&quot;, &quot;kroki_io&quot;)</span>
-<span class="nc" id="L593">                .attribute(&quot;diagram-format&quot;, &quot;svg&quot;)</span>
-<span class="nc" id="L594">                .attribute(&quot;diagram-svg-type&quot;, &quot;inline&quot;)</span>
-<span class="nc" id="L595">                .attribute(&quot;plantuml-preprocess&quot;, &quot;false&quot;)</span>
-<span class="nc" id="L596">                .attribute(&quot;preprocess&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L592">                .attribute(&quot;diagram-server-url&quot;, diagramServerUrl)</span>
+<span class="nc" id="L593">                .attribute(&quot;diagram-server-type&quot;, &quot;kroki_io&quot;)</span>
+<span class="nc" id="L594">                .attribute(&quot;diagram-format&quot;, &quot;svg&quot;)</span>
+<span class="nc" id="L595">                .attribute(&quot;diagram-svg-type&quot;, &quot;inline&quot;)</span>
+<span class="nc" id="L596">                .attribute(&quot;plantuml-preprocess&quot;, &quot;false&quot;)</span>
+<span class="nc" id="L597">                .attribute(&quot;preprocess&quot;, &quot;false&quot;);</span>
     }
 
     private void convert(Asciidoctor asciidoctor, Path masterFile, String backend,
                          Path outDir, Attributes attrs) {
         try {
-<span class="nc" id="L602">            Files.createDirectories(outDir);</span>
-<span class="nc" id="L603">            Options options = Options.builder()</span>
-<span class="nc" id="L604">                    .backend(backend)</span>
-<span class="nc" id="L605">                    .safe(SafeMode.UNSAFE)</span>
-<span class="nc" id="L606">                    .baseDir(masterFile.getParent().toFile())</span>
-<span class="nc" id="L607">                    .toDir(outDir.toFile())</span>
-<span class="nc" id="L608">                    .mkDirs(true)</span>
-<span class="nc" id="L609">                    .standalone(true)</span>
-<span class="nc" id="L610">                    .attributes(attrs)</span>
-<span class="nc" id="L611">                    .build();</span>
-<span class="nc" id="L612">            asciidoctor.convertFile(masterFile.toFile(), options);</span>
-<span class="nc" id="L613">            getLog().info(&quot;idoc:diff rendered &quot; + backend + &quot; -&gt; &quot; + outDir);</span>
-<span class="nc" id="L614">        } catch (RuntimeException | IOException e) {</span>
-<span class="nc" id="L615">            getLog().error(&quot;idoc:diff &quot; + backend + &quot; render failed — packet sources remain at &quot;</span>
-<span class="nc" id="L616">                    + masterFile.getParent() + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L617">        }</span>
-<span class="nc" id="L618">    }</span>
+<span class="nc" id="L603">            Files.createDirectories(outDir);</span>
+<span class="nc" id="L604">            Options options = Options.builder()</span>
+<span class="nc" id="L605">                    .backend(backend)</span>
+<span class="nc" id="L606">                    .safe(SafeMode.UNSAFE)</span>
+<span class="nc" id="L607">                    .baseDir(masterFile.getParent().toFile())</span>
+<span class="nc" id="L608">                    .toDir(outDir.toFile())</span>
+<span class="nc" id="L609">                    .mkDirs(true)</span>
+<span class="nc" id="L610">                    .standalone(true)</span>
+<span class="nc" id="L611">                    .attributes(attrs)</span>
+<span class="nc" id="L612">                    .build();</span>
+<span class="nc" id="L613">            asciidoctor.convertFile(masterFile.toFile(), options);</span>
+<span class="nc" id="L614">            getLog().info(&quot;idoc:diff rendered &quot; + backend + &quot; -&gt; &quot; + outDir);</span>
+<span class="nc" id="L615">        } catch (RuntimeException | IOException e) {</span>
+<span class="nc" id="L616">            getLog().error(&quot;idoc:diff &quot; + backend + &quot; render failed — packet sources remain at &quot;</span>
+<span class="nc" id="L617">                    + masterFile.getParent() + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L618">        }</span>
+<span class="nc" id="L619">    }</span>
 
     private static List&lt;String&gt; lines(String text) {
-<span class="nc bnc" id="L621" title="All 2 branches missed.">        return text == null ? List.of() : Arrays.asList(text.split(&quot;\n&quot;, -1));</span>
+<span class="nc bnc" id="L622" title="All 2 branches missed.">        return text == null ? List.of() : Arrays.asList(text.split(&quot;\n&quot;, -1));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-23
-date_modified: 2026-06-23
+date_published: 2026-06-25
+date_modified: 2026-06-25
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/summary.html
 ---
 
@@ -27,5 +27,5 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | minimal-fonts |
-| Version | 80 |
+| Version | 81 |
 | Type | pom |

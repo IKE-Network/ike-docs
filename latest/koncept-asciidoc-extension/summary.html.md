@@ -1,6 +1,6 @@
 ---
-date_published: 2026-06-23
-date_modified: 2026-06-23
+date_published: 2026-06-25
+date_modified: 2026-06-25
 canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 ---
 
@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | koncept-asciidoc-extension |
-| Version | 80 |
+| Version | 81 |
 | Type | jar |
 | Java Version | 25 |

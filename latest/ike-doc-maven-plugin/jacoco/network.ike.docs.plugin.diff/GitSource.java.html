@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Read-only access to both sides of a doc-diff comparison
@@ -39,9 +40,9 @@ public final class GitSource implements AutoCloseable {
 
     private final Repository repo;
 
-<span class="nc" id="L42">    private GitSource(Repository repo) {</span>
-<span class="nc" id="L43">        this.repo = repo;</span>
-<span class="nc" id="L44">    }</span>
+<span class="nc" id="L43">    private GitSource(Repository repo) {</span>
+<span class="nc" id="L44">        this.repo = repo;</span>
+<span class="nc" id="L45">    }</span>
 
     /**
      * Open the repository that contains the given directory, walking
@@ -53,11 +54,11 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException when no repository contains the directory
      */
     public static GitSource open(Path within) throws IOException {
-<span class="nc" id="L56">        Repository repo = new FileRepositoryBuilder()</span>
-<span class="nc" id="L57">                .findGitDir(within.toFile())</span>
-<span class="nc" id="L58">                .readEnvironment()</span>
-<span class="nc" id="L59">                .build();</span>
-<span class="nc" id="L60">        return new GitSource(repo);</span>
+<span class="nc" id="L57">        Repository repo = new FileRepositoryBuilder()</span>
+<span class="nc" id="L58">                .findGitDir(within.toFile())</span>
+<span class="nc" id="L59">                .readEnvironment()</span>
+<span class="nc" id="L60">                .build();</span>
+<span class="nc" id="L61">        return new GitSource(repo);</span>
     }
 
     /**
@@ -66,7 +67,7 @@ public final class GitSource implements AutoCloseable {
      * @return the working-tree root path
      */
     public Path workTree() {
-<span class="nc" id="L69">        return repo.getWorkTree().toPath();</span>
+<span class="nc" id="L70">        return repo.getWorkTree().toPath();</span>
     }
 
     /**
@@ -77,7 +78,7 @@ public final class GitSource implements AutoCloseable {
      *                for renames; {@code null} for additions)
      * @param newPath the to-side path ({@code null} for deletions)
      */
-<span class="nc" id="L80">    public record Change(ChangeStatus status, String oldPath, String newPath) {</span>
+<span class="nc" id="L81">    public record Change(ChangeStatus status, String oldPath, String newPath) {</span>
 
         /**
          * The path a reader should know this file by — the to side when
@@ -86,7 +87,7 @@ public final class GitSource implements AutoCloseable {
          * @return the display path
          */
         public String displayPath() {
-<span class="nc bnc" id="L89" title="All 2 branches missed.">            return newPath != null ? newPath : oldPath;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            return newPath != null ? newPath : oldPath;</span>
         }
     }
 
@@ -104,29 +105,29 @@ public final class GitSource implements AutoCloseable {
      */
     public List&lt;Change&gt; changes(String fromRef, String toRef,
                                 String pathPrefix, String suffix) throws IOException {
-<span class="nc" id="L107">        try (DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {</span>
-<span class="nc" id="L108">            df.setRepository(repo);</span>
-<span class="nc" id="L109">            df.setDetectRenames(true);</span>
-<span class="nc" id="L110">            List&lt;DiffEntry&gt; entries = df.scan(treeIterator(fromRef), treeIterator(toRef));</span>
-<span class="nc" id="L111">            List&lt;Change&gt; out = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L112" title="All 2 branches missed.">            for (DiffEntry e : entries) {</span>
-<span class="nc" id="L113">                String oldPath = e.getOldPath();</span>
-<span class="nc" id="L114">                String newPath = e.getNewPath();</span>
-<span class="nc bnc" id="L115" title="All 4 branches missed.">                ChangeStatus status = switch (e.getChangeType()) {</span>
-<span class="nc" id="L116">                    case ADD, COPY -&gt; ChangeStatus.ADDED;</span>
-<span class="nc" id="L117">                    case DELETE -&gt; ChangeStatus.DELETED;</span>
-<span class="nc" id="L118">                    case RENAME -&gt; ChangeStatus.RENAMED;</span>
-<span class="nc" id="L119">                    case MODIFY -&gt; ChangeStatus.MODIFIED;</span>
+<span class="nc" id="L108">        try (DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {</span>
+<span class="nc" id="L109">            df.setRepository(repo);</span>
+<span class="nc" id="L110">            df.setDetectRenames(true);</span>
+<span class="nc" id="L111">            List&lt;DiffEntry&gt; entries = df.scan(treeIterator(fromRef), treeIterator(toRef));</span>
+<span class="nc" id="L112">            List&lt;Change&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            for (DiffEntry e : entries) {</span>
+<span class="nc" id="L114">                String oldPath = e.getOldPath();</span>
+<span class="nc" id="L115">                String newPath = e.getNewPath();</span>
+<span class="nc bnc" id="L116" title="All 4 branches missed.">                ChangeStatus status = switch (e.getChangeType()) {</span>
+<span class="nc" id="L117">                    case ADD, COPY -&gt; ChangeStatus.ADDED;</span>
+<span class="nc" id="L118">                    case DELETE -&gt; ChangeStatus.DELETED;</span>
+<span class="nc" id="L119">                    case RENAME -&gt; ChangeStatus.RENAMED;</span>
+<span class="nc" id="L120">                    case MODIFY -&gt; ChangeStatus.MODIFIED;</span>
                 };
-<span class="nc bnc" id="L121" title="All 2 branches missed.">                String probe = status == ChangeStatus.DELETED ? oldPath : newPath;</span>
-<span class="nc bnc" id="L122" title="All 4 branches missed.">                if (!probe.startsWith(pathPrefix) || !probe.endsWith(suffix)) {</span>
-<span class="nc" id="L123">                    continue;</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                String probe = status == ChangeStatus.DELETED ? oldPath : newPath;</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">                if (!probe.startsWith(pathPrefix) || !probe.endsWith(suffix)) {</span>
+<span class="nc" id="L124">                    continue;</span>
                 }
-<span class="nc" id="L125">                out.add(new Change(status,</span>
-<span class="nc bnc" id="L126" title="All 2 branches missed.">                        status == ChangeStatus.ADDED ? null : oldPath,</span>
-<span class="nc bnc" id="L127" title="All 2 branches missed.">                        status == ChangeStatus.DELETED ? null : newPath));</span>
-<span class="nc" id="L128">            }</span>
-<span class="nc" id="L129">            return out;</span>
+<span class="nc" id="L126">                out.add(new Change(status,</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                        status == ChangeStatus.ADDED ? null : oldPath,</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">                        status == ChangeStatus.DELETED ? null : newPath));</span>
+<span class="nc" id="L129">            }</span>
+<span class="nc" id="L130">            return out;</span>
         }
     }
 
@@ -139,24 +140,24 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException on repository access failure
      */
     public String read(String ref, String path) throws IOException {
-<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
-<span class="nc" id="L143">            Path f = workTree().resolve(path);</span>
-<span class="nc bnc" id="L144" title="All 2 branches missed.">            return Files.exists(f) ? Files.readString(f, StandardCharsets.UTF_8) : null;</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
+<span class="nc" id="L144">            Path f = workTree().resolve(path);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            return Files.exists(f) ? Files.readString(f, StandardCharsets.UTF_8) : null;</span>
         }
-<span class="nc" id="L146">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
-<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (commitId == null) {</span>
-<span class="nc" id="L148">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
+<span class="nc" id="L147">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (commitId == null) {</span>
+<span class="nc" id="L149">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
         }
-<span class="nc" id="L150">        try (RevWalk walk = new RevWalk(repo)) {</span>
-<span class="nc" id="L151">            RevCommit commit = walk.parseCommit(commitId);</span>
-<span class="nc" id="L152">            try (TreeWalk tw = TreeWalk.forPath(repo, path, commit.getTree())) {</span>
-<span class="nc bnc" id="L153" title="All 2 branches missed.">                if (tw == null) {</span>
-<span class="nc" id="L154">                    return null;</span>
+<span class="nc" id="L151">        try (RevWalk walk = new RevWalk(repo)) {</span>
+<span class="nc" id="L152">            RevCommit commit = walk.parseCommit(commitId);</span>
+<span class="nc" id="L153">            try (TreeWalk tw = TreeWalk.forPath(repo, path, commit.getTree())) {</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                if (tw == null) {</span>
+<span class="nc" id="L155">                    return null;</span>
                 }
-<span class="nc" id="L156">                byte[] bytes = repo.open(tw.getObjectId(0)).getBytes();</span>
-<span class="nc" id="L157">                return new String(bytes, StandardCharsets.UTF_8);</span>
-<span class="nc bnc" id="L158" title="All 2 branches missed.">            }</span>
-<span class="nc" id="L159">        }</span>
+<span class="nc" id="L157">                byte[] bytes = repo.open(tw.getObjectId(0)).getBytes();</span>
+<span class="nc" id="L158">                return new String(bytes, StandardCharsets.UTF_8);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">            }</span>
+<span class="nc" id="L160">        }</span>
     }
 
     /**
@@ -170,37 +171,37 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException on repository access failure
      */
     public List&lt;String&gt; listYaml(String ref, String dir) throws IOException {
-<span class="nc" id="L173">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
-<span class="nc" id="L175">            Path d = workTree().resolve(dir);</span>
-<span class="nc bnc" id="L176" title="All 2 branches missed.">            if (Files.isDirectory(d)) {</span>
-<span class="nc" id="L177">                try (var stream = Files.list(d)) {</span>
-<span class="nc" id="L178">                    stream.filter(p -&gt; p.getFileName().toString().endsWith(&quot;.yaml&quot;))</span>
-<span class="nc" id="L179">                            .sorted()</span>
-<span class="nc" id="L180">                            .forEach(p -&gt; out.add(dir + &quot;/&quot; + p.getFileName()));</span>
+<span class="nc" id="L174">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
+<span class="nc" id="L176">            Path d = workTree().resolve(dir);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (Files.isDirectory(d)) {</span>
+<span class="nc" id="L178">                try (Stream&lt;Path&gt; stream = Files.list(d)) {</span>
+<span class="nc" id="L179">                    stream.filter(p -&gt; p.getFileName().toString().endsWith(&quot;.yaml&quot;))</span>
+<span class="nc" id="L180">                            .sorted()</span>
+<span class="nc" id="L181">                            .forEach(p -&gt; out.add(dir + &quot;/&quot; + p.getFileName()));</span>
                 }
             }
-<span class="nc" id="L183">            return out;</span>
+<span class="nc" id="L184">            return out;</span>
         }
-<span class="nc" id="L185">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
-<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (commitId == null) {</span>
-<span class="nc" id="L187">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
+<span class="nc" id="L186">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (commitId == null) {</span>
+<span class="nc" id="L188">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
         }
-<span class="nc" id="L189">        try (RevWalk walk = new RevWalk(repo)) {</span>
-<span class="nc" id="L190">            RevCommit commit = walk.parseCommit(commitId);</span>
-<span class="nc" id="L191">            try (TreeWalk tw = TreeWalk.forPath(repo, dir, commit.getTree())) {</span>
-<span class="nc bnc" id="L192" title="All 4 branches missed.">                if (tw == null || !tw.isSubtree()) {</span>
-<span class="nc" id="L193">                    return out;</span>
+<span class="nc" id="L190">        try (RevWalk walk = new RevWalk(repo)) {</span>
+<span class="nc" id="L191">            RevCommit commit = walk.parseCommit(commitId);</span>
+<span class="nc" id="L192">            try (TreeWalk tw = TreeWalk.forPath(repo, dir, commit.getTree())) {</span>
+<span class="nc bnc" id="L193" title="All 4 branches missed.">                if (tw == null || !tw.isSubtree()) {</span>
+<span class="nc" id="L194">                    return out;</span>
                 }
-<span class="nc" id="L195">                tw.enterSubtree();</span>
-<span class="nc bnc" id="L196" title="All 2 branches missed.">                while (tw.next()) {</span>
-<span class="nc bnc" id="L197" title="All 2 branches missed.">                    if (tw.getPathString().endsWith(&quot;.yaml&quot;)) {</span>
-<span class="nc" id="L198">                        out.add(tw.getPathString());</span>
+<span class="nc" id="L196">                tw.enterSubtree();</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">                while (tw.next()) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">                    if (tw.getPathString().endsWith(&quot;.yaml&quot;)) {</span>
+<span class="nc" id="L199">                        out.add(tw.getPathString());</span>
                     }
                 }
-<span class="nc bnc" id="L201" title="All 2 branches missed.">            }</span>
-<span class="nc" id="L202">        }</span>
-<span class="nc" id="L203">        return out;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            }</span>
+<span class="nc" id="L203">        }</span>
+<span class="nc" id="L204">        return out;</span>
     }
 
     /**
@@ -216,35 +217,35 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException on repository access failure
      */
     public String findPath(String ref, String suffix) throws IOException {
-<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
-<span class="nc" id="L220">            Path root = workTree();</span>
-<span class="nc" id="L221">            try (var stream = Files.walk(root)) {</span>
-<span class="nc" id="L222">                return stream</span>
-<span class="nc" id="L223">                        .filter(Files::isRegularFile)</span>
-<span class="nc" id="L224">                        .map(p -&gt; root.relativize(p).toString().replace(java.io.File.separatorChar, '/'))</span>
-<span class="nc bnc" id="L225" title="All 4 branches missed.">                        .filter(p -&gt; p.endsWith(suffix) &amp;&amp; !p.contains(&quot;/target/&quot;)</span>
-<span class="nc bnc" id="L226" title="All 4 branches missed.">                                &amp;&amp; !p.startsWith(&quot;.&quot;) &amp;&amp; !p.contains(&quot;/.&quot;))</span>
-<span class="nc" id="L227">                        .sorted()</span>
-<span class="nc" id="L228">                        .findFirst()</span>
-<span class="nc" id="L229">                        .orElse(null);</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
+<span class="nc" id="L221">            Path root = workTree();</span>
+<span class="nc" id="L222">            try (Stream&lt;Path&gt; stream = Files.walk(root)) {</span>
+<span class="nc" id="L223">                return stream</span>
+<span class="nc" id="L224">                        .filter(Files::isRegularFile)</span>
+<span class="nc" id="L225">                        .map(p -&gt; root.relativize(p).toString().replace(java.io.File.separatorChar, '/'))</span>
+<span class="nc bnc" id="L226" title="All 4 branches missed.">                        .filter(p -&gt; p.endsWith(suffix) &amp;&amp; !p.contains(&quot;/target/&quot;)</span>
+<span class="nc bnc" id="L227" title="All 4 branches missed.">                                &amp;&amp; !p.startsWith(&quot;.&quot;) &amp;&amp; !p.contains(&quot;/.&quot;))</span>
+<span class="nc" id="L228">                        .sorted()</span>
+<span class="nc" id="L229">                        .findFirst()</span>
+<span class="nc" id="L230">                        .orElse(null);</span>
             }
         }
-<span class="nc" id="L232">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
-<span class="nc bnc" id="L233" title="All 2 branches missed.">        if (commitId == null) {</span>
-<span class="nc" id="L234">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
+<span class="nc" id="L233">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (commitId == null) {</span>
+<span class="nc" id="L235">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
         }
-<span class="nc" id="L236">        try (RevWalk walk = new RevWalk(repo);</span>
-<span class="nc" id="L237">             TreeWalk tw = new TreeWalk(repo)) {</span>
-<span class="nc" id="L238">            RevCommit commit = walk.parseCommit(commitId);</span>
-<span class="nc" id="L239">            tw.addTree(commit.getTree());</span>
-<span class="nc" id="L240">            tw.setRecursive(true);</span>
-<span class="nc bnc" id="L241" title="All 2 branches missed.">            while (tw.next()) {</span>
-<span class="nc bnc" id="L242" title="All 2 branches missed.">                if (tw.getPathString().endsWith(suffix)) {</span>
-<span class="nc" id="L243">                    return tw.getPathString();</span>
+<span class="nc" id="L237">        try (RevWalk walk = new RevWalk(repo);</span>
+<span class="nc" id="L238">             TreeWalk tw = new TreeWalk(repo)) {</span>
+<span class="nc" id="L239">            RevCommit commit = walk.parseCommit(commitId);</span>
+<span class="nc" id="L240">            tw.addTree(commit.getTree());</span>
+<span class="nc" id="L241">            tw.setRecursive(true);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            while (tw.next()) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                if (tw.getPathString().endsWith(suffix)) {</span>
+<span class="nc" id="L244">                    return tw.getPathString();</span>
                 }
             }
-<span class="nc" id="L246">        }</span>
-<span class="nc" id="L247">        return null;</span>
+<span class="nc" id="L247">        }</span>
+<span class="nc" id="L248">        return null;</span>
     }
 
     /**
@@ -259,7 +260,7 @@ public final class GitSource implements AutoCloseable {
      * @param fullMessage the full commit message
      * @param files       repository-relative paths the commit touched
      */
-<span class="fc" id="L262">    public record CommitMeta(String id, String author, String date,</span>
+<span class="fc" id="L263">    public record CommitMeta(String id, String author, String date,</span>
                              String subject, String fullMessage, List&lt;String&gt; files) {
     }
 
@@ -271,7 +272,7 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException on repository access failure
      */
     public String branch() throws IOException {
-<span class="nc" id="L274">        return repo.getBranch();</span>
+<span class="nc" id="L275">        return repo.getBranch();</span>
     }
 
     /**
@@ -281,8 +282,8 @@ public final class GitSource implements AutoCloseable {
      * @return the configured {@code user.name}, or {@code &quot;(local)&quot;}
      */
     public String userName() {
-<span class="nc" id="L284">        String name = repo.getConfig().getString(&quot;user&quot;, null, &quot;name&quot;);</span>
-<span class="nc bnc" id="L285" title="All 2 branches missed.">        return name == null ? &quot;(local)&quot; : name;</span>
+<span class="nc" id="L285">        String name = repo.getConfig().getString(&quot;user&quot;, null, &quot;name&quot;);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        return name == null ? &quot;(local)&quot; : name;</span>
     }
 
     /**
@@ -301,61 +302,61 @@ public final class GitSource implements AutoCloseable {
      */
     public List&lt;String&gt; blameInRange(String toRef, String path, java.util.Set&lt;String&gt; rangeCommitIds)
             throws IOException {
-<span class="nc bnc" id="L304" title="All 2 branches missed.">        String blameRef = WORKTREE.equals(toRef) ? &quot;HEAD&quot; : toRef;</span>
-<span class="nc" id="L305">        String blamedText = read(blameRef, path);</span>
-<span class="nc" id="L306">        List&lt;String&gt; blamedLineIds = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (blamedText != null) {</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        String blameRef = WORKTREE.equals(toRef) ? &quot;HEAD&quot; : toRef;</span>
+<span class="nc" id="L306">        String blamedText = read(blameRef, path);</span>
+<span class="nc" id="L307">        List&lt;String&gt; blamedLineIds = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (blamedText != null) {</span>
             try {
-<span class="nc" id="L309">                org.eclipse.jgit.blame.BlameResult result = new org.eclipse.jgit.api.Git(repo)</span>
-<span class="nc" id="L310">                        .blame()</span>
-<span class="nc" id="L311">                        .setFilePath(path)</span>
-<span class="nc" id="L312">                        .setStartCommit(repo.resolve(blameRef + &quot;^{commit}&quot;))</span>
-<span class="nc" id="L313">                        .call();</span>
-<span class="nc" id="L314">                int n = blamedText.split(&quot;\n&quot;, -1).length;</span>
-<span class="nc bnc" id="L315" title="All 2 branches missed.">                for (int i = 0; i &lt; n; i++) {</span>
-<span class="nc bnc" id="L316" title="All 4 branches missed.">                    RevCommit c = result != null &amp;&amp; i &lt; result.getResultContents().size()</span>
-<span class="nc" id="L317">                            ? result.getSourceCommit(i) : null;</span>
-<span class="nc bnc" id="L318" title="All 2 branches missed.">                    String id = c == null ? null : c.abbreviate(8).name();</span>
-<span class="nc bnc" id="L319" title="All 4 branches missed.">                    blamedLineIds.add(id != null &amp;&amp; rangeCommitIds.contains(id) ? id : null);</span>
+<span class="nc" id="L310">                org.eclipse.jgit.blame.BlameResult result = new org.eclipse.jgit.api.Git(repo)</span>
+<span class="nc" id="L311">                        .blame()</span>
+<span class="nc" id="L312">                        .setFilePath(path)</span>
+<span class="nc" id="L313">                        .setStartCommit(repo.resolve(blameRef + &quot;^{commit}&quot;))</span>
+<span class="nc" id="L314">                        .call();</span>
+<span class="nc" id="L315">                int n = blamedText.split(&quot;\n&quot;, -1).length;</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">                for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L317" title="All 4 branches missed.">                    RevCommit c = result != null &amp;&amp; i &lt; result.getResultContents().size()</span>
+<span class="nc" id="L318">                            ? result.getSourceCommit(i) : null;</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">                    String id = c == null ? null : c.abbreviate(8).name();</span>
+<span class="nc bnc" id="L320" title="All 4 branches missed.">                    blamedLineIds.add(id != null &amp;&amp; rangeCommitIds.contains(id) ? id : null);</span>
                 }
-<span class="nc" id="L321">            } catch (org.eclipse.jgit.api.errors.GitAPIException e) {</span>
-<span class="nc" id="L322">                throw new IOException(&quot;blame failed for &quot; + path + &quot;: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L323">            }</span>
+<span class="nc" id="L322">            } catch (org.eclipse.jgit.api.errors.GitAPIException e) {</span>
+<span class="nc" id="L323">                throw new IOException(&quot;blame failed for &quot; + path + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L324">            }</span>
         }
-<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (!WORKTREE.equals(toRef)) {</span>
-<span class="nc" id="L326">            return blamedLineIds;</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (!WORKTREE.equals(toRef)) {</span>
+<span class="nc" id="L327">            return blamedLineIds;</span>
         }
         // Map working-tree lines onto the blamed (HEAD) lines; lines the
         // working tree changed or added are uncommitted.
-<span class="nc" id="L330">        String wtText = read(WORKTREE, path);</span>
-<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (wtText == null) {</span>
-<span class="nc" id="L332">            return List.of();</span>
+<span class="nc" id="L331">        String wtText = read(WORKTREE, path);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        if (wtText == null) {</span>
+<span class="nc" id="L333">            return List.of();</span>
         }
-<span class="nc bnc" id="L334" title="All 2 branches missed.">        List&lt;String&gt; headLines = blamedText == null</span>
-<span class="nc" id="L335">                ? List.of() : java.util.Arrays.asList(blamedText.split(&quot;\n&quot;, -1));</span>
-<span class="nc" id="L336">        List&lt;String&gt; wtLines = java.util.Arrays.asList(wtText.split(&quot;\n&quot;, -1));</span>
-<span class="nc" id="L337">        String[] out = new String[wtLines.size()];</span>
-<span class="nc" id="L338">        java.util.Arrays.fill(out, UNCOMMITTED);</span>
-<span class="nc" id="L339">        int headPos = 0;</span>
-<span class="nc" id="L340">        int wtPos = 0;</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">        List&lt;String&gt; headLines = blamedText == null</span>
+<span class="nc" id="L336">                ? List.of() : java.util.Arrays.asList(blamedText.split(&quot;\n&quot;, -1));</span>
+<span class="nc" id="L337">        List&lt;String&gt; wtLines = java.util.Arrays.asList(wtText.split(&quot;\n&quot;, -1));</span>
+<span class="nc" id="L338">        String[] out = new String[wtLines.size()];</span>
+<span class="nc" id="L339">        java.util.Arrays.fill(out, UNCOMMITTED);</span>
+<span class="nc" id="L340">        int headPos = 0;</span>
+<span class="nc" id="L341">        int wtPos = 0;</span>
         for (com.github.difflib.patch.AbstractDelta&lt;String&gt; d
-<span class="nc bnc" id="L342" title="All 2 branches missed.">                : com.github.difflib.DiffUtils.diff(headLines, wtLines).getDeltas()) {</span>
-<span class="nc bnc" id="L343" title="All 2 branches missed.">            while (wtPos &lt; d.getTarget().getPosition()) {</span>
-<span class="nc bnc" id="L344" title="All 4 branches missed.">                if (wtPos &lt; out.length &amp;&amp; headPos &lt; blamedLineIds.size()) {</span>
-<span class="nc" id="L345">                    out[wtPos] = blamedLineIds.get(headPos);</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                : com.github.difflib.DiffUtils.diff(headLines, wtLines).getDeltas()) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">            while (wtPos &lt; d.getTarget().getPosition()) {</span>
+<span class="nc bnc" id="L345" title="All 4 branches missed.">                if (wtPos &lt; out.length &amp;&amp; headPos &lt; blamedLineIds.size()) {</span>
+<span class="nc" id="L346">                    out[wtPos] = blamedLineIds.get(headPos);</span>
                 }
-<span class="nc" id="L347">                wtPos++;</span>
-<span class="nc" id="L348">                headPos++;</span>
+<span class="nc" id="L348">                wtPos++;</span>
+<span class="nc" id="L349">                headPos++;</span>
             }
-<span class="nc" id="L350">            headPos += d.getSource().getLines().size();</span>
-<span class="nc" id="L351">            wtPos += d.getTarget().getLines().size();</span>
-<span class="nc" id="L352">        }</span>
-<span class="nc bnc" id="L353" title="All 4 branches missed.">        while (wtPos &lt; out.length &amp;&amp; headPos &lt; blamedLineIds.size()) {</span>
-<span class="nc" id="L354">            out[wtPos] = blamedLineIds.get(headPos);</span>
-<span class="nc" id="L355">            wtPos++;</span>
-<span class="nc" id="L356">            headPos++;</span>
+<span class="nc" id="L351">            headPos += d.getSource().getLines().size();</span>
+<span class="nc" id="L352">            wtPos += d.getTarget().getLines().size();</span>
+<span class="nc" id="L353">        }</span>
+<span class="nc bnc" id="L354" title="All 4 branches missed.">        while (wtPos &lt; out.length &amp;&amp; headPos &lt; blamedLineIds.size()) {</span>
+<span class="nc" id="L355">            out[wtPos] = blamedLineIds.get(headPos);</span>
+<span class="nc" id="L356">            wtPos++;</span>
+<span class="nc" id="L357">            headPos++;</span>
         }
-<span class="nc" id="L358">        return java.util.Arrays.asList(out);</span>
+<span class="nc" id="L359">        return java.util.Arrays.asList(out);</span>
     }
 
     /** Attribution value for working-tree lines not yet committed. */
@@ -373,75 +374,75 @@ public final class GitSource implements AutoCloseable {
      * @throws IOException on repository access failure
      */
     public List&lt;CommitMeta&gt; commitsBetween(String fromRef, String toRef) throws IOException {
-<span class="nc" id="L376">        List&lt;CommitMeta&gt; out = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L377">        try (RevWalk walk = new RevWalk(repo)) {</span>
-<span class="nc" id="L378">            walk.markStart(walk.parseCommit(repo.resolve(toRef + &quot;^{commit}&quot;)));</span>
-<span class="nc" id="L379">            walk.markUninteresting(walk.parseCommit(repo.resolve(fromRef + &quot;^{commit}&quot;)));</span>
-<span class="nc bnc" id="L380" title="All 2 branches missed.">            for (RevCommit c : walk) {</span>
-<span class="nc" id="L381">                out.add(new CommitMeta(</span>
-<span class="nc" id="L382">                        c.abbreviate(8).name(),</span>
-<span class="nc" id="L383">                        c.getAuthorIdent().getName(),</span>
-<span class="nc" id="L384">                        c.getAuthorIdent().getWhenAsInstant()</span>
-<span class="nc" id="L385">                                .atZone(c.getAuthorIdent().getZoneId())</span>
-<span class="nc" id="L386">                                .toLocalDate().toString(),</span>
-<span class="nc" id="L387">                        c.getShortMessage(),</span>
-<span class="nc" id="L388">                        c.getFullMessage(),</span>
-<span class="nc" id="L389">                        commitFiles(c)));</span>
-<span class="nc" id="L390">            }</span>
+<span class="nc" id="L377">        List&lt;CommitMeta&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L378">        try (RevWalk walk = new RevWalk(repo)) {</span>
+<span class="nc" id="L379">            walk.markStart(walk.parseCommit(repo.resolve(toRef + &quot;^{commit}&quot;)));</span>
+<span class="nc" id="L380">            walk.markUninteresting(walk.parseCommit(repo.resolve(fromRef + &quot;^{commit}&quot;)));</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">            for (RevCommit c : walk) {</span>
+<span class="nc" id="L382">                out.add(new CommitMeta(</span>
+<span class="nc" id="L383">                        c.abbreviate(8).name(),</span>
+<span class="nc" id="L384">                        c.getAuthorIdent().getName(),</span>
+<span class="nc" id="L385">                        c.getAuthorIdent().getWhenAsInstant()</span>
+<span class="nc" id="L386">                                .atZone(c.getAuthorIdent().getZoneId())</span>
+<span class="nc" id="L387">                                .toLocalDate().toString(),</span>
+<span class="nc" id="L388">                        c.getShortMessage(),</span>
+<span class="nc" id="L389">                        c.getFullMessage(),</span>
+<span class="nc" id="L390">                        commitFiles(c)));</span>
+<span class="nc" id="L391">            }</span>
         }
         // RevWalk yields newest first; the record of changes reads oldest first.
-<span class="nc" id="L393">        List&lt;CommitMeta&gt; reversed = new ArrayList&lt;&gt;(out.size());</span>
-<span class="nc bnc" id="L394" title="All 2 branches missed.">        for (int i = out.size() - 1; i &gt;= 0; i--) {</span>
-<span class="nc" id="L395">            reversed.add(out.get(i));</span>
+<span class="nc" id="L394">        List&lt;CommitMeta&gt; reversed = new ArrayList&lt;&gt;(out.size());</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        for (int i = out.size() - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L396">            reversed.add(out.get(i));</span>
         }
-<span class="nc" id="L397">        return reversed;</span>
+<span class="nc" id="L398">        return reversed;</span>
     }
 
     private List&lt;String&gt; commitFiles(RevCommit commit) throws IOException {
-<span class="nc" id="L401">        List&lt;String&gt; files = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L402">        try (DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);</span>
-<span class="nc" id="L403">             RevWalk walk = new RevWalk(repo)) {</span>
-<span class="nc" id="L404">            df.setRepository(repo);</span>
+<span class="nc" id="L402">        List&lt;String&gt; files = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L403">        try (DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);</span>
+<span class="nc" id="L404">             RevWalk walk = new RevWalk(repo)) {</span>
+<span class="nc" id="L405">            df.setRepository(repo);</span>
             AbstractTreeIterator parent;
-<span class="nc bnc" id="L406" title="All 2 branches missed.">            if (commit.getParentCount() &gt; 0) {</span>
-<span class="nc" id="L407">                RevCommit p = walk.parseCommit(commit.getParent(0).getId());</span>
-<span class="nc" id="L408">                parent = treeParser(p.getTree().getId());</span>
-<span class="nc" id="L409">            } else {</span>
-<span class="nc" id="L410">                parent = new CanonicalTreeParser();</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">            if (commit.getParentCount() &gt; 0) {</span>
+<span class="nc" id="L408">                RevCommit p = walk.parseCommit(commit.getParent(0).getId());</span>
+<span class="nc" id="L409">                parent = treeParser(p.getTree().getId());</span>
+<span class="nc" id="L410">            } else {</span>
+<span class="nc" id="L411">                parent = new CanonicalTreeParser();</span>
             }
-<span class="nc bnc" id="L412" title="All 2 branches missed.">            for (DiffEntry e : df.scan(parent, treeParser(commit.getTree().getId()))) {</span>
-<span class="nc bnc" id="L413" title="All 2 branches missed.">                files.add(e.getChangeType() == DiffEntry.ChangeType.DELETE</span>
-<span class="nc" id="L414">                        ? e.getOldPath() : e.getNewPath());</span>
-<span class="nc" id="L415">            }</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">            for (DiffEntry e : df.scan(parent, treeParser(commit.getTree().getId()))) {</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">                files.add(e.getChangeType() == DiffEntry.ChangeType.DELETE</span>
+<span class="nc" id="L415">                        ? e.getOldPath() : e.getNewPath());</span>
+<span class="nc" id="L416">            }</span>
         }
-<span class="nc" id="L417">        return files;</span>
+<span class="nc" id="L418">        return files;</span>
     }
 
     private AbstractTreeIterator treeIterator(String ref) throws IOException {
-<span class="nc bnc" id="L421" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
-<span class="nc" id="L422">            return new FileTreeIterator(repo);</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        if (WORKTREE.equals(ref)) {</span>
+<span class="nc" id="L423">            return new FileTreeIterator(repo);</span>
         }
-<span class="nc" id="L424">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
-<span class="nc bnc" id="L425" title="All 2 branches missed.">        if (commitId == null) {</span>
-<span class="nc" id="L426">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
+<span class="nc" id="L425">        ObjectId commitId = repo.resolve(ref + &quot;^{commit}&quot;);</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">        if (commitId == null) {</span>
+<span class="nc" id="L427">            throw new IOException(&quot;Cannot resolve ref: &quot; + ref);</span>
         }
-<span class="nc" id="L428">        try (RevWalk walk = new RevWalk(repo)) {</span>
-<span class="nc" id="L429">            RevCommit commit = walk.parseCommit(commitId);</span>
-<span class="nc" id="L430">            return treeParser(commit.getTree().getId());</span>
+<span class="nc" id="L429">        try (RevWalk walk = new RevWalk(repo)) {</span>
+<span class="nc" id="L430">            RevCommit commit = walk.parseCommit(commitId);</span>
+<span class="nc" id="L431">            return treeParser(commit.getTree().getId());</span>
         }
     }
 
     private CanonicalTreeParser treeParser(ObjectId treeId) throws IOException {
-<span class="nc" id="L435">        CanonicalTreeParser parser = new CanonicalTreeParser();</span>
-<span class="nc" id="L436">        try (var reader = repo.newObjectReader()) {</span>
-<span class="nc" id="L437">            parser.reset(reader, treeId);</span>
+<span class="nc" id="L436">        CanonicalTreeParser parser = new CanonicalTreeParser();</span>
+<span class="nc" id="L437">        try (org.eclipse.jgit.lib.ObjectReader reader = repo.newObjectReader()) {</span>
+<span class="nc" id="L438">            parser.reset(reader, treeId);</span>
         }
-<span class="nc" id="L439">        return parser;</span>
+<span class="nc" id="L440">        return parser;</span>
     }
 
     @Override
     public void close() {
-<span class="nc" id="L444">        repo.close();</span>
-<span class="nc" id="L445">    }</span>
+<span class="nc" id="L445">        repo.close();</span>
+<span class="nc" id="L446">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
