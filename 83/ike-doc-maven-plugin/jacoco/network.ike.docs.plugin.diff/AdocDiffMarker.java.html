@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdocDiffMarker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">AdocDiffMarker.java</span></div><h1>AdocDiffMarker.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
+
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.AbstractDelta;
+import com.github.difflib.patch.Patch;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Marks the differences between two versions of an AsciiDoc fragment as
+ * inline {@code [.diff-ins]#…#} / {@code [.diff-del]#…#} roles, producing
+ * a renderable &quot;marked copy&quot; for a doc-diff review packet
+ * (ike-issues#648, #649).
+ *
+ * &lt;p&gt;The marker is deliberately conservative. Constructs that inline role
+ * markup would corrupt are &lt;em&gt;protected&lt;/em&gt; — never marked in place —
+ * and their changes are reported in a per-topic change-summary
+ * {@code [NOTE]} block instead:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;the header region before the {@code [[anchor]]} line
+ *       (comment header and attribute block);&lt;/li&gt;
+ *   &lt;li&gt;attribute-value continuation lines (trailing backslash);&lt;/li&gt;
+ *   &lt;li&gt;verbatim, listing, passthrough, and table interiors;&lt;/li&gt;
+ *   &lt;li&gt;block-attribute, include, indexterm, anchor, and table-cell
+ *       lines, and block delimiters;&lt;/li&gt;
+ *   &lt;li&gt;lines carrying inline macros that word-splicing could break
+ *       ({@code xref:}, {@code k:}, {@code ((…))}, {@code footnote:},
+ *       {@code image:}, …);&lt;/li&gt;
+ *   &lt;li&gt;lines containing the role delimiter character {@code #}.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;Markable lines get a line-level diff with word-level refinement
+ * inside changed line pairs. Because IKE fragments use semantic line
+ * breaks, line-level deltas are already clause-grade. Structural
+ * prefixes (heading and list markers) are kept outside the role so an
+ * inserted heading or list item stays syntactically valid.
+ *
+ * &lt;p&gt;All methods are pure functions of their inputs — no I/O — so the
+ * marking rules are unit-testable in isolation.
+ */
+public final class AdocDiffMarker {
+
+    /** Lines never marked inline; changes to them are reported as notes. */
+<span class="fc" id="L50">    private static final Pattern PROTECTED = Pattern.compile(</span>
+            &quot;^(:[A-Za-z0-9_-]+:|//|\\[\\[|\\[|include::|indexterm:|\\||&lt;&lt;&lt;|\\+$|''')&quot;);
+
+    /** Block delimiter lines (also protected). */
+<span class="fc" id="L54">    private static final Pattern DELIMITERS = Pattern.compile(</span>
+            &quot;^(----|\\.\\.\\.\\.|====|\\*\\*\\*\\*|\\+\\+\\+\\+|____|\\|===|--)\\s*$&quot;);
+
+    /** Inline constructs that make word-splicing risky → whole-line fallback. */
+<span class="fc" id="L58">    private static final Pattern RISKY_INLINE = Pattern.compile(</span>
+            &quot;(xref:|image:|pass:|k:[A-Za-z]|\\(\\(|footnote:|btn:|kbd:)&quot;);
+
+    /** Structural prefix kept outside the role (headings, list markers). */
+<span class="fc" id="L62">    private static final Pattern STRUCTURAL_PREFIX = Pattern.compile(</span>
+            &quot;^((?:=+\\s)|(?:\\*+\\s)|(?:\\.+\\s)|(?:-\\s)|(?:\\d+\\.\\s))&quot;);
+
+    /** Delimiters that open a verbatim region (interior never marked). */
+<span class="fc" id="L66">    private static final Pattern VERBATIM_OPEN = Pattern.compile(</span>
+            &quot;^(----|\\.\\.\\.\\.|\\+\\+\\+\\+|\\|===)\\s*$&quot;);
+
+    private AdocDiffMarker() {
+    }
+
+    /**
+     * The result of marking one fragment: the marked lines, word-level
+     * insertion/deletion counts, and the notes describing changes to
+     * protected constructs.
+     *
+     * @param lines    the marked fragment, line by line, including the
+     *                 injected change-summary note block
+     * @param insWords approximate count of inserted words
+     * @param delWords approximate count of deleted words
+     * @param notes    human-readable notes for changes the marker could
+     *                 not show inline
+     */
+<span class="fc" id="L84">    public record MarkResult(List&lt;String&gt; lines, int insWords, int delWords, List&lt;String&gt; notes) {</span>
+    }
+
+    /**
+     * Source of STAMP endnote refs for marked regions (ike-issues#656).
+     * When provided, each change boundary's last marked line gains a
+     * reusable footnote ref — collapsed to one per paragraph when every
+     * boundary in the paragraph shares the same stamp.
+     */
+    public interface StampSource {
+
+        /**
+         * The footnote macro for an Active region (insertion or
+         * replacement) whose last new-side line has the given index.
+         *
+         * @param newLineIndex the region's last to-side line index
+         * @return the {@code footnote:id[text]} macro, or {@code null}
+         *         to skip stamping this region
+         */
+        String activeRef(int newLineIndex);
+
+        /**
+         * The footnote macro for an Inactive region (unpaired deletion).
+         *
+         * @return the {@code footnote:id[text]} macro, or {@code null}
+         */
+        String inactiveRef();
+    }
+
+    /**
+     * Produce a marked copy of a changed fragment, without stamps.
+     *
+     * @param oldLines the fragment's lines on the from side
+     * @param newLines the fragment's lines on the to side
+     * @return the marked fragment with a change-summary note injected
+     *         after the level-1 title
+     */
+    public static MarkResult mark(List&lt;String&gt; oldLines, List&lt;String&gt; newLines) {
+<span class="fc" id="L122">        return mark(oldLines, newLines, null);</span>
+    }
+
+    /**
+     * Produce a marked copy of a changed fragment, with optional STAMP
+     * endnote refs per change boundary.
+     *
+     * @param oldLines the fragment's lines on the from side
+     * @param newLines the fragment's lines on the to side
+     * @param stamps   stamp-ref source, or {@code null} for no stamps
+     * @return the marked fragment with a change-summary note injected
+     *         after the level-1 title
+     */
+    public static MarkResult mark(List&lt;String&gt; oldLines, List&lt;String&gt; newLines,
+                                  StampSource stamps) {
+<span class="fc" id="L137">        Patch&lt;String&gt; patch = DiffUtils.diff(oldLines, newLines);</span>
+<span class="fc" id="L138">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L139">        List&lt;String&gt; notes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L140">        State state = new State();</span>
+<span class="fc" id="L141">        int[] words = new int[2]; // ins, del</span>
+<span class="fc" id="L142">        List&lt;int[]&gt; pendingRefs = new ArrayList&lt;&gt;();   // [outIdx]</span>
+<span class="fc" id="L143">        List&lt;String&gt; pendingRefText = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L145">        int newPos = 0;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        for (AbstractDelta&lt;String&gt; delta : patch.getDeltas()) {</span>
+            // Copy the equal region preceding this delta from the new side.
+<span class="fc bfc" id="L148" title="All 2 branches covered.">            while (newPos &lt; delta.getTarget().getPosition()) {</span>
+<span class="fc" id="L149">                String l = newLines.get(newPos);</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                if (l.isBlank()) {</span>
+<span class="fc" id="L151">                    flushParagraphRefs(out, pendingRefs, pendingRefText);</span>
+                }
+<span class="fc" id="L153">                emit(out, state, l);</span>
+<span class="fc" id="L154">                newPos++;</span>
+<span class="fc" id="L155">            }</span>
+<span class="fc" id="L156">            List&lt;String&gt; oldRun = delta.getSource().getLines();</span>
+<span class="fc" id="L157">            List&lt;String&gt; newRun = delta.getTarget().getLines();</span>
+<span class="fc" id="L158">            int outStart = out.size();</span>
+<span class="fc" id="L159">            boolean markedAny = applyDelta(oldRun, newRun, out, notes, state, words);</span>
+<span class="pc bpc" id="L160" title="2 of 6 branches missed.">            if (stamps != null &amp;&amp; markedAny &amp;&amp; out.size() &gt; outStart) {</span>
+                // Stamp the last substantive line: walk back past trailing
+                // blanks (and the EOF phantom) on both the to side — for
+                // blame lookup — and the output — for ref attachment.
+<span class="fc" id="L164">                int lastNew = delta.getTarget().getPosition() + newRun.size() - 1;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">                while (lastNew &gt; delta.getTarget().getPosition()</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">                        &amp;&amp; newLines.get(lastNew).isBlank()) {</span>
+<span class="nc" id="L167">                    lastNew--;</span>
+                }
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                String ref = newRun.isEmpty()</span>
+<span class="fc" id="L170">                        ? stamps.inactiveRef()</span>
+<span class="fc" id="L171">                        : stamps.activeRef(lastNew);</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                if (ref != null) {</span>
+<span class="fc" id="L173">                    int attach = out.size() - 1;</span>
+<span class="pc bpc" id="L174" title="1 of 4 branches missed.">                    while (attach &gt; outStart &amp;&amp; out.get(attach).isBlank()) {</span>
+<span class="nc" id="L175">                        attach--;</span>
+                    }
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                    if (!out.get(attach).isBlank()) {</span>
+<span class="fc" id="L178">                        pendingRefs.add(new int[] {attach});</span>
+<span class="fc" id="L179">                        pendingRefText.add(ref);</span>
+                    }
+                }
+            }
+<span class="fc" id="L183">            newPos += newRun.size();</span>
+<span class="fc" id="L184">        }</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        while (newPos &lt; newLines.size()) {</span>
+<span class="fc" id="L186">            String l = newLines.get(newPos);</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (l.isBlank()) {</span>
+<span class="fc" id="L188">                flushParagraphRefs(out, pendingRefs, pendingRefText);</span>
+            }
+<span class="fc" id="L190">            emit(out, state, l);</span>
+<span class="fc" id="L191">            newPos++;</span>
+<span class="fc" id="L192">        }</span>
+<span class="fc" id="L193">        flushParagraphRefs(out, pendingRefs, pendingRefText);</span>
+
+<span class="fc" id="L195">        List&lt;String&gt; withNote = injectSummary(out, words[0], words[1], notes);</span>
+<span class="fc" id="L196">        return new MarkResult(withNote, words[0], words[1], notes);</span>
+    }
+
+    /**
+     * Attach the paragraph's pending stamp refs: one ref at the last
+     * boundary when all boundaries share a stamp, otherwise each
+     * boundary keeps its own.
+     *
+     * @param out            the marked stream
+     * @param pendingRefs    boundary end positions in the stream
+     * @param pendingRefText the corresponding footnote macros
+     */
+    private static void flushParagraphRefs(List&lt;String&gt; out, List&lt;int[]&gt; pendingRefs,
+                                           List&lt;String&gt; pendingRefText) {
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (pendingRefs.isEmpty()) {</span>
+<span class="fc" id="L211">            return;</span>
+        }
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        boolean uniform = pendingRefText.stream().distinct().count() == 1;</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        for (int i = 0; i &lt; pendingRefs.size(); i++) {</span>
+<span class="pc bpc" id="L215" title="2 of 4 branches missed.">            if (uniform &amp;&amp; i &lt; pendingRefs.size() - 1) {</span>
+<span class="nc" id="L216">                continue;</span>
+            }
+<span class="fc" id="L218">            int idx = pendingRefs.get(i)[0];</span>
+<span class="fc" id="L219">            out.set(idx, out.get(idx) + pendingRefText.get(i));</span>
+        }
+<span class="fc" id="L221">        pendingRefs.clear();</span>
+<span class="fc" id="L222">        pendingRefText.clear();</span>
+<span class="fc" id="L223">    }</span>
+
+    /** Block-attribute line opening a diagram block. */
+<span class="fc" id="L226">    private static final Pattern DIAGRAM_ATTR = Pattern.compile(</span>
+            &quot;^\\[(plantuml|graphviz|mermaid)\\b.*]\\s*$&quot;);
+
+    /**
+     * One diagram block found in a fragment.
+     *
+     * @param kind      the diagram kind (plantuml, graphviz, mermaid)
+     * @param body      the lines between the delimiters
+     * @param closeLine the index of the closing delimiter line
+     */
+<span class="fc" id="L236">    private record DiagramBlock(String kind, List&lt;String&gt; body, int closeLine) {</span>
+    }
+
+    /**
+     * Append, after every diagram block whose body meaningfully changed
+     * between the two sides, the compact source delta followed by the
+     * rendered previous version — so the reader sees the new drawing,
+     * what changed in the spec, and the old drawing, in that order.
+     * Blocks are paired per diagram kind in occurrence order; bodies
+     * are compared whitespace-insensitively, so formatting-only edits
+     * never produce a pair, and diagrams only present on one side are
+     * left alone (the change-summary notes already report removed
+     * lines).
+     *
+     * @param oldLines    the fragment's from-side lines
+     * @param markedLines the marked fragment (its verbatim regions carry
+     *                    the to-side diagram blocks unmodified)
+     * @return the marked fragment with delta-plus-previous blocks
+     *         inserted
+     */
+    public static List&lt;String&gt; withDiagramHistory(List&lt;String&gt; oldLines,
+                                                  List&lt;String&gt; markedLines) {
+<span class="fc" id="L258">        List&lt;DiagramBlock&gt; oldBlocks = diagramBlocks(oldLines);</span>
+<span class="fc" id="L259">        List&lt;DiagramBlock&gt; newBlocks = diagramBlocks(markedLines);</span>
+<span class="fc" id="L260">        List&lt;String&gt; out = new ArrayList&lt;&gt;(markedLines);</span>
+        // Bottom-up so earlier insertions don't shift later indices.
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        for (int i = newBlocks.size() - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L263">            DiagramBlock now = newBlocks.get(i);</span>
+<span class="fc" id="L264">            DiagramBlock before = nthOfKind(oldBlocks, now.kind(), kindIndex(newBlocks, i));</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">            if (before == null</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">                    || normalized(before.body()).equals(normalized(now.body()))) {</span>
+<span class="fc" id="L267">                continue;</span>
+            }
+<span class="fc" id="L269">            List&lt;String&gt; insert = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L270">            insert.add(&quot;&quot;);</span>
+<span class="fc" id="L271">            insert.add(&quot;[.diff-meta]##This diagram changed — source delta, then the previous rendering:##&quot;);</span>
+<span class="fc" id="L272">            insert.add(&quot;&quot;);</span>
+<span class="fc" id="L273">            insert.add(&quot;[source,diff]&quot;);</span>
+<span class="fc" id="L274">            insert.add(&quot;-----&quot;);</span>
+<span class="fc" id="L275">            insert.addAll(bodyDelta(before.body(), now.body()));</span>
+<span class="fc" id="L276">            insert.add(&quot;-----&quot;);</span>
+<span class="fc" id="L277">            insert.add(&quot;&quot;);</span>
+<span class="fc" id="L278">            insert.add(&quot;[&quot; + now.kind() + &quot;]&quot;);</span>
+<span class="fc" id="L279">            insert.add(&quot;----&quot;);</span>
+<span class="fc" id="L280">            insert.addAll(before.body());</span>
+<span class="fc" id="L281">            insert.add(&quot;----&quot;);</span>
+<span class="fc" id="L282">            out.addAll(now.closeLine() + 1, insert);</span>
+        }
+<span class="fc" id="L284">        return out;</span>
+    }
+
+    private static List&lt;String&gt; normalized(List&lt;String&gt; body) {
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">        return body.stream().map(String::strip).filter(s -&gt; !s.isEmpty()).toList();</span>
+    }
+
+    private static List&lt;String&gt; bodyDelta(List&lt;String&gt; oldBody, List&lt;String&gt; newBody) {
+<span class="fc" id="L292">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        for (AbstractDelta&lt;String&gt; d : DiffUtils.diff(oldBody, newBody).getDeltas()) {</span>
+<span class="fc" id="L294">            d.getSource().getLines().forEach(l -&gt; out.add(&quot;- &quot; + l));</span>
+<span class="fc" id="L295">            d.getTarget().getLines().forEach(l -&gt; out.add(&quot;+ &quot; + l));</span>
+<span class="fc" id="L296">        }</span>
+<span class="fc" id="L297">        return out;</span>
+    }
+
+    private static List&lt;DiagramBlock&gt; diagramBlocks(List&lt;String&gt; lines) {
+<span class="fc" id="L301">        List&lt;DiagramBlock&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        for (int i = 0; i &lt; lines.size(); i++) {</span>
+<span class="fc" id="L303">            Matcher m = DIAGRAM_ATTR.matcher(lines.get(i).strip());</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">            if (!m.matches()) {</span>
+<span class="fc" id="L305">                continue;</span>
+            }
+<span class="fc" id="L307">            int open = i + 1;</span>
+<span class="pc bpc" id="L308" title="2 of 4 branches missed.">            while (open &lt; lines.size() &amp;&amp; lines.get(open).isBlank()) {</span>
+<span class="nc" id="L309">                open++;</span>
+            }
+<span class="pc bpc" id="L311" title="2 of 4 branches missed.">            if (open &gt;= lines.size() || !lines.get(open).strip().equals(&quot;----&quot;)) {</span>
+<span class="nc" id="L312">                continue;</span>
+            }
+<span class="fc" id="L314">            int close = open + 1;</span>
+<span class="pc bpc" id="L315" title="1 of 4 branches missed.">            while (close &lt; lines.size() &amp;&amp; !lines.get(close).strip().equals(&quot;----&quot;)) {</span>
+<span class="fc" id="L316">                close++;</span>
+            }
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">            if (close &gt;= lines.size()) {</span>
+<span class="nc" id="L319">                continue;</span>
+            }
+<span class="fc" id="L321">            out.add(new DiagramBlock(m.group(1),</span>
+<span class="fc" id="L322">                    List.copyOf(lines.subList(open + 1, close)), close));</span>
+<span class="fc" id="L323">            i = close;</span>
+        }
+<span class="fc" id="L325">        return out;</span>
+    }
+
+    private static int kindIndex(List&lt;DiagramBlock&gt; blocks, int position) {
+<span class="fc" id="L329">        String kind = blocks.get(position).kind();</span>
+<span class="fc" id="L330">        int n = 0;</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">        for (int i = 0; i &lt; position; i++) {</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            if (blocks.get(i).kind().equals(kind)) {</span>
+<span class="nc" id="L333">                n++;</span>
+            }
+        }
+<span class="fc" id="L336">        return n;</span>
+    }
+
+    private static DiagramBlock nthOfKind(List&lt;DiagramBlock&gt; blocks, String kind, int n) {
+<span class="fc" id="L340">        int seen = 0;</span>
+<span class="pc bpc" id="L341" title="1 of 2 branches missed.">        for (DiagramBlock b : blocks) {</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">            if (b.kind().equals(kind)) {</span>
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">                if (seen == n) {</span>
+<span class="fc" id="L344">                    return b;</span>
+                }
+<span class="nc" id="L346">                seen++;</span>
+            }
+<span class="nc" id="L348">        }</span>
+<span class="nc" id="L349">        return null;</span>
+    }
+
+    /**
+     * Produce a full-text copy of an added fragment with a banner note
+     * instead of inline marks.
+     *
+     * @param newLines the fragment's lines on the to side
+     * @param fromRef  the from-side ref name, used in the banner text
+     * @return the banner-annotated fragment
+     */
+    public static MarkResult markAdded(List&lt;String&gt; newLines, String fromRef) {
+<span class="fc" id="L361">        return markAdded(newLines, fromRef, null);</span>
+    }
+
+    /**
+     * Produce a full-text copy of an added fragment with a banner note,
+     * optionally stamped — an added topic is one Active stamp, carried
+     * on the banner rather than in the flow.
+     *
+     * @param newLines the fragment's lines on the to side
+     * @param fromRef  the from-side ref name, used in the banner text
+     * @param stampRef the stamp footnote macro, or {@code null}
+     * @return the banner-annotated fragment
+     */
+    public static MarkResult markAdded(List&lt;String&gt; newLines, String fromRef, String stampRef) {
+<span class="fc" id="L375">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L376">        boolean placed = false;</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">        for (String l : newLines) {</span>
+<span class="fc" id="L378">            out.add(l);</span>
+<span class="fc bfc" id="L379" title="All 4 branches covered.">            if (!placed &amp;&amp; l.startsWith(&quot;= &quot;)) {</span>
+<span class="fc" id="L380">                out.add(&quot;&quot;);</span>
+<span class="fc" id="L381">                out.add(&quot;[NOTE]&quot;);</span>
+<span class="fc" id="L382">                out.add(&quot;====&quot;);</span>
+<span class="fc" id="L383">                out.add(&quot;[.diff-meta]#New topic — did not exist at &quot; + fromRef</span>
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">                        + &quot;; full text follows.#&quot; + (stampRef == null ? &quot;&quot; : stampRef));</span>
+<span class="fc" id="L385">                out.add(&quot;====&quot;);</span>
+<span class="fc" id="L386">                placed = true;</span>
+            }
+<span class="fc" id="L388">        }</span>
+<span class="fc" id="L389">        int ins = newLines.stream().mapToInt(l -&gt; l.split(&quot;\\s+&quot;).length).sum();</span>
+<span class="fc" id="L390">        return new MarkResult(out, ins, 0, List.of());</span>
+    }
+
+    private static boolean applyDelta(List&lt;String&gt; oldRun, List&lt;String&gt; newRun,
+                                      List&lt;String&gt; out, List&lt;String&gt; notes,
+                                      State state, int[] words) {
+<span class="fc" id="L396">        boolean markedAny = false;</span>
+<span class="fc" id="L397">        int max = Math.max(oldRun.size(), newRun.size());</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">        for (int k = 0; k &lt; max; k++) {</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">            String o = k &lt; oldRun.size() ? oldRun.get(k) : null;</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">            String n = k &lt; newRun.size() ? newRun.get(k) : null;</span>
+<span class="fc bfc" id="L401" title="All 4 branches covered.">            if (o != null &amp;&amp; n != null) {</span>
+<span class="fc" id="L402">                boolean ok = inlineOk(o, state);</span>
+<span class="fc" id="L403">                boolean nk = inlineOk(n, state);</span>
+<span class="pc bpc" id="L404" title="1 of 4 branches missed.">                String merged = (ok &amp;&amp; nk) ? wordMerge(o, n) : null;</span>
+<span class="fc bfc" id="L405" title="All 2 branches covered.">                if (merged != null) {</span>
+<span class="fc" id="L406">                    emit(out, state, merged);</span>
+<span class="fc" id="L407">                    markedAny = true;</span>
+<span class="pc bpc" id="L408" title="3 of 4 branches missed.">                } else if (ok &amp;&amp; nk) {</span>
+<span class="nc" id="L409">                    out.add(wrapPrefixed(&quot;diff-del&quot;, o));</span>
+<span class="nc" id="L410">                    emit(out, state, wrapPrefixed(&quot;diff-ins&quot;, n));</span>
+<span class="nc" id="L411">                    markedAny = true;</span>
+                } else {
+<span class="fc" id="L413">                    emit(out, state, n);</span>
+<span class="fc" id="L414">                    notes.add(&quot;changed (shown as new): `&quot; + clip(o, 60)</span>
+<span class="fc" id="L415">                            + &quot;` -&gt; `&quot; + clip(n, 60) + &quot;`&quot;);</span>
+                }
+<span class="fc" id="L417">                words[0] += wordCount(n);</span>
+<span class="fc" id="L418">                words[1] += wordCount(o);</span>
+<span class="fc bfc" id="L419" title="All 2 branches covered.">            } else if (n != null) {</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                if (inlineOk(n, state)) {</span>
+<span class="fc" id="L421">                    emit(out, state, wrapPrefixed(&quot;diff-ins&quot;, n));</span>
+<span class="fc" id="L422">                    markedAny = true;</span>
+                } else {
+<span class="fc" id="L424">                    emit(out, state, n);</span>
+<span class="fc bfc" id="L425" title="All 2 branches covered.">                    if (!n.isBlank()) {</span>
+<span class="fc" id="L426">                        notes.add(&quot;added (shown unmarked): `&quot; + clip(n, 90) + &quot;`&quot;);</span>
+                    }
+                }
+<span class="fc" id="L429">                words[0] += wordCount(n);</span>
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">            } else if (o != null) {</span>
+<span class="pc bpc" id="L431" title="1 of 2 branches missed.">                if (inlineOk(o, state)) {</span>
+<span class="fc" id="L432">                    out.add(wrapPrefixed(&quot;diff-del&quot;, o));</span>
+<span class="fc" id="L433">                    markedAny = true;</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">                } else if (!o.isBlank()) {</span>
+<span class="nc" id="L435">                    notes.add(&quot;removed: `&quot; + clip(o, 90) + &quot;`&quot;);</span>
+                }
+<span class="fc" id="L437">                words[1] += wordCount(o);</span>
+            }
+        }
+<span class="fc" id="L440">        return markedAny;</span>
+    }
+
+    /**
+     * Minimum share of a line pair's characters that must be unchanged
+     * for word-level merging; below this the pair reads better as a
+     * whole struck line followed by a whole inserted line (rewrites
+     * produce unreadable interleave when word-merged).
+     */
+    private static final double MERGE_SIMILARITY_FLOOR = 0.4;
+
+    /**
+     * Merge one old/new line pair with word-level ins/del roles, or
+     * return {@code null} when the pair's structural prefixes differ or
+     * the pair is too dissimilar (a rewrite), in which case the caller
+     * falls back to whole-line marking.
+     *
+     * @param oldLine the from-side line
+     * @param newLine the to-side line
+     * @return the merged line, or {@code null} when no readable merge
+     *         exists
+     */
+    static String wordMerge(String oldLine, String newLine) {
+<span class="fc" id="L463">        String[] po = splitPrefix(oldLine);</span>
+<span class="fc" id="L464">        String[] pn = splitPrefix(newLine);</span>
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">        if (!po[0].equals(pn[0])) {</span>
+<span class="nc" id="L466">            return null;</span>
+        }
+<span class="fc" id="L468">        List&lt;String&gt; ot = tokenize(po[1]);</span>
+<span class="fc" id="L469">        List&lt;String&gt; nt = tokenize(pn[1]);</span>
+<span class="fc" id="L470">        Patch&lt;String&gt; patch = DiffUtils.diff(ot, nt);</span>
+<span class="fc" id="L471">        int changed = 0;</span>
+<span class="fc bfc" id="L472" title="All 2 branches covered.">        for (AbstractDelta&lt;String&gt; d : patch.getDeltas()) {</span>
+<span class="fc" id="L473">            changed += d.getSource().getLines().stream().mapToInt(String::length).sum()</span>
+<span class="fc" id="L474">                    + d.getTarget().getLines().stream().mapToInt(String::length).sum();</span>
+<span class="fc" id="L475">        }</span>
+<span class="fc" id="L476">        int total = po[1].length() + pn[1].length();</span>
+<span class="pc bpc" id="L477" title="2 of 4 branches missed.">        if (total &gt; 0 &amp;&amp; (double) (total - changed) / total &lt; MERGE_SIMILARITY_FLOOR) {</span>
+<span class="nc" id="L478">            return null;</span>
+        }
+<span class="fc" id="L480">        StringBuilder sb = new StringBuilder(pn[0]);</span>
+<span class="fc" id="L481">        int pos = 0;</span>
+<span class="fc bfc" id="L482" title="All 2 branches covered.">        for (AbstractDelta&lt;String&gt; d : patch.getDeltas()) {</span>
+<span class="fc bfc" id="L483" title="All 2 branches covered.">            while (pos &lt; d.getTarget().getPosition()) {</span>
+<span class="fc" id="L484">                sb.append(nt.get(pos));</span>
+<span class="fc" id="L485">                pos++;</span>
+            }
+<span class="fc" id="L487">            String o = String.join(&quot;&quot;, d.getSource().getLines());</span>
+<span class="fc" id="L488">            String n = String.join(&quot;&quot;, d.getTarget().getLines());</span>
+<span class="fc bfc" id="L489" title="All 2 branches covered.">            if (!o.isBlank()) {</span>
+<span class="fc" id="L490">                sb.append(wrap(&quot;diff-del&quot;, o.strip())).append(' ');</span>
+            } else {
+<span class="fc" id="L492">                sb.append(o);</span>
+            }
+<span class="fc bfc" id="L494" title="All 2 branches covered.">            if (!n.isBlank()) {</span>
+<span class="fc" id="L495">                sb.append(wrap(&quot;diff-ins&quot;, n.strip()));</span>
+<span class="pc bpc" id="L496" title="1 of 2 branches missed.">                if (n.endsWith(&quot; &quot;)) {</span>
+<span class="nc" id="L497">                    sb.append(' ');</span>
+                }
+<span class="pc bpc" id="L499" title="3 of 4 branches missed.">            } else if (!n.isEmpty() &amp;&amp; o.isEmpty()) {</span>
+<span class="nc" id="L500">                sb.append(n);</span>
+            }
+<span class="fc" id="L502">            pos += d.getTarget().getLines().size();</span>
+<span class="fc" id="L503">        }</span>
+<span class="fc bfc" id="L504" title="All 2 branches covered.">        while (pos &lt; nt.size()) {</span>
+<span class="fc" id="L505">            sb.append(nt.get(pos));</span>
+<span class="fc" id="L506">            pos++;</span>
+        }
+<span class="fc" id="L508">        return sb.toString().stripTrailing();</span>
+    }
+
+    /**
+     * Decide whether a line may carry inline role markup given the
+     * current stream state.
+     *
+     * @param line  the candidate line
+     * @param state the marker's stream state (header, continuation,
+     *              verbatim tracking)
+     * @return whether inline marking is safe for this line
+     */
+    static boolean inlineOk(String line, State state) {
+<span class="pc bpc" id="L521" title="1 of 6 branches missed.">        if (state.inHeader || state.continuation || state.inVerbatim()) {</span>
+<span class="fc" id="L522">            return false;</span>
+        }
+<span class="fc" id="L524">        String s = line.stripTrailing();</span>
+<span class="pc bpc" id="L525" title="2 of 6 branches missed.">        if (s.isBlank() || PROTECTED.matcher(s).find() || DELIMITERS.matcher(s).matches()) {</span>
+<span class="fc" id="L526">            return false;</span>
+        }
+<span class="pc bpc" id="L528" title="2 of 4 branches missed.">        if (s.endsWith(&quot;\\&quot;) || s.indexOf('#') &gt;= 0) {</span>
+<span class="nc" id="L529">            return false;</span>
+        }
+<span class="fc bfc" id="L531" title="All 2 branches covered.">        return !RISKY_INLINE.matcher(s).find();</span>
+    }
+
+    private static void emit(List&lt;String&gt; out, State state, String line) {
+<span class="fc" id="L535">        state.feed(line);</span>
+<span class="fc" id="L536">        out.add(line);</span>
+<span class="fc" id="L537">    }</span>
+
+    private static List&lt;String&gt; injectSummary(List&lt;String&gt; lines, int ins, int del,
+                                              List&lt;String&gt; notes) {
+<span class="fc" id="L541">        List&lt;String&gt; out = new ArrayList&lt;&gt;(lines.size() + 8);</span>
+<span class="fc" id="L542">        boolean placed = false;</span>
+<span class="fc bfc" id="L543" title="All 2 branches covered.">        for (String l : lines) {</span>
+<span class="fc" id="L544">            out.add(l);</span>
+<span class="fc bfc" id="L545" title="All 4 branches covered.">            if (!placed &amp;&amp; l.startsWith(&quot;= &quot;)) {</span>
+<span class="fc" id="L546">                out.add(&quot;&quot;);</span>
+<span class="fc" id="L547">                out.add(&quot;[NOTE]&quot;);</span>
+<span class="fc" id="L548">                out.add(&quot;====&quot;);</span>
+<span class="fc" id="L549">                out.add(&quot;[.diff-meta]#Change summary: ~&quot; + ins + &quot; words added, ~&quot;</span>
+                        + del + &quot; words removed.#&quot;);
+<span class="fc bfc" id="L551" title="All 2 branches covered.">                if (!notes.isEmpty()) {</span>
+<span class="fc" id="L552">                    out.add(&quot;&quot;);</span>
+<span class="fc" id="L553">                    Set&lt;String&gt; seen = new LinkedHashSet&lt;&gt;(notes);</span>
+<span class="fc bfc" id="L554" title="All 2 branches covered.">                    for (String n : seen) {</span>
+<span class="fc" id="L555">                        out.add(&quot;* [.diff-meta]#&quot; + n + &quot;#&quot;);</span>
+<span class="fc" id="L556">                    }</span>
+                }
+<span class="fc" id="L558">                out.add(&quot;====&quot;);</span>
+<span class="fc" id="L559">                placed = true;</span>
+            }
+<span class="fc" id="L561">        }</span>
+<span class="fc" id="L562">        return out;</span>
+    }
+
+    private static String wrap(String role, String text) {
+        // Unconstrained form (##…##): a constrained role fails to parse at
+        // non-word boundaries (after ';', ']', …) and leaks literally into
+        // the render. Content with a literal '#' never reaches here — such
+        // lines are protected by inlineOk().
+<span class="pc bpc" id="L570" title="1 of 2 branches missed.">        return text.isBlank() ? text : &quot;[.&quot; + role + &quot;]##&quot; + text + &quot;##&quot;;</span>
+    }
+
+    private static String wrapPrefixed(String role, String line) {
+<span class="fc" id="L574">        String[] p = splitPrefix(line);</span>
+<span class="fc" id="L575">        return p[0] + wrap(role, p[1]);</span>
+    }
+
+    private static String[] splitPrefix(String s) {
+<span class="fc" id="L579">        Matcher m = STRUCTURAL_PREFIX.matcher(s);</span>
+<span class="fc bfc" id="L580" title="All 2 branches covered.">        if (m.find()) {</span>
+<span class="fc" id="L581">            return new String[] {m.group(0), s.substring(m.end())};</span>
+        }
+<span class="fc" id="L583">        return new String[] {&quot;&quot;, s};</span>
+    }
+
+    private static List&lt;String&gt; tokenize(String s) {
+<span class="fc" id="L587">        List&lt;String&gt; tokens = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L588">        int i = 0;</span>
+<span class="fc bfc" id="L589" title="All 2 branches covered.">        while (i &lt; s.length()) {</span>
+<span class="fc" id="L590">            int start = i;</span>
+<span class="fc" id="L591">            boolean ws = Character.isWhitespace(s.charAt(i));</span>
+<span class="fc bfc" id="L592" title="All 4 branches covered.">            while (i &lt; s.length() &amp;&amp; Character.isWhitespace(s.charAt(i)) == ws) {</span>
+<span class="fc" id="L593">                i++;</span>
+            }
+<span class="fc" id="L595">            tokens.add(s.substring(start, i));</span>
+<span class="fc" id="L596">        }</span>
+<span class="fc" id="L597">        return tokens;</span>
+    }
+
+    private static int wordCount(String s) {
+<span class="fc" id="L601">        String t = s.strip();</span>
+<span class="fc bfc" id="L602" title="All 2 branches covered.">        return t.isEmpty() ? 0 : t.split(&quot;\\s+&quot;).length;</span>
+    }
+
+    private static String clip(String s, int max) {
+<span class="fc" id="L606">        String t = s.strip();</span>
+<span class="pc bpc" id="L607" title="1 of 2 branches missed.">        return t.length() &lt;= max ? t : t.substring(0, max);</span>
+    }
+
+    /**
+     * Mutable stream state threaded through one marking pass: whether we
+     * are still in the pre-anchor header region, whether the previous
+     * emitted line ended in an attribute continuation, and the verbatim
+     * delimiter currently open (if any).
+     */
+<span class="fc" id="L616">    static final class State {</span>
+<span class="fc" id="L617">        private boolean inHeader = true;</span>
+        private boolean continuation;
+        private String verbatim;
+
+        /**
+         * Update the state from one emitted line.
+         *
+         * @param line the line just emitted to the marked stream
+         */
+        void feed(String line) {
+<span class="fc bfc" id="L627" title="All 4 branches covered.">            if (inHeader &amp;&amp; line.startsWith(&quot;[[&quot;)) {</span>
+<span class="fc" id="L628">                inHeader = false;</span>
+            }
+<span class="fc" id="L630">            continuation = line.stripTrailing().endsWith(&quot;\\&quot;);</span>
+<span class="fc" id="L631">            String s = line.strip();</span>
+<span class="fc bfc" id="L632" title="All 2 branches covered.">            if (verbatim == null) {</span>
+<span class="fc bfc" id="L633" title="All 2 branches covered.">                if (VERBATIM_OPEN.matcher(s).matches()) {</span>
+<span class="fc" id="L634">                    verbatim = s;</span>
+                }
+<span class="fc bfc" id="L636" title="All 2 branches covered.">            } else if (s.equals(verbatim)) {</span>
+<span class="fc" id="L637">                verbatim = null;</span>
+            }
+<span class="fc" id="L639">        }</span>
+
+        /**
+         * Whether the stream is currently inside a verbatim region.
+         *
+         * @return whether a verbatim delimiter is open
+         */
+        boolean inVerbatim() {
+<span class="fc bfc" id="L647" title="All 2 branches covered.">            return verbatim != null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

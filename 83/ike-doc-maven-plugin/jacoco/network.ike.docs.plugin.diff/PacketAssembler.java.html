@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PacketAssembler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">PacketAssembler.java</span></div><h1>PacketAssembler.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
+
+import com.github.difflib.UnifiedDiffUtils;
+import com.github.difflib.patch.Patch;
+import com.github.difflib.DiffUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Composes the review packet's generated AsciiDoc (ike-issues#648):
+ * the master document with cover sheet, change summary, Record of
+ * Changes, per-topic includes, Change Glossary, and Change Index, plus
+ * the unified-diff listings for assembly scaffolding files.
+ *
+ * &lt;p&gt;All methods are pure functions over already-loaded content — the
+ * mojo owns every file read and write.
+ */
+public final class PacketAssembler {
+
+    private PacketAssembler() {
+    }
+
+    /**
+     * One marked topic destined for the packet.
+     *
+     * @param change  the underlying file change
+     * @param outName the flattened file name of the marked copy under
+     *                {@code _diff/}
+     * @param result  the marker's output for this topic
+     */
+<span class="nc" id="L32">    public record TopicEntry(GitSource.Change change, String outName,</span>
+                             AdocDiffMarker.MarkResult result) {
+    }
+
+    /**
+     * One scaffolding (non-fragment) AsciiDoc change shown as a
+     * unified-diff listing.
+     *
+     * @param path        the repository-relative path
+     * @param unifiedDiff the unified diff text
+     */
+<span class="nc" id="L43">    public record ScaffoldEntry(String path, String unifiedDiff) {</span>
+    }
+
+    /**
+     * Produce a unified diff for a scaffolding file.
+     *
+     * @param path     the repository-relative path (used in headers)
+     * @param oldLines the from-side lines (empty when added)
+     * @param newLines the to-side lines (empty when deleted)
+     * @return the unified diff text, without trailing newline
+     */
+    public static String unifiedDiff(String path, List&lt;String&gt; oldLines, List&lt;String&gt; newLines) {
+<span class="nc" id="L55">        Patch&lt;String&gt; patch = DiffUtils.diff(oldLines, newLines);</span>
+<span class="nc" id="L56">        List&lt;String&gt; diff = UnifiedDiffUtils.generateUnifiedDiff(</span>
+                &quot;a/&quot; + path, &quot;b/&quot; + path, oldLines, patch, 3);
+<span class="nc" id="L58">        return String.join(&quot;\n&quot;, diff);</span>
+    }
+
+    /**
+     * Inject one silent change-index term per owning change after a
+     * fragment's level-1 title, so the ordinary {@code [index]} section
+     * collects a change → pages mapping. Titles are quoted because a
+     * comma in an indexterm splits levels.
+     *
+     * @param lines        the marked fragment
+     * @param changeTitles the owning changes' titles
+     * @return the fragment with terms injected (a new list)
+     */
+    public static List&lt;String&gt; injectChangeTerms(List&lt;String&gt; lines, List&lt;String&gt; changeTitles) {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (changeTitles.isEmpty()) {</span>
+<span class="nc" id="L73">            return lines;</span>
+        }
+<span class="nc" id="L75">        List&lt;String&gt; out = new ArrayList&lt;&gt;(lines.size() + changeTitles.size());</span>
+<span class="nc" id="L76">        boolean placed = false;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (String l : lines) {</span>
+<span class="nc" id="L78">            out.add(l);</span>
+<span class="nc bnc" id="L79" title="All 4 branches missed.">            if (!placed &amp;&amp; l.startsWith(&quot;= &quot;)) {</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                for (String t : changeTitles) {</span>
+<span class="nc" id="L81">                    out.add(&quot;indexterm:[change, \&quot;&quot; + t.replace(&quot;\&quot;&quot;, &quot;'&quot;) + &quot;\&quot;]&quot;);</span>
+<span class="nc" id="L82">                }</span>
+<span class="nc" id="L83">                placed = true;</span>
+            }
+<span class="nc" id="L85">        }</span>
+<span class="nc" id="L86">        return out;</span>
+    }
+
+    /**
+     * Find a fragment's anchor id ({@code [[id]]}).
+     *
+     * @param lines the fragment
+     * @return the anchor id, or {@code null} when none is present
+     */
+    public static String anchorOf(List&lt;String&gt; lines) {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (String l : lines) {</span>
+<span class="nc bnc" id="L97" title="All 4 branches missed.">            if (l.startsWith(&quot;[[&quot;) &amp;&amp; l.endsWith(&quot;]]&quot;)) {</span>
+<span class="nc" id="L98">                return l.substring(2, l.length() - 2);</span>
+            }
+<span class="nc" id="L100">        }</span>
+<span class="nc" id="L101">        return null;</span>
+    }
+
+    /**
+     * Compose the packet master document.
+     *
+     * @param title         the document title
+     * @param fromLabel     human label for the from side
+     * @param toLabel       human label for the to side
+     * @param topics        marked topics, in presentation order
+     * @param deleted       repository-relative paths deleted in range
+     * @param manifest      the change manifest
+     * @param anchorsByChange per-change anchor ids for context links,
+     *                      parallel to {@code manifest.changes()}
+     * @param hasRegistryDelta whether a registry-delta partial exists
+     * @param scaffolds     scaffolding diffs, in presentation order
+     * @param singleStampLine the packet's one stamp when in-flow refs
+     *                      are suppressed, or {@code null}
+     * @param stampsUsed    the stamps used in-flow, for the Stamp
+     *                      Register; empty when suppressed
+     * @return the master document text
+     */
+    public static String masterDoc(String title, String fromLabel, String toLabel,
+                                   List&lt;TopicEntry&gt; topics, List&lt;String&gt; deleted,
+                                   ChangeManifest manifest,
+                                   List&lt;List&lt;String&gt;&gt; anchorsByChange,
+                                   boolean hasRegistryDelta,
+                                   List&lt;ScaffoldEntry&gt; scaffolds,
+                                   String singleStampLine,
+                                   List&lt;StampRegistry.Stamp&gt; stampsUsed) {
+<span class="nc" id="L131">        StringBuilder m = new StringBuilder();</span>
+<span class="nc" id="L132">        m.append(&quot;= &quot;).append(title).append('\n')</span>
+<span class="nc" id="L133">         .append(&quot;:doctype: book\n:toc: left\n:toclevels: 1\n:sectnums!:\n&quot;)</span>
+<span class="nc" id="L134">         .append(&quot;:icons: font\n:source-highlighter: rouge\n\n&quot;)</span>
+<span class="nc" id="L135">         .append(&quot;ifdef::backend-html5[]\n++++\n&lt;style&gt;\n&quot;)</span>
+<span class="nc" id="L136">         .append(&quot;span.diff-ins{color:#1a7f37;background:#e6ffec;}\n&quot;)</span>
+<span class="nc" id="L137">         .append(&quot;span.diff-del{color:#cf222e;background:#ffebe9;text-decoration:line-through;}\n&quot;)</span>
+<span class="nc" id="L138">         .append(&quot;span.diff-meta{color:#6e40c9;}\n&quot;)</span>
+<span class="nc" id="L139">         .append(&quot;&lt;/style&gt;\n++++\nendif::[]\n\n&quot;);</span>
+
+<span class="nc" id="L141">        m.append(&quot;== How to Read This Packet\n\n&quot;)</span>
+<span class="nc" id="L142">         .append(&quot;Compared: `&quot;).append(fromLabel).append(&quot;` → `&quot;).append(toLabel).append(&quot;`.\n&quot;)</span>
+<span class="nc" id="L143">         .append(&quot;Each changed topic follows as its own chapter with inline markup:\n&quot;)</span>
+<span class="nc" id="L144">         .append(&quot;[.diff-ins]#inserted text renders like this#, and\n&quot;)</span>
+<span class="nc" id="L145">         .append(&quot;[.diff-del]#removed text renders like this#.\n&quot;)</span>
+<span class="nc" id="L146">         .append(&quot;[.diff-meta]#Metadata notes render like this# and carry changes the\n&quot;)</span>
+<span class="nc" id="L147">         .append(&quot;renderer cannot show inline (attributes, keywords, index terms,\n&quot;)</span>
+<span class="nc" id="L148">         .append(&quot;verbatim blocks).\n&quot;);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (singleStampLine != null) {</span>
+<span class="nc" id="L150">            m.append(&quot;All changes in this packet carry one stamp — &quot;)</span>
+<span class="nc" id="L151">             .append(singleStampLine).append(&quot; — so per-change stamp endnotes are omitted.\n&quot;);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        } else if (!stampsUsed.isEmpty()) {</span>
+<span class="nc" id="L153">            m.append(&quot;Superscript endnotes stamp each change boundary with its\n&quot;)</span>
+<span class="nc" id="L154">             .append(&quot;provenance coordinate; the Stamp Register at the back lists them.\n&quot;);</span>
+        }
+<span class="nc" id="L156">        m.append('\n');</span>
+
+<span class="nc" id="L158">        m.append(&quot;== Change Summary\n\n.Changed topics\n&quot;)</span>
+<span class="nc" id="L159">         .append(&quot;[cols=\&quot;4,1,1,1,1\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L160">         .append(&quot;| Topic file | status | +words | -words | notes\n&quot;);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
+<span class="nc" id="L162">            m.append(&quot;| &quot;).append(t.change().displayPath())</span>
+<span class="nc" id="L163">             .append(&quot; | &quot;).append(t.change().status().name().toLowerCase())</span>
+<span class="nc" id="L164">             .append(&quot; | &quot;).append(t.result().insWords())</span>
+<span class="nc" id="L165">             .append(&quot; | &quot;).append(t.result().delWords())</span>
+<span class="nc" id="L166">             .append(&quot; | &quot;).append(t.result().notes().size()).append('\n');</span>
+<span class="nc" id="L167">        }</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        for (String d : deleted) {</span>
+<span class="nc" id="L169">            m.append(&quot;| &quot;).append(d).append(&quot; | deleted | 0 | — | —\n&quot;);</span>
+<span class="nc" id="L170">        }</span>
+<span class="nc" id="L171">        m.append(&quot;|===\n\n&quot;);</span>
+
+<span class="nc" id="L173">        m.append(&quot;== Record of Changes\n\n&quot;)</span>
+<span class="nc" id="L174">         .append(&quot;Each named change, with context links into the marked topics;\n&quot;)</span>
+<span class="nc" id="L175">         .append(&quot;the Change Index at the back resolves each change to its pages.\n\n&quot;)</span>
+<span class="nc" id="L176">         .append(&quot;[cols=\&quot;2,4,3\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L177">         .append(&quot;| Change | Description | Context\n&quot;);</span>
+<span class="nc" id="L178">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc" id="L180">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
+<span class="nc" id="L181">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">            String links = anchors.isEmpty()</span>
+<span class="nc" id="L183">                    ? &quot;(registry/assembly only)&quot;</span>
+<span class="nc" id="L184">                    : String.join(&quot;, &quot;, anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList());</span>
+<span class="nc" id="L185">            m.append(&quot;| *&quot;).append(c.title()).append(&quot;*\n`&quot;).append(c.id()).append('`')</span>
+<span class="nc" id="L186">             .append(refsSuffix(c))</span>
+<span class="nc" id="L187">             .append(&quot; | &quot;).append(c.description())</span>
+<span class="nc" id="L188">             .append(&quot; | &quot;).append(links).append('\n');</span>
+        }
+<span class="nc" id="L190">        m.append(&quot;|===\n\n&quot;);</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
+<span class="nc" id="L193">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/&quot;).append(t.outName())</span>
+<span class="nc" id="L194">             .append(&quot;[leveloffset=+1]\n\n&quot;);</span>
+<span class="nc" id="L195">        }</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (hasRegistryDelta) {</span>
+<span class="nc" id="L197">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/registry-delta.adoc[leveloffset=+1]\n\n&quot;);</span>
+        }
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (!scaffolds.isEmpty()) {</span>
+<span class="nc" id="L200">            m.append(&quot;&lt;&lt;&lt;\n== Assembly Scaffolding Changes\n\n&quot;)</span>
+<span class="nc" id="L201">             .append(&quot;Source diffs for assembly files (structural includes, not prose).\n\n&quot;);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            for (ScaffoldEntry s : scaffolds) {</span>
+<span class="nc" id="L203">                m.append(&quot;=== &quot;).append(s.path()).append(&quot;\n\n[source,diff]\n-----\n&quot;)</span>
+<span class="nc" id="L204">                 .append(s.unifiedDiff()).append(&quot;\n-----\n\n&quot;);</span>
+<span class="nc" id="L205">            }</span>
+        }
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (!stampsUsed.isEmpty()) {</span>
+<span class="nc" id="L209">            m.append(&quot;&lt;&lt;&lt;\n== Stamp Register\n\n&quot;)</span>
+<span class="nc" id="L210">             .append(&quot;Every stamp used in this packet. S is stated redundantly —\n&quot;)</span>
+<span class="nc" id="L211">             .append(&quot;the marks already render it — for STAMP consistency.\n\n&quot;)</span>
+<span class="nc" id="L212">             .append(&quot;[cols=\&quot;1,2,2,1,1,1,2\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L213">             .append(&quot;| S | Time | Author | Module | Path | Commit | Refs\n&quot;);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            for (StampRegistry.Stamp s : stampsUsed) {</span>
+<span class="nc" id="L215">                m.append(&quot;| &quot;).append(s.status().label())</span>
+<span class="nc" id="L216">                 .append(&quot; | &quot;).append(s.time())</span>
+<span class="nc" id="L217">                 .append(&quot; | &quot;).append(s.author())</span>
+<span class="nc" id="L218">                 .append(&quot; | &quot;).append(s.module())</span>
+<span class="nc" id="L219">                 .append(&quot; | &quot;).append(s.branch())</span>
+<span class="nc" id="L220">                 .append(&quot; | `&quot;).append(s.commitId()).append('`')</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                 .append(&quot; | &quot;).append(s.refs().isEmpty() ? &quot;—&quot; : s.refs())</span>
+<span class="nc" id="L222">                 .append('\n');</span>
+<span class="nc" id="L223">            }</span>
+<span class="nc" id="L224">            m.append(&quot;|===\n\n&quot;);</span>
+        }
+
+<span class="nc" id="L227">        m.append(&quot;&lt;&lt;&lt;\n[glossary]\n== Change Glossary\n\n&quot;);</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc" id="L229">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
+<span class="nc" id="L230">            m.append(c.title()).append(&quot;::\n  &quot;).append(c.description()).append('\n');</span>
+<span class="nc" id="L231">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">            if (!anchors.isEmpty()) {</span>
+<span class="nc" id="L233">                m.append(&quot;  Context: &quot;)</span>
+<span class="nc" id="L234">                 .append(String.join(&quot;, &quot;,</span>
+<span class="nc" id="L235">                         anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList()))</span>
+<span class="nc" id="L236">                 .append(&quot;.\n&quot;);</span>
+            }
+<span class="nc" id="L238">            m.append('\n');</span>
+        }
+
+<span class="nc" id="L241">        m.append(&quot;&lt;&lt;&lt;\n[index]\n== Change Index\n&quot;);</span>
+<span class="nc" id="L242">        return m.toString();</span>
+    }
+
+    private static String refsSuffix(ChangeManifest.ChangeEntity c) {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (c.refs().isEmpty()) {</span>
+<span class="nc" id="L247">            return &quot;&quot;;</span>
+        }
+<span class="nc" id="L249">        return &quot;\n_&quot; + String.join(&quot;, &quot;, c.refs()) + &quot;_&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
