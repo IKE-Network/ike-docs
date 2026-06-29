@@ -1,12 +1,12 @@
 ---
-date_published: 2026-06-26
-date_modified: 2026-06-26
+date_published: 2026-06-28
+date_modified: 2026-06-28
 canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 ---
 
 # Built With
 
-Open-source software that `koncept-asciidoc-extension` 83 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `koncept-asciidoc-extension` 84 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
