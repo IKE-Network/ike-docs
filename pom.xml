@@ -32,7 +32,7 @@
 
     <groupId>network.ike.docs</groupId>
     <artifactId>ike-docs</artifactId>
-    <version>88-SNAPSHOT</version>
+    <version>88</version>
     <packaging>pom</packaging>
 
     <name>IKE Docs</name>
@@ -116,7 +116,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Reproducible builds — maven-release-plugin updates automatically -->
-        <project.build.outputTimestamp>2026-06-30T15:26:15Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-06-30T17:23:23Z</project.build.outputTimestamp>
 
         <!-- ── Java Configuration (from java-parent) ─────────────────── -->
         <java.version>25</java.version>
