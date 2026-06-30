@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | semantic-linebreak |
-| Version | 86 |
+| Version | 87 |
 | Type | maven-plugin |
 | Java Version | 25 |
