@@ -538,11 +538,17 @@
                 </plugin>
 
                 <!-- ── Maven Site Plugin ──────────────────────────────────── -->
-                <!-- AsciiDoc rendering is handled by ike:asciidoc at pre-site,
-                     not by asciidoctor-converter-doxia-module.  This keeps a
-                     single JRuby instance, ensures Koncept macros and Kroki
-                     diagrams are available, and decouples AsciidoctorJ version
-                     from the Doxia module's transitive constraints. -->
+                <!-- src/site/asciidoc/*.adoc is rendered natively at site:site
+                     by asciidoctor-parser-doxia-module (declared below). NOTE:
+                     the Doxia parser does NOT invoke AsciidoctorJ extensions —
+                     no asciidoctor-diagram, no Koncept macros. PlantUML/diagram
+                     blocks are therefore pre-rendered to static SVG and embedded
+                     via image:: (src/site/resources/images/*.svg); see
+                     IKE-Network/ike-issues#796. The full AsciidoctorJ + diagram
+                     + Kroki pipeline lives in the asciidoctor-maven-plugin config
+                     below, which drives the standalone HTML/PDF doc renders, not
+                     this Maven site. (The former ike:asciidoc pre-site render was
+                     removed in the #310 cleanup — ike-issues#437.) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
