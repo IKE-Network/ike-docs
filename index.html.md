@@ -14,47 +14,7 @@ Split from the archived `ike-pipeline` monolith in `IKE-Network/ike-issues#216`;
 
 ## [#module-architecture](#module-architecture)Module Architecture
 
-```
-@startuml
-!theme plain
-skinparam linetype ortho
-skinparam nodesep 60
-skinparam ranksep 40
-skinparam packageStyle rectangle
-skinparam defaultFontSize 11
-
-skinparam rectangle {
-    BackgroundColor<<infra>> #E3F2FD
-    BorderColor<<infra>> #1565C0
-    BackgroundColor<<plugin>> #FFF3E0
-    BorderColor<<plugin>> #E65100
-    BackgroundColor<<tool>> #E8F5E9
-    BorderColor<<tool>> #2E7D32
-}
-
-rectangle "ike-doc-resources\n//Themes, CSS, assembly descriptors//" <<infra>> as DR
-rectangle "minimal-fonts\n//Noto font subset (zip)//" <<infra>> as MF
-rectangle "docbook-xsl\n//DocBook XSL 1.79.2 + IKE FO//" <<infra>> as DX
-
-rectangle "koncept-asciidoc-extension\n//k:Name[] macro + glossary//" <<plugin>> as KE
-rectangle "ike-doc-maven-plugin\n//idoc:* render goals//" <<plugin>> as DP
-
-rectangle "semantic-linebreak\n//CLI sentence-per-line tool//" <<tool>> as SL
-
-DP ..> KE : SPI extension dep
-DP ..> DR : unpacks for renders
-DP ..> MF : unpacks fonts
-DP ..> DX : unpacks XSL
-
-legend right
-  | Color | Role |
-  |<#E3F2FD>| Infrastructure resource |
-  |<#FFF3E0>| Maven plugin / extension |
-  |<#E8F5E9>| Standalone tool |
-endlegend
-
-@enduml
-```
+![ike-docs module architecture: infrastructure resources, Maven plugins/extensions, and the standalone CLI tool, with the plugin's build-time dependencies](images/module-architecture.svg) 
 
 `ike-doc-maven-plugin` is the consumer-facing entry point — external doc projects declare it (or rather, declare it indirectly through `ike-parent’s `<pluginManagement>`) and invoke `idoc:*` goals. The other modules are infrastructure artifacts the plugin unpacks at build time, plus a standalone CLI tool.
 
@@ -64,71 +24,7 @@ The reactor itself is not consumed as an aggregator — `ike-parent` lives in `i
 
 All renderers start from the same AsciiDoc source. The pipeline splits into three families based on how intermediate formats reach the final PDF.
 
-```
-@startuml
-!theme plain
-skinparam activityBackgroundColor #FFFFFF
-skinparam activityBorderColor #333333
-skinparam arrowColor #555555
-skinparam defaultFontSize 11
-
-start
-
-:AsciiDoc Source\n(.adoc files);
-
-fork
-    :AsciidoctorJ\nHTML5 backend;
-    :HTML5 output;
-    note right: Browsable, TOC sidebar\nKoncept glossary appended
-    stop
-
-fork again
-    :AsciidoctorJ\nPDF backend (Prawn);
-    :PDF;
-    note right: Built-in, free\nJRuby + Prawn
-    stop
-
-fork again
-    :AsciidoctorJ\nHTML5 backend;
-    :Print-ready HTML;
-    fork
-        :Prince XML;
-        :PDF;
-        note right: CSS Paged Media\nPDF/UA-1, $495+
-        stop
-    fork again
-        :Antenna House;
-        :PDF;
-        note right: CSS mode\nPDF/UA-1, $560+
-        stop
-    fork again
-        :WeasyPrint;
-        :PDF;
-        note right: Open source\nPython, free
-        stop
-    end fork
-
-fork again
-    :AsciidoctorJ\nDocBook 5 backend;
-    :DocBook XML;
-    :Saxon-HE + DocBook XSL;
-    :XSL-FO;
-    fork
-        :RenderX XEP;
-        :PDF;
-        note right: Free personal license
-        stop
-    fork again
-        :Apache FOP;
-        :PDF;
-        note right: Apache 2.0, free\nPure Java
-        stop
-    end fork
-
-end fork
-
-@enduml
-```
+![Rendering pipelines: one AsciiDoc source fans out through AsciidoctorJ into HTML5, Prawn PDF, print-ready HTML (Prince/Antenna House/WeasyPrint), and DocBook (Saxon + XSL-FO via XEP/FOP)](images/renderer-pipelines.svg) 
 
 Render selection is property-driven: every backend is gated by a `-Dike.pdf.<name>=true` toggle. Multiple backends activate concurrently; consumers compare output across renderers without rebuilding.
 

@@ -13,4 +13,3 @@ This document provides an overview of the various reports that are automatically
 | Document | Description |
 | --- | --- |
 | [Javadoc](apidocs/index.html)[2] | Javadoc API documentation. |
-| [JaCoCo](jacoco/index.html)[3] | JaCoCo Coverage Report. |

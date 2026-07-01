@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 88, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 89-SNAPSHOT, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -45,9 +45,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `ike-doc-resources` | `88` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `88` |
-| `network.ike.docs` | `koncept-core` | `88` |
+| `network.ike.docs` | `ike-doc-resources` | `89-SNAPSHOT` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `89-SNAPSHOT` |
+| `network.ike.docs` | `koncept-core` | `89-SNAPSHOT` |
 | `network.ike.tooling` | `ike-build-standards` | `233` |
 | `network.ike.tooling` | `ike-build-standards` | `233` |
 | `network.ike.tooling` | `ike-build-standards` | `233` |

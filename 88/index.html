@@ -91,13 +91,13 @@
 					<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">88</span>
+							<span class="version">89-SNAPSHOT</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
 						<div class="header-title">IKE Documentation Pipeline</div>
 						<div class="header-subtitle">
-							Version <strong>88</strong>
+							Version <strong>89-SNAPSHOT</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -184,7 +184,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Docs 88
+							<h3><small>IKE Docs</small><br/>							IKE Docs 89-SNAPSHOT
 							</h3>
 						</div>
 								<div class="home-xs visible-xs">
@@ -242,45 +242,7 @@
 <div>
  <h2 id="module-architecture"><a href="#module-architecture"></a><a id="module-architecture"></a>Module Architecture</h2>
  <div>
-  <pre copy-to-clipboard="">@startuml
-!theme plain
-skinparam linetype ortho
-skinparam nodesep 60
-skinparam ranksep 40
-skinparam packageStyle rectangle
-skinparam defaultFontSize 11
-
-skinparam rectangle {
-    BackgroundColor&lt;&lt;infra&gt;&gt; #E3F2FD
-    BorderColor&lt;&lt;infra&gt;&gt; #1565C0
-    BackgroundColor&lt;&lt;plugin&gt;&gt; #FFF3E0
-    BorderColor&lt;&lt;plugin&gt;&gt; #E65100
-    BackgroundColor&lt;&lt;tool&gt;&gt; #E8F5E9
-    BorderColor&lt;&lt;tool&gt;&gt; #2E7D32
-}
-
-rectangle "ike-doc-resources\n//Themes, CSS, assembly descriptors//" &lt;&lt;infra&gt;&gt; as DR
-rectangle "minimal-fonts\n//Noto font subset (zip)//" &lt;&lt;infra&gt;&gt; as MF
-rectangle "docbook-xsl\n//DocBook XSL 1.79.2 + IKE FO//" &lt;&lt;infra&gt;&gt; as DX
-
-rectangle "koncept-asciidoc-extension\n//k:Name[] macro + glossary//" &lt;&lt;plugin&gt;&gt; as KE
-rectangle "ike-doc-maven-plugin\n//idoc:* render goals//" &lt;&lt;plugin&gt;&gt; as DP
-
-rectangle "semantic-linebreak\n//CLI sentence-per-line tool//" &lt;&lt;tool&gt;&gt; as SL
-
-DP ..&gt; KE : SPI extension dep
-DP ..&gt; DR : unpacks for renders
-DP ..&gt; MF : unpacks fonts
-DP ..&gt; DX : unpacks XSL
-
-legend right
-  | Color | Role |
-  |&lt;#E3F2FD&gt;| Infrastructure resource |
-  |&lt;#FFF3E0&gt;| Maven plugin / extension |
-  |&lt;#E8F5E9&gt;| Standalone tool |
-endlegend
-
-@enduml</pre>
+  <img src="images/module-architecture.svg" alt="ike-docs module architecture: infrastructure resources, Maven plugins/extensions, and the standalone CLI tool, with the plugin's build-time dependencies">
  </div>
  <p><code>ike-doc-maven-plugin</code> is the consumer-facing entry point — external doc projects declare it (or rather, declare it indirectly through <code>ike-parent’s `&lt;pluginManagement&gt;</code>) and invoke <code>idoc:*</code> goals. The other modules are infrastructure artifacts the plugin unpacks at build time, plus a standalone CLI tool.</p>
  <p>The reactor itself is not consumed as an aggregator — <code>ike-parent</code> lives in <code>ike-platform</code>, not here, so external projects do not inherit from <code>ike-docs/pom.xml</code>. This reactor exists only to coordinate the build and release cadence of the ike-docs artifacts.</p>
@@ -289,69 +251,7 @@ endlegend
  <h2 id="rendering-pipelines"><a href="#rendering-pipelines"></a><a id="rendering-pipelines"></a>Rendering Pipelines</h2>
  <p>All renderers start from the same AsciiDoc source. The pipeline splits into three families based on how intermediate formats reach the final PDF.</p>
  <div>
-  <pre copy-to-clipboard="">@startuml
-!theme plain
-skinparam activityBackgroundColor #FFFFFF
-skinparam activityBorderColor #333333
-skinparam arrowColor #555555
-skinparam defaultFontSize 11
-
-start
-
-:AsciiDoc Source\n(.adoc files);
-
-fork
-    :AsciidoctorJ\nHTML5 backend;
-    :HTML5 output;
-    note right: Browsable, TOC sidebar\nKoncept glossary appended
-    stop
-
-fork again
-    :AsciidoctorJ\nPDF backend (Prawn);
-    :PDF;
-    note right: Built-in, free\nJRuby + Prawn
-    stop
-
-fork again
-    :AsciidoctorJ\nHTML5 backend;
-    :Print-ready HTML;
-    fork
-        :Prince XML;
-        :PDF;
-        note right: CSS Paged Media\nPDF/UA-1, $495+
-        stop
-    fork again
-        :Antenna House;
-        :PDF;
-        note right: CSS mode\nPDF/UA-1, $560+
-        stop
-    fork again
-        :WeasyPrint;
-        :PDF;
-        note right: Open source\nPython, free
-        stop
-    end fork
-
-fork again
-    :AsciidoctorJ\nDocBook 5 backend;
-    :DocBook XML;
-    :Saxon-HE + DocBook XSL;
-    :XSL-FO;
-    fork
-        :RenderX XEP;
-        :PDF;
-        note right: Free personal license
-        stop
-    fork again
-        :Apache FOP;
-        :PDF;
-        note right: Apache 2.0, free\nPure Java
-        stop
-    end fork
-
-end fork
-
-@enduml</pre>
+  <img src="images/renderer-pipelines.svg" alt="Rendering pipelines: one AsciiDoc source fans out through AsciidoctorJ into HTML5, Prawn PDF, print-ready HTML (Prince/Antenna House/WeasyPrint), and DocBook (Saxon + XSL-FO via XEP/FOP)">
  </div>
  <p>Render selection is property-driven: every backend is gated by a <code>-Dike.pdf.&lt;name&gt;=true</code> toggle. Multiple backends activate concurrently; consumers compare output across renderers without rebuilding.</p>
 </div>
@@ -518,7 +418,7 @@ end fork
 								</ul>
 							</div>
 <div class="authors">Author: <strong>IKE Network</strong></div>
-<div class="date">Date: <strong>2026-06-30 10:25:30 -0700</strong></div>
+<div class="date">Date: <strong>2026-06-30 17:35:08 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -597,7 +497,7 @@ end fork
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>IKE Documentation Pipeline 88</strong>
+			<strong>IKE Documentation Pipeline 89-SNAPSHOT</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
 			Documentation as of <strong><time datetime="2026-06-30">2026-06-30</time></strong>
 		</p>

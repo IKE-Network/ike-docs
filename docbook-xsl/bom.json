@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:2555f744-5e9d-3176-bcb7-91ba7828121a",
+  "serialNumber" : "urn:uuid:e8580c1d-6f6d-3a1c-9d12-7966ff46fe57",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/docbook-xsl@88?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/docbook-xsl@89-SNAPSHOT?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "docbook-xsl",
-      "version" : "88",
+      "version" : "89-SNAPSHOT",
       "description" : "DocBook XSL 1.79.2 stylesheets with IKE FO customization layer. Ready-to-use artifact for the AsciiDoc → DocBook5 → XSL-FO → PDF pipeline.",
       "licenses" : [
         {
@@ -77,7 +77,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/docbook-xsl@88?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/docbook-xsl@89-SNAPSHOT?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -442,7 +442,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/docbook-xsl@88?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/docbook-xsl@89-SNAPSHOT?type=jar",
       "dependsOn" : [
         "pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=claude&type=zip",
         "pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=config&type=zip",

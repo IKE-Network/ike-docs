@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:93e56769-9391-3447-98be-f82e9cbd4d2f" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:149cb036-e64f-3f73-98fd-cf166b75a25d" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@88?type=maven-plugin">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@89-SNAPSHOT?type=maven-plugin">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>ike-doc-maven-plugin</name>
-      <version>88</version>
+      <version>89-SNAPSHOT</version>
       <description>Maven plugin (prefix idoc:) driving the IKE documentation pipeline:
         AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook
         post-processing, breadcrumb injection, and ike-doc packaging.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/ike-doc-maven-plugin@88?type=maven-plugin</purl>
+      <purl>pkg:maven/network.ike.docs/ike-doc-maven-plugin@89-SNAPSHOT?type=maven-plugin</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -2015,31 +2015,31 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@88?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@89-SNAPSHOT?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-asciidoc-extension</name>
-      <version>88</version>
+      <version>89-SNAPSHOT</version>
       <description>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
         with SVG badge rendering and auto-generated Referenced Koncepts glossary
         with description logic axiom display.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">3c140f4aaa5a2bddd1d29c41b81e8a5e</hash>
-        <hash alg="SHA-1">089e9bf4de6b3963145e90fbf9a9156787d637c1</hash>
-        <hash alg="SHA-256">a4cdc67039a79d587da5222966ff84342b2f48b4df7c89e99eb11a7978026a4e</hash>
-        <hash alg="SHA-512">53056d63f8b8a77006e656f7303687c7a7a7a1bc64702c9c8ba12c43728fb4f215ca50d2be18c6f36ee8ef0bbe66cf070bf92117c563d986a5cb8fc7444a74d7</hash>
-        <hash alg="SHA-384">9c6a560859fda3ccc96781af86d095e77dc0e4ebe2bca23e3f67bd3efd4afb34eca18dfe702dc125f19fce3aeb0a1fdd</hash>
-        <hash alg="SHA3-384">2deeca6fc35958c428c25e88fd3da5f6c186a7b764c2bc539498856953286272abe9413f1a7780a314c3397d9b7dea96</hash>
-        <hash alg="SHA3-256">d6a902887ba5666582453257885a254ce32ebc50febe69495e799e231664e684</hash>
-        <hash alg="SHA3-512">e9decd0500c568ea04f7225308196a551b2accc88c72886e1e03b67e25b3d2213cf854e42dbb043b12a4ed36c31842b659d6f3b65a4142bbc40a610eea374c19</hash>
+        <hash alg="MD5">656de09bc0dd719e56a363330c4325ba</hash>
+        <hash alg="SHA-1">2bfb4f39b728b2795c44ea4ab5bd9cf85282dc7a</hash>
+        <hash alg="SHA-256">c148b5d38055e67b2178e46ae80e6c5bf0324bd77a400e32581531e2258783c7</hash>
+        <hash alg="SHA-512">812f2b906429a5bea494a4bd711c06883585d1260d11315fedd8a7cda056c2a4b8539f45c502b79e9117ae88af36036aa4e1e96acbf5307357f1c5d156a41784</hash>
+        <hash alg="SHA-384">847a874ccfa43d1a01baf2aff587b84570e2400e2e5163fc3497b9f66e0f4de49343b648a6d1a257f558bcfb4575dfc0</hash>
+        <hash alg="SHA3-384">904b8c2848b14e15f6f69111e71a6fe37aa69113c468485bd117c29566f815c94c4f8b9a3e6c2dde17527dbce8801e26</hash>
+        <hash alg="SHA3-256">01970a047622d9360f4f94b2391b0163d03f8737831dd21156c61d38ae7c9196</hash>
+        <hash alg="SHA3-512">4fbe2779dfbe60e68955ab9365e1f343b9a234b0ba75ef48a12459c407ad8500dba16cc00dbe188ffec6427bd9fc98d96a42b7e741589338e86e9987c064ac22</hash>
       </hashes>
       <licenses>
         <license>
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@88?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@89-SNAPSHOT?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -2052,31 +2052,31 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-core@88?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-core@89-SNAPSHOT?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-core</name>
-      <version>88</version>
+      <version>89-SNAPSHOT</version>
       <description>Rendering-agnostic Koncept core (ike-issues#623): the shared, JavaFX-free component-kind
         scheme (KonceptKind) and the locked stamp-sigil pentagon geometry (StampSigilGeometry),
         consumed by the koncept AsciiDoc extension and — downstream in the release cascade — by Komet.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">118c5f3392bf115ae9ebc3dcc5aa77f9</hash>
-        <hash alg="SHA-1">bd1035d19b9e9a29d6503c127437445529bbd1f2</hash>
-        <hash alg="SHA-256">0f19bb450892656add693a8f1818d1a6daa902807121984ce899301b46fbbc65</hash>
-        <hash alg="SHA-512">773e5e59da00808134849eacac644436e5632b036cb624d569b0e31ab71b7eb2e654a5edac8acaf3dcfae823dc8cdcf8c85c51925bffe9095edeeba75729129b</hash>
-        <hash alg="SHA-384">b6748fcbfd6eedf9d2ce031754380f4e1f169d3f7082b72153f3e49e1249b125844f5ccf257f7fe887401e9610f33eb2</hash>
-        <hash alg="SHA3-384">70c0845167a71869e83fa9e95efe7fe77a9ec0d44d38dc207209e1e3db0ae71790f95847a35178a5e1d066c450010d1f</hash>
-        <hash alg="SHA3-256">59972e2c52d82c4b8098427f85cc338aac105aa39934a09f6ef88087b7983879</hash>
-        <hash alg="SHA3-512">fcb0df7351e3e8dfffb0ff07a075dd0050a3d72aadca508d783525e649f1f5a28945177c6732a04fba876e609568976543075382b6c9c72f13e5c0fe977799bf</hash>
+        <hash alg="MD5">28c3ecf8ea930a52b0a84c30104c4414</hash>
+        <hash alg="SHA-1">ccb818d52b4d36612dff9462d658a92e973d5170</hash>
+        <hash alg="SHA-256">3c70b507ff5ed20b74ad44458143fcc0738ee59dee73fe91b30c370198a694e5</hash>
+        <hash alg="SHA-512">1df3533cd8bed07f61c2e67ba37c61a99f67bd6c59ff3d21870980bdf7178b0925b20e0b2bf2c2aa3762df4a3ce48de58170ea0cc8567e7a761152a0efa4ee75</hash>
+        <hash alg="SHA-384">d2be40cc8d1123bdc98579da19fb6d6b390f93f18ae8ce0e17285d3d52c3df45ef4f27a14209c23338854f07079d3ea1</hash>
+        <hash alg="SHA3-384">ef4921714c5dc7908e5535726ace7f57fd8add63341ce5034ea0c84af70248f6730d38132905c7eade101162ee0f9517</hash>
+        <hash alg="SHA3-256">ddfb69f39e7deba9e4cc7a27edca4f72f71f069ed54fb560943fa7fe4cbc5294</hash>
+        <hash alg="SHA3-512">1b73c19a52d0ab3d12cc2d56753709b85d09210f7c1e97857687af18f1f4c37740a7ee59cf80021300298c741525f98b1c63054256cc7e7da4673811bc1bcb24</hash>
       </hashes>
       <licenses>
         <license>
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-core@88?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-core@89-SNAPSHOT?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -2120,31 +2120,31 @@
         </reference>
       </externalReferences>
     </component>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>ike-doc-resources</name>
-      <version>88</version>
+      <version>89-SNAPSHOT</version>
       <description>Shared build resources for the IKE documentation pipeline:
         assembly descriptors, PDF themes, renderer configurations,
         SVGO configs, and AsciiDoc shared docinfo.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">76ad419fe2251c2c238e04099fc0ac5a</hash>
-        <hash alg="SHA-1">513c1ed45b1b8bcce154a8b852196f193bebc2e5</hash>
-        <hash alg="SHA-256">a7898f2125518ebe5ed8fb8ecb982beec184100f4ca01b5a47fe3541f08f0afe</hash>
-        <hash alg="SHA-512">24cf91fbfe93c3d79c9baa5733bc0f81bbe6845cd2b5a18ac48097e0c5e16e1f9f7a471e0222d479b53db0b9417cad5cdb732f1df04c6b80ea4dc33b9fc2fa29</hash>
-        <hash alg="SHA-384">b4d8103b6446af80aa8b479194b05447f9182848efc795ecaafaaac515b253a5c746b7696f64cc229d4c0a5fb9cdc9ae</hash>
-        <hash alg="SHA3-384">16a55499d7a3e66bbe2a28168fb3e7a6e34330b54bcef4ddb15a851c07cfd1f0e523fc8f45628fc89c0f89d45ad01731</hash>
-        <hash alg="SHA3-256">7649826a787053c3607113d066d2f3067c8c28351b810c5617d36656db87ba09</hash>
-        <hash alg="SHA3-512">be49d7b7b9b81577e9b476984b0cd6567e283e3a536eaf37ccb108bde9b01ee43e6a7024ff6126173ed46423bc8ccebcdcf8b9d1fe23f433e4053a90d230f649</hash>
+        <hash alg="MD5">7b730777ab5afe9c54d9cc20798f1350</hash>
+        <hash alg="SHA-1">787a6fd35ba204d344135263ae14d07577d1ad38</hash>
+        <hash alg="SHA-256">fbe8883dbc32b4de22bfffe0b2eafe6b7dea6f82fcc0811767ddecfaaddd2640</hash>
+        <hash alg="SHA-512">6ae7fb08360708f113cfd04af56928ad45b1579f127eed6b48535623818c2fd60736f04f7e1817783cfccea82223a67b4210494935e703187cf0643cc0031baa</hash>
+        <hash alg="SHA-384">76c8cb08073fa3857cac64dd986dfe269e10669ff26ad542d4a570ea69bbe73389dd3bd1514a3205e0605d323631a941</hash>
+        <hash alg="SHA3-384">477ac740de00b8a8ced59f0b231116d924eac6db6edd414c4173b2c312df9abce4b3853aaf3ece5ac9bfc41d47254023</hash>
+        <hash alg="SHA3-256">2033f9c9ad1e31e90ebeb743e8c9f66ed674ac591e4bceb7c8aec0d5ae5812ac</hash>
+        <hash alg="SHA3-512">39c73d4e59ebd9871a5e918a0c43fde2c2efbdc6333956c17c85ea51f680b24f7c6ba5de589ccfc9aa0f262b35aba6be421ec28342da68af85d3eea4d1b95234</hash>
       </hashes>
       <licenses>
         <license>
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -2271,7 +2271,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@88?type=maven-plugin">
+    <dependency ref="pkg:maven/network.ike.docs/ike-doc-maven-plugin@89-SNAPSHOT?type=maven-plugin">
       <dependency ref="pkg:maven/network.ike.tooling/ike-maven-plugin-support@233?type=jar"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=claude&amp;type=zip"/>
       <dependency ref="pkg:maven/org.apache.maven/maven-api-core@4.0.0-rc-5?type=jar"/>
@@ -2284,8 +2284,8 @@
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-pdf@2.3.23?type=jar"/>
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram@2.3.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
-      <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@88?type=jar"/>
-      <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar"/>
+      <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@89-SNAPSHOT?type=jar"/>
+      <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar"/>
       <dependency ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=built-with&amp;type=zip"/>
@@ -2431,14 +2431,14 @@
     </dependency>
     <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram-batik@1.17?type=jar"/>
     <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-diagram-ditaamini@1.0.3?type=jar"/>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@88?type=jar">
-      <dependency ref="pkg:maven/network.ike.docs/koncept-core@88?type=jar"/>
+    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@89-SNAPSHOT?type=jar">
+      <dependency ref="pkg:maven/network.ike.docs/koncept-core@89-SNAPSHOT?type=jar"/>
       <dependency ref="pkg:maven/org.yaml/snakeyaml@2.3?type=jar"/>
       <dependency ref="pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"/>
     </dependency>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-core@88?type=jar"/>
+    <dependency ref="pkg:maven/network.ike.docs/koncept-core@89-SNAPSHOT?type=jar"/>
     <dependency ref="pkg:maven/com.sparrowwallet/toucan@0.9.0?type=jar"/>
-    <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar"/>
+    <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar"/>
     <dependency ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip"/>
     <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=site-theme&amp;type=zip"/>
     <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=built-with&amp;type=zip"/>

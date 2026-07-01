@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:d526bf03-e82d-3e01-aca3-5eb5203a68c4" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:c4545ef4-e007-39bc-a6c9-27b11bd81f18" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>ike-doc-resources</name>
-      <version>88</version>
+      <version>89-SNAPSHOT</version>
       <description>Shared build resources for the IKE documentation pipeline:
         assembly descriptors, PDF themes, renderer configurations,
         SVGO configs, and AsciiDoc shared docinfo.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -174,7 +174,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@88?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/ike-doc-resources@89-SNAPSHOT?type=jar">
       <dependency ref="pkg:maven/network.ike/ike-base-parent@15?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@233?classifier=built-with&amp;type=zip"/>
