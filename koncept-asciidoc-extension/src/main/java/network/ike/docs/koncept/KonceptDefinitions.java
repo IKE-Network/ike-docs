@@ -50,16 +50,27 @@ final class KonceptDefinitions {
      */
     private static KonceptDefinitionSource resolve(Document document) {
         Object cpPath = document.getAttribute(ATTR_DEFS_CLASSPATH);
-        String classpathResource = (cpPath != null && !cpPath.toString().isBlank())
-                ? cpPath.toString()
-                : DEFAULT_CLASSPATH_RESOURCE;
-        KonceptDefinitionSource base = KonceptDefinitionSource.fromClasspath(classpathResource);
+        boolean explicitClasspath = cpPath != null && !cpPath.toString().isBlank();
 
         Object filePath = document.getAttribute(ATTR_DEFS_FILE);
-        if (filePath != null && !filePath.toString().isBlank()) {
+        boolean hasFile = filePath != null && !filePath.toString().isBlank();
+
+        if (hasFile) {
             KonceptDefinitionSource overlay = KonceptDefinitionSource.fromFile(filePath.toString());
-            return new CompositeKonceptDefinitionSource(List.of(overlay, base));
+            // The named file is authoritative. Compose a shared base only when the author
+            // explicitly names one via :koncept-definitions-classpath: — never the bundled
+            // demo /koncepts.yml, which would otherwise leak sample koncepts into a real
+            // document's comprehensive glossary.
+            if (explicitClasspath) {
+                return new CompositeKonceptDefinitionSource(
+                        List.of(overlay, KonceptDefinitionSource.fromClasspath(cpPath.toString())));
+            }
+            return overlay;
         }
-        return base;
+
+        // No file: fall back to the classpath resource (an explicit one, or the bundled
+        // demo default for the extension's own examples).
+        return KonceptDefinitionSource.fromClasspath(
+                explicitClasspath ? cpPath.toString() : DEFAULT_CLASSPATH_RESOURCE);
     }
 }

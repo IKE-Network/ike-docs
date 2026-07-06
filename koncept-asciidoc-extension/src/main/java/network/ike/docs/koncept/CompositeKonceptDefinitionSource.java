@@ -33,4 +33,15 @@ public class CompositeKonceptDefinitionSource implements KonceptDefinitionSource
         }
         return Optional.empty();
     }
+
+    @Override
+    public java.util.Collection<String> identifiers() {
+        // Union across all sources (a later source may add identifiers an earlier one
+        // lacks); lookup() still resolves each by priority order.
+        java.util.LinkedHashSet<String> all = new java.util.LinkedHashSet<>();
+        for (KonceptDefinitionSource source : sources) {
+            all.addAll(source.identifiers());
+        }
+        return all;
+    }
 }
