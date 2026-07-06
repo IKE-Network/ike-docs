@@ -53,6 +53,11 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
         return Optional.ofNullable(definitions.get(identifier));
     }
 
+    @Override
+    public java.util.Collection<String> identifiers() {
+        return java.util.List.copyOf(definitions.keySet());
+    }
+
     /**
      * Loads definitions from a classpath resource.
      *
@@ -120,6 +125,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .iri(stringField(fields, "iri"))
                     .uuids(stringListField(fields, "uuids"))
                     .kind(stringField(fields, "kind"))
+                    .broader(stringListField(fields, "broader"))
                     .build();
 
             defs.put(identifier, def);

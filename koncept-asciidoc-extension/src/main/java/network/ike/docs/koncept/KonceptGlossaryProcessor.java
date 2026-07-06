@@ -59,15 +59,34 @@ public class KonceptGlossaryProcessor extends Postprocessor {
         // Build glossary content (may be empty if no koncept references)
         String glossaryContent = "";
         Map<String, KonceptEntry> rawRegistry = KonceptInlineMacro.removeRegistry(document);
-        if (rawRegistry != null && !rawRegistry.isEmpty()) {
-            Map<String, KonceptEntry> registry = new TreeMap<>(rawRegistry);
-            LOG.debug("Generating glossary for {} referenced koncepts", registry.size());
-            KonceptDefinitionSource defSource = resolveDefinitionSource(document);
+        Map<String, KonceptEntry> registry =
+                rawRegistry != null ? new TreeMap<>(rawRegistry) : new TreeMap<>();
+        KonceptDefinitionSource defSource = resolveDefinitionSource(document);
 
+        // A comprehensive glossary (koncept-glossary-all) lists every known koncept,
+        // not only those referenced in the document — the standard reference for a
+        // knowledge set. Otherwise only referenced koncepts appear (the default).
+        boolean glossaryAll = document.hasAttribute("koncept-glossary-all");
+        java.util.Set<String> ids = new java.util.TreeSet<>(registry.keySet());
+        if (glossaryAll) {
+            ids.addAll(defSource.identifiers());
+        }
+
+        // Invert broader into children across every known definition.
+        Map<String, java.util.List<String>> childrenById = new java.util.TreeMap<>();
+        for (String id : defSource.identifiers()) {
+            for (String parent : defSource.lookup(id).map(KonceptDefinition::broader)
+                    .orElse(java.util.List.of())) {
+                childrenById.computeIfAbsent(parent, k -> new java.util.ArrayList<>()).add(id);
+            }
+        }
+
+        if (!ids.isEmpty()) {
+            LOG.debug("Generating glossary for {} koncepts (all={})", ids.size(), glossaryAll);
             if ("docbook5".equals(backend) || "docbook".equals(backend)) {
                 glossaryContent = buildGlossaryDocbook(registry, defSource);
             } else {
-                glossaryContent = buildGlossaryHtml(registry, defSource);
+                glossaryContent = buildGlossaryHtml(ids, registry, childrenById, defSource);
             }
         }
 
@@ -138,10 +157,15 @@ public class KonceptGlossaryProcessor extends Postprocessor {
     }
 
     /**
-     * Build the glossary section as complete HTML.
+     * Build the glossary section as complete HTML: one entry per koncept in
+     * {@code ids} (referenced, or all known when {@code koncept-glossary-all} is set),
+     * each with its definition, logical axiom, parents and children (as identicon-linked
+     * chips), and all identifiers (UUID, koncept identifier, SCTID, IRI).
      */
     private String buildGlossaryHtml(
+            java.util.Set<String> ids,
             Map<String, KonceptEntry> registry,
+            Map<String, java.util.List<String>> childrenById,
             KonceptDefinitionSource defSource) {
 
         StringBuilder html = new StringBuilder();
@@ -149,10 +173,9 @@ public class KonceptGlossaryProcessor extends Postprocessor {
         html.append("<h2 id=\"_referenced_koncepts\">Referenced Koncepts</h2>\n");
         html.append("<dl class=\"koncept-definitions\">\n");
 
-        for (Map.Entry<String, KonceptEntry> entry : registry.entrySet()) {
-            String id = entry.getKey();
-            KonceptEntry konceptEntry = entry.getValue();
+        for (String id : ids) {
             Optional<KonceptDefinition> defOpt = defSource.lookup(id);
+            KonceptEntry konceptEntry = registry.get(id);
 
             String label = defOpt
                     .map(KonceptDefinition::label)
@@ -163,7 +186,7 @@ public class KonceptGlossaryProcessor extends Postprocessor {
             html.append("<strong>").append(escapeHtml(label)).append("</strong>");
 
             // Show reference count
-            if (konceptEntry.getRefCount() > 1) {
+            if (konceptEntry != null && konceptEntry.getRefCount() > 1) {
                 html.append(" <span class=\"koncept-ref-count\">(")
                     .append(konceptEntry.getRefCount())
                     .append(" references)</span>");
@@ -189,22 +212,26 @@ public class KonceptGlossaryProcessor extends Postprocessor {
                         .append("</code></p>\n");
                 }
 
-                // Terminology identifiers
-                if (def.sctid() != null || def.iri() != null) {
-                    html.append("    <p class=\"koncept-ids\">");
-                    if (def.sctid() != null) {
-                        html.append("<span class=\"koncept-sctid\">SCTID: ")
-                            .append(escapeHtml(def.sctid()))
-                            .append("</span>");
-                    }
-                    if (def.iri() != null) {
-                        if (def.sctid() != null) html.append(" | ");
-                        html.append("<span class=\"koncept-iri\">IRI: ")
-                            .append(escapeHtml(def.iri()))
-                            .append("</span>");
-                    }
-                    html.append("</p>\n");
+                // Taxonomy: parents and children as identicon chips linked to their entries.
+                appendTaxonomyHtml(html, "Parents", def.broader(), defSource);
+                appendTaxonomyHtml(html, "Children", childrenById.get(id), defSource);
+
+                // Identifiers: koncept id, UUID(s), SCTID, IRI.
+                html.append("    <p class=\"koncept-ids\">");
+                java.util.List<String> parts = new java.util.ArrayList<>();
+                parts.add("<span class=\"koncept-identifier\">id: <code>"
+                        + escapeHtml(def.identifier()) + "</code></span>");
+                if (def.uuids() != null && !def.uuids().isEmpty()) {
+                    parts.add("<span class=\"koncept-uuid\">UUID: <code>"
+                            + escapeHtml(def.uuids().get(0)) + "</code></span>");
                 }
+                if (def.sctid() != null) {
+                    parts.add("<span class=\"koncept-sctid\">SCTID: " + escapeHtml(def.sctid()) + "</span>");
+                }
+                if (def.iri() != null) {
+                    parts.add("<span class=\"koncept-iri\">IRI: " + escapeHtml(def.iri()) + "</span>");
+                }
+                html.append(String.join(" | ", parts)).append("</p>\n");
             } else {
                 html.append("    <p class=\"koncept-def-missing\">")
                     .append("<em>Definition not available.</em></p>\n");
@@ -217,6 +244,34 @@ public class KonceptGlossaryProcessor extends Postprocessor {
         html.append("</div>\n");
 
         return html.toString();
+    }
+
+    /**
+     * Append a taxonomy line (Parents or Children) as identicon chips linking to each
+     * related koncept's glossary entry. No-op when the list is empty.
+     */
+    private void appendTaxonomyHtml(StringBuilder html, String heading,
+                                    java.util.List<String> relatedIds,
+                                    KonceptDefinitionSource defSource) {
+        if (relatedIds == null || relatedIds.isEmpty()) {
+            return;
+        }
+        html.append("    <p class=\"koncept-taxonomy koncept-taxonomy-")
+            .append(heading.toLowerCase(java.util.Locale.ROOT)).append("\">")
+            .append("<span class=\"koncept-taxonomy-label\">").append(heading).append(":</span> ");
+        java.util.List<String> chips = new java.util.ArrayList<>();
+        for (String relId : relatedIds) {
+            Optional<KonceptDefinition> relDef = defSource.lookup(relId);
+            String relLabel = relDef.map(KonceptDefinition::label)
+                    .orElse(KonceptInlineMacro.splitCamelCase(relId));
+            String img = htmlIdenticonImg(relDef);
+            chips.add("<a href=\"#koncept-" + escapeHtml(relId)
+                    + "\" class=\"koncept-ref koncept-taxonomy-ref\" style=\"text-decoration:none;"
+                    + "white-space:nowrap;\">" + img + "<span class=\"koncept-taxonomy-name\" "
+                    + "style=\"font-variant:small-caps;color:#2a5a8a;\">" + escapeHtml(relLabel)
+                    + "</span></a>");
+        }
+        html.append(String.join(" ", chips)).append("</p>\n");
     }
 
     /**

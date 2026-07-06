@@ -24,6 +24,19 @@ public interface KonceptDefinitionSource {
     Optional<KonceptDefinition> lookup(String identifier);
 
     /**
+     * All identifiers this source can enumerate, for a comprehensive glossary that
+     * lists every known koncept (not only those referenced in the document) and for
+     * inverting the {@code broader} taxonomy into children. Sources that cannot
+     * enumerate (for example a live terminology server queried on demand) return an
+     * empty collection, and the glossary falls back to referenced koncepts only.
+     *
+     * @return every known identifier, or an empty collection if enumeration is unsupported
+     */
+    default java.util.Collection<String> identifiers() {
+        return java.util.List.of();
+    }
+
+    /**
      * Create a source backed by a YAML file on the classpath.
      *
      * @param classpathResource resource path (e.g., "/koncepts.yml")

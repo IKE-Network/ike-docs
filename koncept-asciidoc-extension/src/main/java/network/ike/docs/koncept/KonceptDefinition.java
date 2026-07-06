@@ -18,6 +18,9 @@ import java.util.List;
  * @param kind         Optional component kind ({@code concept}, {@code description},
  *                     {@code semantic}, {@code pattern}, {@code stamp}, {@code unknown});
  *                     {@code null} or absent means {@code concept} (the bare default)
+ * @param broader      Optional identifiers of this koncept's supertypes (is-a parents);
+ *                     the glossary renders them as parent chips and inverts them across
+ *                     the source to render each koncept's children
  */
 public record KonceptDefinition(
         String identifier,
@@ -27,7 +30,8 @@ public record KonceptDefinition(
         String sctid,
         String iri,
         List<String> uuids,
-        String kind
+        String kind,
+        List<String> broader
 ) {
 
     /**
@@ -43,6 +47,7 @@ public record KonceptDefinition(
         private String iri;
         private List<String> uuids;
         private String kind;
+        private List<String> broader;
 
         /** Creates a new empty builder. */
         public Builder() {
@@ -139,6 +144,17 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets the identifiers of this koncept's supertypes (is-a parents).
+         *
+         * @param broader the parent identifiers to set
+         * @return this builder
+         */
+        public Builder broader(List<String> broader) {
+            this.broader = broader;
+            return this;
+        }
+
+        /**
          * Builds an immutable {@link KonceptDefinition} from this builder's state.
          *
          * @return the constructed definition
@@ -153,7 +169,9 @@ public record KonceptDefinition(
                 label = identifier.replaceAll("([a-z])([A-Z])", "$1 $2");
             }
             List<String> uuidList = uuids != null ? List.copyOf(uuids) : List.of();
-            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri, uuidList, kind);
+            List<String> broaderList = broader != null ? List.copyOf(broader) : List.of();
+            return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
+                    uuidList, kind, broaderList);
         }
     }
 

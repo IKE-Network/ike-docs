@@ -86,6 +86,7 @@ DiabetesMellitus:
   axiom: "≡ EndocrineDisorder ⊓ MetabolicDisorder ⊓ ∃findingSite.PancreaticStructure ⊓ ∃hasFinding.Hyperglycemia"
   sctid: "73211009"
   iri: "http://snomed.info/id/73211009"
+  broader: [EndocrineDisorder, MetabolicDisorder]
 
 EndocrineDisorder:
   label: Endocrine Disorder

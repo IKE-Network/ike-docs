@@ -1,6 +1,7 @@
 package network.ike.docs.koncept;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Attributes;
 import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.junit.jupiter.api.BeforeAll;
@@ -102,6 +103,38 @@ class KonceptExtensionIntegrationTest {
 
         assertTrue(html.contains("koncept-glossary-icon"),
                 "Glossary entry should display the concept's identicon");
+    }
+
+    @Test
+    void glossaryShowsParentsChildrenAndIdentifiers() {
+        // DiabetesMellitus broader: [EndocrineDisorder, MetabolicDisorder]
+        String html = convert("Patient with k:DiabetesMellitus[] and k:EndocrineDisorder[].");
+
+        assertTrue(html.contains("koncept-taxonomy-parents"),
+                "DiabetesMellitus entry should show a Parents line");
+        assertTrue(html.contains("href=\"#koncept-EndocrineDisorder\""),
+                "Parent should link to EndocrineDisorder's glossary entry");
+        assertTrue(html.contains("koncept-taxonomy-children"),
+                "EndocrineDisorder entry should show a Children line (inverted broader)");
+        assertTrue(html.contains("href=\"#koncept-DiabetesMellitus\""),
+                "Child link back to DiabetesMellitus");
+        assertTrue(html.contains("koncept-identifier") && html.contains("UUID:") || html.contains("id: <code>"),
+                "Entry should show identifiers (koncept id, UUID)");
+    }
+
+    @Test
+    void comprehensiveGlossary_listsAllKnownKoncepts() {
+        // koncept-glossary-all lists every definition, not only the one referenced.
+        Options options = Options.builder().safe(SafeMode.UNSAFE).backend("html5")
+                .attributes(org.asciidoctor.Attributes.builder()
+                        .attribute("koncept-glossary-all", "").build())
+                .build();
+        String html = asciidoctor.convert("Only k:HeartFailure[] is referenced.", options);
+
+        assertTrue(html.contains("id=\"koncept-DiabetesMellitus\""),
+                "Comprehensive glossary should include an unreferenced koncept");
+        assertTrue(html.contains("id=\"koncept-HeartFailure\""),
+                "and the referenced one too");
     }
 
     @Test
