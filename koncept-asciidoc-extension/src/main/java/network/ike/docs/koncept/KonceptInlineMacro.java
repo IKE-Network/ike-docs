@@ -12,8 +12,6 @@ import network.ike.docs.konceptcore.KonceptKind;
 import network.ike.docs.konceptcore.StampSigilGeometry;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
@@ -67,35 +65,43 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     @Override
     public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
         Document doc = parent.getDocument();
-        Map<String, KonceptEntry> registry = getOrCreateRegistry(doc);
 
-        // Register this reference (idempotent on first occurrence)
-        registry.computeIfAbsent(target, KonceptEntry::new)
-                .incrementRefCount();
+        // Positional attribute 1 is the bracket content: k:Target[label]. Resolve a name key OR a
+        // typed id (k:sctid=/uuid=/id=/nid=) through the shared resolver, so the two forms render
+        // identically here and inside a koncept-tree (ike-issues#837).
+        Object bracket = attributes.get("1");
+        String bracketLabel = bracket != null ? bracket.toString() : null;
+        KonceptResolver.Resolved resolved = KonceptResolver.resolveTarget(doc, target, bracketLabel);
+        String label = resolved.label();
+        KonceptKind kind = resolved.kind();
+        Optional<String> idString = resolved.idString();
 
-        LOG.debug("Koncept reference: {} (total refs: {})",
-                target, registry.get(target).getRefCount());
+        // Glossary anchor + registry key is the resolved concept identifier, so a name-key and a
+        // typed-id reference to the same concept share one glossary entry. An uncurated reference
+        // keys on its bare value; an uncurated TYPED id has no glossary entry, so it is not
+        // registered (registering "sctid=…" would mint a bogus "missing definition" entry).
+        String linkTarget = resolved.anchor() != null
+                ? resolved.anchor() : KonceptResolver.bareValue(target);
+        if (resolved.anchor() != null || !KonceptResolver.isTyped(target)) {
+            KonceptEntry entry = getOrCreateRegistry(doc)
+                    .computeIfAbsent(linkTarget, KonceptEntry::new);
+            entry.incrementRefCount();
+            LOG.debug("Koncept reference: {} → {} (total refs: {})",
+                    target, linkTarget, entry.getRefCount());
+        }
 
-        // Determine display label
-        // Positional attribute 1 is the content inside brackets: k:Target[label]
-        String label = resolveLabel(doc, target, attributes);
-
+        // The rendered #koncept-… anchor is slugged: a curated identifier is already safe (no-op),
+        // but an uncurated typed value (a comma in a multi-UUID id, a stray bracket) would otherwise
+        // break the link attribute of the re-parsed Prawn image macro (the #836 class of bug).
+        String renderLink = KonceptResolver.anchorSlug(linkTarget);
         String backend = doc.getAttribute("backend", "html5").toString();
-        Optional<String> idString = resolveIdString(doc, target);
-
-        // The component kind drives the honest sigil (ike-issues#638): concept = bare, a stamp shows
-        // the gray pentagon (no name), every other kind a coloured letter. Absent/unknown → concept.
-        KonceptKind kind = KonceptDefinitions.forDocument(doc).lookup(target)
-                .map(KonceptDefinition::kind)
-                .map(KonceptKind::fromString)
-                .orElse(KonceptKind.CONCEPT);
 
         // A STAMP is provenance — never an identicon or a name-pill — in EVERY backend, so it must be
         // decided BEFORE the identicon dispatch (ike-issues#638). Otherwise a stamp that carries an id
         // (idString present) would fall through to the pdf/docbook identicon paths below and
         // masquerade as a named concept.
         if (kind.isStamp()) {
-            return createPhraseNode(parent, "quoted", renderStamp(backend, target, label),
+            return createPhraseNode(parent, "quoted", renderStamp(backend, renderLink, label),
                     Map.of("subs", ":none"));
         }
 
@@ -103,14 +109,14 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         // re-processable AsciiDoc — a native inline image macro (the identicon) followed by the
         // visible name (ike-issues#836). Fall through to the text badge below when no identicon.
         if ("pdf".equals(backend) && idString.isPresent()) {
-            return createIdenticonChipNode(parent, target, label, idString.get(), kind);
+            return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind);
         }
 
         String rendered;
         if ("docbook5".equals(backend) || "docbook".equals(backend)) {
             rendered = idString.isPresent()
-                    ? renderDocbookIdenticon(target, label, idString.get(), kind)
-                    : renderDocbookBadge(target, label);
+                    ? renderDocbookIdenticon(renderLink, label, idString.get(), kind)
+                    : renderDocbookBadge(renderLink, label);
         } else if ("pdf".equals(backend)) {
             // Prawn PDF without an identicon: only basic HTML is supported.
             rendered = "<strong><font color=\"#2a5a8a\">K</font></strong>"
@@ -118,28 +124,13 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         } else {
             // html5 and CSS-based PDF backends (Prince, AH, WeasyPrint).
             rendered = idString.isPresent()
-                    ? renderHtmlIdenticon(target, label, idString.get(), kind)
-                    : KonceptSvgRenderer.render(target, label, kind);
+                    ? renderHtmlIdenticon(renderLink, label, idString.get(), kind)
+                    : KonceptSvgRenderer.render(renderLink, label, kind);
         }
 
         // Return as inline passthrough (no further substitution)
         return createPhraseNode(parent, "quoted", rendered,
                 Map.of("subs", ":none"));
-    }
-
-    /**
-     * Resolve the koncept's identicon idString, honouring the
-     * {@code :koncept-identicon:} toggle (default on). Empty when the toggle
-     * is off or the koncept has no resolvable PublicId.
-     */
-    private Optional<String> resolveIdString(Document doc, String target) {
-        Object flag = doc.getAttribute("koncept-identicon", "true");
-        if ("false".equalsIgnoreCase(String.valueOf(flag))) {
-            return Optional.empty();
-        }
-        return KonceptDefinitions.forDocument(doc)
-                .lookup(target)
-                .flatMap(KonceptIdentity::idString);
     }
 
     /**
@@ -271,25 +262,6 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
-    }
-
-    /**
-     * Resolve the display label for this koncept reference.
-     * Priority: explicit bracket content > camelCase split of target.
-     */
-    private String resolveLabel(Document doc, String target, Map<String, Object> attributes) {
-        Object explicit = attributes.get("1");
-        if (explicit != null && !explicit.toString().isBlank()) {
-            return explicit.toString().strip();
-        }
-        // Prefer the koncept's declared label (a stamp's "status · date-time · author" provenance, or
-        // "Heart Failure (en)") over a camelCase split of the identifier; the split is the last resort
-        // for an unregistered reference. KonceptDefinition.build() defaults label to the split when the
-        // yml omits it, so this never regresses a plain concept.
-        return KonceptDefinitions.forDocument(doc).lookup(target)
-                .map(KonceptDefinition::label)
-                .filter(l -> l != null && !l.isBlank())
-                .orElseGet(() -> splitCamelCase(target));
     }
 
     /**

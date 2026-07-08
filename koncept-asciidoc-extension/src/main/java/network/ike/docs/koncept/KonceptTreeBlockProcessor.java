@@ -10,20 +10,13 @@ import org.asciidoctor.extension.Reader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import network.ike.docs.konceptcore.KonceptKind;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -250,7 +243,7 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
      * @return the HTML for the chip
      */
     private String renderChip(Document doc, ParsedNode node) {
-        Resolved r = resolve(doc, node);
+        KonceptResolver.Resolved r = resolve(doc, node);
         String labelHtml = "<span class=\"koncept-label\" "
                 + "style=\"color:#2a5a8a;font-variant:small-caps;letter-spacing:0.02em;\">"
                 + escapeXml(r.label()) + "</span>";
@@ -346,7 +339,7 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
      * @return the row's AsciiDoc source
      */
     private String rowAsciiDoc(Document doc, ParsedNode node) {
-        Resolved resolved = resolve(doc, node);
+        KonceptResolver.Resolved resolved = resolve(doc, node);
         if (resolved.anchor() != null) {
             // k: renders identicon + visible name + glossary cross-reference on every backend
             // (ike-issues#836); pass the (possibly overridden) label so the chip shows exactly it.
@@ -372,212 +365,19 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         return "\"" + value.replace("\"", "\\\"").replace("]", "\\]") + "\"";
     }
 
-    // ── Resolution ──────────────────────────────────────────────────────
+    // ── Resolution (delegated to the shared resolver, #837) ─────────────
 
     /**
-     * A node resolved for rendering: display label, identicon idString (empty when none),
-     * component kind, glossary anchor (null for id-only nodes), and identity text.
-     *
-     * @param label    the display label
-     * @param idString the Tinkar identicon idString, or empty
-     * @param kind     the component kind
-     * @param anchor   the glossary anchor identifier, or {@code null}
-     * @param identity the identity text (name · id) for alt/title
-     */
-    private record Resolved(String label, Optional<String> idString, KonceptKind kind,
-                            String anchor, String identity) {
-    }
-
-    /**
-     * Resolves a parsed node <em>through {@code koncepts.yml}</em> — the resolution authority until a
-     * live datastore is wired in. A name-key token resolves by identifier; a typed token
-     * ({@code sctid}/{@code uuid}/{@code id}) resolves by a reverse index over the curated
-     * definitions. When a definition is found, the concept's <b>PublicId is preferred</b> — explicit
-     * UUIDs, in datastore order, win over a SNOMED-derived UUID — and the node gains its glossary
-     * cross-reference and component kind. A typed token whose id is not curated falls back to the
-     * PublicId it carries (a {@code uuid}/{@code id} array) or, last, a SNOMED-derived UUID: best
-     * effort, and not guaranteed byte-identical to the live identicon — which is the reason to curate
-     * the concept into {@code koncepts.yml}.
+     * Resolves a parsed node through the shared {@link KonceptResolver}, so a tree node and an
+     * inline {@code k:} reference resolve identically (typed ids via the reverse index, PublicId
+     * preferred, koncepts.yml the authority).
      *
      * @param doc  the document
      * @param node the parsed node
      * @return the resolved rendering data
      */
-    private Resolved resolve(Document doc, ParsedNode node) {
-        String bracketLabel = (node.label() != null && !node.label().isBlank())
-                ? node.label().strip() : null;
-        KonceptDefinitionSource source = KonceptDefinitions.forDocument(doc);
-        Optional<KonceptDefinition> def = node.kind() == null
-                ? source.lookup(node.value())
-                : reverseIndex(doc, source).find(node.kind(), node.value()).flatMap(source::lookup);
-
-        String label;
-        KonceptKind kind;
-        String anchor;
-        List<UUID> uuids;
-        if (def.isPresent()) {
-            KonceptDefinition d = def.get();
-            anchor = d.identifier();
-            kind = Optional.ofNullable(d.kind()).map(KonceptKind::fromString).orElse(KonceptKind.CONCEPT);
-            label = bracketLabel != null ? bracketLabel
-                    : (d.label() != null && !d.label().isBlank()
-                        ? d.label() : KonceptInlineMacro.splitCamelCase(d.identifier()));
-            uuids = publicId(d);
-        } else {
-            anchor = null;                      // not curated → no glossary cross-reference
-            kind = KonceptKind.CONCEPT;
-            label = bracketLabel != null ? bracketLabel
-                    : (node.kind() == null ? KonceptInlineMacro.splitCamelCase(node.value()) : node.value());
-            uuids = uncuratedPublicId(node);
-        }
-
-        Optional<String> idString = idsEnabled(doc) && !uuids.isEmpty()
-                ? Optional.of(KonceptIdentity.idString(uuids)) : Optional.empty();
-        return new Resolved(label, idString, kind, anchor, identity(label, uuids, node));
-    }
-
-    /** The concept's PublicId UUIDs (explicit UUIDs preferred over the SNOMED-derived one), or empty. */
-    private static List<UUID> publicId(KonceptDefinition def) {
-        try {
-            return KonceptIdentity.resolveUuids(def);
-        } catch (RuntimeException e) {
-            LOG.debug("koncept-tree: malformed uuids on {}: {}", def.identifier(), e.toString());
-            return List.of();
-        }
-    }
-
-    /**
-     * The PublicId for a typed token that is <em>not</em> curated in {@code koncepts.yml}: a
-     * {@code uuid}/{@code id} token already carries its PublicId; an {@code sctid} token falls back
-     * to a SNOMED-derived UUID; a {@code nid} is a live-store id with no static form.
-     *
-     * @param node the parsed node
-     * @return the PublicId UUIDs, or empty when none can be formed
-     */
-    private static List<UUID> uncuratedPublicId(ParsedNode node) {
-        if (node.kind() == null) {
-            return List.of();                   // a bare name absent from koncepts.yml
-        }
-        try {
-            return switch (node.kind()) {
-                case "uuid", "id" -> parseUuids(node.value());
-                case "sctid" -> List.of(SnomedUuids.fromSnomed(node.value()));
-                default -> List.of();           // nid
-            };
-        } catch (RuntimeException e) {
-            LOG.debug("koncept-tree: unresolvable {}={}: {}", node.kind(), node.value(), e.toString());
-            return List.of();
-        }
-    }
-
-    /** Parses a single UUID or a comma-joined UUID array into an ordered list (a multi-id PublicId). */
-    private static List<UUID> parseUuids(String value) {
-        String[] parts = value.split(",");
-        List<UUID> uuids = new ArrayList<>(parts.length);
-        for (String part : parts) {
-            uuids.add(UUID.fromString(part.trim()));
-        }
-        return uuids;
-    }
-
-    /** Honours the {@code :koncept-identicon:} toggle (default on). */
-    private static boolean idsEnabled(Document doc) {
-        return !"false".equalsIgnoreCase(String.valueOf(doc.getAttribute("koncept-identicon", "true")));
-    }
-
-    /**
-     * Builds the identity text carried in the identicon {@code alt} and link {@code title} so a
-     * concept survives — as name-plus-identity — a copy into a plain-text context. The identity is
-     * the <b>PublicId</b> (the concept's UUIDs, preferred over any SNOMED id); a {@code nid} node,
-     * which has no static PublicId, carries its native id instead.
-     *
-     * @param label the display name
-     * @param uuids the PublicId UUIDs, possibly empty
-     * @param node  the parsed node (for the nid fallback)
-     * @return e.g. {@code "Heart Failure · f05fae71-…"}, or just the label when no id is known
-     */
-    private static String identity(String label, List<UUID> uuids, ParsedNode node) {
-        if (!uuids.isEmpty()) {
-            StringBuilder sb = new StringBuilder(label).append(" · ");
-            for (int i = 0; i < uuids.size(); i++) {
-                if (i > 0) {
-                    sb.append(", ");
-                }
-                sb.append(uuids.get(i));
-            }
-            return sb.toString();
-        }
-        if ("nid".equals(node.kind())) {
-            return label + " · nid " + node.value();
-        }
-        return label;
-    }
-
-    // ── Reverse index (typed id → curated identifier) ───────────────────
-
-    /** Per-document cache of the reverse index over the curated definitions. */
-    private static final Map<Document, ReverseIndex> REVERSE_INDEX = new WeakHashMap<>();
-
-    private static synchronized ReverseIndex reverseIndex(Document doc, KonceptDefinitionSource source) {
-        return REVERSE_INDEX.computeIfAbsent(doc, d -> ReverseIndex.build(source));
-    }
-
-    /**
-     * Maps a typed id (SCTID or UUID) back to its curated koncept identifier, so {@code k:sctid=…}
-     * and {@code k:uuid=…} resolve through {@code koncepts.yml} exactly as a name key does. Built by
-     * enumerating the source's definitions; a source that cannot enumerate yields an empty index and
-     * typed tokens fall back to the id they carry.
-     *
-     * @param bySctid SNOMED CT id → koncept identifier
-     * @param byUuid  lowercase UUID → koncept identifier
-     */
-    private record ReverseIndex(Map<String, String> bySctid, Map<String, String> byUuid) {
-
-        static ReverseIndex build(KonceptDefinitionSource source) {
-            Map<String, String> bySctid = new HashMap<>();
-            Map<String, String> byUuid = new HashMap<>();
-            Set<String> conceptSctids = new HashSet<>();
-            for (String identifier : source.identifiers()) {
-                source.lookup(identifier).ifPresent(def -> {
-                    boolean concept = Optional.ofNullable(def.kind()).map(KonceptKind::fromString)
-                            .orElse(KonceptKind.CONCEPT) == KonceptKind.CONCEPT;
-                    if (def.sctid() != null && !def.sctid().isBlank()) {
-                        String sctid = def.sctid().strip();
-                        // A bare SCTID means the concept — not a description or stamp that shares it.
-                        if (concept) {
-                            bySctid.put(sctid, identifier);
-                            conceptSctids.add(sctid);
-                        } else if (!conceptSctids.contains(sctid)) {
-                            bySctid.putIfAbsent(sctid, identifier);
-                        }
-                    }
-                    if (def.uuids() != null) {
-                        for (String uuid : def.uuids()) {
-                            byUuid.putIfAbsent(uuid.strip().toLowerCase(Locale.ROOT), identifier);
-                        }
-                    }
-                });
-            }
-            return new ReverseIndex(bySctid, byUuid);
-        }
-
-        Optional<String> find(String kind, String value) {
-            return switch (kind) {
-                case "sctid" -> Optional.ofNullable(bySctid.get(value.strip()));
-                case "uuid", "id" -> firstUuidMatch(value);
-                default -> Optional.empty();     // nid is not curated by UUID
-            };
-        }
-
-        private Optional<String> firstUuidMatch(String value) {
-            for (String part : value.split(",")) {
-                String identifier = byUuid.get(part.strip().toLowerCase(Locale.ROOT));
-                if (identifier != null) {
-                    return Optional.of(identifier);
-                }
-            }
-            return Optional.empty();
-        }
+    private KonceptResolver.Resolved resolve(Document doc, ParsedNode node) {
+        return KonceptResolver.resolve(doc, node.kind(), node.value(), node.label());
     }
 
     /** Minimal XML/HTML attribute-and-text escaping. */
