@@ -1,0 +1,11 @@
+# Test fixture for KonceptTreeBlockRenderingTest.
+# DualId carries BOTH an sctid and an explicit (multi-UUID) PublicId whose UUIDs are
+# deliberately NOT the SNOMED-derived one — so a test can prove the curated PublicId is
+# preferred over sctid derivation.
+DualId:
+  label: Dual Identified Concept
+  definition: A concept curated with an explicit PublicId that differs from its SNOMED-derived id.
+  sctid: "12345678"
+  uuids:
+    - "aaaaaaaa-0000-4000-8000-000000000001"
+    - "bbbbbbbb-0000-4000-8000-000000000002"

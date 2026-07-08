@@ -2,6 +2,7 @@ package network.ike.docs.plugin;
 
 import network.ike.docs.koncept.KonceptGlossaryProcessor;
 import network.ike.docs.koncept.KonceptInlineMacro;
+import network.ike.docs.koncept.KonceptTreeBlockProcessor;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
@@ -233,6 +234,11 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             // Register Koncept inline macro (safe for all backends)
             asciidoctor.javaExtensionRegistry()
                     .inlineMacro(KonceptInlineMacro.class);
+
+            // Register the [koncept-tree] block (indented Koncept chips; IKE-Network/ike-issues#827).
+            // Safe for all backends — declines to a literal block outside the html5 family.
+            asciidoctor.javaExtensionRegistry()
+                    .block(KonceptTreeBlockProcessor.class);
 
             // Convert each enabled backend
             boolean hadErrors = false;

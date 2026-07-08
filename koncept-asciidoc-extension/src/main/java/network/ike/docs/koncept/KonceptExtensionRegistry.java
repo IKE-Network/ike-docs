@@ -23,6 +23,12 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .inlineMacro(KonceptInlineMacro.class);
 
+        // The [koncept-tree] block: an indented list of Koncept chips — the static projection of
+        // the live assistant tree (IKE-Network/ike-issues#827). Renders on the html5 family;
+        // declines gracefully to a literal block on other backends. Safe for all backends.
+        asciidoctor.javaExtensionRegistry()
+                .block(KonceptTreeBlockProcessor.class);
+
         // Tag [preface]/[appendix] etc. with front-/back-matter roles so the
         // loose-leaf print stylesheet can route them (chapter numbering
         // excludes them, keeping composite folios aligned with section
