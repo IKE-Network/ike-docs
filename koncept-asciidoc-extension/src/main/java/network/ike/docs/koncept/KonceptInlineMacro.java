@@ -99,11 +99,11 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
                     Map.of("subs", ":none"));
         }
 
-        // Prawn PDF: a passthrough <img> is not rendered by the Prawn
-        // converter, so return a real inline image node. Fall through to the
-        // text badge below when no identicon is available.
+        // Prawn PDF: a passthrough <img> is not rendered by the Prawn converter, so return
+        // re-processable AsciiDoc — a native inline image macro (the identicon) followed by the
+        // visible name (ike-issues#836). Fall through to the text badge below when no identicon.
         if ("pdf".equals(backend) && idString.isPresent()) {
-            return createIdenticonImageNode(parent, target, label, idString.get(), kind);
+            return createIdenticonChipNode(parent, target, label, idString.get(), kind);
         }
 
         String rendered;
@@ -189,13 +189,17 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         String glyphPrefix = kind.hasLetterGlyph()
                 ? "<phrase role=\"koncept-sigil\">" + escapeXml(kind.glyph()) + " </phrase>"
                 : "";
+        // The visible name follows the identicon, inside the link, on EVERY backend (ike-issues#836):
+        // the textobject phrase is only the image's fallback (shown if the PNG cannot render), so
+        // without this the concept reads as a bare identicon in FO/print.
         return "<link linkend=\"koncept-" + escapeXml(target) + "\">"
                 + glyphPrefix
                 + "<inlinemediaobject>"
                 + "<imageobject><imagedata fileref=\"" + escapeXml(uri) + "\""
                 + " format=\"PNG\" contentwidth=\"12pt\" contentdepth=\"12pt\"/></imageobject>"
                 + "<textobject><phrase>" + escapeXml(label) + "</phrase></textobject>"
-                + "</inlinemediaobject></link>";
+                + "</inlinemediaobject>&#160;<phrase role=\"koncept-label\">" + escapeXml(label)
+                + "</phrase></link>";
     }
 
     /**
@@ -229,23 +233,36 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     }
 
     /**
-     * Prawn PDF: build a native inline image node referencing the generated
-     * PNG file (absolute path; resolves under {@code SafeMode.UNSAFE}), linked
-     * to the glossary anchor.
+     * Prawn PDF: the identicon chip as re-processable AsciiDoc — a native inline {@code image:}
+     * macro (which Prawn renders from the generated PNG; a passthrough {@code <img>} would not
+     * render) followed by the visible concept name (ike-issues#836). The image carries the
+     * glossary link; a non-concept kind's letter glyph precedes it. Returned as a {@code quoted}
+     * node whose {@code specialcharacters,macros} substitutions render the image and escape the
+     * label without letting a stray {@code *} or {@code _} in a name turn into formatting.
      */
-    private PhraseNode createIdenticonImageNode(StructuralNode parent, String target,
+    private PhraseNode createIdenticonChipNode(StructuralNode parent, String target,
                                                String label, String idString, KonceptKind kind) {
         String absPath = IdenticonRenderer.pngFile(idString);
-        Map<String, Object> attrs = new HashMap<>();
-        // Prawn renders the identicon image; the letter glyph (a visible sigil only on html5) is
-        // folded into the alt text so the kind is not entirely lost in the PDF (ike-issues#638).
-        attrs.put("alt", kind.hasLetterGlyph() ? kind.glyph() + " " + label : label);
-        attrs.put("width", "18");
-        attrs.put("link", "#koncept-" + target);
-        Map<Object, Object> options = new HashMap<>();
-        options.put("type", ":image");
-        options.put("target", absPath);
-        return createPhraseNode(parent, "image", List.<String>of(), attrs, options);
+        String glyph = kind.hasLetterGlyph() ? kind.glyph() + " " : "";
+        // Content is RAW, not pre-escaped: the specialcharacters substitution escapes the glyph and
+        // label, and the macros substitution renders the inline image — pre-escaping here would
+        // double-escape. A literal non-breaking space (U+00A0, not an &#160; entity, which the
+        // substitution would mangle) keeps the identicon and name on one line.
+        String content = glyph + "image:" + absPath + "[" + attrValue(label)
+                + ",18,18,link=#koncept-" + target + "]\u00A0" + label;
+        return createPhraseNode(parent, "quoted", content,
+                Map.of("subs", "specialcharacters,macros"));
+    }
+
+    /**
+     * Renders a value safe to embed as an inline-macro attribute: quoted so a comma cannot split
+     * the attribute list, and with {@code ]} backslash-escaped so it cannot prematurely close the
+     * macro — Asciidoctor's macro-boundary regex terminates the attrlist at the first unescaped
+     * {@code ]} <em>before</em> quotes are parsed, so quoting alone does not protect it. (SNOMED CT
+     * carries bracketed descriptions like {@code [D]Chest pain}.)
+     */
+    private static String attrValue(String value) {
+        return "\"" + value.replace("\"", "\\\"").replace("]", "\\]") + "\"";
     }
 
     private String escapeXml(String s) {

@@ -9,3 +9,9 @@ DualId:
   uuids:
     - "aaaaaaaa-0000-4000-8000-000000000001"
     - "bbbbbbbb-0000-4000-8000-000000000002"
+
+# A label containing ']' — SNOMED CT carries bracketed descriptions like "[D]Chest pain".
+# The ']' must not prematurely close the re-parsed k:/image: macro (ike-issues#836).
+BracketLabel:
+  label: "[D]Chest pain"
+  sctid: "29857009"

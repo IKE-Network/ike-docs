@@ -348,12 +348,12 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
     private String rowAsciiDoc(Document doc, ParsedNode node) {
         Resolved resolved = resolve(doc, node);
         if (resolved.anchor() != null) {
-            // k: renders the identicon + glossary cross-reference; the visible name is appended
-            // explicitly, since the inline chip shows the label only on html5 (in DocBook/Prawn it
-            // rides the image alt/fallback, which is not visible in print).
-            return "k:" + resolved.anchor() + "[] " + resolved.label();
+            // k: renders identicon + visible name + glossary cross-reference on every backend
+            // (ike-issues#836); pass the (possibly overridden) label so the chip shows exactly it.
+            return "k:" + resolved.anchor() + "[" + adocAttribute(resolved.label()) + "]";
         }
         if (resolved.idString().isPresent()) {
+            // Uncurated node: an inline image macro (no k: chip), so the name is appended here.
             String png = IdenticonRenderer.pngFile(resolved.idString().get());
             return "image:" + png + "[" + adocAttribute(resolved.identity()) + ",18,18] "
                     + resolved.label();
@@ -361,9 +361,15 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         return resolved.label();
     }
 
-    /** Quotes an AsciiDoc attribute value so a comma or bracket in it cannot split the attribute list. */
+    /**
+     * Renders a value safe to embed as a re-parsed {@code k:}/{@code image:} attribute: quoted so a
+     * comma cannot split the attribute list, and with {@code ]} backslash-escaped so it cannot
+     * prematurely close the macro — Asciidoctor's macro-boundary regex terminates the attrlist at
+     * the first unescaped {@code ]} before quotes are parsed. (SNOMED CT carries bracketed
+     * descriptions like {@code [D]Chest pain}.)
+     */
     private static String adocAttribute(String value) {
-        return "\"" + value.replace("\"", "\\\"") + "\"";
+        return "\"" + value.replace("\"", "\\\"").replace("]", "\\]") + "\"";
     }
 
     // ── Resolution ──────────────────────────────────────────────────────

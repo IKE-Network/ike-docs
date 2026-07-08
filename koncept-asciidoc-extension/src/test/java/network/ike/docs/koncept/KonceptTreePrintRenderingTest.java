@@ -101,6 +101,29 @@ class KonceptTreePrintRenderingTest {
                 ":koncept-identicon: false renders the tree with no identicon images");
     }
 
+    @Test
+    void bracketInLabelDoesNotBreakTheReParsedMacro() {
+        // A ']' in a label (SNOMED "[D]…" descriptions) must be escaped, or Asciidoctor's macro
+        // boundary truncates the re-parsed k:/image: and leaks raw ",18,18,link=…" markup.
+        Options options = Options.builder()
+                .safe(SafeMode.UNSAFE)
+                .backend("docbook5")
+                .attributes(Attributes.builder()
+                        .attribute("koncept-definitions-classpath", "/koncept-tree-test.yml").build())
+                .build();
+        String xml = asciidoctor.convert("""
+                [koncept-tree]
+                ----
+                k:BracketLabel[]
+                ----
+                """, options);
+
+        assertTrue(xml.contains("[D]Chest pain"), "the bracketed label renders intact");
+        assertFalse(xml.contains(",18,18,link"),
+                "no raw macro markup leaks — the ']' did not truncate the attribute list");
+        assertTrue(xml.contains("linkend=\"koncept-BracketLabel\""), "and it still cross-references");
+    }
+
     private String convert(String backend) {
         Options options = Options.builder()
                 .safe(SafeMode.UNSAFE)

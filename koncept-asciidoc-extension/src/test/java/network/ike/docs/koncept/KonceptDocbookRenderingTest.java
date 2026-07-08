@@ -47,6 +47,8 @@ class KonceptDocbookRenderingTest {
                 "Image data should be a PNG");
         assertTrue(xml.contains("linkend=\"koncept-HeartFailure\""),
                 "Identicon should link to the glossary entry");
+        assertTrue(xml.contains("<phrase role=\"koncept-label\">Heart Failure</phrase>"),
+                "The concept name must be visible in print, not only the image alt (ike-issues#836)");
 
         Matcher m = Pattern.compile("fileref=\"(file:[^\"]+)\"").matcher(xml);
         assertTrue(m.find(), "imagedata should carry a file: reference");
