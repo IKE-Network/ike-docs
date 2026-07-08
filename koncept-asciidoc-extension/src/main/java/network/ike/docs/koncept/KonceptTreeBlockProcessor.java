@@ -128,9 +128,14 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         if ("html5".equals(backend)) {
             return createBlock(parent, "pass", renderHtml(doc, nodes));
         }
-        // Stage 2 targets: docbook5 → FO and Prawn pdf. Until their indented projection lands, emit
-        // the source tokens as a literal block so the content is visible, never dropped.
-        LOG.debug("koncept-tree: backend {} not yet rendered; emitting literal tokens", backend);
+        if (backend.startsWith("docbook") || "pdf".equals(backend)) {
+            // DocBook → FO and Prawn PDF: re-parse each row as AsciiDoc so the inline k: macro
+            // emits each backend's own identicon — a DocBook inlinemediaobject or a Prawn native
+            // image — via the exact per-backend paths the inline chip is already tested on.
+            return renderViaAsciiDoc(parent, doc, nodes);
+        }
+        // Any other backend: the raw tokens as a literal block, so the content is visible, never dropped.
+        LOG.debug("koncept-tree: backend {} has no tree projection; emitting literal tokens", backend);
         return createBlock(parent, "literal", lines);
     }
 
@@ -299,6 +304,66 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         }
         return "<span title=\"%s\" style=\"white-space:nowrap;\">".formatted(escapeXml(identity))
                 + inner + "</span>";
+    }
+
+    // ── DocBook / Prawn-PDF rendering (re-parsed rows) ──────────────────
+
+    /**
+     * Renders the tree for the DocBook and Prawn-PDF backends by re-parsing its rows as AsciiDoc:
+     * a curated node becomes a {@code k:} inline chip (so the inline macro emits the backend's own
+     * identicon — a DocBook {@code inlinemediaobject} or a Prawn native image, both already tested),
+     * an uncurated node with a PublicId an inline {@code image:} of its identicon PNG, and an
+     * unresolved node its plain label. Rows are one paragraph — hard-break separated and indented
+     * with non-breaking spaces (depth × {@link #NBSP_PER_LEVEL}) — inside an open block.
+     *
+     * @param parent the parent AST node
+     * @param doc    the document (for {@code koncepts.yml} resolution)
+     * @param nodes  the parsed nodes
+     * @return an open block containing the rendered tree paragraph
+     */
+    private Object renderViaAsciiDoc(StructuralNode parent, Document doc, List<ParsedNode> nodes) {
+        int[] depth = depths(nodes);
+        List<String> rows = new ArrayList<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            String indent = "{nbsp}".repeat(depth[i] * NBSP_PER_LEVEL);
+            String row = indent + rowAsciiDoc(doc, nodes.get(i));
+            // A trailing " +" hard-breaks to the next row, keeping the whole tree one tight paragraph.
+            rows.add(i < nodes.size() - 1 ? row + " +" : row);
+        }
+        StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
+        parseContent(container, rows);
+        return container;
+    }
+
+    /**
+     * One tree row as AsciiDoc: a {@code k:} chip for a curated node (the inline macro resolves the
+     * canonical label unless the author bracketed an override), an inline identicon {@code image:}
+     * for an uncurated node that still carries a PublicId, or the plain label when no identicon
+     * resolves.
+     *
+     * @param doc  the document
+     * @param node the parsed node
+     * @return the row's AsciiDoc source
+     */
+    private String rowAsciiDoc(Document doc, ParsedNode node) {
+        Resolved resolved = resolve(doc, node);
+        if (resolved.anchor() != null) {
+            // k: renders the identicon + glossary cross-reference; the visible name is appended
+            // explicitly, since the inline chip shows the label only on html5 (in DocBook/Prawn it
+            // rides the image alt/fallback, which is not visible in print).
+            return "k:" + resolved.anchor() + "[] " + resolved.label();
+        }
+        if (resolved.idString().isPresent()) {
+            String png = IdenticonRenderer.pngFile(resolved.idString().get());
+            return "image:" + png + "[" + adocAttribute(resolved.identity()) + ",18,18] "
+                    + resolved.label();
+        }
+        return resolved.label();
+    }
+
+    /** Quotes an AsciiDoc attribute value so a comma or bracket in it cannot split the attribute list. */
+    private static String adocAttribute(String value) {
+        return "\"" + value.replace("\"", "\\\"") + "\"";
     }
 
     // ── Resolution ──────────────────────────────────────────────────────
