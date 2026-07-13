@@ -20,9 +20,14 @@ class KonceptExtensionIntegrationTest {
     @BeforeAll
     static void setup() {
         asciidoctor = Asciidoctor.Factory.create();
-        // Register extensions explicitly (SPI also works but explicit is clearer in tests)
+        // Register extensions explicitly (SPI also works but explicit is clearer in tests).
+        // The treeprocessor is included because it now owns koncept-glossary-all for the
+        // html5 family (IKE-Network/ike-issues#877); the postprocessor early-returns for
+        // that combination, so comprehensiveGlossary_listsAllKnownKoncepts needs both
+        // registered to see real production behavior.
         asciidoctor.javaExtensionRegistry()
                 .inlineMacro(KonceptInlineMacro.class)
+                .treeprocessor(KonceptGlossaryTreeprocessor.class)
                 .postprocessor(KonceptGlossaryProcessor.class);
     }
 

@@ -126,6 +126,11 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .uuids(stringListField(fields, "uuids"))
                     .kind(stringField(fields, "kind"))
                     .broader(stringListField(fields, "broader"))
+                    .section(stringField(fields, "section"))
+                    .since(stringField(fields, "since"))
+                    .comments(stringListField(fields, "comments"))
+                    .retiredComments(retiredCommentsField(fields, "retiredComments"))
+                    .seeAlso(stringListField(fields, "seeAlso"))
                     .build();
 
             defs.put(identifier, def);
@@ -161,5 +166,30 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
         }
         String s = val.toString().strip();
         return s.isEmpty() ? null : List.of(s);
+    }
+
+    /**
+     * Reads a list of {@code {text, retiredAt}} maps into
+     * {@link KonceptDefinition.RetiredComment} records. Returns {@code null} when the
+     * field is absent or empty so the builder can apply its default.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<KonceptDefinition.RetiredComment> retiredCommentsField(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (!(val instanceof List<?> list) || list.isEmpty()) {
+            return null;
+        }
+        List<KonceptDefinition.RetiredComment> out = new ArrayList<>(list.size());
+        for (Object o : list) {
+            if (o instanceof Map<?, ?> entryMap) {
+                Map<String, Object> retired = (Map<String, Object>) entryMap;
+                String text = stringField(retired, "text");
+                String retiredAt = stringField(retired, "retiredAt");
+                if (text != null) {
+                    out.add(new KonceptDefinition.RetiredComment(text, retiredAt));
+                }
+            }
+        }
+        return out.isEmpty() ? null : out;
     }
 }

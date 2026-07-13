@@ -37,6 +37,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .treeprocessor(FrontBackMatterTreeprocessor.class);
 
+        // The comprehensive (koncept-glossary-all) glossary, grouped by taxonomy
+        // section into real, TOC-visible AST sections (IKE-Network/ike-issues#877).
+        // AST-only treeprocessor — safe for every backend; no-ops unless
+        // koncept-glossary-all is set, and defers to KonceptGlossaryProcessor for
+        // pdf/DocBook (see its own javadoc for why).
+        asciidoctor.javaExtensionRegistry()
+                .treeprocessor(KonceptGlossaryTreeprocessor.class);
+
         // The glossary Postprocessor is NOT registered here because it is
         // incompatible with the asciidoctorj-pdf (Prawn) backend. The PDF
         // converter returns a Ruby object instead of a String, causing a

@@ -1,0 +1,42 @@
+# Fixture for KonceptGlossaryTreeprocessorTest — deliberately includes section/
+# since/comments/retiredComments so grouping and history rendering are both
+# exercised against realistic (if synthetic) data. Not the bundled demo
+# koncepts.yml, which has no section: data.
+
+RootA:
+  label: Root A
+  definition: Definition of root A, used as the group's narrative.
+  section: RootA
+
+ChildA1:
+  label: Child A1
+  definition: Definition of child A1.
+  section: RootA
+  broader: [RootA]
+  since: "2020-01-01T00:00:00Z"
+  comments:
+    - "Still active comment"
+  retiredComments:
+    - text: "Old comment text"
+      retiredAt: "2020-06-01T00:00:00Z"
+
+ChildA2:
+  label: Child A2
+  definition: Definition of child A2, with no history fields at all.
+  section: RootA
+  broader: [RootA]
+
+RootB:
+  label: Root B
+  definition: Definition of root B, used as the second group's narrative.
+  section: RootB
+
+ChildB1:
+  label: Child B1
+  definition: Definition of child B1.
+  section: RootB
+  broader: [RootB]
+
+OrphanKoncept:
+  label: Orphan Koncept
+  definition: A koncept with no section field at all.
