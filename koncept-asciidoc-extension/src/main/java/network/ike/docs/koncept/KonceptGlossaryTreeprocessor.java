@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -114,6 +115,7 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
 
         Section glossary = createSection(document, 1, true, Map.of());
         glossary.setTitle("Koncept Glossary");
+        glossary.setId(slugify(glossary.getTitle()));
         document.append(glossary);
 
         StringBuilder html = new StringBuilder();
@@ -148,12 +150,14 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
 
         Section glossary = createSection(document, 1, true, Map.of());
         glossary.setTitle("Koncept Glossary");
+        glossary.setId(slugify(glossary.getTitle()));
         document.append(glossary);
 
         for (String groupKey : groupKeys) {
             List<String> ids = idsBySection.get(groupKey);
             Section group = createSection(glossary, 2, true, Map.of());
             group.setTitle(groupTitle(groupKey, defSource));
+            group.setId(slugify(group.getTitle()));
 
             StringBuilder html = new StringBuilder();
             Optional<KonceptDefinition> rootDef = defSource.lookup(groupKey);
@@ -194,5 +198,21 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
             return "Additional Koncepts (" + residual.group(1) + ")";
         }
         return "Unclassified".equals(groupKey) ? "Unclassified Koncepts" : groupKey;
+    }
+
+    /**
+     * Slugifies a title into an anchor id matching this pipeline's {@code idprefix=""}/
+     * {@code idseparator="-"} convention ({@code AsciidocMojo}) — the same shape Asciidoctor's
+     * native parser auto-assigns to author-written {@code == Title} sections. A section built
+     * via the extension API (like this treeprocessor's) gets no such auto-id, so without this,
+     * the TOC link falls back to a bare {@code href="#"} that a PDF renderer's
+     * {@code target-counter} cannot resolve, corrupting every page number after it.
+     *
+     * @param title the section title
+     * @return the slugified id
+     */
+    private static String slugify(String title) {
+        String slug = title.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-");
+        return slug.replaceAll("^-+|-+$", "");
     }
 }
