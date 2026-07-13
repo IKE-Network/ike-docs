@@ -36,6 +36,11 @@ import java.util.List;
  *                        analog); no Tinkar association/replacement pattern is wired
  *                        anywhere today, so this is reserved plumbing, not yet populated
  *                        by any known source
+ * @param narrative       Optional curated, long-form AsciiDoc prose for this koncept (as
+ *                        opposed to the short {@code definition} gloss) — real AsciiDoc
+ *                        source, including embedded {@code k:} chip references, meant to
+ *                        be spliced into a document and re-parsed (see the
+ *                        {@code koncept-narrative} block macro), not rendered as flat text
  */
 public record KonceptDefinition(
         String identifier,
@@ -51,7 +56,8 @@ public record KonceptDefinition(
         String since,
         List<String> comments,
         List<RetiredComment> retiredComments,
-        List<String> seeAlso
+        List<String> seeAlso,
+        String narrative
 ) {
 
     /**
@@ -83,6 +89,7 @@ public record KonceptDefinition(
         private List<String> comments;
         private List<RetiredComment> retiredComments;
         private List<String> seeAlso;
+        private String narrative;
 
         /** Creates a new empty builder. */
         public Builder() {
@@ -246,6 +253,17 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets the curated, long-form AsciiDoc prose for this koncept.
+         *
+         * @param narrative the AsciiDoc source to set
+         * @return this builder
+         */
+        public Builder narrative(String narrative) {
+            this.narrative = narrative;
+            return this;
+        }
+
+        /**
          * Builds an immutable {@link KonceptDefinition} from this builder's state.
          *
          * @return the constructed definition
@@ -266,7 +284,8 @@ public record KonceptDefinition(
                     retiredComments != null ? List.copyOf(retiredComments) : List.of();
             List<String> seeAlsoList = seeAlso != null ? List.copyOf(seeAlso) : List.of();
             return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
-                    uuidList, kind, broaderList, section, since, commentsList, retiredCommentsList, seeAlsoList);
+                    uuidList, kind, broaderList, section, since, commentsList, retiredCommentsList, seeAlsoList,
+                    narrative);
         }
     }
 

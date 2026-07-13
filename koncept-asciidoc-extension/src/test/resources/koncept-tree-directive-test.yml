@@ -1,0 +1,32 @@
+# Fixture for KonceptTreeDirectiveRenderingTest — a two-level taxonomy so
+# leaves: (recursive) and children: (direct only) produce different results.
+#
+#   Root
+#   ├── Mid
+#   │   ├── Leaf1
+#   │   └── Leaf2
+#   └── DirectChild   (itself a leaf: no children of its own)
+
+Root:
+  label: Root
+  definition: Root definition.
+
+Mid:
+  label: Mid
+  definition: Mid definition.
+  broader: [Root]
+
+Leaf1:
+  label: Leaf One
+  definition: Leaf one definition.
+  broader: [Mid]
+
+Leaf2:
+  label: Leaf Two
+  definition: Leaf two definition.
+  broader: [Mid]
+
+DirectChild:
+  label: Direct Child
+  definition: A child of Root that is itself a leaf.
+  broader: [Root]

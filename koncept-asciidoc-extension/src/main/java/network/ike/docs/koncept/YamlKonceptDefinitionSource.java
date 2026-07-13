@@ -131,6 +131,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .comments(stringListField(fields, "comments"))
                     .retiredComments(retiredCommentsField(fields, "retiredComments"))
                     .seeAlso(stringListField(fields, "seeAlso"))
+                    .narrative(stringField(fields, "narrative"))
                     .build();
 
             defs.put(identifier, def);

@@ -1,0 +1,20 @@
+# Fixture for KonceptNarrativeBlockMacroTest — a koncept with curated narrative
+# prose that embeds a k: chip reference to a sibling koncept, and one with no
+# narrative field at all.
+
+WithNarrative:
+  label: With Narrative
+  definition: A koncept whose narrative references another koncept.
+  narrative: |
+    This is curated prose. It references k:OtherKoncept[] inline, which must
+    resolve as a real chip after re-parsing, not appear as literal text.
+
+    A second paragraph, to confirm blank-line paragraph breaks survive.
+
+OtherKoncept:
+  label: Other Koncept
+  definition: The koncept referenced from WithNarrative's narrative.
+
+NoNarrative:
+  label: No Narrative
+  definition: A koncept with no narrative field at all.

@@ -29,6 +29,13 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .block(KonceptTreeBlockProcessor.class);
 
+        // The koncept-narrative::Identifier[] block macro: splices a koncept's curated,
+        // long-form narrative field into the document as real AsciiDoc source, re-parsed so
+        // embedded k: chips resolve normally (IKE-Network/ike-issues#879). Safe for all
+        // backends — parseContent is backend-agnostic.
+        asciidoctor.javaExtensionRegistry()
+                .blockMacro(KonceptNarrativeBlockMacro.class);
+
         // Tag [preface]/[appendix] etc. with front-/back-matter roles so the
         // loose-leaf print stylesheet can route them (chapter numbering
         // excludes them, keeping composite folios aligned with section

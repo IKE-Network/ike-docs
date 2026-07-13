@@ -52,6 +52,22 @@ import java.util.regex.Pattern;
  *       glossary cross-reference and the component-kind sigil.</li>
  * </ul>
  *
+ * <p>A line may also be a <em>computed query directive</em> instead of a literal
+ * {@code k:} token — {@code leaves: Identifier} (every leaf descendant, walked
+ * recursively) or {@code children: Identifier} (direct children only) — expanded,
+ * before token parsing, into the equivalent set of {@code k:Identifier[]} lines at
+ * the directive's own indent (so they nest exactly where a literal list of the same
+ * lines would have). Both are computed fresh from the {@code broader} relationship
+ * already in {@code koncepts.yml} ({@link KonceptGraph}) — no separate query data,
+ * just a graph walk over what's already there (IKE-Network/ike-issues#879):
+ * <pre>
+ * [koncept-tree]
+ * ----
+ * k:Axioms[]
+ *   leaves: Axioms
+ * ----
+ * </pre>
+ *
  * <p>The hierarchy is drawn with <em>indentation, not line art</em>: box-drawing connectors
  * ({@code ├─ └─ │}) are exactly what breaks on copy-and-paste (wrong font, collapsed whitespace, a
  * plain-text target), whereas a leading run of fixed-width non-breaking spaces survives. The
@@ -89,6 +105,13 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
     private static final Pattern NAMED = Pattern.compile(
             "^k:\\s*([^\\[\\]=]+?)\\s*(?:\\[(.*)])?$");
 
+    /**
+     * A computed-query directive line: {@code leaves: Identifier} or
+     * {@code children: Identifier}. Group 1 = the directive kind, group 2 = the
+     * koncept identifier to walk from.
+     */
+    private static final Pattern DIRECTIVE = Pattern.compile("^(leaves|children)\\s*:\\s*(\\S+)\\s*$");
+
     /** Non-breaking spaces of indent per nesting level — fixed width, copy-survivable. */
     private static final int NBSP_PER_LEVEL = 3;
     /** The indent character: {@code U+00A0}, which (unlike a plain space) never collapses in HTML. */
@@ -111,7 +134,7 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
     @Override
     public Object process(StructuralNode parent, Reader reader, Map<String, Object> attributes) {
         Document doc = parent.getDocument();
-        List<String> lines = reader.readLines();
+        List<String> lines = expandDirectives(doc, reader.readLines());
         List<ParsedNode> nodes = parse(lines);
         if (nodes.isEmpty()) {
             LOG.debug("koncept-tree: no well-formed token line; rendering raw content as literal");
@@ -130,6 +153,50 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         // Any other backend: the raw tokens as a literal block, so the content is visible, never dropped.
         LOG.debug("koncept-tree: backend {} has no tree projection; emitting literal tokens", backend);
         return createBlock(parent, "literal", lines);
+    }
+
+    /**
+     * Expands every {@code leaves:}/{@code children:} directive line into the
+     * equivalent set of {@code k:Identifier[]} lines at the directive's own indent,
+     * computed fresh from the document's known koncepts' {@code broader} relationship.
+     * Any other line (blank, a literal {@code k:} token, garbage that will fail
+     * {@link #parse}) passes through unchanged.
+     *
+     * @param doc   the document (for {@code koncepts.yml} resolution)
+     * @param lines the raw block lines
+     * @return the lines with every directive expanded
+     */
+    private static List<String> expandDirectives(Document doc, List<String> lines) {
+        KonceptDefinitionSource defSource = KonceptDefinitions.forDocument(doc);
+        Map<String, List<String>> childrenById = null; // built lazily; most blocks have no directive
+        List<String> expanded = new ArrayList<>(lines.size());
+        for (String line : lines) {
+            if (line.isBlank()) {
+                expanded.add(line);
+                continue;
+            }
+            String indent = line.substring(0, line.length() - line.stripLeading().length());
+            Matcher directive = DIRECTIVE.matcher(line.strip());
+            if (!directive.matches()) {
+                expanded.add(line);
+                continue;
+            }
+            if (childrenById == null) {
+                childrenById = KonceptGraph.invertBroader(defSource.identifiers(), defSource);
+            }
+            String kind = directive.group(1);
+            String rootId = directive.group(2);
+            List<String> ids = "leaves".equals(kind)
+                    ? KonceptGraph.leaves(rootId, childrenById)
+                    : childrenById.getOrDefault(rootId, List.of());
+            if (ids.isEmpty()) {
+                LOG.debug("koncept-tree: {} directive for {} produced no results", kind, rootId);
+            }
+            for (String id : ids) {
+                expanded.add(indent + "k:" + id + "[]");
+            }
+        }
+        return expanded;
     }
 
     // ── Parsing (pure; no document access) ──────────────────────────────

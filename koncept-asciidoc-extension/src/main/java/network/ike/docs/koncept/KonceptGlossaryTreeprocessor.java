@@ -106,7 +106,7 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
      * the narrative structure separately.
      */
     private void buildFlat(Document document, Collection<String> allIds, KonceptDefinitionSource defSource) {
-        Map<String, List<String>> childrenById = invertBroader(allIds, defSource);
+        Map<String, List<String>> childrenById = KonceptGraph.invertBroader(allIds, defSource);
         List<String> sortedIds = new ArrayList<>(allIds);
         sortedIds.sort(Comparator.comparing(
                 id -> defSource.lookup(id).map(KonceptDefinition::label).orElse(id),
@@ -136,7 +136,7 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
      * a genuine taxonomy subtree.
      */
     private void buildGrouped(Document document, Collection<String> allIds, KonceptDefinitionSource defSource) {
-        Map<String, List<String>> childrenById = invertBroader(allIds, defSource);
+        Map<String, List<String>> childrenById = KonceptGraph.invertBroader(allIds, defSource);
         Map<String, List<String>> idsBySection = new TreeMap<>();
         for (String id : allIds) {
             String section = defSource.lookup(id).map(KonceptDefinition::section).orElse(null);
@@ -175,17 +175,6 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
         }
 
         LOG.debug("Built {} TOC-visible glossary group(s) covering {} koncepts", groupKeys.size(), allIds.size());
-    }
-
-    /** Inverts every known koncept's {@code broader} parents into a children map. */
-    private static Map<String, List<String>> invertBroader(Collection<String> allIds, KonceptDefinitionSource defSource) {
-        Map<String, List<String>> childrenById = new TreeMap<>();
-        for (String id : allIds) {
-            for (String parent : defSource.lookup(id).map(KonceptDefinition::broader).orElse(List.of())) {
-                childrenById.computeIfAbsent(parent, key -> new ArrayList<>()).add(id);
-            }
-        }
-        return childrenById;
     }
 
     /**
