@@ -18,8 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builds a real, TOC-visible AST section per taxonomy group for the comprehensive
- * ({@code koncept-glossary-all}) glossary mode (IKE-Network/ike-issues#877).
+ * Builds a real, TOC-visible AST section for the comprehensive ({@code koncept-glossary-all})
+ * glossary mode (IKE-Network/ike-issues#877).
  * <p>
  * {@link KonceptGlossaryProcessor} — the pre-existing, referenced-only (default)
  * glossary — is a {@link org.asciidoctor.extension.Postprocessor}: it runs after
@@ -31,12 +31,23 @@ import java.util.regex.Pattern;
  * <p>
  * This treeprocessor runs during tree processing instead, so the {@link Section}
  * nodes it creates here are exactly what Asciidoctor's TOC-builder walks moments
- * later. Every known koncept (from {@link KonceptDefinitionSource#identifiers()})
- * is grouped by its {@code section} field — computed against the live knowledge
- * base by {@code KonceptExtractor} (tinkar-core), not derived here — into one
- * child section per group, nested under one "Koncept Glossary" parent, each
- * titled with its group's own koncept label when the group is a genuine taxonomy
- * subtree, opening with that koncept's own definition as the section's narrative.
+ * later. Two shapes, both covering every known koncept (from
+ * {@link KonceptDefinitionSource#identifiers()}):
+ * <ul>
+ *   <li><b>Default</b> — one flat "Koncept Glossary" section, alphabetical by
+ *   label: a traditional glossary appendix. The intended companion to a
+ *   hand-authored manuscript (separate chapters) that carries the narrative
+ *   structure a reader actually wants — this treeprocessor's job is just
+ *   comprehensive lookup, not organization.</li>
+ *   <li><b>{@code koncept-glossary-grouped}</b> (set alongside
+ *   {@code koncept-glossary-all}) — the original grouped shape: one child
+ *   section per {@code section} field (computed against the live knowledge
+ *   base by {@code KonceptExtractor} in tinkar-core, not derived here), titled
+ *   with its group's own koncept label when the group is a genuine taxonomy
+ *   subtree, opening with that koncept's own definition as the section's
+ *   narrative. Kept as an opt-in for whoever wants taxonomy-shaped browsing
+ *   instead of (or alongside, via a separate render) the flat default.</li>
+ * </ul>
  * <p>
  * No-ops unless {@code koncept-glossary-all} is set, and skips the {@code pdf}
  * (Prawn) and DocBook backends — the HTML5 family first; {@link KonceptGlossaryProcessor}
@@ -80,6 +91,51 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
             return document;
         }
 
+        if (document.hasAttribute("koncept-glossary-grouped")) {
+            buildGrouped(document, allIds, defSource);
+        } else {
+            buildFlat(document, allIds, defSource);
+        }
+        return document;
+    }
+
+    /**
+     * The default shape: one flat "Koncept Glossary" section, every known koncept in
+     * one {@code <dl>}, alphabetical by label — a traditional glossary appendix. No
+     * grouping, no per-entry narrative; a hand-authored manuscript is expected to carry
+     * the narrative structure separately.
+     */
+    private void buildFlat(Document document, Collection<String> allIds, KonceptDefinitionSource defSource) {
+        Map<String, List<String>> childrenById = invertBroader(allIds, defSource);
+        List<String> sortedIds = new ArrayList<>(allIds);
+        sortedIds.sort(Comparator.comparing(
+                id -> defSource.lookup(id).map(KonceptDefinition::label).orElse(id),
+                String.CASE_INSENSITIVE_ORDER));
+
+        Section glossary = createSection(document, 1, true, Map.of());
+        glossary.setTitle("Koncept Glossary");
+        document.append(glossary);
+
+        StringBuilder html = new StringBuilder();
+        html.append("<dl class=\"koncept-definitions\">\n");
+        for (String id : sortedIds) {
+            html.append(KonceptGlossaryEntryRenderer.entryHtml(
+                    id, defSource.lookup(id), null, childrenById, defSource));
+        }
+        html.append("</dl>\n");
+
+        Block block = createBlock(glossary, "pass", html.toString(), Map.of());
+        glossary.append(block);
+
+        LOG.debug("Built flat, alphabetical glossary covering {} koncepts", sortedIds.size());
+    }
+
+    /**
+     * The opt-in shape ({@code koncept-glossary-grouped}): one child section per
+     * {@code section} field, titled and narrated by its root koncept when the group is
+     * a genuine taxonomy subtree.
+     */
+    private void buildGrouped(Document document, Collection<String> allIds, KonceptDefinitionSource defSource) {
         Map<String, List<String>> childrenById = invertBroader(allIds, defSource);
         Map<String, List<String>> idsBySection = new TreeMap<>();
         for (String id : allIds) {
@@ -119,7 +175,6 @@ public final class KonceptGlossaryTreeprocessor extends Treeprocessor {
         }
 
         LOG.debug("Built {} TOC-visible glossary group(s) covering {} koncepts", groupKeys.size(), allIds.size());
-        return document;
     }
 
     /** Inverts every known koncept's {@code broader} parents into a children map. */

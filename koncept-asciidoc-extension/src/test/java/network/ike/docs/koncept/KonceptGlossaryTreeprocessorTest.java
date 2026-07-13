@@ -11,11 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Exercises {@link KonceptGlossaryTreeprocessor}: the grouped,
+ * Exercises {@link KonceptGlossaryTreeprocessor}: the comprehensive
  * {@code koncept-glossary-all} glossary that builds real, TOC-visible AST
  * sections (IKE-Network/ike-issues#877), against the dedicated
  * {@code koncept-glossary-tree-test.yml} fixture (section/since/comments/
  * retiredComments — data the bundled demo {@code koncepts.yml} doesn't have).
+ * Covers both shapes: the default flat/alphabetical glossary, and the opt-in
+ * {@code koncept-glossary-grouped} taxonomy-grouped glossary.
  */
 class KonceptGlossaryTreeprocessorTest {
 
@@ -31,8 +33,34 @@ class KonceptGlossaryTreeprocessorTest {
     }
 
     @Test
-    void groupsAppearAsRealTocVisibleSections() {
-        String html = convertAll("An empty document body.");
+    void defaultModeIsOneFlatAlphabeticalSection() {
+        String html = convertFlat("An empty document body.");
+
+        int tocStart = html.indexOf("id=\"toc\"");
+        assertTrue(tocStart >= 0, "Document should render a table of contents:\n" + html);
+        String toc = html.substring(tocStart, html.indexOf("</div>", html.indexOf("</div>", tocStart) + 1));
+
+        assertTrue(toc.contains("Koncept Glossary"), "TOC should list the glossary section:\n" + toc);
+        assertFalse(toc.contains("Root A") || toc.contains("Root B") || toc.contains("Unclassified Koncepts"),
+                "The default glossary must not be grouped into sub-sections:\n" + toc);
+
+        // Every koncept still gets an entry, just alphabetically (by label) in one <dl>.
+        int rootAIndex = html.indexOf("id=\"koncept-RootA\"");
+        int rootBIndex = html.indexOf("id=\"koncept-RootB\"");
+        int orphanIndex = html.indexOf("id=\"koncept-OrphanKoncept\"");
+        assertTrue(rootAIndex >= 0 && rootBIndex >= 0 && orphanIndex >= 0,
+                "Every koncept should render an entry:\n" + html);
+        // Labels: "Orphan Koncept" < "Root A" < "Root B" alphabetically.
+        assertTrue(orphanIndex < rootAIndex && rootAIndex < rootBIndex,
+                "Entries should be sorted alphabetically by label");
+
+        assertFalse(html.contains("koncept-section-narrative"),
+                "The flat glossary has no per-group narrative to render");
+    }
+
+    @Test
+    void groupedModeIsOptIn() {
+        String html = convertGrouped("An empty document body.");
 
         // Asciidoctor's own TOC is built from the parsed AST during conversion --
         // if these titles appear there, they are real Section nodes the TOC-builder
@@ -50,7 +78,7 @@ class KonceptGlossaryTreeprocessorTest {
 
     @Test
     void memberEntriesGroupedUnderTheirOwnRoot() {
-        String html = convertAll("An empty document body.");
+        String html = convertGrouped("An empty document body.");
 
         int rootAIndex = html.indexOf("id=\"koncept-RootA\"");
         int childA1Index = html.indexOf("id=\"koncept-ChildA1\"");
@@ -67,7 +95,7 @@ class KonceptGlossaryTreeprocessorTest {
 
     @Test
     void sectionNarrativeComesFromTheRootsOwnDefinition() {
-        String html = convertAll("An empty document body.");
+        String html = convertGrouped("An empty document body.");
 
         assertTrue(html.contains("koncept-section-narrative"), "A group narrative block should render");
         assertTrue(html.contains("Definition of root A, used as the group&#8217;s narrative.")
@@ -77,7 +105,7 @@ class KonceptGlossaryTreeprocessorTest {
 
     @Test
     void historyFieldsRenderOnlyWhenPresent() {
-        String html = convertAll("An empty document body.");
+        String html = convertGrouped("An empty document body.");
 
         String childA1Entry = entryHtml(html, "ChildA1");
         assertTrue(childA1Entry.contains("koncept-since") && childA1Entry.contains("2020-01-01T00:00:00Z"),
@@ -122,7 +150,7 @@ class KonceptGlossaryTreeprocessorTest {
                 "An unreferenced koncept must not appear in referenced-only mode");
     }
 
-    private String convertAll(String adoc) {
+    private String convertFlat(String adoc) {
         Options options = Options.builder()
                 .safe(SafeMode.UNSAFE)
                 .backend("html5")
@@ -130,6 +158,20 @@ class KonceptGlossaryTreeprocessorTest {
                         .attribute("toc", "")
                         .attribute("koncept-definitions-classpath", "/koncept-glossary-tree-test.yml")
                         .attribute("koncept-glossary-all", "")
+                        .build())
+                .build();
+        return asciidoctor.convert(adoc, options);
+    }
+
+    private String convertGrouped(String adoc) {
+        Options options = Options.builder()
+                .safe(SafeMode.UNSAFE)
+                .backend("html5")
+                .attributes(Attributes.builder()
+                        .attribute("toc", "")
+                        .attribute("koncept-definitions-classpath", "/koncept-glossary-tree-test.yml")
+                        .attribute("koncept-glossary-all", "")
+                        .attribute("koncept-glossary-grouped", "")
                         .build())
                 .build();
         return asciidoctor.convert(adoc, options);
