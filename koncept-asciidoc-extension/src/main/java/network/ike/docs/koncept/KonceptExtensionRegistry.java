@@ -36,12 +36,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .blockMacro(KonceptNarrativeBlockMacro.class);
 
-        // The koncept-pattern-table::[] block macro: a dedicated "Table of Patterns" index,
-        // one row per kind: pattern koncept, linking to its full shape in the Koncept
-        // Glossary (IKE-Network/ike-issues#880). A plain HTML pass block — safe for the
-        // html5 family; renders as an inert raw-HTML passthrough on other backends.
+        // The koncept-pattern-list::[] block macro: a dedicated "List of Patterns" index —
+        // the "List of Tables"/"List of Figures" book convention, styled like the document's
+        // own table of contents — one entry per kind: pattern koncept, linking to its full
+        // shape in the Koncept Glossary (IKE-Network/ike-issues#880). A plain HTML pass
+        // block — safe for the html5 family; renders as an inert raw-HTML passthrough on
+        // other backends.
         asciidoctor.javaExtensionRegistry()
-                .blockMacro(KonceptPatternTableBlockMacro.class);
+                .blockMacro(KonceptPatternListBlockMacro.class);
 
         // Tag [preface]/[appendix] etc. with front-/back-matter roles so the
         // loose-leaf print stylesheet can route them (chapter numbering

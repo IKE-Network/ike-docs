@@ -201,12 +201,8 @@ final class KonceptGlossaryEntryRenderer {
         html.append("      </tbody>\n    </table>\n");
     }
 
-    /**
-     * Builds one identicon-chip link to a related koncept's glossary entry. Package-visible
-     * so {@link KonceptPatternTableBlockMacro} can render the same chip style in the
-     * "Table of Patterns" index.
-     */
-    static String chipHtml(String relId, KonceptDefinitionSource defSource) {
+    /** Builds one identicon-chip link to a related koncept's glossary entry. */
+    private static String chipHtml(String relId, KonceptDefinitionSource defSource) {
         Optional<KonceptDefinition> relDef = defSource.lookup(relId);
         String relLabel = relDef.map(KonceptDefinition::label)
                 .orElse(KonceptInlineMacro.splitCamelCase(relId));
