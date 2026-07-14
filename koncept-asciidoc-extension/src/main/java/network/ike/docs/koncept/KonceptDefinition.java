@@ -41,6 +41,17 @@ import java.util.List;
  *                        source, including embedded {@code k:} chip references, meant to
  *                        be spliced into a document and re-parsed (see the
  *                        {@code koncept-narrative} block macro), not rendered as flat text
+ * @param referencedComponentMeaning Optional identifier of a {@code kind: pattern} koncept's
+ *                        own referenced-component meaning concept — what a semantic of this
+ *                        pattern's referenced component means (Tinkar's wire schema calls
+ *                        this pair {@code ReferencedComponentMeaning}/{@code Purpose}; the
+ *                        Java entity API calls it {@code semanticMeaning}/{@code Purpose} —
+ *                        both names describe the same field); {@code null} for a concept
+ * @param referencedComponentPurpose Optional identifier of a {@code kind: pattern} koncept's
+ *                        own referenced-component purpose concept; {@code null} for a concept
+ * @param fields          Optional field definitions of a {@code kind: pattern} koncept, in
+ *                        declared order — each field's own meaning, purpose, and data-type
+ *                        koncept identifiers; empty for a concept
  */
 public record KonceptDefinition(
         String identifier,
@@ -57,7 +68,10 @@ public record KonceptDefinition(
         List<String> comments,
         List<RetiredComment> retiredComments,
         List<String> seeAlso,
-        String narrative
+        String narrative,
+        String referencedComponentMeaning,
+        String referencedComponentPurpose,
+        List<PatternField> fields
 ) {
 
     /**
@@ -68,6 +82,17 @@ public record KonceptDefinition(
      * @param retiredAt the time it was superseded by an inactive version
      */
     public record RetiredComment(String text, String retiredAt) {
+    }
+
+    /**
+     * One field of a {@code kind: pattern} koncept: its own meaning, purpose, and data-type
+     * koncept identifiers, in the pattern's own declared field order.
+     *
+     * @param meaning  the field's own meaning koncept identifier
+     * @param purpose  the field's own purpose koncept identifier
+     * @param dataType the field's own data-type koncept identifier
+     */
+    public record PatternField(String meaning, String purpose, String dataType) {
     }
 
     /**
@@ -90,6 +115,9 @@ public record KonceptDefinition(
         private List<RetiredComment> retiredComments;
         private List<String> seeAlso;
         private String narrative;
+        private String referencedComponentMeaning;
+        private String referencedComponentPurpose;
+        private List<PatternField> fields;
 
         /** Creates a new empty builder. */
         public Builder() {
@@ -264,6 +292,41 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets a {@code kind: pattern} koncept's own referenced-component meaning concept
+         * identifier.
+         *
+         * @param referencedComponentMeaning the referenced-component meaning identifier to set
+         * @return this builder
+         */
+        public Builder referencedComponentMeaning(String referencedComponentMeaning) {
+            this.referencedComponentMeaning = referencedComponentMeaning;
+            return this;
+        }
+
+        /**
+         * Sets a {@code kind: pattern} koncept's own referenced-component purpose concept
+         * identifier.
+         *
+         * @param referencedComponentPurpose the referenced-component purpose identifier to set
+         * @return this builder
+         */
+        public Builder referencedComponentPurpose(String referencedComponentPurpose) {
+            this.referencedComponentPurpose = referencedComponentPurpose;
+            return this;
+        }
+
+        /**
+         * Sets a {@code kind: pattern} koncept's own field definitions, in declared order.
+         *
+         * @param fields the field definitions to set
+         * @return this builder
+         */
+        public Builder fields(List<PatternField> fields) {
+            this.fields = fields;
+            return this;
+        }
+
+        /**
          * Builds an immutable {@link KonceptDefinition} from this builder's state.
          *
          * @return the constructed definition
@@ -283,9 +346,10 @@ public record KonceptDefinition(
             List<RetiredComment> retiredCommentsList =
                     retiredComments != null ? List.copyOf(retiredComments) : List.of();
             List<String> seeAlsoList = seeAlso != null ? List.copyOf(seeAlso) : List.of();
+            List<PatternField> fieldsList = fields != null ? List.copyOf(fields) : List.of();
             return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
                     uuidList, kind, broaderList, section, since, commentsList, retiredCommentsList, seeAlsoList,
-                    narrative);
+                    narrative, referencedComponentMeaning, referencedComponentPurpose, fieldsList);
         }
     }
 

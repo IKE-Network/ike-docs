@@ -132,6 +132,9 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .retiredComments(retiredCommentsField(fields, "retiredComments"))
                     .seeAlso(stringListField(fields, "seeAlso"))
                     .narrative(stringField(fields, "narrative"))
+                    .referencedComponentMeaning(stringField(fields, "referencedComponentMeaning"))
+                    .referencedComponentPurpose(stringField(fields, "referencedComponentPurpose"))
+                    .fields(patternFieldsField(fields, "fields"))
                     .build();
 
             defs.put(identifier, def);
@@ -188,6 +191,32 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                 String retiredAt = stringField(retired, "retiredAt");
                 if (text != null) {
                     out.add(new KonceptDefinition.RetiredComment(text, retiredAt));
+                }
+            }
+        }
+        return out.isEmpty() ? null : out;
+    }
+
+    /**
+     * Reads a list of {@code {meaning, purpose, dataType}} maps into
+     * {@link KonceptDefinition.PatternField} records, in declared order. Returns
+     * {@code null} when the field is absent or empty so the builder can apply its default.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<KonceptDefinition.PatternField> patternFieldsField(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (!(val instanceof List<?> list) || list.isEmpty()) {
+            return null;
+        }
+        List<KonceptDefinition.PatternField> out = new ArrayList<>(list.size());
+        for (Object o : list) {
+            if (o instanceof Map<?, ?> entryMap) {
+                Map<String, Object> field = (Map<String, Object>) entryMap;
+                String meaning = stringField(field, "meaning");
+                String purpose = stringField(field, "purpose");
+                String dataType = stringField(field, "dataType");
+                if (meaning != null && purpose != null && dataType != null) {
+                    out.add(new KonceptDefinition.PatternField(meaning, purpose, dataType));
                 }
             }
         }

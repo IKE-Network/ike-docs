@@ -9,7 +9,8 @@ import java.util.Optional;
 /**
  * Renders one koncept's glossary entry as HTML — identicon, definition, axiom,
  * parent/child taxonomy chips, identifiers, and (when present) since/comments/
- * retired-comments/see-also. Shared by {@link KonceptGlossaryProcessor} (the
+ * retired-comments/see-also/referenced-component/fields (the last two present only
+ * for a {@code kind: pattern} koncept). Shared by {@link KonceptGlossaryProcessor} (the
  * referenced-only, default Postprocessor) and {@link KonceptGlossaryTreeprocessor}
  * (the grouped {@code koncept-glossary-all} mode), so the two modes render one
  * koncept identically wherever they overlap.
@@ -70,6 +71,8 @@ final class KonceptGlossaryEntryRenderer {
 
             appendTaxonomyHtml(html, "Parents", def.broader(), defSource);
             appendTaxonomyHtml(html, "Children", childrenById.get(id), defSource);
+            appendReferencedComponentHtml(html, def, defSource);
+            appendPatternFieldsHtml(html, def.fields(), defSource);
 
             if (def.since() != null) {
                 html.append("    <p class=\"koncept-since\"><span class=\"koncept-history-label\">Since:</span> ")
@@ -146,17 +149,74 @@ final class KonceptGlossaryEntryRenderer {
             .append("<span class=\"koncept-taxonomy-label\">").append(heading).append(":</span> ");
         List<String> chips = new ArrayList<>();
         for (String relId : relatedIds) {
-            Optional<KonceptDefinition> relDef = defSource.lookup(relId);
-            String relLabel = relDef.map(KonceptDefinition::label)
-                    .orElse(KonceptInlineMacro.splitCamelCase(relId));
-            String img = htmlIdenticonImg(relDef);
-            chips.add("<a href=\"#koncept-" + escapeHtml(relId)
-                    + "\" class=\"koncept-ref koncept-taxonomy-ref\" style=\"text-decoration:none;"
-                    + "white-space:nowrap;\">" + img + "<span class=\"koncept-taxonomy-name\" "
-                    + "style=\"font-variant:small-caps;color:#2a5a8a;\">" + escapeHtml(relLabel)
-                    + "</span></a>");
+            chips.add(chipHtml(relId, defSource));
         }
         html.append(String.join(" ", chips)).append("</p>\n");
+    }
+
+    /**
+     * Append a "Referenced component" line: the meaning and purpose concepts a semantic
+     * of a {@code kind: pattern} koncept's referenced component carries (Tinkar's wire
+     * schema calls this pair {@code ReferencedComponentMeaning}/{@code Purpose}; the Java
+     * entity API calls the identical field {@code semanticMeaning}/{@code Purpose} — both
+     * names describe the same field). No-op for a concept, where both are {@code null}.
+     */
+    static void appendReferencedComponentHtml(StringBuilder html, KonceptDefinition def,
+                                               KonceptDefinitionSource defSource) {
+        if (def.referencedComponentMeaning() == null && def.referencedComponentPurpose() == null) {
+            return;
+        }
+        html.append("    <p class=\"koncept-referenced-component\">")
+            .append("<span class=\"koncept-taxonomy-label\">Referenced component:</span> ");
+        List<String> parts = new ArrayList<>();
+        if (def.referencedComponentMeaning() != null) {
+            parts.add(roleChip("meaning", def.referencedComponentMeaning(), defSource));
+        }
+        if (def.referencedComponentPurpose() != null) {
+            parts.add(roleChip("purpose", def.referencedComponentPurpose(), defSource));
+        }
+        html.append(String.join(" &middot; ", parts)).append("</p>\n");
+    }
+
+    /**
+     * Append a {@code kind: pattern} koncept's own field definitions — one row per field,
+     * each naming its own meaning, purpose, and data-type koncepts as chips, in declared
+     * order. No-op when the pattern has no resolvable fields.
+     */
+    static void appendPatternFieldsHtml(StringBuilder html, List<KonceptDefinition.PatternField> fields,
+                                         KonceptDefinitionSource defSource) {
+        if (fields == null || fields.isEmpty()) {
+            return;
+        }
+        html.append("    <div class=\"koncept-pattern-fields\">")
+            .append("<span class=\"koncept-history-label\">Fields:</span>\n    <ol>\n");
+        for (KonceptDefinition.PatternField field : fields) {
+            html.append("      <li>")
+                .append(roleChip("meaning", field.meaning(), defSource)).append(' ')
+                .append(roleChip("purpose", field.purpose(), defSource)).append(' ')
+                .append(roleChip("type", field.dataType(), defSource))
+                .append("</li>\n");
+        }
+        html.append("    </ol></div>\n");
+    }
+
+    /** A role label ("meaning"/"purpose"/"type") followed by its concept's identicon chip. */
+    private static String roleChip(String role, String relId, KonceptDefinitionSource defSource) {
+        return "<span class=\"koncept-referenced-component-role\">" + role + "</span> "
+                + chipHtml(relId, defSource);
+    }
+
+    /** Builds one identicon-chip link to a related koncept's glossary entry. */
+    private static String chipHtml(String relId, KonceptDefinitionSource defSource) {
+        Optional<KonceptDefinition> relDef = defSource.lookup(relId);
+        String relLabel = relDef.map(KonceptDefinition::label)
+                .orElse(KonceptInlineMacro.splitCamelCase(relId));
+        String img = htmlIdenticonImg(relDef);
+        return "<a href=\"#koncept-" + escapeHtml(relId)
+                + "\" class=\"koncept-ref koncept-taxonomy-ref\" style=\"text-decoration:none;"
+                + "white-space:nowrap;\">" + img + "<span class=\"koncept-taxonomy-name\" "
+                + "style=\"font-variant:small-caps;color:#2a5a8a;\">" + escapeHtml(relLabel)
+                + "</span></a>";
     }
 
     static String escapeHtml(String s) {

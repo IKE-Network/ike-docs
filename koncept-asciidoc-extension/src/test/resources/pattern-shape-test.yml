@@ -1,0 +1,36 @@
+# Fixture for pattern meaning/purpose/referencedComponent/fields tests
+# (IKE-Network/ike-issues#880).
+
+TestPattern:
+  label: Test Pattern
+  kind: pattern
+  referencedComponentMeaning: TestMeaning
+  referencedComponentPurpose: TestPurpose
+  fields:
+    - meaning: FieldOneMeaning
+      purpose: FieldOnePurpose
+      dataType: FieldOneType
+    - meaning: FieldTwoMeaning
+      purpose: FieldTwoPurpose
+      dataType: FieldTwoType
+
+PlainConcept:
+  label: Plain Concept
+  definition: A concept, not a pattern -- carries none of the pattern-specific fields.
+
+TestMeaning:
+  label: Test Meaning
+TestPurpose:
+  label: Test Purpose
+FieldOneMeaning:
+  label: Field One Meaning
+FieldOnePurpose:
+  label: Field One Purpose
+FieldOneType:
+  label: Field One Type
+FieldTwoMeaning:
+  label: Field Two Meaning
+FieldTwoPurpose:
+  label: Field Two Purpose
+FieldTwoType:
+  label: Field Two Type
