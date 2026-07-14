@@ -53,11 +53,12 @@ class KonceptPatternShapeTest {
         String html = KonceptGlossaryEntryRenderer.entryHtml(
                 "TestPattern", Optional.of(def), null, Map.of(), source);
 
-        assertTrue(html.contains("koncept-referenced-component"), "must render the referenced-component line:\n" + html);
+        assertTrue(html.contains("koncept-pattern-shape"), "must render the pattern-shape table:\n" + html);
+        assertTrue(html.contains("koncept-pattern-referenced-component"),
+                "must render the referenced-component row:\n" + html);
         assertTrue(html.contains("#koncept-TestMeaning"), "must link to the referenced-component meaning koncept:\n" + html);
         assertTrue(html.contains("#koncept-TestPurpose"), "must link to the referenced-component purpose koncept:\n" + html);
 
-        assertTrue(html.contains("koncept-pattern-fields"), "must render the fields list:\n" + html);
         assertTrue(html.contains("#koncept-FieldOneMeaning") && html.contains("#koncept-FieldOnePurpose")
                         && html.contains("#koncept-FieldOneType"),
                 "must link to the first field's meaning/purpose/dataType koncepts:\n" + html);
@@ -74,9 +75,7 @@ class KonceptPatternShapeTest {
         String html = KonceptGlossaryEntryRenderer.entryHtml(
                 "PlainConcept", Optional.of(def), null, Map.of(), source);
 
-        assertFalse(html.contains("koncept-referenced-component"),
-                "a plain concept must not render a referenced-component line:\n" + html);
-        assertFalse(html.contains("koncept-pattern-fields"),
-                "a plain concept must not render a fields list:\n" + html);
+        assertFalse(html.contains("koncept-pattern-shape"),
+                "a plain concept must not render a pattern-shape table:\n" + html);
     }
 }

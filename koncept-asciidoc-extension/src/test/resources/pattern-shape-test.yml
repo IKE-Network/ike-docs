@@ -14,6 +14,12 @@ TestPattern:
       purpose: FieldTwoPurpose
       dataType: FieldTwoType
 
+AnotherPattern:
+  label: Another Pattern
+  kind: pattern
+  referencedComponentMeaning: TestMeaning
+  referencedComponentPurpose: TestPurpose
+
 PlainConcept:
   label: Plain Concept
   definition: A concept, not a pattern -- carries none of the pattern-specific fields.
