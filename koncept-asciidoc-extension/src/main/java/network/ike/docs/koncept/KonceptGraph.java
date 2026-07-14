@@ -68,4 +68,47 @@ final class KonceptGraph {
             collectLeaves(child, childrenById, out, visited);
         }
     }
+
+    /**
+     * Every descendant of {@code rootId}, not including {@code rootId} itself — nodes
+     * reachable by following {@code childrenById}, at any depth. A node with a cyclic
+     * {@code broader} chain is visited at most once, so a data error degrades to an
+     * incomplete list rather than an infinite walk.
+     *
+     * @param rootId       the koncept identifier to walk descendants from
+     * @param childrenById the children map, as built by {@link #invertBroader}
+     * @return every descendant, in a depth-first, first-seen order
+     */
+    static List<String> descendants(String rootId, Map<String, List<String>> childrenById) {
+        List<String> out = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        visited.add(rootId);
+        collectDescendants(rootId, childrenById, out, visited);
+        return out;
+    }
+
+    private static void collectDescendants(String id, Map<String, List<String>> childrenById,
+                                            List<String> out, Set<String> visited) {
+        for (String child : childrenById.getOrDefault(id, List.of())) {
+            if (visited.add(child)) {
+                out.add(child);
+                collectDescendants(child, childrenById, out, visited);
+            }
+        }
+    }
+
+    /**
+     * {@code rootId} itself plus every one of its descendants — Tinkar's own "kind of"
+     * relation.
+     *
+     * @param rootId       the koncept identifier
+     * @param childrenById the children map, as built by {@link #invertBroader}
+     * @return {@code rootId} followed by every descendant, in a depth-first, first-seen order
+     */
+    static List<String> kindOf(String rootId, Map<String, List<String>> childrenById) {
+        List<String> out = new ArrayList<>();
+        out.add(rootId);
+        out.addAll(descendants(rootId, childrenById));
+        return out;
+    }
 }

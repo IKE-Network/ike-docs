@@ -54,7 +54,10 @@ import java.util.regex.Pattern;
  *
  * <p>A line may also be a <em>computed query directive</em> instead of a literal
  * {@code k:} token — {@code leaves: Identifier} (every leaf descendant, walked
- * recursively) or {@code children: Identifier} (direct children only) — expanded,
+ * recursively), {@code children: Identifier} (direct children only),
+     * {@code descendants: Identifier} (every descendant at any depth, not including the
+     * identifier itself), or {@code kindof: Identifier} (the identifier itself plus every
+     * descendant — Tinkar's own "kind of" relation) — expanded,
  * before token parsing, into the equivalent set of {@code k:Identifier[]} lines at
  * the directive's own indent (so they nest exactly where a literal list of the same
  * lines would have). Both are computed fresh from the {@code broader} relationship
@@ -106,11 +109,12 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
             "^k:\\s*([^\\[\\]=]+?)\\s*(?:\\[(.*)])?$");
 
     /**
-     * A computed-query directive line: {@code leaves: Identifier} or
-     * {@code children: Identifier}. Group 1 = the directive kind, group 2 = the
-     * koncept identifier to walk from.
+     * A computed-query directive line: {@code leaves: Identifier}, {@code children: Identifier},
+     * {@code descendants: Identifier}, or {@code kindof: Identifier}. Group 1 = the directive
+     * kind, group 2 = the koncept identifier to walk from.
      */
-    private static final Pattern DIRECTIVE = Pattern.compile("^(leaves|children)\\s*:\\s*(\\S+)\\s*$");
+    private static final Pattern DIRECTIVE =
+            Pattern.compile("^(leaves|children|descendants|kindof)\\s*:\\s*(\\S+)\\s*$");
 
     /** Non-breaking spaces of indent per nesting level — fixed width, copy-survivable. */
     private static final int NBSP_PER_LEVEL = 3;
@@ -156,9 +160,10 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
     }
 
     /**
-     * Expands every {@code leaves:}/{@code children:} directive line into the
-     * equivalent set of {@code k:Identifier[]} lines at the directive's own indent,
-     * computed fresh from the document's known koncepts' {@code broader} relationship.
+     * Expands every {@code leaves:}/{@code children:}/{@code descendants:}/{@code kindof:}
+     * directive line into the equivalent set of {@code k:Identifier[]} lines at the
+     * directive's own indent, computed fresh from the document's known koncepts'
+     * {@code broader} relationship.
      * Any other line (blank, a literal {@code k:} token, garbage that will fail
      * {@link #parse}) passes through unchanged.
      *
@@ -186,9 +191,12 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
             }
             String kind = directive.group(1);
             String rootId = directive.group(2);
-            List<String> ids = "leaves".equals(kind)
-                    ? KonceptGraph.leaves(rootId, childrenById)
-                    : childrenById.getOrDefault(rootId, List.of());
+            List<String> ids = switch (kind) {
+                case "leaves" -> KonceptGraph.leaves(rootId, childrenById);
+                case "descendants" -> KonceptGraph.descendants(rootId, childrenById);
+                case "kindof" -> KonceptGraph.kindOf(rootId, childrenById);
+                default -> childrenById.getOrDefault(rootId, List.of()); // "children"
+            };
             if (ids.isEmpty()) {
                 LOG.debug("koncept-tree: {} directive for {} produced no results", kind, rootId);
             }

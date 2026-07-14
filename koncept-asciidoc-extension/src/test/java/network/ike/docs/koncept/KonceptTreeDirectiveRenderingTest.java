@@ -10,10 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Exercises the {@code leaves:}/{@code children:} computed-query directives inside a
- * {@code [koncept-tree]} block (IKE-Network/ike-issues#879): a directive line expands,
- * before token parsing, into the equivalent {@code k:Identifier[]} lines, computed
- * fresh from the {@code broader} relationship already in {@code koncepts.yml}.
+ * Exercises the {@code leaves:}/{@code children:}/{@code descendants:}/{@code kindof:}
+ * computed-query directives inside a {@code [koncept-tree]} block
+ * (IKE-Network/ike-issues#879, #880): a directive line expands, before token parsing,
+ * into the equivalent {@code k:Identifier[]} lines, computed fresh from the
+ * {@code broader} relationship already in {@code koncepts.yml}.
  */
 class KonceptTreeDirectiveRenderingTest {
 
@@ -59,6 +60,38 @@ class KonceptTreeDirectiveRenderingTest {
         assertTrue(html.contains("Direct Child"), "DirectChild is a direct child of Root");
         assertFalse(html.contains("Leaf One"), "Leaf1 is a grandchild, not a direct child of Root");
         assertFalse(html.contains("Leaf Two"), "Leaf2 is a grandchild, not a direct child of Root");
+    }
+
+    @Test
+    void descendantsDirective_walksRecursivelyButExcludesRootItself() {
+        String html = convert("""
+                [koncept-tree]
+                ----
+                k:Mid[]
+                  descendants: Root
+                ----
+                """);
+
+        assertTrue(html.contains("Mid"), "Mid is a descendant of Root");
+        assertTrue(html.contains("Direct Child"), "DirectChild is a descendant of Root");
+        assertTrue(html.contains("Leaf One"), "Leaf1 is a descendant of Root (grandchild)");
+        assertTrue(html.contains("Leaf Two"), "Leaf2 is a descendant of Root (grandchild)");
+    }
+
+    @Test
+    void kindOfDirective_includesTheAnchorItself() {
+        String html = convert("""
+                [koncept-tree]
+                ----
+                k:Leaf1[]
+                  kindof: Mid
+                ----
+                """);
+
+        assertTrue(html.contains(">Mid<"), "kindof: includes the anchor concept itself");
+        assertTrue(html.contains("Leaf One"), "Leaf1 is a descendant of Mid");
+        assertTrue(html.contains("Leaf Two"), "Leaf2 is a descendant of Mid");
+        assertFalse(html.contains("Direct Child"), "DirectChild is not kind-of Mid (it's under Root)");
     }
 
     @Test
