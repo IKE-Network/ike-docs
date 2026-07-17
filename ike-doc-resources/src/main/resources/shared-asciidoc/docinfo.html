@@ -130,6 +130,19 @@ a.koncept-ref:hover svg {
     filter: brightness(0.85);
 }
 
+/* Pattern-shape tables (koncept-pattern-table:: block macro): Model Feature
+   label rows and e.g. example rows are muted grey; example rows indent under
+   their feature's badge row. Both are italic via their cells' own e style. */
+table.koncept-pattern-table .koncept-model-feature {
+    color: #6a737d;
+}
+
+table.koncept-pattern-table .koncept-feature-example {
+    color: #6a737d;
+    display: inline-block;
+    padding-left: 1.25em;
+}
+
 /* Glossary section */
 .koncept-glossary-section {
     margin-top: 2em;

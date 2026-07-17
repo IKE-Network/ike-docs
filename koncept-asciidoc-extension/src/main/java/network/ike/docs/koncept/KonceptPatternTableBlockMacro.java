@@ -52,8 +52,9 @@ import java.util.Optional;
  * 0-indexed storage; the referenced component is never numbered because it is not part
  * of the fields array at either the schema or the instance level. The
  * {@code koncept-pattern-table}, {@code koncept-model-feature}, and
- * {@code koncept-feature-example} roles are stylesheet hooks; without CSS the label and
- * example rows still read correctly as italic.
+ * {@code koncept-feature-example} roles are stylesheet hooks — the shared
+ * {@code ike-doc-resources} docinfo mutes and indents them; without that CSS the label
+ * and example rows still read correctly as italic.
  * <p>
  * A target with no pattern shape (a plain concept, or an unknown identifier) renders a
  * visible placeholder rather than silently vanishing, matching the
@@ -108,13 +109,13 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
         lines.add("");
 
         appendModelFeature(lines,
-                "[.koncept-model-feature]#Referenced component# — the component (concept, "
-                        + "semantic, pattern, or STAMP) this pattern's semantics attach to",
+                "[.koncept-model-feature]##Referenced component — the component (concept, "
+                        + "semantic, pattern, or STAMP) this pattern's semantics attach to##",
                 def.referencedComponentMeaning(), def.referencedComponentPurpose(), null,
                 def.referencedComponentExample(), defSource);
         int displayIndex = 1;
         for (KonceptDefinition.PatternField field : def.fields()) {
-            appendModelFeature(lines, "[.koncept-model-feature]#Field " + displayIndex++ + "#",
+            appendModelFeature(lines, "[.koncept-model-feature]##Field " + displayIndex++ + "##",
                     field.meaning(), field.purpose(), field.dataType(), field.example(), defSource);
         }
 
@@ -144,7 +145,8 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
         lines.add("| " + badgeOrDash(meaning) + " | " + badgeOrDash(purpose)
                 + " | " + badgeOrDash(dataType));
         if (example != null && !example.isBlank()) {
-            lines.add("3+e| [.koncept-feature-example]#e.g.# " + exampleCell(example, defSource));
+            lines.add("3+e| [.koncept-feature-example]##e.g. "
+                    + exampleCell(example, defSource) + "##");
         }
         lines.add("");
     }
