@@ -134,6 +134,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .narrative(stringField(fields, "narrative"))
                     .referencedComponentMeaning(stringField(fields, "referencedComponentMeaning"))
                     .referencedComponentPurpose(stringField(fields, "referencedComponentPurpose"))
+                    .referencedComponentExample(stringField(fields, "referencedComponentExample"))
                     .fields(patternFieldsField(fields, "fields"))
                     .build();
 
@@ -215,8 +216,9 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                 String meaning = stringField(field, "meaning");
                 String purpose = stringField(field, "purpose");
                 String dataType = stringField(field, "dataType");
+                String example = stringField(field, "example");
                 if (meaning != null && purpose != null && dataType != null) {
-                    out.add(new KonceptDefinition.PatternField(meaning, purpose, dataType));
+                    out.add(new KonceptDefinition.PatternField(meaning, purpose, dataType, example));
                 }
             }
         }

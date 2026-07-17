@@ -30,10 +30,24 @@ class KonceptPatternShapeTest {
 
         List<KonceptDefinition.PatternField> fields = def.fields();
         assertEquals(2, fields.size());
-        assertEquals(new KonceptDefinition.PatternField("FieldOneMeaning", "FieldOnePurpose", "FieldOneType"),
+        assertEquals(new KonceptDefinition.PatternField("FieldOneMeaning", "FieldOnePurpose", "FieldOneType", null),
                 fields.get(0));
-        assertEquals(new KonceptDefinition.PatternField("FieldTwoMeaning", "FieldTwoPurpose", "FieldTwoType"),
+        assertEquals(new KonceptDefinition.PatternField("FieldTwoMeaning", "FieldTwoPurpose", "FieldTwoType", null),
                 fields.get(1));
+    }
+
+    @Test
+    void patternExampleValuesParseCorrectly() {
+        // A dedicated fixture (not pattern-shape-test.yml): KonceptPatternListBlockMacroTest
+        // asserts an exact pattern count/order against that shared file.
+        KonceptDefinition def = KonceptDefinitionSource.fromClasspath("/pattern-shape-example-test.yml")
+                .lookup("PatternWithExample").orElseThrow();
+
+        assertEquals("ExampleTestMeaning", def.referencedComponentExample());
+
+        List<KonceptDefinition.PatternField> fields = def.fields();
+        assertEquals("ExampleFieldOneMeaning", fields.get(0).example());
+        assertEquals("a literal example value", fields.get(1).example());
     }
 
     @Test

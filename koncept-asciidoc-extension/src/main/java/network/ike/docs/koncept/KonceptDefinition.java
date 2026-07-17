@@ -49,6 +49,10 @@ import java.util.List;
  *                        both names describe the same field); {@code null} for a concept
  * @param referencedComponentPurpose Optional identifier of a {@code kind: pattern} koncept's
  *                        own referenced-component purpose concept; {@code null} for a concept
+ * @param referencedComponentExample Optional referenced component of a real, deterministically
+ *                        chosen semantic of this pattern already in the knowledge base — a
+ *                        koncept identifier when it resolves to one, otherwise its plain display
+ *                        text; {@code null} for a concept, or for a pattern with no semantics yet
  * @param fields          Optional field definitions of a {@code kind: pattern} koncept, in
  *                        declared order — each field's own meaning, purpose, and data-type
  *                        koncept identifiers; empty for a concept
@@ -71,6 +75,7 @@ public record KonceptDefinition(
         String narrative,
         String referencedComponentMeaning,
         String referencedComponentPurpose,
+        String referencedComponentExample,
         List<PatternField> fields
 ) {
 
@@ -91,8 +96,12 @@ public record KonceptDefinition(
      * @param meaning  the field's own meaning koncept identifier
      * @param purpose  the field's own purpose koncept identifier
      * @param dataType the field's own data-type koncept identifier
+     * @param example  this field's actual value on the same example semantic used for
+     *                 {@link KonceptDefinition#referencedComponentExample()} — a koncept
+     *                 identifier if the value resolves to one, otherwise its plain display
+     *                 text — or {@code null} if no example semantic was found
      */
-    public record PatternField(String meaning, String purpose, String dataType) {
+    public record PatternField(String meaning, String purpose, String dataType, String example) {
     }
 
     /**
@@ -117,6 +126,7 @@ public record KonceptDefinition(
         private String narrative;
         private String referencedComponentMeaning;
         private String referencedComponentPurpose;
+        private String referencedComponentExample;
         private List<PatternField> fields;
 
         /** Creates a new empty builder. */
@@ -316,6 +326,18 @@ public record KonceptDefinition(
         }
 
         /**
+         * Sets a {@code kind: pattern} koncept's referenced-component example — the referenced
+         * component of a real semantic of this pattern already in the knowledge base.
+         *
+         * @param referencedComponentExample the referenced-component example to set
+         * @return this builder
+         */
+        public Builder referencedComponentExample(String referencedComponentExample) {
+            this.referencedComponentExample = referencedComponentExample;
+            return this;
+        }
+
+        /**
          * Sets a {@code kind: pattern} koncept's own field definitions, in declared order.
          *
          * @param fields the field definitions to set
@@ -349,7 +371,8 @@ public record KonceptDefinition(
             List<PatternField> fieldsList = fields != null ? List.copyOf(fields) : List.of();
             return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
                     uuidList, kind, broaderList, section, since, commentsList, retiredCommentsList, seeAlsoList,
-                    narrative, referencedComponentMeaning, referencedComponentPurpose, fieldsList);
+                    narrative, referencedComponentMeaning, referencedComponentPurpose,
+                    referencedComponentExample, fieldsList);
         }
     }
 

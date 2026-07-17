@@ -1,0 +1,36 @@
+# Dedicated fixture for referencedComponentExample/PatternField.example parsing
+# (IKE-Network/ike-issues#883) -- deliberately separate from pattern-shape-test.yml, which
+# KonceptPatternListBlockMacroTest also loads and asserts an exact pattern count/order against.
+
+PatternWithExample:
+  label: Pattern With Example
+  kind: pattern
+  referencedComponentMeaning: ExampleTestMeaning
+  referencedComponentPurpose: ExampleTestPurpose
+  referencedComponentExample: ExampleTestMeaning
+  fields:
+    - meaning: ExampleFieldOneMeaning
+      purpose: ExampleFieldOnePurpose
+      dataType: ExampleFieldOneType
+      example: ExampleFieldOneMeaning
+    - meaning: ExampleFieldTwoMeaning
+      purpose: ExampleFieldTwoPurpose
+      dataType: ExampleFieldTwoType
+      example: "a literal example value"
+
+ExampleTestMeaning:
+  label: Example Test Meaning
+ExampleTestPurpose:
+  label: Example Test Purpose
+ExampleFieldOneMeaning:
+  label: Example Field One Meaning
+ExampleFieldOnePurpose:
+  label: Example Field One Purpose
+ExampleFieldOneType:
+  label: Example Field One Type
+ExampleFieldTwoMeaning:
+  label: Example Field Two Meaning
+ExampleFieldTwoPurpose:
+  label: Example Field Two Purpose
+ExampleFieldTwoType:
+  label: Example Field Two Type
