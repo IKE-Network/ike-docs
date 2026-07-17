@@ -23,6 +23,17 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .inlineMacro(KonceptInlineMacro.class);
 
+        // The koncept-identicon-figure::Target[] and koncept-badge-anatomy::Target[] block
+        // macros: real, captioned figures (per the image standards — block title + alt text)
+        // rendered at conversion time from the same primitives the badges use — the LifeHash
+        // identicon and the KonceptKind sigil data — for front matter that teaches the badge
+        // language (ike-issues#883). Safe for all backends: data URIs on the html family,
+        // content-addressed PNG files on DocBook/Prawn.
+        asciidoctor.javaExtensionRegistry()
+                .blockMacro(KonceptIdenticonFigureBlockMacro.class);
+        asciidoctor.javaExtensionRegistry()
+                .blockMacro(KonceptBadgeAnatomyBlockMacro.class);
+
         // The koncept-sigil:kind[] inline macro: a component-kind sigil on its own (amber D,
         // green S, violet P, the grey stamp pentagon, red ?) rendered from the same locked
         // KonceptKind/StampSigilGeometry data as the badges — for prose that talks about the
