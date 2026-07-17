@@ -129,6 +129,27 @@ public final class KonceptSvgRenderer {
      * @return complete SVG+anchor HTML string for the stamp pentagon + compact text
      */
     public static String renderStampSigil(String target, String label) {
+        return """
+            <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s">%s</a>\
+            """.formatted(escapeHtml(target), escapeHtml(label), stampChipSvg(label, true))
+                .strip();
+    }
+
+    /**
+     * Render a stamp chip as a <em>specimen</em> — the pentagon and compact provenance
+     * text, exactly as {@link #renderStampSigil(String, String)} draws them, but with no
+     * anchor: for prose that shows what a stamp badge looks like (a "How to Read This
+     * Guide" front matter) rather than referencing a glossary-curated component.
+     *
+     * @param label the compact stamp text ({@code status · date-time · author}), verbatim
+     * @return the stamp chip SVG, unlinked
+     */
+    public static String renderStampSpecimen(String label) {
+        return stampChipSvg(label, false);
+    }
+
+    /** The stamp chip SVG — gray chip, locked pentagon, compact provenance text. */
+    private static String stampChipSvg(String label, boolean linked) {
         double centerX = PADDING_X + STAMP_BOX / 2.0;
         double centerY = HEIGHT / 2.0;
         double unitRadius = (STAMP_BOX / 2.0) * STAMP_RADIUS_FRACTION;
@@ -138,16 +159,14 @@ public final class KonceptSvgRenderer {
         int totalWidth = textX + labelWidth + PADDING_X;
 
         return """
-            <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s">\
             <svg xmlns="http://www.w3.org/2000/svg" class="koncept-stamp" width="%d" height="%d" \
-            style="display:inline-block;vertical-align:middle;cursor:pointer;">\
+            style="display:inline-block;vertical-align:middle;%s">\
             <rect rx="%d" ry="%d" width="%d" height="%d" fill="%s"/>\
             %s\
             <text x="%d" y="%d" fill="%s" font-size="%d" font-family="%s">%s</text>\
-            </svg></a>\
+            </svg>\
             """.formatted(
-                escapeHtml(target), escapeHtml(label),
-                totalWidth, HEIGHT,
+                totalWidth, HEIGHT, linked ? "cursor:pointer;" : "",
                 CORNER_RADIUS, CORNER_RADIUS, totalWidth, HEIGHT, STAMP_CHIP_COLOR,
                 pentagonMarkup(centerX, centerY, unitRadius),
                 textX, TEXT_BASELINE_Y, STAMP_TEXT_COLOR, FONT_SIZE, FONT_FAMILY, escapeHtml(label)

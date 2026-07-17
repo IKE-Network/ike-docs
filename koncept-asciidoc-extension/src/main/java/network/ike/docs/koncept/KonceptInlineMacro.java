@@ -257,11 +257,42 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     }
 
     private String escapeXml(String s) {
+        return escapeXmlStatic(s);
+    }
+
+    private static String escapeXmlStatic(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
+    }
+
+    /**
+     * A specimen chip for a letter-glyph component kind: the kind's sigil and a label in
+     * the same soft chip the identicon badges use, but unlinked and with no identicon —
+     * for prose that shows what a badge of this kind looks like (a "How to Read This
+     * Guide" front matter) without claiming a reference to a curated component. Stamps
+     * render via {@link KonceptSvgRenderer#renderStampSpecimen(String)} instead.
+     *
+     * @param kind  the component kind whose sigil leads the chip
+     * @param label the specimen's display text
+     * @return the chip HTML, unlinked
+     */
+    static String renderSpecimenChip(KonceptKind kind, String label) {
+        String sigil = kind.hasLetterGlyph()
+                ? "<span class=\"koncept-sigil koncept-sigil-%s\" "
+                        .formatted(kind.name().toLowerCase(java.util.Locale.ROOT))
+                        + "style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
+                        .formatted(kind.colorHex(), escapeXmlStatic(kind.glyph()))
+                : "";
+        return """
+            <span class="koncept-chip koncept-specimen" style="display:inline;background:#e9eff6;\
+            border-radius:0.5em;padding:0.12em 0.45em;\
+            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
+            %s<span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
+            letter-spacing:0.02em;">%s</span></span>\
+            """.formatted(sigil, escapeXmlStatic(label)).strip();
     }
 
     /**

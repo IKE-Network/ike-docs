@@ -36,6 +36,22 @@ import java.util.Map;
  * sigil ("concept bare, everything else marked", ike-issues#638) and renders nothing, with
  * a warning. On non-HTML backends the sigil degrades to its letter glyph, or the kind
  * name for the pentagon.
+ * <p>
+ * With a bracket label the macro renders a <em>specimen badge</em> instead of the bare
+ * sigil — the full badge form of that kind carrying the given text, unlinked and with no
+ * identicon, because a specimen shows what a badge of the kind looks like without
+ * claiming a reference to a curated component:
+ * <pre>
+ * koncept-sigil:description[Uninitialized Component (SOLOR)]
+ * koncept-sigil:semantic[Gretel]
+ * koncept-sigil:stamp[Active · Inception · Tinkar Starter Data Author]
+ * </pre>
+ * Letter kinds render the badge chip (sigil + small-caps label) via
+ * {@link KonceptInlineMacro#renderSpecimenChip(KonceptKind, String)}; a stamp renders the
+ * pentagon-and-provenance chip via
+ * {@link KonceptSvgRenderer#renderStampSpecimen(String)}. Keep specimen text real —
+ * drawn from actual knowledge-base content — so the guide never illustrates with
+ * invented values.
  */
 @Name("koncept-sigil")
 public class KonceptSigilInlineMacro extends InlineMacroProcessor {
@@ -60,11 +76,23 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
 
         Document doc = parent.getDocument();
         String backend = doc.getAttribute("backend", "html5").toString();
+        Object bracket = attributes.get("1");
+        String label = bracket != null && !bracket.toString().isBlank()
+                ? bracket.toString().strip() : null;
+
         if (backend.startsWith("html")) {
-            return createPhraseNode(parent, "quoted",
-                    KonceptSvgRenderer.renderSigil(kind), Map.of("subs", ":none"));
+            String rendered;
+            if (label == null) {
+                rendered = KonceptSvgRenderer.renderSigil(kind);
+            } else if (kind.isStamp()) {
+                rendered = KonceptSvgRenderer.renderStampSpecimen(label);
+            } else {
+                rendered = KonceptInlineMacro.renderSpecimenChip(kind, label);
+            }
+            return createPhraseNode(parent, "quoted", rendered, Map.of("subs", ":none"));
         }
-        String fallback = kind.hasLetterGlyph() ? kind.glyph() : kind.accessibleName();
+        String glyph = kind.hasLetterGlyph() ? kind.glyph() : kind.accessibleName();
+        String fallback = label == null ? glyph : glyph + " " + label;
         return createPhraseNode(parent, "quoted", fallback, Map.of("subs", ":none"));
     }
 }

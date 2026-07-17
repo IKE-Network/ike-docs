@@ -64,6 +64,29 @@ class KonceptSigilInlineMacroTest {
     }
 
     @Test
+    void bracketLabelRendersASpecimenChipNotABareSigil() {
+        String html = convert("koncept-sigil:description[Uninitialized Component (SOLOR)]");
+
+        assertTrue(html.contains("koncept-specimen"), "a labeled sigil is a specimen chip:\n" + html);
+        assertTrue(html.contains("#b8860b") && html.contains(">D</span>"),
+                "…leading with the kind's sigil:\n" + html);
+        assertTrue(html.contains("Uninitialized Component (SOLOR)"),
+                "…carrying the given label:\n" + html);
+        assertFalse(html.contains("<a "), "a specimen is unlinked — it references nothing:\n" + html);
+        assertFalse(html.contains("<img"), "…and has no identicon, having no identity:\n" + html);
+    }
+
+    @Test
+    void stampSpecimenRendersThePentagonChipWithProvenanceText() {
+        String html = convert("koncept-sigil:stamp[Active · Inception · Tinkar Starter Data Author]");
+
+        assertTrue(html.contains("<polygon"), "the stamp specimen carries the locked pentagon:\n" + html);
+        assertTrue(html.contains("Active · Inception · Tinkar Starter Data Author"),
+                "…and the verbatim provenance text:\n" + html);
+        assertFalse(html.contains("<a "), "a specimen is unlinked:\n" + html);
+    }
+
+    @Test
     void bareConceptRendersNothing() {
         String html = convert("before koncept-sigil:concept[] after");
 
