@@ -133,6 +133,79 @@ public final class KonceptSvgRenderer {
         double centerY = HEIGHT / 2.0;
         double unitRadius = (STAMP_BOX / 2.0) * STAMP_RADIUS_FRACTION;
 
+        int labelWidth = (int) Math.ceil(label.length() * CHAR_WIDTH);
+        int textX = PADDING_X + STAMP_BOX + 6;
+        int totalWidth = textX + labelWidth + PADDING_X;
+
+        return """
+            <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s">\
+            <svg xmlns="http://www.w3.org/2000/svg" class="koncept-stamp" width="%d" height="%d" \
+            style="display:inline-block;vertical-align:middle;cursor:pointer;">\
+            <rect rx="%d" ry="%d" width="%d" height="%d" fill="%s"/>\
+            %s\
+            <text x="%d" y="%d" fill="%s" font-size="%d" font-family="%s">%s</text>\
+            </svg></a>\
+            """.formatted(
+                escapeHtml(target), escapeHtml(label),
+                totalWidth, HEIGHT,
+                CORNER_RADIUS, CORNER_RADIUS, totalWidth, HEIGHT, STAMP_CHIP_COLOR,
+                pentagonMarkup(centerX, centerY, unitRadius),
+                textX, TEXT_BASELINE_Y, STAMP_TEXT_COLOR, FONT_SIZE, FONT_FAMILY, escapeHtml(label)
+        ).strip();
+    }
+
+    /**
+     * Render a component-kind sigil on its own — no badge pill, no anchor, no name — as
+     * standalone inline SVG from the same locked constants the badge renderers use
+     * ({@link KonceptKind}'s glyph/colour data and the {@link StampSigilGeometry}
+     * pentagon), so a sigil shown in prose can never drift from the sigil shown in a
+     * badge. Carries the kind's {@link KonceptKind#accessibleName()} as the SVG
+     * {@code <title>} for assistive technology.
+     *
+     * @param kind the component kind; {@code null} is treated as {@link KonceptKind#CONCEPT}
+     * @return the sigil SVG, or an empty string for the bare {@link KonceptKind#CONCEPT},
+     *         which by design shows no sigil
+     */
+    public static String renderSigil(KonceptKind kind) {
+        KonceptKind resolved = (kind == null) ? KonceptKind.CONCEPT : kind;
+        if (resolved.isBare()) {
+            return "";
+        }
+        String title = "<title>" + escapeHtml(resolved.accessibleName()) + " kind sigil</title>";
+        if (resolved.isStamp()) {
+            double center = HEIGHT / 2.0;
+            double unitRadius = (STAMP_BOX / 2.0) * STAMP_RADIUS_FRACTION;
+            return """
+                <svg xmlns="http://www.w3.org/2000/svg" class="koncept-sigil" role="img" \
+                width="%d" height="%d" style="display:inline-block;vertical-align:middle;">\
+                %s%s</svg>\
+                """.formatted(HEIGHT, HEIGHT, title, pentagonMarkup(center, center, unitRadius))
+                    .strip();
+        }
+        return """
+            <svg xmlns="http://www.w3.org/2000/svg" class="koncept-sigil" role="img" \
+            width="%d" height="%d" style="display:inline-block;vertical-align:middle;">\
+            %s<text x="2" y="%d" fill="%s" font-size="%d" font-family="%s" \
+            font-weight="bold">%s</text></svg>\
+            """.formatted(
+                SIGIL_WIDTH, HEIGHT, title,
+                TEXT_BASELINE_Y, resolved.colorHex(), FONT_SIZE, FONT_FAMILY,
+                escapeHtml(resolved.glyph())
+        ).strip();
+    }
+
+    /**
+     * The locked pentagon's SVG markup — outline polygon, five asymmetric reading dots,
+     * and the centre hub — computed from {@link StampSigilGeometry} around the given
+     * centre. Shared by the stamp badge and the standalone sigil so the pentagon is
+     * identical wherever it appears.
+     *
+     * @param centerX    the pentagon centre x, in the target SVG's pixel space
+     * @param centerY    the pentagon centre y, in the target SVG's pixel space
+     * @param unitRadius the radius in pixels corresponding to the geometry's unit circle
+     * @return the polygon and circle elements
+     */
+    private static String pentagonMarkup(double centerX, double centerY, double unitRadius) {
         StringBuilder points = new StringBuilder();
         for (int i = 0; i < StampSigilGeometry.AXIS_COUNT; i++) {
             double px = centerX + StampSigilGeometry.VERTICES[i][0] * unitRadius;
@@ -156,27 +229,8 @@ public final class KonceptSvgRenderer {
         dots.append("<circle cx=\"%s\" cy=\"%s\" r=\"%s\" fill=\"%s\"/>"
                 .formatted(fmt(centerX), fmt(centerY), fmt(hubRadius), StampSigilGeometry.COLOR));
 
-        int labelWidth = (int) Math.ceil(label.length() * CHAR_WIDTH);
-        int textX = PADDING_X + STAMP_BOX + 6;
-        int totalWidth = textX + labelWidth + PADDING_X;
-
-        return """
-            <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s">\
-            <svg xmlns="http://www.w3.org/2000/svg" class="koncept-stamp" width="%d" height="%d" \
-            style="display:inline-block;vertical-align:middle;cursor:pointer;">\
-            <rect rx="%d" ry="%d" width="%d" height="%d" fill="%s"/>\
-            <polygon points="%s" fill="none" stroke="%s" stroke-width="%s" stroke-linejoin="round"/>\
-            %s\
-            <text x="%d" y="%d" fill="%s" font-size="%d" font-family="%s">%s</text>\
-            </svg></a>\
-            """.formatted(
-                escapeHtml(target), escapeHtml(label),
-                totalWidth, HEIGHT,
-                CORNER_RADIUS, CORNER_RADIUS, totalWidth, HEIGHT, STAMP_CHIP_COLOR,
-                points, StampSigilGeometry.COLOR, fmt(StampSigilGeometry.STROKE_WIDTH_PX),
-                dots,
-                textX, TEXT_BASELINE_Y, STAMP_TEXT_COLOR, FONT_SIZE, FONT_FAMILY, escapeHtml(label)
-        ).strip();
+        return "<polygon points=\"%s\" fill=\"none\" stroke=\"%s\" stroke-width=\"%s\" stroke-linejoin=\"round\"/>%s"
+                .formatted(points, StampSigilGeometry.COLOR, fmt(StampSigilGeometry.STROKE_WIDTH_PX), dots);
     }
 
     /** Formats a coordinate compactly: integers without a decimal point, else two places. */

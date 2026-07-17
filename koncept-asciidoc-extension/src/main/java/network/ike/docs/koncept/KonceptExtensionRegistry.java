@@ -23,6 +23,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .inlineMacro(KonceptInlineMacro.class);
 
+        // The koncept-sigil:kind[] inline macro: a component-kind sigil on its own (amber D,
+        // green S, violet P, the grey stamp pentagon, red ?) rendered from the same locked
+        // KonceptKind/StampSigilGeometry data as the badges — for prose that talks about the
+        // sigil scheme itself (ike-issues#883). Safe for all backends: SVG on the html family,
+        // letter-glyph/name text elsewhere.
+        asciidoctor.javaExtensionRegistry()
+                .inlineMacro(KonceptSigilInlineMacro.class);
+
         // The [koncept-tree] block: an indented list of Koncept chips — the static projection of
         // the live assistant tree (IKE-Network/ike-issues#827). Renders on the html5 family;
         // declines gracefully to a literal block on other backends. Safe for all backends.
