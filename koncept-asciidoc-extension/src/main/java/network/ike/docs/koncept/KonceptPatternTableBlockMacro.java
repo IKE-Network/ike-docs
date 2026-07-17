@@ -30,9 +30,11 @@ import java.util.Optional;
  * {@link KonceptNarrativeBlockMacro} uses — so Asciidoctor numbers the table
  * ("Table 2.1"), prose can cross-reference it via
  * {@code <<koncept-pattern-table-DescriptionPattern>>}, and the {@code k:} badges in
- * its cells resolve through the normal inline-macro pipeline. This is what the
- * glossary's own raw-HTML {@link KonceptGlossaryEntryRenderer#appendPatternShapeTable
- * pattern-shape table} cannot do, and why this macro exists alongside it.
+ * its cells resolve through the normal inline-macro pipeline. The glossary's
+ * {@link KonceptGlossaryEntryRenderer#appendPatternShapeTable pattern-shape table}
+ * renders the same design from the same {@link KonceptDefinition#modelFeatures()}
+ * source; only this macro's tables are numbered and cross-referenceable, which is why
+ * the two exist side by side.
  * <p>
  * Each Model Feature renders as three rows, with no separate row-label column:
  * <ol>
@@ -73,10 +75,8 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
     public StructuralNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
         Document doc = parent.getDocument();
         KonceptDefinitionSource defSource = KonceptDefinitions.forDocument(doc);
-        Optional<KonceptDefinition> def = defSource.lookup(target).filter(d ->
-                d.referencedComponentMeaning() != null
-                        || d.referencedComponentPurpose() != null
-                        || !d.fields().isEmpty());
+        Optional<KonceptDefinition> def = defSource.lookup(target)
+                .filter(d -> !d.modelFeatures().isEmpty());
 
         StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
         if (def.isEmpty()) {
@@ -108,47 +108,19 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
         lines.add("| Meaning | Purpose | Data type");
         lines.add("");
 
-        appendModelFeature(lines,
-                "[.koncept-model-feature]##Referenced component — the component (concept, "
-                        + "semantic, pattern, or STAMP) this pattern's semantics attach to##",
-                def.referencedComponentMeaning(), def.referencedComponentPurpose(), null,
-                def.referencedComponentExample(), defSource);
-        int displayIndex = 1;
-        for (KonceptDefinition.PatternField field : def.fields()) {
-            appendModelFeature(lines, "[.koncept-model-feature]##Field " + displayIndex++ + "##",
-                    field.meaning(), field.purpose(), field.dataType(), field.example(), defSource);
+        for (KonceptDefinition.ModelFeature feature : def.modelFeatures()) {
+            lines.add("3+e| [.koncept-model-feature]##" + feature.label() + "##");
+            lines.add("| " + badgeOrDash(feature.meaning()) + " | " + badgeOrDash(feature.purpose())
+                    + " | " + badgeOrDash(feature.dataType()));
+            if (feature.example() != null && !feature.example().isBlank()) {
+                lines.add("3+e| [.koncept-feature-example]##e.g. "
+                        + exampleCell(feature.example(), defSource) + "##");
+            }
+            lines.add("");
         }
 
         lines.add("|===");
         return lines;
-    }
-
-    /**
-     * Appends one Model Feature's three-row group: the spanning label row, the
-     * Meaning | Purpose | Data type content row, and — when an example value exists —
-     * the spanning {@code e.g.} row.
-     *
-     * @param lines     the table source under construction
-     * @param labelCell the label row's full cell content (role span plus any phrase)
-     * @param meaning   the feature's meaning koncept identifier, or {@code null}
-     * @param purpose   the feature's purpose koncept identifier, or {@code null}
-     * @param dataType  the feature's data-type koncept identifier, or {@code null} for
-     *                  the referenced component, which has none
-     * @param example   the feature's example value, or {@code null} when the extraction
-     *                  found no example semantic
-     * @param defSource the document's definition source
-     */
-    private static void appendModelFeature(List<String> lines, String labelCell,
-                                           String meaning, String purpose, String dataType,
-                                           String example, KonceptDefinitionSource defSource) {
-        lines.add("3+e| " + labelCell);
-        lines.add("| " + badgeOrDash(meaning) + " | " + badgeOrDash(purpose)
-                + " | " + badgeOrDash(dataType));
-        if (example != null && !example.isBlank()) {
-            lines.add("3+e| [.koncept-feature-example]##e.g. "
-                    + exampleCell(example, defSource) + "##");
-        }
-        lines.add("");
     }
 
     /** Renders a koncept identifier as a badge, or an em dash for {@code null}. */

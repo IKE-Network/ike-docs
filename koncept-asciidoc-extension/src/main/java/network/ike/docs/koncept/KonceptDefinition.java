@@ -1,5 +1,6 @@
 package network.ike.docs.koncept;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -102,6 +103,53 @@ public record KonceptDefinition(
      *                 text — or {@code null} if no example semantic was found
      */
     public record PatternField(String meaning, String purpose, String dataType, String example) {
+    }
+
+    /**
+     * One Model Feature of a {@code kind: pattern} koncept in presentation form: the
+     * referenced component first, then each declared field, labeled 1-indexed
+     * ({@code Field 1} is the first declared field). The referenced component is never
+     * numbered because it is not part of the fields array at either the schema or the
+     * instance level.
+     *
+     * @param label    the feature's display label — {@code Referenced component} with the
+     *                 generic any-component phrase, or {@code Field N}
+     * @param meaning  the feature's meaning koncept identifier, or {@code null}
+     * @param purpose  the feature's purpose koncept identifier, or {@code null}
+     * @param dataType the feature's data-type koncept identifier, or {@code null} for the
+     *                 referenced component, which has none
+     * @param example  the feature's live example value, or {@code null} when the
+     *                 extraction found no example semantic
+     */
+    public record ModelFeature(String label, String meaning, String purpose,
+                               String dataType, String example) {
+    }
+
+    /**
+     * This pattern's Model Features in presentation order — the single source of truth
+     * behind every shape rendering (the {@code koncept-pattern-table} block macro and the
+     * glossary's pattern-shape table): the referenced component, then each declared field
+     * in order.
+     *
+     * @return the Model Features, or an empty list for a koncept with no shape at all
+     */
+    public List<ModelFeature> modelFeatures() {
+        if (referencedComponentMeaning == null && referencedComponentPurpose == null
+                && fields.isEmpty()) {
+            return List.of();
+        }
+        List<ModelFeature> features = new ArrayList<>();
+        features.add(new ModelFeature(
+                "Referenced component — the component (concept, semantic, pattern, or STAMP) "
+                        + "this pattern's semantics attach to",
+                referencedComponentMeaning, referencedComponentPurpose, null,
+                referencedComponentExample));
+        int displayIndex = 1;
+        for (PatternField field : fields) {
+            features.add(new ModelFeature("Field " + displayIndex++,
+                    field.meaning(), field.purpose(), field.dataType(), field.example()));
+        }
+        return List.copyOf(features);
     }
 
     /**

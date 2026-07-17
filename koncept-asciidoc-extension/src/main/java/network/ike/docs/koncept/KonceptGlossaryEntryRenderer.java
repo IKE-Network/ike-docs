@@ -155,50 +155,58 @@ final class KonceptGlossaryEntryRenderer {
     }
 
     /**
-     * Append a {@code kind: pattern} koncept's shape as one HTML table: a first row for
-     * the referenced component (the meaning/purpose a semantic of this pattern's own
-     * referenced component carries — Tinkar's wire schema calls this pair
-     * {@code ReferencedComponentMeaning}/{@code Purpose}; the Java entity API calls the
-     * identical field {@code semanticMeaning}/{@code Purpose} — both names describe the
-     * same field), followed by one row per declared field, each naming its own meaning,
-     * purpose, and data-type koncepts as chips, in declared order. No-op for a concept
-     * (both the referenced component and the field list are {@code null}/empty).
+     * Append a {@code kind: pattern} koncept's shape as one HTML table matching the
+     * {@code koncept-pattern-table} block macro's Model Feature design — both render
+     * {@link KonceptDefinition#modelFeatures()}, so the two can never drift: a
+     * Meaning | Purpose | Data type header, then per feature an italic spanning label
+     * row, a chip content row (em dash where a feature has no data type), and — when a
+     * live example value exists — an italic spanning {@code e.g.} row. Shares the
+     * {@code koncept-pattern-table}/{@code koncept-model-feature}/
+     * {@code koncept-feature-example} stylesheet hooks with the block macro; only the
+     * macro's tables carry Asciidoctor numbering and xref anchors. No-op for a concept
+     * (no shape).
      */
     static void appendPatternShapeTable(StringBuilder html, KonceptDefinition def,
                                          KonceptDefinitionSource defSource) {
-        boolean hasReferencedComponent =
-                def.referencedComponentMeaning() != null || def.referencedComponentPurpose() != null;
-        List<KonceptDefinition.PatternField> fields = def.fields();
-        boolean hasFields = fields != null && !fields.isEmpty();
-        if (!hasReferencedComponent && !hasFields) {
+        List<KonceptDefinition.ModelFeature> features = def.modelFeatures();
+        if (features.isEmpty()) {
             return;
         }
 
-        html.append("    <table class=\"koncept-pattern-shape\">\n")
+        html.append("    <table class=\"koncept-pattern-table\">\n")
             .append("      <caption>Pattern shape</caption>\n")
-            .append("      <thead><tr><th>Role</th><th>Meaning</th><th>Purpose</th>")
+            .append("      <thead><tr><th>Meaning</th><th>Purpose</th>")
             .append("<th>Data type</th></tr></thead>\n      <tbody>\n");
 
-        if (hasReferencedComponent) {
-            html.append("        <tr class=\"koncept-pattern-referenced-component\">")
-                .append("<th scope=\"row\">Referenced component</th><td>")
-                .append(def.referencedComponentMeaning() != null
-                        ? chipHtml(def.referencedComponentMeaning(), defSource) : "&mdash;")
-                .append("</td><td>")
-                .append(def.referencedComponentPurpose() != null
-                        ? chipHtml(def.referencedComponentPurpose(), defSource) : "&mdash;")
-                .append("</td><td>&mdash;</td></tr>\n");
-        }
-        if (hasFields) {
-            int index = 1;
-            for (KonceptDefinition.PatternField field : fields) {
-                html.append("        <tr><th scope=\"row\">Field ").append(index++).append("</th><td>")
-                    .append(chipHtml(field.meaning(), defSource)).append("</td><td>")
-                    .append(chipHtml(field.purpose(), defSource)).append("</td><td>")
-                    .append(chipHtml(field.dataType(), defSource)).append("</td></tr>\n");
+        for (KonceptDefinition.ModelFeature feature : features) {
+            html.append("        <tr><td colspan=\"3\"><em><span class=\"koncept-model-feature\">")
+                .append(escapeHtml(feature.label()))
+                .append("</span></em></td></tr>\n");
+            html.append("        <tr><td>").append(chipOrDash(feature.meaning(), defSource))
+                .append("</td><td>").append(chipOrDash(feature.purpose(), defSource))
+                .append("</td><td>").append(chipOrDash(feature.dataType(), defSource))
+                .append("</td></tr>\n");
+            if (feature.example() != null && !feature.example().isBlank()) {
+                html.append("        <tr><td colspan=\"3\"><em><span class=\"koncept-feature-example\">")
+                    .append("e.g. ").append(exampleHtml(feature.example(), defSource))
+                    .append("</span></em></td></tr>\n");
             }
         }
         html.append("      </tbody>\n    </table>\n");
+    }
+
+    /** Renders a koncept identifier as a chip, or an em dash for {@code null}. */
+    private static String chipOrDash(String identifier, KonceptDefinitionSource defSource) {
+        return identifier != null ? chipHtml(identifier, defSource) : "&mdash;";
+    }
+
+    /**
+     * Renders an example value: a chip when it resolves to a curated koncept, otherwise
+     * its plain display text, escaped.
+     */
+    private static String exampleHtml(String example, KonceptDefinitionSource defSource) {
+        return defSource.lookup(example).isPresent()
+                ? chipHtml(example, defSource) : escapeHtml(example);
     }
 
     /** Builds one identicon-chip link to a related koncept's glossary entry. */
