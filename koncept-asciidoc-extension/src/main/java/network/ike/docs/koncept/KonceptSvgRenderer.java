@@ -11,7 +11,8 @@ import java.util.Locale;
  * The badge renders as a compact, clickable pill that links to the glossary anchor for the
  * referenced Koncept. The component-kind sigil (ike-issues#638) leads the badge: a coloured
  * letter ({@code D}/{@code S}/{@code P}/{@code ?}) for description/semantic/pattern/unknown, the
- * locked {@link StampSigilGeometry} pentagon for a stamp (no name), and nothing for a bare concept.
+ * locked {@link StampSigilGeometry} pentagon for a stamp — whose compact provenance text stands in
+ * place of a name — and nothing for a bare concept.
  * <p>
  * SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and PDF backends.
  */
@@ -113,10 +114,13 @@ public final class KonceptSvgRenderer {
     }
 
     /**
-     * Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
-     * {@link StampSigilGeometry}) as inline SVG — five asymmetric reading dots and a centre hub,
-     * no name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so the
-     * pentagon is identical in every medium.
+     * Render a STAMP badge <em>without</em> an identicon — the no-computable-identity
+     * fallback (the identicon-bearing stamp chip is
+     * {@code KonceptInlineMacro#renderHtmlStampChip}): the locked gray pentagon (computed
+     * from the shared {@link StampSigilGeometry}) as inline SVG — five asymmetric reading
+     * dots and a centre hub — beside the compact provenance text that stands in place of
+     * a name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so
+     * the pentagon is identical in every medium.
      *
      * <p>The {@code label} is the caller-formatted, verbatim provenance string; this renderer only
      * HTML-escapes it and never reformats or re-spells it. In particular the status token within
@@ -174,43 +178,79 @@ public final class KonceptSvgRenderer {
     }
 
     /**
-     * Render a component-kind sigil on its own — no badge pill, no anchor, no name — as
+     * Render a component-kind sigil on its own at natural badge scale — see
+     * {@link #renderSigil(KonceptKind, double)}.
+     *
+     * @param kind the component kind; {@code null} is treated as {@link KonceptKind#CONCEPT}
+     * @return the sigil SVG, or an empty string for the bare {@link KonceptKind#CONCEPT}
+     */
+    public static String renderSigil(KonceptKind kind) {
+        return renderSigil(kind, 1.0);
+    }
+
+    /**
+     * Render a component-kind sigil on its own — no badge, no anchor, no name — as
      * standalone inline SVG from the same locked constants the badge renderers use
      * ({@link KonceptKind}'s glyph/colour data and the {@link StampSigilGeometry}
      * pentagon), so a sigil shown in prose can never drift from the sigil shown in a
      * badge. Carries the kind's {@link KonceptKind#accessibleName()} as the SVG
-     * {@code <title>} for assistive technology.
+     * {@code <title>} for assistive technology. The geometry lives in the SVG
+     * {@code viewBox}; {@code scale} only enlarges the rendered box (legend and
+     * teaching contexts want the mark bigger than badge scale without redrawing it).
      *
-     * @param kind the component kind; {@code null} is treated as {@link KonceptKind#CONCEPT}
+     * @param kind  the component kind; {@code null} is treated as {@link KonceptKind#CONCEPT}
+     * @param scale the display scale, {@code 1.0} being natural badge scale
      * @return the sigil SVG, or an empty string for the bare {@link KonceptKind#CONCEPT},
      *         which by design shows no sigil
      */
-    public static String renderSigil(KonceptKind kind) {
+    public static String renderSigil(KonceptKind kind, double scale) {
         KonceptKind resolved = (kind == null) ? KonceptKind.CONCEPT : kind;
         if (resolved.isBare()) {
             return "";
         }
         String title = "<title>" + escapeHtml(resolved.accessibleName()) + " kind sigil</title>";
         if (resolved.isStamp()) {
-            double center = HEIGHT / 2.0;
-            double unitRadius = (STAMP_BOX / 2.0) * STAMP_RADIUS_FRACTION;
-            return """
-                <svg xmlns="http://www.w3.org/2000/svg" class="koncept-sigil" role="img" \
-                width="%d" height="%d" style="display:inline-block;vertical-align:middle;">\
-                %s%s</svg>\
-                """.formatted(HEIGHT, HEIGHT, title, pentagonMarkup(center, center, unitRadius))
-                    .strip();
+            return pentagonSvg(title,
+                    (int) Math.round(HEIGHT * scale), (int) Math.round(HEIGHT * scale), "");
         }
         return """
             <svg xmlns="http://www.w3.org/2000/svg" class="koncept-sigil" role="img" \
-            width="%d" height="%d" style="display:inline-block;vertical-align:middle;">\
+            viewBox="0 0 %d %d" width="%d" height="%d" \
+            style="display:inline-block;vertical-align:middle;">\
             %s<text x="2" y="%d" fill="%s" font-size="%d" font-family="%s" \
             font-weight="bold">%s</text></svg>\
             """.formatted(
-                SIGIL_WIDTH, HEIGHT, title,
-                TEXT_BASELINE_Y, resolved.colorHex(), FONT_SIZE, FONT_FAMILY,
+                SIGIL_WIDTH, HEIGHT,
+                (int) Math.round(SIGIL_WIDTH * scale), (int) Math.round(HEIGHT * scale),
+                title, TEXT_BASELINE_Y, resolved.colorHex(), FONT_SIZE, FONT_FAMILY,
                 escapeHtml(resolved.glyph())
         ).strip();
+    }
+
+    /**
+     * The stamp pentagon as a standalone SVG with the geometry in a fixed
+     * {@code viewBox}, so a consumer can size it by attribute or by CSS without touching
+     * the locked geometry. Package-private for the badge chip, which sizes the pentagon
+     * in {@code em} to sit beside an identicon.
+     *
+     * @param title      the SVG {@code <title>} markup (may be empty)
+     * @param width      the rendered width in pixels
+     * @param height     the rendered height in pixels
+     * @param extraStyle style appended after the base inline-block styling, e.g. em
+     *                   sizing that overrides the pixel attributes; may be empty
+     * @return the pentagon SVG
+     */
+    static String pentagonSvg(String title, int width, int height, String extraStyle) {
+        double center = HEIGHT / 2.0;
+        double unitRadius = (STAMP_BOX / 2.0) * STAMP_RADIUS_FRACTION;
+        return """
+            <svg xmlns="http://www.w3.org/2000/svg" class="koncept-sigil" role="img" \
+            viewBox="0 0 %d %d" width="%d" height="%d" \
+            style="display:inline-block;vertical-align:middle;%s">\
+            %s%s</svg>\
+            """.formatted(HEIGHT, HEIGHT, width, height, extraStyle,
+                title, pentagonMarkup(center, center, unitRadius))
+                .strip();
     }
 
     /**

@@ -49,6 +49,16 @@ class KonceptSigilInlineMacroTest {
     }
 
     @Test
+    void scaleAttributeEnlargesTheRenderedBoxNotTheGeometry() {
+        String html = convert("koncept-sigil:pattern[scale=2]");
+
+        assertTrue(html.contains("width=\"26\"") && html.contains("height=\"44\""),
+                "scale=2 doubles the rendered box (13x22 -> 26x44):\n" + html);
+        assertTrue(html.contains("viewBox=\"0 0 13 22\""),
+                "…while the geometry stays in the unscaled viewBox:\n" + html);
+    }
+
+    @Test
     void kindNameIsCaseInsensitive() {
         String html = convert("koncept-sigil:STAMP[]");
 

@@ -96,11 +96,20 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         String renderLink = KonceptResolver.anchorSlug(linkTarget);
         String backend = doc.getAttribute("backend", "html5").toString();
 
-        // A STAMP is provenance — never an identicon or a name-pill — in EVERY backend, so it must be
-        // decided BEFORE the identicon dispatch (ike-issues#638). Otherwise a stamp that carries an id
-        // (idString present) would fall through to the pdf/docbook identicon paths below and
-        // masquerade as a named concept.
+        // A STAMP badge is provenance-shaped, not name-shaped: the pentagon sigil precedes the
+        // STAMP's own identicon (the sigil is never bare — the identicon tells one STAMP from
+        // another at a glance), and the compact provenance text stands in place of a name. Decided
+        // BEFORE the generic dispatch so a stamp never renders as a small-caps name-pill.
         if (kind.isStamp()) {
+            if (idString.isPresent()) {
+                if ("pdf".equals(backend)) {
+                    return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind);
+                }
+                String rendered = ("docbook5".equals(backend) || "docbook".equals(backend))
+                        ? renderDocbookIdenticon(renderLink, label, idString.get(), kind)
+                        : renderHtmlStampChip(renderLink, label, idString.get());
+                return createPhraseNode(parent, "quoted", rendered, Map.of("subs", ":none"));
+            }
             return createPhraseNode(parent, "quoted", renderStamp(backend, renderLink, label),
                     Map.of("subs", ":none"));
         }
@@ -174,12 +183,15 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      */
     private String renderDocbookIdenticon(String target, String label, String idString, KonceptKind kind) {
         String uri = new File(IdenticonRenderer.pngFile(idString)).toURI().toString();
-        // Honest kind glyph (ike-issues#638): a non-concept letter kind keeps its glyph as text before
-        // the identicon so it is not silently dropped in FO. The pentagon image is HTML-only; FO/Prawn
-        // carry the letter (the data channel), not necessarily its colour.
-        String glyphPrefix = kind.hasLetterGlyph()
-                ? "<phrase role=\"koncept-sigil\">" + escapeXml(kind.glyph()) + " </phrase>"
-                : "";
+        // Honest kind glyph (ike-issues#638): a non-concept kind keeps its mark as text before the
+        // identicon so it is not silently dropped in FO — the letter for letter kinds, ⬠ for a
+        // stamp. The drawn pentagon is HTML-only; FO/Prawn carry the glyph (the data channel), not
+        // necessarily its colour.
+        String glyphPrefix = kind.isStamp()
+                ? "<phrase role=\"koncept-sigil\">⬠ </phrase>"
+                : kind.hasLetterGlyph()
+                        ? "<phrase role=\"koncept-sigil\">" + escapeXml(kind.glyph()) + " </phrase>"
+                        : "";
         // The visible name follows the identicon, inside the link, on EVERY backend (ike-issues#836):
         // the textobject phrase is only the image's fallback (shown if the PNG cannot render), so
         // without this the concept reads as a bare identicon in FO/print.
@@ -194,10 +206,35 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     }
 
     /**
-     * A stamp's per-backend rendering — never an identicon or a name-pill (ike-issues#638): on html5
-     * (and CSS-PDF) the locked gray pentagon plus the compact provenance text; on docbook5/FO a gray
-     * phrase; on Prawn gray inline text. The pentagon image is deferred in FO/Prawn, where the
-     * provenance text ({@code status · date-time · author}) carries the meaning.
+     * html5 / CSS-PDF: the identicon-bearing STAMP chip — the pentagon sigil, then the STAMP's own
+     * identicon (the sigil always precedes an identicon, never bare; the identicon tells one STAMP
+     * from another at a glance), then the compact provenance text ({@code status · date-time ·
+     * author}) in place of a name — on the gray provenance chip, linked to the glossary anchor.
+     */
+    private String renderHtmlStampChip(String target, String label, String idString) {
+        String dataUri = IdenticonRenderer.dataUri(idString);
+        String pentagon = KonceptSvgRenderer.pentagonSvg("", 22, 22,
+                "height:0.95em;width:0.95em;vertical-align:-0.12em;margin-right:0.25em;");
+        return """
+            <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s" \
+            style="text-decoration:none;white-space:nowrap;">\
+            <span class="koncept-chip koncept-stamp-chip" style="display:inline;background:#ecebe8;\
+            border-radius:0.5em;padding:0.12em 0.45em;\
+            -webkit-box-decoration-break:clone;box-decoration-break:clone;">\
+            %s<img class="koncept-identicon" src="%s" alt="%s identicon" \
+            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
+            image-rendering:pixelated;margin-right:0.3em;"/>\
+            <span class="koncept-label" style="color:#5a5750;">%s</span></span></a>\
+            """.formatted(
+                escapeXml(target), escapeXml(label), pentagon, dataUri,
+                escapeXml(label), escapeXml(label)).strip();
+    }
+
+    /**
+     * A stamp's per-backend rendering when no identicon can be computed: on html5 (and CSS-PDF) the
+     * locked gray pentagon plus the compact provenance text; on docbook5/FO a gray phrase; on Prawn
+     * gray inline text. With a computable identity a stamp renders identicon-bearing instead — see
+     * {@link #renderHtmlStampChip(String, String, String)} and the stamp-aware identicon paths.
      *
      * @param backend the asciidoctor backend
      * @param target  the koncept identifier (anchor)
@@ -234,7 +271,7 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     private PhraseNode createIdenticonChipNode(StructuralNode parent, String target,
                                                String label, String idString, KonceptKind kind) {
         String absPath = IdenticonRenderer.pngFile(idString);
-        String glyph = kind.hasLetterGlyph() ? kind.glyph() + " " : "";
+        String glyph = kind.isStamp() ? "⬠ " : (kind.hasLetterGlyph() ? kind.glyph() + " " : "");
         // Content is RAW, not pre-escaped: the specialcharacters substitution escapes the glyph and
         // label, and the macros substitution renders the inline image — pre-escaping here would
         // double-escape. A literal non-breaking space (U+00A0, not an &#160; entity, which the

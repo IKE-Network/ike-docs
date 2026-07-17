@@ -52,6 +52,11 @@ import java.util.Map;
  * {@link KonceptSvgRenderer#renderStampSpecimen(String)}. Keep specimen text real —
  * drawn from actual knowledge-base content — so the guide never illustrates with
  * invented values.
+ * <p>
+ * A bare sigil accepts a {@code scale} attribute ({@code koncept-sigil:stamp[scale=1.5]})
+ * for legend and teaching contexts where the mark should read larger than badge scale;
+ * the geometry is untouched — only the rendered box grows. Specimen chips size with the
+ * surrounding text and ignore {@code scale}.
  */
 @Name("koncept-sigil")
 public class KonceptSigilInlineMacro extends InlineMacroProcessor {
@@ -83,7 +88,7 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
         if (backend.startsWith("html")) {
             String rendered;
             if (label == null) {
-                rendered = KonceptSvgRenderer.renderSigil(kind);
+                rendered = KonceptSvgRenderer.renderSigil(kind, scale(attributes, target));
             } else if (kind.isStamp()) {
                 rendered = KonceptSvgRenderer.renderStampSpecimen(label);
             } else {
@@ -94,5 +99,27 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
         String glyph = kind.hasLetterGlyph() ? kind.glyph() : kind.accessibleName();
         String fallback = label == null ? glyph : glyph + " " + label;
         return createPhraseNode(parent, "quoted", fallback, Map.of("subs", ":none"));
+    }
+
+    /**
+     * The bare sigil's display scale from the {@code scale} attribute: {@code 1.0} when
+     * absent, clamped to a sane range, with a warning on an unparseable value.
+     *
+     * @param attributes the macro's attributes
+     * @param target     the macro target, for the warning
+     * @return the display scale
+     */
+    private static double scale(Map<String, Object> attributes, String target) {
+        Object raw = attributes.get("scale");
+        if (raw == null) {
+            return 1.0;
+        }
+        try {
+            double parsed = Double.parseDouble(raw.toString().trim());
+            return Math.clamp(parsed, 0.5, 4.0);
+        } catch (NumberFormatException e) {
+            LOG.warn("koncept-sigil: unparseable scale '{}' on {} — using 1.0", raw, target);
+            return 1.0;
+        }
     }
 }
