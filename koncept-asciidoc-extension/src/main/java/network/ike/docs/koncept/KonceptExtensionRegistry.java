@@ -45,6 +45,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .blockMacro(KonceptPatternListBlockMacro.class);
 
+        // The koncept-pattern-table::Identifier[] block macro: a pattern's shape as a
+        // real, captioned/numbered, xref-able AsciiDoc table — one Model Feature
+        // (referenced component, then each field) per three-row group, k: badges in the
+        // cells (IKE-Network/ike-issues#883). Safe for all backends — parseContent is
+        // backend-agnostic, and the emitted source is plain AsciiDoc table markup.
+        asciidoctor.javaExtensionRegistry()
+                .blockMacro(KonceptPatternTableBlockMacro.class);
+
         // Tag [preface]/[appendix] etc. with front-/back-matter roles so the
         // loose-leaf print stylesheet can route them (chapter numbering
         // excludes them, keeping composite folios aligned with section
