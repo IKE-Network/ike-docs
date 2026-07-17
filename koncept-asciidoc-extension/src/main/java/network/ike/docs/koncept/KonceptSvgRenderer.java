@@ -56,14 +56,14 @@ public final class KonceptSvgRenderer {
     /** Inline edge length of the stamp pentagon — matches the JavaFX {@code StampSigil}. */
     private static final int STAMP_BOX = 16;
 
-    /** Pentagon unit-radius as a fraction of the half-box — identical to the JavaFX {@code StampSigil}. */
-    private static final double STAMP_RADIUS_FRACTION = 0.92;
+    /** Pentagon unit-radius as a fraction of the half-box — identical to the JavaFX {@code StampSigil}. Package-visible for {@link KonceptFigureRenderer}. */
+    static final double STAMP_RADIUS_FRACTION = 0.92;
 
-    /** Gray provenance chip behind the stamp pentagon + text. */
-    private static final String STAMP_CHIP_COLOR = "#ecebe8";
+    /** Gray provenance chip behind the stamp pentagon + text. Package-visible for {@link KonceptFigureRenderer}. */
+    static final String STAMP_CHIP_COLOR = "#ecebe8";
 
-    /** Dark-gray text for the stamp's compact provenance. */
-    private static final String STAMP_TEXT_COLOR = "#5a5750";
+    /** Dark-gray text for the stamp's compact provenance. Package-visible for {@link KonceptFigureRenderer}. */
+    static final String STAMP_TEXT_COLOR = "#5a5750";
 
     /**
      * Render an inline SVG badge for a Koncept reference, honest about its kind.

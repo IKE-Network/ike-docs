@@ -1,6 +1,7 @@
 package network.ike.docs.koncept;
 
 import network.ike.docs.konceptcore.KonceptKind;
+import network.ike.docs.konceptcore.StampSigilGeometry;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -55,6 +56,12 @@ final class KonceptFigureRenderer {
     /** Muted annotation gray, matching the guide's muted rows. */
     private static final Color ANNOTATION_COLOR = new Color(0x6a, 0x73, 0x7d);
 
+    /** Stamp chip gray, decoded from the SVG renderer's shared constant. */
+    private static final Color STAMP_CHIP_COLOR = Color.decode(KonceptSvgRenderer.STAMP_CHIP_COLOR);
+
+    /** Stamp provenance text gray, decoded from the SVG renderer's shared constant. */
+    private static final Color STAMP_TEXT_COLOR = Color.decode(KonceptSvgRenderer.STAMP_TEXT_COLOR);
+
     private static final Map<String, String> FILE_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, String> DATA_URI_CACHE = new ConcurrentHashMap<>();
 
@@ -73,6 +80,7 @@ final class KonceptFigureRenderer {
         int pad = 12 * SCALE;
         int chipPad = 8 * SCALE;
         int identiconSize = 32 * SCALE;
+        int pentagonBox = 20 * SCALE;
         Font sigilFont = new Font(Font.SANS_SERIF, Font.BOLD, 15 * SCALE);
         Font nameFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12 * SCALE);
         Font partFont = new Font(Font.SANS_SERIF, Font.PLAIN, 9 * SCALE);
@@ -82,15 +90,18 @@ final class KonceptFigureRenderer {
         FontMetrics sigilFm = pg.getFontMetrics(sigilFont);
         FontMetrics nameFm = pg.getFontMetrics(nameFont);
         FontMetrics partFm = pg.getFontMetrics(partFont);
-        String name = label.toUpperCase(java.util.Locale.ROOT);
-        boolean hasSigil = kind.hasLetterGlyph();
-        int sigilW = hasSigil ? sigilFm.stringWidth(kind.glyph()) : 0;
+        // A stamp's provenance text stands in place of a name and renders verbatim; a
+        // name renders as small caps, approximated here as reduced-size uppercase.
+        boolean stamp = kind.isStamp();
+        String name = stamp ? label : label.toUpperCase(java.util.Locale.ROOT);
+        boolean letterSigil = kind.hasLetterGlyph();
+        int sigilW = letterSigil ? sigilFm.stringWidth(kind.glyph()) : (stamp ? pentagonBox : 0);
         int nameW = nameFm.stringWidth(name);
         pg.dispose();
 
         int gap = 8 * SCALE;
         int chipH = identiconSize + 2 * chipPad;
-        int chipW = chipPad + (hasSigil ? sigilW + gap : 0) + identiconSize + gap + nameW + chipPad;
+        int chipW = chipPad + (sigilW > 0 ? sigilW + gap : 0) + identiconSize + gap + nameW + chipPad;
         int partH = partFm.getHeight() + 14 * SCALE;
         int width = chipW + 2 * pad;
         int height = pad + chipH + partH + pad;
@@ -103,19 +114,24 @@ final class KonceptFigureRenderer {
 
         int chipX = pad;
         int chipY = pad;
-        g.setColor(CHIP_COLOR);
+        g.setColor(stamp ? STAMP_CHIP_COLOR : CHIP_COLOR);
         g.fillRoundRect(chipX, chipY, chipW, chipH, 10 * SCALE, 10 * SCALE);
 
         int centerY = chipY + chipH / 2;
         int x = chipX + chipPad;
         int sigilCenter = 0;
-        if (hasSigil) {
+        if (letterSigil) {
             g.setFont(sigilFont);
             g.setColor(Color.decode(kind.colorHex()));
             int baseline = centerY + (sigilFm.getAscent() - sigilFm.getDescent()) / 2;
             g.drawString(kind.glyph(), x, baseline);
             sigilCenter = x + sigilW / 2;
             x += sigilW + gap;
+        } else if (stamp) {
+            drawPentagon(g, x + pentagonBox / 2.0, centerY,
+                    (pentagonBox / 2.0) * KonceptSvgRenderer.STAMP_RADIUS_FRACTION);
+            sigilCenter = x + pentagonBox / 2;
+            x += pentagonBox + gap;
         }
 
         int identiconX = x;
@@ -131,7 +147,7 @@ final class KonceptFigureRenderer {
         x += identiconSize + gap;
 
         g.setFont(nameFont);
-        g.setColor(LABEL_COLOR);
+        g.setColor(stamp ? STAMP_TEXT_COLOR : LABEL_COLOR);
         int nameBaseline = centerY + (nameFm.getAscent() - nameFm.getDescent()) / 2;
         g.drawString(name, x, nameBaseline);
         int nameCenter = x + nameW / 2;
@@ -144,12 +160,14 @@ final class KonceptFigureRenderer {
         int lineTop = chipY + chipH + 2 * SCALE;
         int lineBottom = lineTop + 6 * SCALE;
         int partBaseline = lineBottom + partFm.getAscent() + SCALE;
+        boolean hasSigil = letterSigil || stamp;
+        String nameLabel = stamp ? "provenance" : "name";
         int[] centers = hasSigil
                 ? new int[] {sigilCenter, identiconCenter, nameCenter}
                 : new int[] {identiconCenter, nameCenter};
         String[] texts = hasSigil
-                ? new String[] {"kind sigil", "identicon", "name"}
-                : new String[] {"identicon", "name"};
+                ? new String[] {"kind sigil", "identicon", nameLabel}
+                : new String[] {"identicon", nameLabel};
         int cursor = 2;
         for (int i = 0; i < centers.length; i++) {
             int textW = partFm.stringWidth(texts[i]);
@@ -166,6 +184,45 @@ final class KonceptFigureRenderer {
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to encode anatomy PNG for " + label, e);
         }
+    }
+
+    /**
+     * Draws the locked stamp pentagon — outline, five asymmetric reading dots, and the
+     * centre hub — from the shared {@link StampSigilGeometry} numbers, so the Java2D
+     * figure matches the SVG badge and the JavaFX node exactly.
+     *
+     * @param g          the graphics to draw on
+     * @param centerX    the pentagon centre x
+     * @param centerY    the pentagon centre y
+     * @param unitRadius the pixel radius of the geometry's unit circle
+     */
+    private static void drawPentagon(Graphics2D g, double centerX, double centerY,
+                                     double unitRadius) {
+        g.setColor(Color.decode(StampSigilGeometry.COLOR));
+        int n = StampSigilGeometry.AXIS_COUNT;
+        int[] xs = new int[n];
+        int[] ys = new int[n];
+        for (int i = 0; i < n; i++) {
+            xs[i] = (int) Math.round(centerX + StampSigilGeometry.VERTICES[i][0] * unitRadius);
+            ys[i] = (int) Math.round(centerY + StampSigilGeometry.VERTICES[i][1] * unitRadius);
+        }
+        g.setStroke(new BasicStroke((float) (StampSigilGeometry.STROKE_WIDTH_PX * SCALE)));
+        g.drawPolygon(xs, ys, n);
+
+        double dotRadius = Math.max(StampSigilGeometry.DOT_RADIUS * unitRadius, 1.0);
+        double hubRadius = dotRadius * (StampSigilGeometry.HUB_RADIUS / StampSigilGeometry.DOT_RADIUS);
+        for (int i = 0; i < n; i++) {
+            double reading = StampSigilGeometry.AXIS_DOT_RADII[i] * unitRadius;
+            fillCircle(g, centerX + StampSigilGeometry.VERTICES[i][0] * reading,
+                    centerY + StampSigilGeometry.VERTICES[i][1] * reading, dotRadius);
+        }
+        fillCircle(g, centerX, centerY, hubRadius);
+    }
+
+    /** Fills a circle centred at the given point. */
+    private static void fillCircle(Graphics2D g, double cx, double cy, double r) {
+        g.fillOval((int) Math.round(cx - r), (int) Math.round(cy - r),
+                (int) Math.round(2 * r), (int) Math.round(2 * r));
     }
 
     /**

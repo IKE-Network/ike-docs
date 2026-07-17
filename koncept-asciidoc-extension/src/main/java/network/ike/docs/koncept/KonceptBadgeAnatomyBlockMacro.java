@@ -35,6 +35,19 @@ import java.util.Map;
  * placeholder. The html family embeds a {@code data:} URI; file-referencing backends get
  * a content-addressed PNG file. Drawn at 2&times; and displayed at half width for
  * crispness.
+ * <p>
+ * An <em>uncurated typed</em> target — a component whose identity is source-declared but
+ * not in {@code koncepts.yml}, like a ledger-declared STAMP whose PublicId is the
+ * deterministic {@code Stamp.stampUuid} of its tuple — resolves with no kind and its id
+ * as label, so the author asserts both explicitly:
+ * <pre>
+ * .Anatomy of a STAMP badge
+ * koncept-badge-anatomy::uuid=1e041b79-…[kind=stamp, label="Active · 2026-07-12 00:00 · IKE Community"]
+ * </pre>
+ * The same adopt-never-re-mint discipline as declared component identities: assert only
+ * what the source of the identity declares. A stamp anatomy renders the pentagon on the
+ * gray provenance chip, with the verbatim provenance text labelled {@code provenance} in
+ * place of {@code name}.
  */
 @Name("koncept-badge-anatomy")
 public class KonceptBadgeAnatomyBlockMacro extends BlockMacroProcessor {
@@ -57,9 +70,13 @@ public class KonceptBadgeAnatomyBlockMacro extends BlockMacroProcessor {
             return container;
         }
 
-        KonceptKind kind = resolved.kind();
+        Object kindOverride = attributes.get("kind");
+        KonceptKind kind = kindOverride != null
+                ? KonceptKind.fromString(kindOverride.toString()) : resolved.kind();
+        Object labelOverride = attributes.get("label");
+        String label = labelOverride != null && !labelOverride.toString().isBlank()
+                ? labelOverride.toString().strip() : resolved.label();
         String idString = resolved.idString().get();
-        String label = resolved.label();
 
         String backend = doc.getAttribute("backend", "html5").toString();
         boolean fileBackend = "pdf".equals(backend)
@@ -70,7 +87,8 @@ public class KonceptBadgeAnatomyBlockMacro extends BlockMacroProcessor {
 
         Map<String, Object> imageAttrs = new HashMap<>();
         imageAttrs.put("target", imageTarget);
-        imageAttrs.put("alt", "Anatomy of the " + label + " badge: kind sigil, identicon, name");
+        imageAttrs.put("alt", "Anatomy of the " + label + " badge: kind sigil, identicon, "
+                + (kind.isStamp() ? "provenance" : "name"));
         imageAttrs.put("width", Integer.toString(displayWidth(kind, idString, label)));
         Block image = createBlock(parent, "image", "", imageAttrs);
         Object title = attributes.get("title");

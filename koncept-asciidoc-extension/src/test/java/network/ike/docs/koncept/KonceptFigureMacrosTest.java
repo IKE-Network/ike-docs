@@ -60,6 +60,34 @@ class KonceptFigureMacrosTest {
     }
 
     @Test
+    void stampAnatomy_rendersProvenanceShapedViaACuratedStamp() {
+        String html = convert("""
+                .Anatomy of a STAMP badge
+                koncept-badge-anatomy::ExampleStamp[]
+                """);
+
+        assertTrue(html.contains("imageblock") && html.contains("src=\"data:image/png;base64,"),
+                "the curated demo stamp renders as a composed figure:\n" + html);
+        assertTrue(html.contains("kind sigil, identicon, provenance"),
+                "a stamp anatomy labels the text part provenance, not name:\n" + html);
+    }
+
+    @Test
+    void stampAnatomy_acceptsKindAndLabelOverridesForAnUncuratedTypedTarget() {
+        String html = convert("""
+                .Anatomy of a STAMP badge
+                koncept-badge-anatomy::uuid=1e041b79-2aa5-5d19-ad09-05a079cb396f[kind=stamp, label="Active · 2026-07-12 00:00 · IKE Community"]
+                """);
+
+        assertTrue(html.contains("imageblock") && html.contains("src=\"data:image/png;base64,"),
+                "a source-declared identity with asserted kind and label renders:\n" + html);
+        assertTrue(html.contains("Anatomy of the Active · 2026-07-12 00:00 · IKE Community badge"),
+                "the asserted label carries into the alt text:\n" + html);
+        assertTrue(html.contains("kind sigil, identicon, provenance"),
+                "the asserted stamp kind drives the provenance part label:\n" + html);
+    }
+
+    @Test
     void unresolvableTarget_rendersAVisiblePlaceholderNotABrokenFigure() {
         String html = convert("koncept-identicon-figure::NoSuchKoncept[]");
 
