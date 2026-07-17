@@ -19,19 +19,24 @@ import java.util.Locale;
 
 /**
  * The component-kind a Koncept badge is <em>honest</em> about, with the leading asymmetric sigil
- * scheme "concept bare, everything else marked" (ike-issues#638): {@link #CONCEPT} shows no sigil,
+ * scheme "Koncept bare, everything else marked" (ike-issues#638): {@link #CONCEPT} shows no sigil,
  * {@link #DESCRIPTION}/{@link #SEMANTIC}/{@link #PATTERN}/{@link #UNKNOWN} show a coloured letter,
  * and {@link #STAMP} shows the {@link StampSigilGeometry pentagon}.
  *
  * <p>The glyph and colour are <em>data</em> (not styling), so every medium adapter — the adoc SVG
- * macro, the Zulip/email PNG, the JavaFX badge — renders the same sigil. This is the rendering-
- * agnostic mirror of Komet's {@code dev.ikm.komet.framework.controls.ComponentKind}; keep the two in
- * step until Komet re-points downstream to this module (ike-issues#623).
+ * macro, the Zulip/email PNG, the JavaFX badge — renders the same sigil. Komet consumes this enum
+ * directly ({@code dev.ikm.komet.framework.controls.KonceptKindResolver}, re-pointed under
+ * ike-issues#623): this module is the single source of the kind vocabulary.
  */
 public enum KonceptKind {
 
-    /** A concept — the bare default; rendered with no kind sigil. */
-    CONCEPT(null, null, "Concept"),
+    /**
+     * A Koncept — with a K: the formal, identified, versioned construct carrying descriptions and a
+     * logical definition, deliberately distinct from a concept in the mind (it is the
+     * <em>referent</em> of the semiotic triangle, not the thought). The bare default; rendered with
+     * no kind sigil.
+     */
+    CONCEPT(null, null, "Koncept"),
 
     /** A semantic whose pattern is one of the view coordinate's description patterns. Amber {@code D}. */
     DESCRIPTION("D", "#b8860b", "Description"),

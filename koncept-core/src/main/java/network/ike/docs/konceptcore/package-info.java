@@ -20,7 +20,7 @@
  *
  * <ul>
  *   <li>{@link network.ike.docs.konceptcore.KonceptKind} — the honest component-kind sigil scheme
- *       ("concept bare, everything else marked"): a coloured letter for description/semantic/pattern/
+ *       ("Koncept bare, everything else marked"): a coloured letter for description/semantic/pattern/
  *       unknown, the pentagon for a stamp.</li>
  *   <li>{@link network.ike.docs.konceptcore.StampSigilGeometry} — the locked pentagon geometry of the
  *       STAMP sigil (ike-issues#638), pure constants with no rendering dependency.</li>

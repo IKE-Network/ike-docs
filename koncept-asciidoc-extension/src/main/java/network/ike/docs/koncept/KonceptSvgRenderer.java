@@ -12,7 +12,7 @@ import java.util.Locale;
  * referenced Koncept. The component-kind sigil (ike-issues#638) leads the badge: a coloured
  * letter ({@code D}/{@code S}/{@code P}/{@code ?}) for description/semantic/pattern/unknown, the
  * locked {@link StampSigilGeometry} pentagon for a stamp — whose compact provenance text stands in
- * place of a name — and nothing for a bare concept.
+ * place of a name — and nothing for a bare Koncept.
  * <p>
  * SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and PDF backends.
  */

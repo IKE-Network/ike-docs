@@ -148,7 +148,7 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      */
     private String renderHtmlIdenticon(String target, String label, String idString, KonceptKind kind) {
         String dataUri = IdenticonRenderer.dataUri(idString);
-        // Honest kind sigil (ike-issues#638): a concept stays bare; every other letter kind prepends
+        // Honest kind sigil (ike-issues#638): a Koncept stays bare; every other letter kind prepends
         // its coloured glyph (colour inline, from the kind, for cross-medium parity). Self-contained
         // inline styles — no dependency on koncept.css, which consuming documents may not link.
         String sigil = kind.hasLetterGlyph()

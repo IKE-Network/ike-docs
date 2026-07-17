@@ -32,8 +32,8 @@ import java.util.Map;
  * {@link KonceptSvgRenderer#renderSigil(KonceptKind)}, which draws from the same locked
  * {@link KonceptKind} glyph/colour data and {@link StampSigilGeometry} pentagon the badge
  * renderers use — the sigil shown in prose is the sigil shown in badges, by construction,
- * never a hand-copied asset that could drift. The bare concept kind deliberately has no
- * sigil ("concept bare, everything else marked", ike-issues#638) and renders nothing, with
+ * never a hand-copied asset that could drift. The bare Koncept kind deliberately has no
+ * sigil ("Koncept bare, everything else marked", ike-issues#638) and renders nothing, with
  * a warning. On non-HTML backends the sigil degrades to its letter glyph, or the kind
  * name for the pentagon.
  * <p>
@@ -75,7 +75,7 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
             LOG.warn("koncept-sigil: unrecognised kind '{}' — rendering the unknown sigil", target);
         }
         if (kind.isBare()) {
-            LOG.warn("koncept-sigil: the bare concept kind has no sigil (target '{}')", target);
+            LOG.warn("koncept-sigil: the bare Koncept kind has no sigil (target '{}')", target);
             return createPhraseNode(parent, "quoted", "", Map.of("subs", ":none"));
         }
 
