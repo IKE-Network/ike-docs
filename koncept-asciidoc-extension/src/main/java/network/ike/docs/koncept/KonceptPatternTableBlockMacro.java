@@ -47,16 +47,21 @@ import java.util.Optional;
  *   <li>an italic {@code e.g.} row spanning all three columns with the feature's real
  *       example value — a live value from an actual semantic of this pattern, badged
  *       when it resolves to a curated koncept, plain text otherwise — omitted when the
- *       extraction found no example semantic.</li>
+ *       extraction found no example semantic;</li>
+ *   <li>an italic {@code default} row spanning all three columns with the feature's
+ *       default value — the value from the pattern's default value semantic
+ *       (IKE-Network/ike-issues#888), rendered exactly like the {@code e.g.} row —
+ *       omitted when the pattern has no active default value semantic.</li>
  * </ol>
  * Fields display 1-indexed ({@code Field 1} is {@code fieldDefinitions().get(0)}),
  * matching {@code SemanticVersionRecord.toString()}'s existing display convention over
  * 0-indexed storage; the referenced component is never numbered because it is not part
  * of the fields array at either the schema or the instance level. The
- * {@code koncept-pattern-table}, {@code koncept-model-feature}, and
- * {@code koncept-feature-example} roles are stylesheet hooks — the shared
- * {@code ike-doc-resources} docinfo mutes and indents them; without that CSS the label
- * and example rows still read correctly as italic.
+ * {@code koncept-pattern-table}, {@code koncept-model-feature},
+ * {@code koncept-feature-example}, and {@code koncept-feature-default} roles are
+ * stylesheet hooks — the shared {@code ike-doc-resources} docinfo mutes and indents
+ * them; without that CSS the label, example, and default rows still read correctly as
+ * italic.
  * <p>
  * A target with no pattern shape (a plain concept, or an unknown identifier) renders a
  * visible placeholder rather than silently vanishing, matching the
@@ -114,7 +119,11 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
                     + " | " + badgeOrDash(feature.dataType()));
             if (feature.example() != null && !feature.example().isBlank()) {
                 lines.add("3+e| [.koncept-feature-example]##e.g. "
-                        + exampleCell(feature.example(), defSource) + "##");
+                        + valueCell(feature.example(), defSource) + "##");
+            }
+            if (feature.defaultValue() != null && !feature.defaultValue().isBlank()) {
+                lines.add("3+e| [.koncept-feature-default]##default "
+                        + valueCell(feature.defaultValue(), defSource) + "##");
             }
             lines.add("");
         }
@@ -129,13 +138,13 @@ public class KonceptPatternTableBlockMacro extends BlockMacroProcessor {
     }
 
     /**
-     * Renders an example value: a badge when it resolves to a curated koncept,
-     * otherwise its plain display text with table-cell separators escaped.
+     * Renders a live value (an example or a default): a badge when it resolves to a
+     * curated koncept, otherwise its plain display text with table-cell separators escaped.
      */
-    private static String exampleCell(String example, KonceptDefinitionSource defSource) {
-        if (defSource.lookup(example).isPresent()) {
-            return "k:" + example + "[]";
+    private static String valueCell(String value, KonceptDefinitionSource defSource) {
+        if (defSource.lookup(value).isPresent()) {
+            return "k:" + value + "[]";
         }
-        return example.replace("|", "\\|");
+        return value.replace("|", "\\|");
     }
 }

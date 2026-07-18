@@ -160,11 +160,13 @@ final class KonceptGlossaryEntryRenderer {
      * {@link KonceptDefinition#modelFeatures()}, so the two can never drift: a
      * Meaning | Purpose | Data type header, then per feature an italic spanning label
      * row, a chip content row (em dash where a feature has no data type), and — when a
-     * live example value exists — an italic spanning {@code e.g.} row. Shares the
+     * live example value exists — an italic spanning {@code e.g.} row, followed — when
+     * the pattern's default value semantic supplies one (IKE-Network/ike-issues#888) —
+     * by an italic spanning {@code default} row rendered the same way. Shares the
      * {@code koncept-pattern-table}/{@code koncept-model-feature}/
-     * {@code koncept-feature-example} stylesheet hooks with the block macro; only the
-     * macro's tables carry Asciidoctor numbering and xref anchors. No-op for a concept
-     * (no shape).
+     * {@code koncept-feature-example}/{@code koncept-feature-default} stylesheet hooks
+     * with the block macro; only the macro's tables carry Asciidoctor numbering and xref
+     * anchors. No-op for a concept (no shape).
      */
     static void appendPatternShapeTable(StringBuilder html, KonceptDefinition def,
                                          KonceptDefinitionSource defSource) {
@@ -188,7 +190,12 @@ final class KonceptGlossaryEntryRenderer {
                 .append("</td></tr>\n");
             if (feature.example() != null && !feature.example().isBlank()) {
                 html.append("        <tr><td colspan=\"3\"><em><span class=\"koncept-feature-example\">")
-                    .append("e.g. ").append(exampleHtml(feature.example(), defSource))
+                    .append("e.g. ").append(valueHtml(feature.example(), defSource))
+                    .append("</span></em></td></tr>\n");
+            }
+            if (feature.defaultValue() != null && !feature.defaultValue().isBlank()) {
+                html.append("        <tr><td colspan=\"3\"><em><span class=\"koncept-feature-default\">")
+                    .append("default ").append(valueHtml(feature.defaultValue(), defSource))
                     .append("</span></em></td></tr>\n");
             }
         }
@@ -201,12 +208,12 @@ final class KonceptGlossaryEntryRenderer {
     }
 
     /**
-     * Renders an example value: a chip when it resolves to a curated koncept, otherwise
-     * its plain display text, escaped.
+     * Renders a live value (an example or a default): a chip when it resolves to a
+     * curated koncept, otherwise its plain display text, escaped.
      */
-    private static String exampleHtml(String example, KonceptDefinitionSource defSource) {
-        return defSource.lookup(example).isPresent()
-                ? chipHtml(example, defSource) : escapeHtml(example);
+    private static String valueHtml(String value, KonceptDefinitionSource defSource) {
+        return defSource.lookup(value).isPresent()
+                ? chipHtml(value, defSource) : escapeHtml(value);
     }
 
     /** Builds one identicon-chip link to a related koncept's glossary entry. */

@@ -1,5 +1,6 @@
 # Dedicated fixture for referencedComponentExample/PatternField.example parsing
-# (IKE-Network/ike-issues#883) -- deliberately separate from pattern-shape-test.yml, which
+# (IKE-Network/ike-issues#883) and PatternField.default parsing (IKE-Network/ike-issues#888)
+# -- deliberately separate from pattern-shape-test.yml, which
 # KonceptPatternListBlockMacroTest also loads and asserts an exact pattern count/order against.
 
 PatternWithExample:
@@ -13,10 +14,12 @@ PatternWithExample:
       purpose: ExampleFieldOnePurpose
       dataType: ExampleFieldOneType
       example: ExampleFieldOneMeaning
+      default: ExampleFieldOneDefault
     - meaning: ExampleFieldTwoMeaning
       purpose: ExampleFieldTwoPurpose
       dataType: ExampleFieldTwoType
       example: "a literal example value"
+      default: "a literal default value"
 
 ExampleTestMeaning:
   label: Example Test Meaning
@@ -24,6 +27,8 @@ ExampleTestPurpose:
   label: Example Test Purpose
 ExampleFieldOneMeaning:
   label: Example Field One Meaning
+ExampleFieldOneDefault:
+  label: Example Field One Default
 ExampleFieldOnePurpose:
   label: Example Field One Purpose
 ExampleFieldOneType:

@@ -94,15 +94,21 @@ public record KonceptDefinition(
      * One field of a {@code kind: pattern} koncept: its own meaning, purpose, and data-type
      * koncept identifiers, in the pattern's own declared field order.
      *
-     * @param meaning  the field's own meaning koncept identifier
-     * @param purpose  the field's own purpose koncept identifier
-     * @param dataType the field's own data-type koncept identifier
-     * @param example  this field's actual value on the same example semantic used for
-     *                 {@link KonceptDefinition#referencedComponentExample()} — a koncept
-     *                 identifier if the value resolves to one, otherwise its plain display
-     *                 text — or {@code null} if no example semantic was found
+     * @param meaning      the field's own meaning koncept identifier
+     * @param purpose      the field's own purpose koncept identifier
+     * @param dataType     the field's own data-type koncept identifier
+     * @param example      this field's actual value on the same example semantic used for
+     *                     {@link KonceptDefinition#referencedComponentExample()} — a koncept
+     *                     identifier if the value resolves to one, otherwise its plain display
+     *                     text — or {@code null} if no example semantic was found
+     * @param defaultValue this field's value on the pattern's default value semantic
+     *                     (parsed from the {@code default:} YAML key —
+     *                     IKE-Network/ike-issues#888), with the same identifier-or-display-text
+     *                     convention as {@code example} — or {@code null} when the pattern has
+     *                     no active default value semantic
      */
-    public record PatternField(String meaning, String purpose, String dataType, String example) {
+    public record PatternField(String meaning, String purpose, String dataType, String example,
+                               String defaultValue) {
     }
 
     /**
@@ -112,17 +118,22 @@ public record KonceptDefinition(
      * numbered because it is not part of the fields array at either the schema or the
      * instance level.
      *
-     * @param label    the feature's display label — {@code Referenced component} with the
-     *                 generic any-component phrase, or {@code Field N}
-     * @param meaning  the feature's meaning koncept identifier, or {@code null}
-     * @param purpose  the feature's purpose koncept identifier, or {@code null}
-     * @param dataType the feature's data-type koncept identifier, or {@code null} for the
-     *                 referenced component, which has none
-     * @param example  the feature's live example value, or {@code null} when the
-     *                 extraction found no example semantic
+     * @param label        the feature's display label — {@code Referenced component} with the
+     *                     generic any-component phrase, or {@code Field N}
+     * @param meaning      the feature's meaning koncept identifier, or {@code null}
+     * @param purpose      the feature's purpose koncept identifier, or {@code null}
+     * @param dataType     the feature's data-type koncept identifier, or {@code null} for the
+     *                     referenced component, which has none
+     * @param example      the feature's live example value, or {@code null} when the
+     *                     extraction found no example semantic
+     * @param defaultValue the feature's default value from the pattern's default value
+     *                     semantic, or {@code null} when the pattern has none — always
+     *                     {@code null} for the referenced component, whose referenced
+     *                     component on the defaults semantic is the defaults attachment
+     *                     concept itself, not a documentable value
      */
     public record ModelFeature(String label, String meaning, String purpose,
-                               String dataType, String example) {
+                               String dataType, String example, String defaultValue) {
     }
 
     /**
@@ -143,11 +154,12 @@ public record KonceptDefinition(
                 "Referenced component — the component (concept, semantic, pattern, or STAMP) "
                         + "this pattern's semantics attach to",
                 referencedComponentMeaning, referencedComponentPurpose, null,
-                referencedComponentExample));
+                referencedComponentExample, null));
         int displayIndex = 1;
         for (PatternField field : fields) {
             features.add(new ModelFeature("Field " + displayIndex++,
-                    field.meaning(), field.purpose(), field.dataType(), field.example()));
+                    field.meaning(), field.purpose(), field.dataType(), field.example(),
+                    field.defaultValue()));
         }
         return List.copyOf(features);
     }

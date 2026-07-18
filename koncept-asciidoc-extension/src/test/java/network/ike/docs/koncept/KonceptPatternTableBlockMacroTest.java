@@ -98,6 +98,26 @@ class KonceptPatternTableBlockMacroTest {
     }
 
     @Test
+    void defaultRowsBadgeResolvableValuesAndPassThroughLiterals() {
+        String html = convert("koncept-pattern-table::PatternWithExample[]",
+                "/pattern-shape-example-test.yml");
+
+        assertTrue(html.contains("koncept-feature-default"),
+                "default rows carry their own stylesheet-hook role, distinct from e.g. rows:\n"
+                        + html);
+        assertTrue(html.contains("default "),
+                "default rows carry the default label:\n" + html);
+        assertTrue(html.contains("href=\"#koncept-ExampleFieldOneDefault\""),
+                "a default that resolves to a koncept renders as a badge:\n" + html);
+        assertTrue(html.contains("a literal default value"),
+                "a default that resolves to no koncept renders as plain text:\n" + html);
+        assertFalse(html.contains("href=\"#koncept-a literal default value\""),
+                "…and is not wrapped as a badge link:\n" + html);
+        assertFalse(html.contains("e.g. default"),
+                "default rows are their own rows, never fused onto the e.g. row:\n" + html);
+    }
+
+    @Test
     void patternWithoutExamples_omitsExampleRows() {
         String html = convert("koncept-pattern-table::TestPattern[]", "/pattern-shape-test.yml");
 
@@ -105,6 +125,8 @@ class KonceptPatternTableBlockMacroTest {
                 "the shape table still renders without examples:\n" + html);
         assertFalse(html.contains("e.g."),
                 "no example semantic extracted means no e.g. rows, not blank ones:\n" + html);
+        assertFalse(html.contains("koncept-feature-default"),
+                "no default value semantic means no default rows, not blank ones:\n" + html);
     }
 
     @Test

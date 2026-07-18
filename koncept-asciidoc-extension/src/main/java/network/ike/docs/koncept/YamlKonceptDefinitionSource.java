@@ -200,8 +200,11 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
 
     /**
      * Reads a list of {@code {meaning, purpose, dataType}} maps into
-     * {@link KonceptDefinition.PatternField} records, in declared order. Returns
-     * {@code null} when the field is absent or empty so the builder can apply its default.
+     * {@link KonceptDefinition.PatternField} records, in declared order — each optionally
+     * carrying an {@code example} (a live value from a real semantic) and a {@code default}
+     * (the value from the pattern's default value semantic, IKE-Network/ike-issues#888).
+     * Returns {@code null} when the field is absent or empty so the builder can apply its
+     * default.
      */
     @SuppressWarnings("unchecked")
     private static List<KonceptDefinition.PatternField> patternFieldsField(Map<String, Object> map, String key) {
@@ -217,8 +220,10 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                 String purpose = stringField(field, "purpose");
                 String dataType = stringField(field, "dataType");
                 String example = stringField(field, "example");
+                String defaultValue = stringField(field, "default");
                 if (meaning != null && purpose != null && dataType != null) {
-                    out.add(new KonceptDefinition.PatternField(meaning, purpose, dataType, example));
+                    out.add(new KonceptDefinition.PatternField(meaning, purpose, dataType, example,
+                            defaultValue));
                 }
             }
         }

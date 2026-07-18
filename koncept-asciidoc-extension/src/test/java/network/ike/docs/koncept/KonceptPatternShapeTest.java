@@ -30,9 +30,11 @@ class KonceptPatternShapeTest {
 
         List<KonceptDefinition.PatternField> fields = def.fields();
         assertEquals(2, fields.size());
-        assertEquals(new KonceptDefinition.PatternField("FieldOneMeaning", "FieldOnePurpose", "FieldOneType", null),
+        assertEquals(new KonceptDefinition.PatternField(
+                        "FieldOneMeaning", "FieldOnePurpose", "FieldOneType", null, null),
                 fields.get(0));
-        assertEquals(new KonceptDefinition.PatternField("FieldTwoMeaning", "FieldTwoPurpose", "FieldTwoType", null),
+        assertEquals(new KonceptDefinition.PatternField(
+                        "FieldTwoMeaning", "FieldTwoPurpose", "FieldTwoType", null, null),
                 fields.get(1));
     }
 
@@ -48,6 +50,25 @@ class KonceptPatternShapeTest {
         List<KonceptDefinition.PatternField> fields = def.fields();
         assertEquals("ExampleFieldOneMeaning", fields.get(0).example());
         assertEquals("a literal example value", fields.get(1).example());
+    }
+
+    @Test
+    void patternDefaultValuesParseCorrectly() {
+        KonceptDefinition def = KonceptDefinitionSource.fromClasspath("/pattern-shape-example-test.yml")
+                .lookup("PatternWithExample").orElseThrow();
+
+        List<KonceptDefinition.PatternField> fields = def.fields();
+        assertEquals("ExampleFieldOneDefault", fields.get(0).defaultValue(),
+                "a default: key that names a koncept parses as its identifier");
+        assertEquals("a literal default value", fields.get(1).defaultValue(),
+                "a quoted default: literal parses as plain text");
+
+        List<KonceptDefinition.ModelFeature> features = def.modelFeatures();
+        assertEquals(null, features.get(0).defaultValue(),
+                "the referenced component never carries a default value");
+        assertEquals("ExampleFieldOneDefault", features.get(1).defaultValue(),
+                "modelFeatures() carries each field's default value through to renderers");
+        assertEquals("a literal default value", features.get(2).defaultValue());
     }
 
     @Test
@@ -104,6 +125,8 @@ class KonceptPatternShapeTest {
                 "must link to the second field's meaning/purpose/dataType koncepts:\n" + html);
         assertFalse(html.contains("e.g."),
                 "no example values in this fixture means no e.g. rows:\n" + html);
+        assertFalse(html.contains("koncept-feature-default"),
+                "no default values in this fixture means no default rows:\n" + html);
     }
 
     @Test
@@ -122,6 +145,25 @@ class KonceptPatternShapeTest {
                 "a resolvable example renders as a chip:\n" + html);
         assertTrue(html.contains("a literal example value"),
                 "an unresolvable example renders as plain text:\n" + html);
+    }
+
+    @Test
+    void glossaryEntryRendersDefaultRowsMatchingTheBlockMacro() {
+        KonceptDefinitionSource source =
+                KonceptDefinitionSource.fromClasspath("/pattern-shape-example-test.yml");
+        KonceptDefinition def = source.lookup("PatternWithExample").orElseThrow();
+
+        String html = KonceptGlossaryEntryRenderer.entryHtml(
+                "PatternWithExample", Optional.of(def), null, Map.of(), source);
+
+        assertTrue(html.contains("koncept-feature-default"),
+                "default rows carry their own stylesheet hook, distinct from e.g. rows:\n" + html);
+        assertTrue(html.contains("default "),
+                "default rows carry the default label, not e.g.:\n" + html);
+        assertTrue(html.contains("#koncept-ExampleFieldOneDefault"),
+                "a resolvable default renders as a chip:\n" + html);
+        assertTrue(html.contains("a literal default value"),
+                "an unresolvable default renders as plain text:\n" + html);
     }
 
     @Test
