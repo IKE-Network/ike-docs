@@ -34,7 +34,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#use">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 89</div>
+<div class="about-language"><b>Koncept Extension</b> 90</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -71,12 +71,28 @@ description logic axiom, and optional terminology identifiers.</div>
 <div class="block">Builder for constructing KonceptDefinition instances from parsed YAML
 or programmatic sources.</div>
 </div>
-<div class="col-first even-row-color"><a href="class-use/KonceptDefinitionSource.html#network.ike.docs.koncept">KonceptDefinitionSource</a></div>
+<div class="col-first even-row-color"><a href="class-use/KonceptDefinition.ModelFeature.html#network.ike.docs.koncept">KonceptDefinition.ModelFeature</a></div>
 <div class="col-last even-row-color">
+<div class="block">One Model Feature of a <code>kind: pattern</code> koncept in presentation form: the
+referenced component first, then each declared field, labeled 1-indexed
+(<code>Field 1</code> is the first declared field).</div>
+</div>
+<div class="col-first odd-row-color"><a href="class-use/KonceptDefinition.PatternField.html#network.ike.docs.koncept">KonceptDefinition.PatternField</a></div>
+<div class="col-last odd-row-color">
+<div class="block">One field of a <code>kind: pattern</code> koncept: its own meaning, purpose, and data-type
+koncept identifiers, in the pattern's own declared field order.</div>
+</div>
+<div class="col-first even-row-color"><a href="class-use/KonceptDefinition.RetiredComment.html#network.ike.docs.koncept">KonceptDefinition.RetiredComment</a></div>
+<div class="col-last even-row-color">
+<div class="block">A comment's text immediately before it was retired, and the time of that
+retirement.</div>
+</div>
+<div class="col-first odd-row-color"><a href="class-use/KonceptDefinitionSource.html#network.ike.docs.koncept">KonceptDefinitionSource</a></div>
+<div class="col-last odd-row-color">
 <div class="block">Strategy interface for resolving Koncept definitions.</div>
 </div>
-<div class="col-first odd-row-color"><a href="class-use/YamlKonceptDefinitionSource.html#network.ike.docs.koncept">YamlKonceptDefinitionSource</a></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><a href="class-use/YamlKonceptDefinitionSource.html#network.ike.docs.koncept">YamlKonceptDefinitionSource</a></div>
+<div class="col-last even-row-color">
 <div class="block">Loads Koncept definitions from a YAML file.</div>
 </div>
 </div>

@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 89</div>
+<div class="about-language"><b>Koncept Extension</b> 90</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#lookup(java.lang.String)" tabindex="0">lookup(String)</a></li>
+<li><a href="#identifiers()" tabindex="0">identifiers()</a></li>
 </ol>
 </li>
 </ol>
@@ -122,9 +123,16 @@ listed first will override definitions from the pipeline classpath.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lookup(java.lang.String)" class="member-name-link">lookup</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#identifiers()" class="member-name-link">identifiers</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">All identifiers this source can enumerate, for a comprehensive glossary that
+lists every known koncept (not only those referenced in the document) and for
+inverting the <code>broader</code> taxonomy into children.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lookup(java.lang.String)" class="member-name-link">lookup</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Look up the definition for the given koncept identifier.</div>
 </div>
 </div>
@@ -179,6 +187,26 @@ listed first will override definitions from the pipeline classpath.</div>
 <dd><code>identifier</code> - CamelCase koncept identifier (e.g., "HeartFailure")</dd>
 <dt>Returns:</dt>
 <dd>the definition if found</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="identifiers()">
+<h3>identifiers</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">identifiers</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="KonceptDefinitionSource.html#identifiers()">KonceptDefinitionSource</a></code></span></div>
+<div class="block">All identifiers this source can enumerate, for a comprehensive glossary that
+lists every known koncept (not only those referenced in the document) and for
+inverting the <code>broader</code> taxonomy into children. Sources that cannot
+enumerate (for example a live terminology server queried on demand) return an
+empty collection, and the glossary falls back to referenced koncepts only.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="KonceptDefinitionSource.html#identifiers()">identifiers</a></code>&nbsp;in interface&nbsp;<code><a href="KonceptDefinitionSource.html" title="interface in network.ike.docs.koncept">KonceptDefinitionSource</a></code></dd>
+<dt>Returns:</dt>
+<dd>every known identifier, or an empty collection if enumeration is unsupported</dd>
 </dl>
 </div>
 </section>

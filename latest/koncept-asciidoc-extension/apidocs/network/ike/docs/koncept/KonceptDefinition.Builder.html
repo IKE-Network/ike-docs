@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 89</div>
+<div class="about-language"><b>Koncept Extension</b> 90</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -73,6 +73,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#iri(java.lang.String)" tabindex="0">iri(String)</a></li>
 <li><a href="#uuids(java.util.List)" tabindex="0">uuids(List)</a></li>
 <li><a href="#kind(java.lang.String)" tabindex="0">kind(String)</a></li>
+<li><a href="#broader(java.util.List)" tabindex="0">broader(List)</a></li>
+<li><a href="#section(java.lang.String)" tabindex="0">section(String)</a></li>
+<li><a href="#since(java.lang.String)" tabindex="0">since(String)</a></li>
+<li><a href="#comments(java.util.List)" tabindex="0">comments(List)</a></li>
+<li><a href="#retiredComments(java.util.List)" tabindex="0">retiredComments(List)</a></li>
+<li><a href="#seeAlso(java.util.List)" tabindex="0">seeAlso(List)</a></li>
+<li><a href="#narrative(java.lang.String)" tabindex="0">narrative(String)</a></li>
+<li><a href="#referencedComponentMeaning(java.lang.String)" tabindex="0">referencedComponentMeaning(String)</a></li>
+<li><a href="#referencedComponentPurpose(java.lang.String)" tabindex="0">referencedComponentPurpose(String)</a></li>
+<li><a href="#referencedComponentExample(java.lang.String)" tabindex="0">referencedComponentExample(String)</a></li>
+<li><a href="#fields(java.util.List)" tabindex="0">fields(List)</a></li>
 <li><a href="#build()" tabindex="0">build()</a></li>
 </ol>
 </li>
@@ -132,10 +143,20 @@ or programmatic sources.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the description logic axiom string.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#build()" class="member-name-link">build</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#broader(java.util.List)" class="member-name-link">broader</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;broader)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the identifiers of this koncept's supertypes (is-a parents).</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#build()" class="member-name-link">build</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Builds an immutable <a href="KonceptDefinition.html" title="class in network.ike.docs.koncept"><code>KonceptDefinition</code></a> from this builder's state.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#comments(java.util.List)" class="member-name-link">comments</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;comments)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the text of every currently active comment attached to this koncept.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#definition(java.lang.String)" class="member-name-link">definition</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;definition)</code></div>
@@ -143,25 +164,59 @@ or programmatic sources.</div>
 <div class="block">Sets the natural language definition text.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#identifier(java.lang.String)" class="member-name-link">identifier</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fields(java.util.List)" class="member-name-link">fields</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="KonceptDefinition.PatternField.html" title="class in network.ike.docs.koncept">KonceptDefinition.PatternField</a>&gt;&nbsp;fields)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sets the CamelCase identifier.</div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's own field definitions, in declared order.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iri(java.lang.String)" class="member-name-link">iri</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;iri)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#identifier(java.lang.String)" class="member-name-link">identifier</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sets the OWL IRI for the concept.</div>
+<div class="block">Sets the CamelCase identifier.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#kind(java.lang.String)" class="member-name-link">kind</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;kind)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iri(java.lang.String)" class="member-name-link">iri</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;iri)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the OWL IRI for the concept.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#kind(java.lang.String)" class="member-name-link">kind</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;kind)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the component kind (<code>concept</code>, <code>description</code>, <code>semantic</code>,
 <code>pattern</code>, <code>stamp</code>, <code>unknown</code>); <code>null</code> or absent means concept.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#label(java.lang.String)" class="member-name-link">label</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#label(java.lang.String)" class="member-name-link">label</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the human-readable label.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#narrative(java.lang.String)" class="member-name-link">narrative</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;narrative)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the curated, long-form AsciiDoc prose for this koncept.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#referencedComponentExample(java.lang.String)" class="member-name-link">referencedComponentExample</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentExample)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets a <code>kind: pattern</code> koncept's referenced-component example — the referenced
+component of a real semantic of this pattern already in the knowledge base.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#referencedComponentMeaning(java.lang.String)" class="member-name-link">referencedComponentMeaning</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentMeaning)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component meaning concept
+identifier.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#referencedComponentPurpose(java.lang.String)" class="member-name-link">referencedComponentPurpose</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentPurpose)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component purpose concept
+identifier.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#retiredComments(java.util.List)" class="member-name-link">retiredComments</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="KonceptDefinition.RetiredComment.html" title="class in network.ike.docs.koncept">KonceptDefinition.RetiredComment</a>&gt;&nbsp;retiredComments)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the prior text and retirement time of comments superseded by an
+inactive version.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sctid(java.lang.String)" class="member-name-link">sctid</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sctid)</code></div>
@@ -169,8 +224,23 @@ or programmatic sources.</div>
 <div class="block">Sets the SNOMED CT concept identifier.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#section(java.lang.String)" class="member-name-link">section</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;section)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the stable section-grouping key computed against the live knowledge base.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#seeAlso(java.util.List)" class="member-name-link">seeAlso</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;seeAlso)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the identifiers of related koncepts (a javadoc-<code>@see</code> analog).</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#since(java.lang.String)" class="member-name-link">since</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;since)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the earliest stamp time of this koncept's own version chain.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the explicit Tinkar PublicId UUIDs (in datastore order) used
 to compute the Komet identicon.</div>
 </div>
@@ -324,6 +394,175 @@ to compute the Komet identicon.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>kind</code> - the kind name to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="broader(java.util.List)">
+<h3>broader</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">broader</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;broader)</span></div>
+<div class="block">Sets the identifiers of this koncept's supertypes (is-a parents).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>broader</code> - the parent identifiers to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="section(java.lang.String)">
+<h3>section</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">section</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;section)</span></div>
+<div class="block">Sets the stable section-grouping key computed against the live knowledge base.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>section</code> - the section key to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="since(java.lang.String)">
+<h3>since</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">since</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;since)</span></div>
+<div class="block">Sets the earliest stamp time of this koncept's own version chain.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>since</code> - the formatted time to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="comments(java.util.List)">
+<h3>comments</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">comments</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;comments)</span></div>
+<div class="block">Sets the text of every currently active comment attached to this koncept.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>comments</code> - the comment texts to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="retiredComments(java.util.List)">
+<h3>retiredComments</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">retiredComments</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="KonceptDefinition.RetiredComment.html" title="class in network.ike.docs.koncept">KonceptDefinition.RetiredComment</a>&gt;&nbsp;retiredComments)</span></div>
+<div class="block">Sets the prior text and retirement time of comments superseded by an
+inactive version.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>retiredComments</code> - the retired comments to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="seeAlso(java.util.List)">
+<h3>seeAlso</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">seeAlso</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;seeAlso)</span></div>
+<div class="block">Sets the identifiers of related koncepts (a javadoc-<code>@see</code> analog).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>seeAlso</code> - the related identifiers to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="narrative(java.lang.String)">
+<h3>narrative</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">narrative</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;narrative)</span></div>
+<div class="block">Sets the curated, long-form AsciiDoc prose for this koncept.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>narrative</code> - the AsciiDoc source to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="referencedComponentMeaning(java.lang.String)">
+<h3>referencedComponentMeaning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">referencedComponentMeaning</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentMeaning)</span></div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component meaning concept
+identifier.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>referencedComponentMeaning</code> - the referenced-component meaning identifier to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="referencedComponentPurpose(java.lang.String)">
+<h3>referencedComponentPurpose</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">referencedComponentPurpose</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentPurpose)</span></div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component purpose concept
+identifier.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>referencedComponentPurpose</code> - the referenced-component purpose identifier to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="referencedComponentExample(java.lang.String)">
+<h3>referencedComponentExample</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">referencedComponentExample</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentExample)</span></div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's referenced-component example — the referenced
+component of a real semantic of this pattern already in the knowledge base.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>referencedComponentExample</code> - the referenced-component example to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fields(java.util.List)">
+<h3>fields</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">fields</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="KonceptDefinition.PatternField.html" title="class in network.ike.docs.koncept">KonceptDefinition.PatternField</a>&gt;&nbsp;fields)</span></div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's own field definitions, in declared order.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>fields</code> - the field definitions to set</dd>
 <dt>Returns:</dt>
 <dd>this builder</dd>
 </dl>

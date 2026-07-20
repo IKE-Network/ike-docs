@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../../search.html">Search</a></li>
 <li><a href="../../../../../help-doc.html#use">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 89</div>
+<div class="about-language"><b>Koncept Extension</b> 90</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -71,10 +71,20 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Sets the description logic axiom string.</div>
 </div>
-<div class="col-first odd-row-color"><code>static <a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.</span><code><a href="../KonceptDefinition.html#builder()" class="member-name-link">builder</a>()</code></div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#broader(java.util.List)" class="member-name-link">broader</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;broader)</code></div>
 <div class="col-last odd-row-color">
+<div class="block">Sets the identifiers of this koncept's supertypes (is-a parents).</div>
+</div>
+<div class="col-first even-row-color"><code>static <a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.</span><code><a href="../KonceptDefinition.html#builder()" class="member-name-link">builder</a>()</code></div>
+<div class="col-last even-row-color">
 <div class="block">Creates a new builder for constructing <a href="../KonceptDefinition.html" title="class in network.ike.docs.koncept"><code>KonceptDefinition</code></a> instances.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#comments(java.util.List)" class="member-name-link">comments</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;comments)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Sets the text of every currently active comment attached to this koncept.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
 <div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#definition(java.lang.String)" class="member-name-link">definition</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;definition)</code></div>
@@ -82,25 +92,59 @@ loadScripts(document, 'script');</script>
 <div class="block">Sets the natural language definition text.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#identifier(java.lang.String)" class="member-name-link">identifier</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#fields(java.util.List)" class="member-name-link">fields</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../KonceptDefinition.PatternField.html" title="class in network.ike.docs.koncept">KonceptDefinition.PatternField</a>&gt;&nbsp;fields)</code></div>
 <div class="col-last odd-row-color">
-<div class="block">Sets the CamelCase identifier.</div>
+<div class="block">Sets a <code>kind: pattern</code> koncept's own field definitions, in declared order.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#iri(java.lang.String)" class="member-name-link">iri</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;iri)</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#identifier(java.lang.String)" class="member-name-link">identifier</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;identifier)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Sets the OWL IRI for the concept.</div>
+<div class="block">Sets the CamelCase identifier.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#kind(java.lang.String)" class="member-name-link">kind</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;kind)</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#iri(java.lang.String)" class="member-name-link">iri</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;iri)</code></div>
 <div class="col-last odd-row-color">
+<div class="block">Sets the OWL IRI for the concept.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#kind(java.lang.String)" class="member-name-link">kind</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;kind)</code></div>
+<div class="col-last even-row-color">
 <div class="block">Sets the component kind (<code>concept</code>, <code>description</code>, <code>semantic</code>,
 <code>pattern</code>, <code>stamp</code>, <code>unknown</code>); <code>null</code> or absent means concept.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#label(java.lang.String)" class="member-name-link">label</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#label(java.lang.String)" class="member-name-link">label</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last odd-row-color">
 <div class="block">Sets the human-readable label.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#narrative(java.lang.String)" class="member-name-link">narrative</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;narrative)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Sets the curated, long-form AsciiDoc prose for this koncept.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#referencedComponentExample(java.lang.String)" class="member-name-link">referencedComponentExample</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentExample)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Sets a <code>kind: pattern</code> koncept's referenced-component example — the referenced
+component of a real semantic of this pattern already in the knowledge base.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#referencedComponentMeaning(java.lang.String)" class="member-name-link">referencedComponentMeaning</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentMeaning)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component meaning concept
+identifier.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#referencedComponentPurpose(java.lang.String)" class="member-name-link">referencedComponentPurpose</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;referencedComponentPurpose)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Sets a <code>kind: pattern</code> koncept's own referenced-component purpose concept
+identifier.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#retiredComments(java.util.List)" class="member-name-link">retiredComments</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../KonceptDefinition.RetiredComment.html" title="class in network.ike.docs.koncept">KonceptDefinition.RetiredComment</a>&gt;&nbsp;retiredComments)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Sets the prior text and retirement time of comments superseded by an
+inactive version.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
 <div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#sctid(java.lang.String)" class="member-name-link">sctid</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sctid)</code></div>
@@ -108,8 +152,23 @@ loadScripts(document, 'script');</script>
 <div class="block">Sets the SNOMED CT concept identifier.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#section(java.lang.String)" class="member-name-link">section</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;section)</code></div>
 <div class="col-last even-row-color">
+<div class="block">Sets the stable section-grouping key computed against the live knowledge base.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#seeAlso(java.util.List)" class="member-name-link">seeAlso</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;seeAlso)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Sets the identifiers of related koncepts (a javadoc-<code>@see</code> analog).</div>
+</div>
+<div class="col-first even-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#since(java.lang.String)" class="member-name-link">since</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;since)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Sets the earliest stamp time of this koncept's own version chain.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="../KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">KonceptDefinition.Builder.</span><code><a href="../KonceptDefinition.Builder.html#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
+<div class="col-last odd-row-color">
 <div class="block">Sets the explicit Tinkar PublicId UUIDs (in datastore order) used
 to compute the Komet identicon.</div>
 </div>

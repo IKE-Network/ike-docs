@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 89</div>
+<div class="about-language"><b>Koncept Extension</b> 90</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -60,6 +60,9 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)" tabindex="0">render(String, String, KonceptKind)</a></li>
 <li><a href="#renderStampSigil(java.lang.String,java.lang.String)" tabindex="0">renderStampSigil(String, String)</a></li>
+<li><a href="#renderStampSpecimen(java.lang.String)" tabindex="0">renderStampSpecimen(String)</a></li>
+<li><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind)" tabindex="0">renderSigil(KonceptKind)</a></li>
+<li><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)" tabindex="0">renderSigil(KonceptKind, double)</a></li>
 </ol>
 </li>
 </ol>
@@ -82,7 +85,8 @@ loadScripts(document, 'script');</script>
 The badge renders as a compact, clickable pill that links to the glossary anchor for the
 referenced Koncept. The component-kind sigil (ike-issues#638) leads the badge: a coloured
 letter (<code>D</code>/<code>S</code>/<code>P</code>/<code>?</code>) for description/semantic/pattern/unknown, the
-locked <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a> pentagon for a stamp (no name), and nothing for a bare concept.
+locked <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a> pentagon for a stamp — whose compact provenance text stands in
+place of a name — and nothing for a bare Koncept.
 <p>
 SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and PDF backends.</div>
 </div>
@@ -108,12 +112,39 @@ SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and 
 <div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Render a component-kind sigil on its own at natural badge scale — see
+<a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)"><code>renderSigil(KonceptKind, double)</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
+ double&nbsp;scale)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Render a component-kind sigil on its own — no badge, no anchor, no name — as
+standalone inline SVG from the same locked constants the badge renderers use
+(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind</code></a>'s glyph/colour data and the <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>
+pentagon), so a sigil shown in prose can never drift from the sigil shown in a
+badge.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSigil(java.lang.String,java.lang.String)" class="member-name-link">renderStampSigil</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
-<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading dots and a centre hub,
-no name.</div>
+<div class="block">Render a STAMP badge <em>without</em> an identicon — the no-computable-identity
+fallback (the identicon-bearing stamp chip is
+<code>KonceptInlineMacro#renderHtmlStampChip</code>): the locked gray pentagon (computed
+from the shared <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading
+dots and a centre hub — beside the compact provenance text that stands in place of
+a name.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSpecimen(java.lang.String)" class="member-name-link">renderStampSpecimen</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Render a stamp chip as a <em>specimen</em> — the pentagon and compact provenance
+text, exactly as <a href="#renderStampSigil(java.lang.String,java.lang.String)"><code>renderStampSigil(String, String)</code></a> draws them, but with no
+anchor: for prose that shows what a stamp badge looks like (a "How to Read This
+Guide" front matter) rather than referencing a glossary-curated component.</div>
 </div>
 </div>
 </div>
@@ -157,10 +188,13 @@ no name.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">renderStampSigil</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</span></div>
-<div class="block">Render the STAMP kind sigil: the locked gray pentagon (computed from the shared
-<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading dots and a centre hub,
-no name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so the
-pentagon is identical in every medium.
+<div class="block">Render a STAMP badge <em>without</em> an identicon — the no-computable-identity
+fallback (the identicon-bearing stamp chip is
+<code>KonceptInlineMacro#renderHtmlStampChip</code>): the locked gray pentagon (computed
+from the shared <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>) as inline SVG — five asymmetric reading
+dots and a centre hub — beside the compact provenance text that stands in place of
+a name. The geometry is the same numbers the JavaFX node and the Java2D PNG use, so
+the pentagon is identical in every medium.
 
 <p>The <code>label</code> is the caller-formatted, verbatim provenance string; this renderer only
 HTML-escapes it and never reformats or re-spells it. In particular the status token within
@@ -173,6 +207,65 @@ verbatim).</div>
               pentagon — provenance, in place of a name</dd>
 <dt>Returns:</dt>
 <dd>complete SVG+anchor HTML string for the stamp pentagon + compact text</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="renderStampSpecimen(java.lang.String)">
+<h3>renderStampSpecimen</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">renderStampSpecimen</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</span></div>
+<div class="block">Render a stamp chip as a <em>specimen</em> — the pentagon and compact provenance
+text, exactly as <a href="#renderStampSigil(java.lang.String,java.lang.String)"><code>renderStampSigil(String, String)</code></a> draws them, but with no
+anchor: for prose that shows what a stamp badge looks like (a "How to Read This
+Guide" front matter) rather than referencing a glossary-curated component.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>label</code> - the compact stamp text (<code>status · date-time · author</code>), verbatim</dd>
+<dt>Returns:</dt>
+<dd>the stamp chip SVG, unlinked</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="renderSigil(network.ike.docs.konceptcore.KonceptKind)">
+<h3>renderSigil</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">renderSigil</span><wbr><span class="parameters">(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</span></div>
+<div class="block">Render a component-kind sigil on its own at natural badge scale — see
+<a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)"><code>renderSigil(KonceptKind, double)</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>kind</code> - the component kind; <code>null</code> is treated as <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
+<dt>Returns:</dt>
+<dd>the sigil SVG, or an empty string for the bare <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="renderSigil(network.ike.docs.konceptcore.KonceptKind,double)">
+<h3>renderSigil</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">renderSigil</span><wbr><span class="parameters">(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
+ double&nbsp;scale)</span></div>
+<div class="block">Render a component-kind sigil on its own — no badge, no anchor, no name — as
+standalone inline SVG from the same locked constants the badge renderers use
+(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind</code></a>'s glyph/colour data and the <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>
+pentagon), so a sigil shown in prose can never drift from the sigil shown in a
+badge. Carries the kind's <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#accessibleName()" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.accessibleName()</code></a> as the SVG
+<code>&lt;title&gt;</code> for assistive technology. The geometry lives in the SVG
+<code>viewBox</code>; <code>scale</code> only enlarges the rendered box (legend and
+teaching contexts want the mark bigger than badge scale without redrawing it).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>kind</code> - the component kind; <code>null</code> is treated as <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
+<dd><code>scale</code> - the display scale, <code>1.0</code> being natural badge scale</dd>
+<dt>Returns:</dt>
+<dd>the sigil SVG, or an empty string for the bare <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a>,
+        which by design shows no sigil</dd>
 </dl>
 </div>
 </section>
