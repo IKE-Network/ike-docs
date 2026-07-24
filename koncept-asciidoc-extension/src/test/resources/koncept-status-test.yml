@@ -1,0 +1,44 @@
+# Test fixture for KonceptStatusRenderingTest (ike-issues#742 amendment, #940).
+# Exercises the Koncept logical-status cluster: the copula from the stated EL++
+# expression (defined ≡ / primitive ⊑ / root ⊤) plus the ⋎ multi-parent fork
+# derived from broader's size. Kind sigils and status glyphs never co-occur.
+
+DefinedSingle:
+  label: Defined Single Parent
+  definition: A sufficiently defined concept with one stated parent.
+  axiom: "≡ RootThing"
+  broader: [RootThing]
+  status: defined
+  uuids:
+    - "aaaaaaaa-1111-4000-8000-000000000001"
+
+PrimitiveMulti:
+  label: Primitive Multi Parent
+  definition: A primitive concept with two stated parents.
+  axiom: "⊑ RootThing ⊓ DefinedSingle"
+  broader: [RootThing, DefinedSingle]
+  status: primitive
+  uuids:
+    - "aaaaaaaa-2222-4000-8000-000000000002"
+
+RootThing:
+  label: Root Thing
+  definition: The taxonomy root of this fixture.
+  status: root
+  uuids:
+    - "aaaaaaaa-3333-4000-8000-000000000003"
+
+Statusless:
+  label: Statusless Concept
+  definition: A concept with no stated logical definition — its badge stays truly bare.
+  uuids:
+    - "aaaaaaaa-4444-4000-8000-000000000004"
+
+StatusedPattern:
+  label: Statused Pattern
+  definition: A pattern that (wrongly) carries a status field — the kind sigil must win.
+  kind: pattern
+  status: defined
+  broader: [RootThing, DefinedSingle]
+  uuids:
+    - "aaaaaaaa-5555-4000-8000-000000000005"

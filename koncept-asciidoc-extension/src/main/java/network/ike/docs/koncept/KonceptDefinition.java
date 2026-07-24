@@ -1,5 +1,7 @@
 package network.ike.docs.koncept;
 
+import network.ike.docs.konceptcore.KonceptStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,11 @@ import java.util.List;
  * @param broader         Optional identifiers of this koncept's supertypes (is-a parents);
  *                        the glossary renders them as parent chips and inverts them across
  *                        the source to render each koncept's children
+ * @param status          Optional logical-definition status from the stated EL++ expression
+ *                        ({@code defined}, {@code primitive}, {@code root}); {@code null} or
+ *                        absent means no stated definition — the badge stays bare
+ *                        (ike-issues#742 design amendment, #940). Multi-parent is not a
+ *                        status: it is derived from {@code broader}'s size
  * @param section         Optional stable grouping key computed against the live knowledge
  *                        base (a taxonomy-subtree root's own identifier, or a positional
  *                        {@code ResidualN}/{@code Unclassified} bucket); the grouped
@@ -68,6 +75,7 @@ public record KonceptDefinition(
         List<String> uuids,
         String kind,
         List<String> broader,
+        String status,
         String section,
         String since,
         List<String> comments,
@@ -137,6 +145,26 @@ public record KonceptDefinition(
     }
 
     /**
+     * The logical-definition status as the typed vocabulary — {@link KonceptStatus#NONE}
+     * when {@link #status()} is absent or unrecognised.
+     *
+     * @return the resolved status, never {@code null}
+     */
+    public KonceptStatus konceptStatus() {
+        return KonceptStatus.fromString(status);
+    }
+
+    /**
+     * Whether this koncept has more than one stated is-a parent — the structural property
+     * the badge renders as the appended {@value KonceptStatus#MULTI_PARENT_GLYPH} fork.
+     *
+     * @return {@code true} when {@link #broader()} lists more than one parent
+     */
+    public boolean isMultiParent() {
+        return broader != null && broader.size() > 1;
+    }
+
+    /**
      * This pattern's Model Features in presentation order — the single source of truth
      * behind every shape rendering (the {@code koncept-pattern-table} block macro and the
      * glossary's pattern-shape table): the referenced component, then each declared field
@@ -178,6 +206,7 @@ public record KonceptDefinition(
         private List<String> uuids;
         private String kind;
         private List<String> broader;
+        private String status;
         private String section;
         private String since;
         private List<String> comments;
@@ -291,6 +320,18 @@ public record KonceptDefinition(
          */
         public Builder broader(List<String> broader) {
             this.broader = broader;
+            return this;
+        }
+
+        /**
+         * Sets the logical-definition status name ({@code defined}, {@code primitive},
+         * {@code root}); {@code null} or absent means no stated definition.
+         *
+         * @param status the status name to set
+         * @return this builder
+         */
+        public Builder status(String status) {
+            this.status = status;
             return this;
         }
 
@@ -430,7 +471,8 @@ public record KonceptDefinition(
             List<String> seeAlsoList = seeAlso != null ? List.copyOf(seeAlso) : List.of();
             List<PatternField> fieldsList = fields != null ? List.copyOf(fields) : List.of();
             return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
-                    uuidList, kind, broaderList, section, since, commentsList, retiredCommentsList, seeAlsoList,
+                    uuidList, kind, broaderList, status, section, since, commentsList,
+                    retiredCommentsList, seeAlsoList,
                     narrative, referencedComponentMeaning, referencedComponentPurpose,
                     referencedComponentExample, fieldsList);
         }

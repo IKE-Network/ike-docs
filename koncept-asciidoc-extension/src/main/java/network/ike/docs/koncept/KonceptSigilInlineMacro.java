@@ -10,8 +10,11 @@ import org.asciidoctor.extension.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * AsciidoctorJ inline macro that renders a component-kind sigil on its own — the mark a
@@ -38,20 +41,22 @@ import java.util.Map;
  * name for the pentagon.
  * <p>
  * With a bracket label the macro renders a <em>specimen badge</em> instead of the bare
- * sigil — the full badge form of that kind carrying the given text, unlinked and with no
- * identicon, because a specimen shows what a badge of the kind looks like without
- * claiming a reference to a curated component:
+ * sigil — the full badge form of that kind carrying the given text, unlinked, because a
+ * specimen shows what a badge of the kind looks like without claiming a glossary
+ * reference. A {@code uuid} attribute names the specimen's real referent, and the badge
+ * renders <em>in full</em> — sigil, identicon, label — honouring the anatomy rule that a
+ * sigil never stands alone (ike-issues#742 amendment):
  * <pre>
- * koncept-sigil:description[Uninitialized Component (SOLOR)]
- * koncept-sigil:semantic[Gretel]
- * koncept-sigil:stamp[Active · Inception · Tinkar Starter Data Author]
+ * koncept-sigil:description[label="Uninitialized Component (SOLOR)", uuid=6d3a2410-…]
+ * koncept-sigil:semantic[label="Gretel", uuid=1a5b28fd-…]
+ * koncept-sigil:stamp[label="Active · Inception · IKE Community", uuid=770cba9b-…]
  * </pre>
- * Letter kinds render the badge chip (sigil + small-caps label) via
- * {@link KonceptInlineMacro#renderSpecimenChip(KonceptKind, String)}; a stamp renders the
- * pentagon-and-provenance chip via
- * {@link KonceptSvgRenderer#renderStampSpecimen(String)}. Keep specimen text real —
- * drawn from actual knowledge-base content — so the guide never illustrates with
- * invented values.
+ * Without a {@code uuid} the chip degrades to sigil + label (legacy form). Letter kinds
+ * render via {@link KonceptInlineMacro#renderSpecimenChip}; a stamp renders the
+ * pentagon-and-provenance chip via {@link KonceptInlineMacro#renderStampSpecimenChip}
+ * (or {@link KonceptSvgRenderer#renderStampSpecimen(String)} without a uuid). Keep
+ * specimen text and uuids real — drawn from actual knowledge-base content — so the guide
+ * never illustrates with invented values.
  * <p>
  * A bare sigil accepts a {@code scale} attribute ({@code koncept-sigil:stamp[scale=1.5]})
  * for legend and teaching contexts where the mark should read larger than badge scale;
@@ -81,14 +86,25 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
 
         Document doc = parent.getDocument();
         String backend = doc.getAttribute("backend", "html5").toString();
-        Object bracket = attributes.get("1");
+        // label: the named attribute wins; positional 1 is the legacy bracket-label form. A
+        // positional value containing '=' would have been parsed as a named attribute, so the
+        // named form is required once uuid= appears.
+        Object named = attributes.get("label");
+        Object bracket = named != null ? named : attributes.get("1");
         String label = bracket != null && !bracket.toString().isBlank()
                 ? bracket.toString().strip() : null;
+        String idString = specimenIdString(attributes, target);
+        String identity = label != null && idString != null
+                ? label + " · " + attributes.get("uuid").toString().strip() : label;
 
         if (backend.startsWith("html")) {
             String rendered;
             if (label == null) {
                 rendered = KonceptSvgRenderer.renderSigil(kind, scale(attributes, target));
+            } else if (idString != null) {
+                rendered = kind.isStamp()
+                        ? KonceptInlineMacro.renderStampSpecimenChip(label, idString, identity)
+                        : KonceptInlineMacro.renderSpecimenChip(kind, label, idString, identity);
             } else if (kind.isStamp()) {
                 rendered = KonceptSvgRenderer.renderStampSpecimen(label);
             } else {
@@ -96,9 +112,48 @@ public class KonceptSigilInlineMacro extends InlineMacroProcessor {
             }
             return createPhraseNode(parent, "quoted", rendered, Map.of("subs", ":none"));
         }
+
         String glyph = kind.hasLetterGlyph() ? kind.glyph() : kind.accessibleName();
+        // Prawn PDF with a referent: re-processable AsciiDoc — the glyph, a native inline
+        // image of the identicon PNG, then the label (the KonceptInlineMacro #836 idiom,
+        // unlinked). The stamp's pentagon degrades to its ⬠ text glyph here.
+        if ("pdf".equals(backend) && label != null && idString != null) {
+            String mark = kind.isStamp() ? "⬠" : glyph;
+            String content = mark + " image:" + IdenticonRenderer.pngFile(idString) + "["
+                    + KonceptInlineMacro.attrValue(label) + ",18,18] " + label;
+            return createPhraseNode(parent, "quoted", content,
+                    Map.of("subs", "specialcharacters,macros"));
+        }
         String fallback = label == null ? glyph : glyph + " " + label;
         return createPhraseNode(parent, "quoted", fallback, Map.of("subs", ":none"));
+    }
+
+    /**
+     * The specimen referent's identicon idString from the {@code uuid} attribute (a single
+     * UUID or a comma-joined PublicId array), or {@code null} when absent or malformed —
+     * a malformed uuid degrades to the no-identicon specimen with a warning rather than
+     * failing the build.
+     *
+     * @param attributes the macro's attributes
+     * @param target     the macro target, for the warning
+     * @return the idString, or {@code null}
+     */
+    private static String specimenIdString(Map<String, Object> attributes, String target) {
+        Object raw = attributes.get("uuid");
+        if (raw == null || raw.toString().isBlank()) {
+            return null;
+        }
+        try {
+            List<UUID> uuids = new ArrayList<>();
+            for (String part : raw.toString().split(",")) {
+                uuids.add(UUID.fromString(part.strip()));
+            }
+            return KonceptIdentity.idString(uuids);
+        } catch (RuntimeException e) {
+            LOG.warn("koncept-sigil: unparseable uuid '{}' on {} — rendering without identicon",
+                    raw, target);
+            return null;
+        }
     }
 
     /**

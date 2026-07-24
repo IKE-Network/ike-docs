@@ -66,6 +66,21 @@ a.koncept-identicon-ref .koncept-label {
 .koncept-sigil-pattern     { color: #7a4fb5; }
 .koncept-sigil-unknown     { color: #b00020; }
 
+/* Koncept logical-status cluster (ike-issues#742 amendment): the leading copula from the
+   concept's own stated EL++ expression — ≡ sufficiently defined, ⊑ primitive, ⊤ root — with
+   the ⋎ fork appended for a multi-parent concept. Colours are set inline from KonceptStatus
+   (data, for cross-medium parity); these rules mirror the emitted styles for consistency
+   when koncept.css IS linked. Kind sigils and status glyphs never co-occur. */
+.koncept-status {
+    font-size: 0.85em;
+    margin-right: 0.25em;
+    white-space: nowrap;
+}
+.koncept-status-defined     { color: #3b8c2f; }
+.koncept-status-primitive   { color: #6b7682; }
+.koncept-status-root        { color: #8a6d00; }
+.koncept-status-multiparent { color: #185fa5; }
+
 /* Larger identicon in the Referenced Koncepts glossary */
 img.koncept-glossary-icon {
     height: 1.3em;

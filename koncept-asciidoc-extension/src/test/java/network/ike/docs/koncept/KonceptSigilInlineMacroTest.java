@@ -97,6 +97,43 @@ class KonceptSigilInlineMacroTest {
     }
 
     @Test
+    void uuidAttributeRendersAnIdenticonBearingSpecimen() {
+        String html = convert("koncept-sigil:description[label=\"Uninitialized Component (SOLOR)\", "
+                + "uuid=6d3a2410-0000-4000-8000-000000000001]");
+
+        assertTrue(html.contains("koncept-specimen"), "a labeled sigil is a specimen chip:\n" + html);
+        assertTrue(html.contains("#b8860b") && html.contains(">D</span>"),
+                "…leading with the kind's sigil:\n" + html);
+        assertTrue(html.contains("<img") && html.contains("data:image/png;base64"),
+                "…the sigil never stands alone — the referent's identicon follows it:\n" + html);
+        assertTrue(html.contains("Uninitialized Component (SOLOR)"),
+                "…then the given label:\n" + html);
+        assertFalse(html.contains("<a "), "a specimen stays unlinked:\n" + html);
+    }
+
+    @Test
+    void uuidAttributeRendersTheStampSpecimenWithItsIdenticon() {
+        String html = convert("koncept-sigil:stamp[label=\"Active · Inception · IKE Community\", "
+                + "uuid=770cba9b-6970-5a98-8049-e82383905086]");
+
+        assertTrue(html.contains("<polygon"), "the stamp specimen leads with the pentagon:\n" + html);
+        assertTrue(html.contains("<img") && html.contains("data:image/png;base64"),
+                "…then the STAMP's own identicon:\n" + html);
+        assertTrue(html.contains("Active · Inception · IKE Community"),
+                "…then the verbatim provenance text:\n" + html);
+        assertFalse(html.contains("<a "), "a specimen stays unlinked:\n" + html);
+    }
+
+    @Test
+    void malformedUuidDegradesToTheNoIdenticonSpecimen() {
+        String html = convert("koncept-sigil:semantic[label=\"Gretel\", uuid=not-a-uuid]");
+
+        assertTrue(html.contains("koncept-specimen") && html.contains("Gretel"),
+                "a malformed uuid still renders the specimen chip:\n" + html);
+        assertFalse(html.contains("<img"), "…just without an identicon:\n" + html);
+    }
+
+    @Test
     void bareConceptRendersNothing() {
         String html = convert("before koncept-sigil:concept[] after");
 

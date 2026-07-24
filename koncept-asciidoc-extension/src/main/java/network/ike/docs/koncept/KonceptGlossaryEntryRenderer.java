@@ -1,5 +1,8 @@
 package network.ike.docs.koncept;
 
+import network.ike.docs.konceptcore.KonceptKind;
+import network.ike.docs.konceptcore.KonceptStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +46,7 @@ final class KonceptGlossaryEntryRenderer {
                 .orElse(KonceptInlineMacro.splitCamelCase(id));
 
         html.append("  <dt id=\"koncept-").append(escapeHtml(id)).append("\">");
+        html.append(markHtml(defOpt));
         html.append(htmlIdenticonImg(defOpt));
         html.append("<strong>").append(escapeHtml(label)).append("</strong>");
 
@@ -123,6 +127,25 @@ final class KonceptGlossaryEntryRenderer {
 
         html.append("  </dd>\n");
         return html.toString();
+    }
+
+    /**
+     * The badge's single leading mark for a definition (ike-issues#742 amendment): the kind
+     * sigil for a letter kind, the logical-status copula cluster for a Koncept, or the empty
+     * string — so glossary headings and taxonomy chips carry the same mark as inline badges.
+     *
+     * @param defOpt the koncept's definition, if resolved
+     * @return the mark HTML, or the empty string
+     */
+    static String markHtml(Optional<KonceptDefinition> defOpt) {
+        return defOpt.map(d -> {
+            KonceptKind kind = Optional.ofNullable(d.kind())
+                    .map(KonceptKind::fromString).orElse(KonceptKind.CONCEPT);
+            KonceptStatus status = kind == KonceptKind.CONCEPT
+                    ? d.konceptStatus() : KonceptStatus.NONE;
+            boolean multiParent = kind == KonceptKind.CONCEPT && d.isMultiParent();
+            return KonceptInlineMacro.markHtml(kind, status, multiParent);
+        }).orElse("");
     }
 
     /** Build an HTML {@code <img>} for the koncept's identicon, or an empty string. */
@@ -221,7 +244,7 @@ final class KonceptGlossaryEntryRenderer {
         Optional<KonceptDefinition> relDef = defSource.lookup(relId);
         String relLabel = relDef.map(KonceptDefinition::label)
                 .orElse(KonceptInlineMacro.splitCamelCase(relId));
-        String img = htmlIdenticonImg(relDef);
+        String img = markHtml(relDef) + htmlIdenticonImg(relDef);
         return "<a href=\"#koncept-" + escapeHtml(relId)
                 + "\" class=\"koncept-ref koncept-taxonomy-ref\" style=\"text-decoration:none;"
                 + "white-space:nowrap;\">" + img + "<span class=\"koncept-taxonomy-name\" "

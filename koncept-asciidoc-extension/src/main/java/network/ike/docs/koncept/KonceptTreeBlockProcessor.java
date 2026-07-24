@@ -329,11 +329,10 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
                     "<span class=\"koncept-stamp\" style=\"color:#777;\">⬠ </span>" + labelHtml);
         }
 
-        String sigil = r.kind().hasLetterGlyph()
-                ? "<span class=\"koncept-sigil koncept-sigil-%s\" style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
-                        .formatted(r.kind().name().toLowerCase(Locale.ROOT), r.kind().colorHex(),
-                                escapeXml(r.kind().glyph()))
-                : "";
+        // One leading mark (ike-issues#742 amendment): the kind sigil for a letter kind, the
+        // logical-status copula cluster for a Koncept — so a tree node shows its definitional
+        // character (≡/⊑/⊤, ⋎ multi-parent) exactly like an inline badge.
+        String sigil = KonceptInlineMacro.markHtml(r.kind(), r.status(), r.multiParent());
 
         if (r.idString().isEmpty()) {
             // Unresolved id (e.g. a nid at build time) — the authoring label carries the node, so a

@@ -16,6 +16,7 @@
 package network.ike.docs.koncept;
 
 import network.ike.docs.konceptcore.KonceptKind;
+import network.ike.docs.konceptcore.KonceptStatus;
 import org.asciidoctor.ast.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,19 @@ final class KonceptResolver {
     /**
      * A resolved reference, ready to render on any backend.
      *
-     * @param label    the display label (bracket override &gt; definition label &gt; camelCase/value)
-     * @param idString the Tinkar identicon idString, or empty when none resolves
-     * @param kind     the component kind
-     * @param anchor   the glossary anchor identifier when curated, else {@code null}
-     * @param identity the identity text (name · PublicId) for the identicon alt / link title
+     * @param label       the display label (bracket override &gt; definition label &gt; camelCase/value)
+     * @param idString    the Tinkar identicon idString, or empty when none resolves
+     * @param kind        the component kind
+     * @param status      the logical-definition status a Koncept badge leads with
+     *                    ({@link KonceptStatus#NONE} for a non-concept kind, an uncurated
+     *                    reference, or a concept with no stated definition)
+     * @param multiParent whether the concept has more than one stated parent (renders the
+     *                    appended {@value KonceptStatus#MULTI_PARENT_GLYPH} fork)
+     * @param anchor      the glossary anchor identifier when curated, else {@code null}
+     * @param identity    the identity text (name · PublicId) for the identicon alt / link title
      */
     record Resolved(String label, Optional<String> idString, KonceptKind kind,
+                    KonceptStatus status, boolean multiParent,
                     String anchor, String identity) {
     }
 
@@ -141,12 +148,19 @@ final class KonceptResolver {
 
         String label;
         KonceptKind konceptKind;
+        KonceptStatus status;
+        boolean multiParent;
         String anchor;
         List<UUID> uuids;
         if (def.isPresent()) {
             KonceptDefinition d = def.get();
             anchor = d.identifier();
             konceptKind = Optional.ofNullable(d.kind()).map(KonceptKind::fromString).orElse(KonceptKind.CONCEPT);
+            // The status cluster is a Koncept-only mark (kind sigils and status glyphs never
+            // co-occur — ike-issues#742 amendment), so a non-concept kind stays NONE even if a
+            // stray status: field appears on it.
+            status = konceptKind == KonceptKind.CONCEPT ? d.konceptStatus() : KonceptStatus.NONE;
+            multiParent = konceptKind == KonceptKind.CONCEPT && d.isMultiParent();
             label = bracket != null ? bracket
                     : (d.label() != null && !d.label().isBlank()
                         ? d.label() : KonceptInlineMacro.splitCamelCase(d.identifier()));
@@ -154,6 +168,8 @@ final class KonceptResolver {
         } else {
             anchor = null;                      // not curated → no glossary cross-reference
             konceptKind = KonceptKind.CONCEPT;
+            status = KonceptStatus.NONE;
+            multiParent = false;
             label = bracket != null ? bracket
                     : (kind == null ? KonceptInlineMacro.splitCamelCase(value) : value);
             uuids = uncuratedPublicId(kind, value);
@@ -161,7 +177,8 @@ final class KonceptResolver {
 
         Optional<String> idString = idsEnabled(doc) && !uuids.isEmpty()
                 ? Optional.of(KonceptIdentity.idString(uuids)) : Optional.empty();
-        return new Resolved(label, idString, konceptKind, anchor, identity(label, uuids, kind, value));
+        return new Resolved(label, idString, konceptKind, status, multiParent, anchor,
+                identity(label, uuids, kind, value));
     }
 
     /** The concept's PublicId UUIDs (explicit UUIDs preferred over the SNOMED-derived one), or empty. */

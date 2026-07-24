@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import network.ike.docs.konceptcore.KonceptKind;
+import network.ike.docs.konceptcore.KonceptStatus;
 import network.ike.docs.konceptcore.StampSigilGeometry;
 
 import java.io.File;
@@ -103,10 +104,12 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         if (kind.isStamp()) {
             if (idString.isPresent()) {
                 if ("pdf".equals(backend)) {
-                    return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind);
+                    return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind,
+                            KonceptStatus.NONE, false);
                 }
                 String rendered = ("docbook5".equals(backend) || "docbook".equals(backend))
-                        ? renderDocbookIdenticon(renderLink, label, idString.get(), kind)
+                        ? renderDocbookIdenticon(renderLink, label, idString.get(), kind,
+                                KonceptStatus.NONE, false)
                         : renderHtmlStampChip(renderLink, label, idString.get());
                 return createPhraseNode(parent, "quoted", rendered, Map.of("subs", ":none"));
             }
@@ -118,13 +121,15 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         // re-processable AsciiDoc — a native inline image macro (the identicon) followed by the
         // visible name (ike-issues#836). Fall through to the text badge below when no identicon.
         if ("pdf".equals(backend) && idString.isPresent()) {
-            return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind);
+            return createIdenticonChipNode(parent, renderLink, label, idString.get(), kind,
+                    resolved.status(), resolved.multiParent());
         }
 
         String rendered;
         if ("docbook5".equals(backend) || "docbook".equals(backend)) {
             rendered = idString.isPresent()
-                    ? renderDocbookIdenticon(renderLink, label, idString.get(), kind)
+                    ? renderDocbookIdenticon(renderLink, label, idString.get(), kind,
+                            resolved.status(), resolved.multiParent())
                     : renderDocbookBadge(renderLink, label);
         } else if ("pdf".equals(backend)) {
             // Prawn PDF without an identicon: only basic HTML is supported.
@@ -133,7 +138,8 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         } else {
             // html5 and CSS-based PDF backends (Prince, AH, WeasyPrint).
             rendered = idString.isPresent()
-                    ? renderHtmlIdenticon(renderLink, label, idString.get(), kind)
+                    ? renderHtmlIdenticon(renderLink, label, idString.get(), kind,
+                            resolved.status(), resolved.multiParent())
                     : KonceptSvgRenderer.render(renderLink, label, kind);
         }
 
@@ -146,17 +152,13 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * html5 / CSS-PDF: inline identicon image (data URI) + label, linked to
      * the glossary anchor.
      */
-    private String renderHtmlIdenticon(String target, String label, String idString, KonceptKind kind) {
+    private String renderHtmlIdenticon(String target, String label, String idString, KonceptKind kind,
+                                       KonceptStatus status, boolean multiParent) {
         String dataUri = IdenticonRenderer.dataUri(idString);
-        // Honest kind sigil (ike-issues#638): a Koncept stays bare; every other letter kind prepends
-        // its coloured glyph (colour inline, from the kind, for cross-medium parity). Self-contained
+        // One leading mark (ike-issues#742 amendment): a letter kind prepends its coloured sigil;
+        // a Koncept prepends its logical-status copula cluster (or stays truly bare). Self-contained
         // inline styles — no dependency on koncept.css, which consuming documents may not link.
-        String sigil = kind.hasLetterGlyph()
-                ? "<span class=\"koncept-sigil koncept-sigil-%s\" "
-                        .formatted(kind.name().toLowerCase(java.util.Locale.ROOT))
-                        + "style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
-                        .formatted(kind.colorHex(), escapeXml(kind.glyph()))
-                : "";
+        String sigil = markHtml(kind, status, multiParent);
         // A soft rounded "chip" rendered with display:inline (NOT inline-block) so its vertical
         // padding extends the tint visually but never changes the line box height. The chip holds the
         // identicon (0.9em, balanced against small caps) and a small-caps IKE-blue label.
@@ -181,17 +183,22 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * file (resolved by FOP/XEP), with the label as alt text, linked to the
      * glossary entry.
      */
-    private String renderDocbookIdenticon(String target, String label, String idString, KonceptKind kind) {
+    private String renderDocbookIdenticon(String target, String label, String idString, KonceptKind kind,
+                                          KonceptStatus status, boolean multiParent) {
         String uri = new File(IdenticonRenderer.pngFile(idString)).toURI().toString();
-        // Honest kind glyph (ike-issues#638): a non-concept kind keeps its mark as text before the
-        // identicon so it is not silently dropped in FO — the letter for letter kinds, ⬠ for a
-        // stamp. The drawn pentagon is HTML-only; FO/Prawn carry the glyph (the data channel), not
-        // necessarily its colour.
+        // One leading mark (ike-issues#638/#742): the mark stays as text before the identicon so it
+        // is not silently dropped in FO — the letter for letter kinds, ⬠ for a stamp, the
+        // logical-status copula cluster for a Koncept. FO/Prawn carry the glyph (the data channel),
+        // not necessarily its colour.
+        String statusCluster = status.cluster(multiParent);
         String glyphPrefix = kind.isStamp()
                 ? "<phrase role=\"koncept-sigil\">⬠ </phrase>"
                 : kind.hasLetterGlyph()
                         ? "<phrase role=\"koncept-sigil\">" + escapeXml(kind.glyph()) + " </phrase>"
-                        : "";
+                        : !statusCluster.isEmpty()
+                                ? "<phrase role=\"koncept-status\">" + escapeXml(statusCluster)
+                                        + " </phrase>"
+                                : "";
         // The visible name follows the identicon, inside the link, on EVERY backend (ike-issues#836):
         // the textobject phrase is only the image's fallback (shown if the PNG cannot render), so
         // without this the concept reads as a bare identicon in FO/print.
@@ -269,9 +276,13 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * label without letting a stray {@code *} or {@code _} in a name turn into formatting.
      */
     private PhraseNode createIdenticonChipNode(StructuralNode parent, String target,
-                                               String label, String idString, KonceptKind kind) {
+                                               String label, String idString, KonceptKind kind,
+                                               KonceptStatus status, boolean multiParent) {
         String absPath = IdenticonRenderer.pngFile(idString);
-        String glyph = kind.isStamp() ? "⬠ " : (kind.hasLetterGlyph() ? kind.glyph() + " " : "");
+        String statusCluster = status.cluster(multiParent);
+        String glyph = kind.isStamp() ? "⬠ "
+                : kind.hasLetterGlyph() ? kind.glyph() + " "
+                : !statusCluster.isEmpty() ? statusCluster + " " : "";
         // Content is RAW, not pre-escaped: the specialcharacters substitution escapes the glyph and
         // label, and the macros substitution renders the inline image — pre-escaping here would
         // double-escape. A literal non-breaking space (U+00A0, not an &#160; entity, which the
@@ -289,7 +300,7 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * {@code ]} <em>before</em> quotes are parsed, so quoting alone does not protect it. (SNOMED CT
      * carries bracketed descriptions like {@code [D]Chest pain}.)
      */
-    private static String attrValue(String value) {
+    static String attrValue(String value) {
         return "\"" + value.replace("\"", "\\\"").replace("]", "\\]") + "\"";
     }
 
@@ -306,6 +317,71 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     }
 
     /**
+     * The single leading mark a badge carries (ike-issues#742 amendment): the coloured kind
+     * sigil for a letter kind, the logical-status copula cluster for a Koncept, nothing
+     * otherwise (a stamp's pentagon is drawn by the stamp paths; a Koncept with no stated
+     * definition stays truly bare). Kind sigils and status glyphs never co-occur, so the
+     * leading slot always holds at most one mark class.
+     *
+     * @param kind        the component kind
+     * @param status      the Koncept's logical-definition status
+     * @param multiParent whether the Koncept has more than one stated parent
+     * @return the mark HTML, or the empty string
+     */
+    static String markHtml(KonceptKind kind, KonceptStatus status, boolean multiParent) {
+        if (kind.hasLetterGlyph()) {
+            return sigilSpanHtml(kind);
+        }
+        if (kind == KonceptKind.CONCEPT) {
+            return statusClusterHtml(status, multiParent);
+        }
+        return "";
+    }
+
+    /**
+     * The coloured single-letter kind-sigil span (colour inline, from the kind, for
+     * cross-medium parity — ike-issues#638).
+     *
+     * @param kind a kind with a letter glyph
+     * @return the sigil span HTML
+     */
+    static String sigilSpanHtml(KonceptKind kind) {
+        return "<span class=\"koncept-sigil koncept-sigil-%s\" "
+                .formatted(kind.name().toLowerCase(java.util.Locale.ROOT))
+                + "style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
+                .formatted(kind.colorHex(), escapeXmlStatic(kind.glyph()));
+    }
+
+    /**
+     * The logical-status copula cluster span a Koncept badge leads with (ike-issues#742
+     * amendment): the copula glyph in its status colour, with the appended multi-parent
+     * fork in its own colour, and the accessible names as the hover title — always visible,
+     * never hover-dependent (the title only <em>explains</em> the visible mark).
+     *
+     * @param status      the logical-definition status
+     * @param multiParent whether the concept has more than one stated parent
+     * @return the cluster span HTML, or the empty string for {@link KonceptStatus#NONE}
+     */
+    static String statusClusterHtml(KonceptStatus status, boolean multiParent) {
+        if (!status.hasGlyph()) {
+            return "";
+        }
+        String title = multiParent
+                ? status.accessibleName() + " · " + KonceptStatus.MULTI_PARENT_ACCESSIBLE_NAME
+                : status.accessibleName();
+        String fork = multiParent
+                ? "<span class=\"koncept-status-multiparent\" style=\"color:%s;\">%s</span>"
+                        .formatted(KonceptStatus.MULTI_PARENT_COLOR_HEX,
+                                KonceptStatus.MULTI_PARENT_GLYPH)
+                : "";
+        return "<span class=\"koncept-status koncept-status-%s\" title=\"%s\" "
+                .formatted(status.name().toLowerCase(java.util.Locale.ROOT), escapeXmlStatic(title))
+                + "style=\"font-size:0.85em;margin-right:0.25em;white-space:nowrap;\">"
+                + "<span style=\"color:%s;\">%s</span>".formatted(status.colorHex(), status.glyph())
+                + fork + "</span>";
+    }
+
+    /**
      * A specimen chip for a letter-glyph component kind: the kind's sigil and a label in
      * the same soft chip the identicon badges use, but unlinked and with no identicon —
      * for prose that shows what a badge of this kind looks like (a "How to Read This
@@ -317,12 +393,7 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * @return the chip HTML, unlinked
      */
     static String renderSpecimenChip(KonceptKind kind, String label) {
-        String sigil = kind.hasLetterGlyph()
-                ? "<span class=\"koncept-sigil koncept-sigil-%s\" "
-                        .formatted(kind.name().toLowerCase(java.util.Locale.ROOT))
-                        + "style=\"color:%s;font-weight:bold;margin-right:0.25em;\">%s</span>"
-                        .formatted(kind.colorHex(), escapeXmlStatic(kind.glyph()))
-                : "";
+        String sigil = kind.hasLetterGlyph() ? sigilSpanHtml(kind) : "";
         return """
             <span class="koncept-chip koncept-specimen" style="display:inline;background:#e9eff6;\
             border-radius:0.5em;padding:0.12em 0.45em;\
@@ -330,6 +401,63 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
             %s<span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
             letter-spacing:0.02em;">%s</span></span>\
             """.formatted(sigil, escapeXmlStatic(label)).strip();
+    }
+
+    /**
+     * An identicon-bearing specimen chip for a letter-glyph component kind (ike-issues#742
+     * amendment — a sigil never stands alone): the kind's sigil, the referent's real
+     * identicon, and the label in the same soft chip the linked badges use, but unlinked —
+     * the specimen shows what a full badge of this kind looks like, drawn from a real
+     * component, without claiming a glossary reference.
+     *
+     * @param kind     the component kind whose sigil leads the chip
+     * @param label    the specimen's display text
+     * @param idString the referent's Tinkar identicon idString
+     * @param identity the identity text (label · PublicId) for the identicon alt and the
+     *                 chip's hover title
+     * @return the chip HTML, unlinked
+     */
+    static String renderSpecimenChip(KonceptKind kind, String label, String idString,
+                                     String identity) {
+        String sigil = kind.hasLetterGlyph() ? sigilSpanHtml(kind) : "";
+        return """
+            <span class="koncept-chip koncept-specimen" title="%s" style="display:inline;\
+            background:#e9eff6;border-radius:0.5em;padding:0.12em 0.45em;\
+            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
+            %s<img class="koncept-identicon" src="%s" alt="%s" \
+            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
+            image-rendering:pixelated;margin-right:0.3em;"/>\
+            <span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
+            letter-spacing:0.02em;">%s</span></span>\
+            """.formatted(escapeXmlStatic(identity), sigil, IdenticonRenderer.dataUri(idString),
+                escapeXmlStatic(identity), escapeXmlStatic(label)).strip();
+    }
+
+    /**
+     * An identicon-bearing STAMP specimen chip (ike-issues#742 amendment): the pentagon
+     * sigil, the STAMP's own identicon, and the compact provenance text on the gray
+     * provenance chip — the same anatomy as {@link #renderHtmlStampChip(String, String,
+     * String)}, but unlinked.
+     *
+     * @param label    the compact stamp provenance text
+     * @param idString the STAMP's Tinkar identicon idString
+     * @param identity the identity text (label · PublicId) for the identicon alt and the
+     *                 chip's hover title
+     * @return the chip HTML, unlinked
+     */
+    static String renderStampSpecimenChip(String label, String idString, String identity) {
+        String pentagon = KonceptSvgRenderer.pentagonSvg("", 22, 22,
+                "height:0.95em;width:0.95em;vertical-align:-0.12em;margin-right:0.25em;");
+        return """
+            <span class="koncept-chip koncept-stamp-chip koncept-specimen" title="%s" \
+            style="display:inline;background:#ecebe8;border-radius:0.5em;padding:0.12em 0.45em;\
+            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
+            %s<img class="koncept-identicon" src="%s" alt="%s" \
+            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
+            image-rendering:pixelated;margin-right:0.3em;"/>\
+            <span class="koncept-label" style="color:#5a5750;">%s</span></span>\
+            """.formatted(escapeXmlStatic(identity), pentagon, IdenticonRenderer.dataUri(idString),
+                escapeXmlStatic(identity), escapeXmlStatic(label)).strip();
     }
 
     /**
