@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `koncept-asciidoc-extension` 93, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `koncept-asciidoc-extension` 94, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -42,7 +42,7 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `koncept-core` | `93` |
+| `network.ike.docs` | `koncept-core` | `94` |
 | `network.ike.tooling` | `ike-build-standards` | `237` |
 | `network.ike.tooling` | `ike-build-standards` | `237` |
 | `org.asciidoctor` | `asciidoctorj` | `3.0.1` |

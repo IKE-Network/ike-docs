@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 93</div>
+<div class="about-language"><b>Koncept Extension</b> 94</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -75,6 +75,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#kind(java.lang.String)" tabindex="0">kind(String)</a></li>
 <li><a href="#broader(java.util.List)" tabindex="0">broader(List)</a></li>
 <li><a href="#status(java.lang.String)" tabindex="0">status(String)</a></li>
+<li><a href="#state(java.lang.String)" tabindex="0">state(String)</a></li>
 <li><a href="#section(java.lang.String)" tabindex="0">section(String)</a></li>
 <li><a href="#since(java.lang.String)" tabindex="0">since(String)</a></li>
 <li><a href="#comments(java.util.List)" tabindex="0">comments(List)</a></li>
@@ -240,14 +241,20 @@ inactive version.</div>
 <div class="block">Sets the earliest stamp time of this koncept's own version chain.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#status(java.lang.String)" class="member-name-link">status</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;status)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#state(java.lang.String)" class="member-name-link">state</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;state)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the lifecycle state of the koncept's latest version (<code>inactive</code> renders
+the retired treatment); <code>null</code> or absent means active.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#status(java.lang.String)" class="member-name-link">status</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;status)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the logical-definition status name (<code>defined</code>, <code>primitive</code>,
 <code>root</code>); <code>null</code> or absent means no stated definition.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#uuids(java.util.List)" class="member-name-link">uuids</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;uuids)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the explicit Tinkar PublicId UUIDs (in datastore order) used
 to compute the Komet identicon.</div>
 </div>
@@ -432,6 +439,22 @@ to compute the Komet identicon.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>status</code> - the status name to set</dd>
+<dt>Returns:</dt>
+<dd>this builder</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="state(java.lang.String)">
+<h3>state</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></span>&nbsp;<span class="element-name">state</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;state)</span></div>
+<div class="block">Sets the lifecycle state of the koncept's latest version (<code>inactive</code> renders
+the retired treatment); <code>null</code> or absent means active.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>state</code> - the state name to set</dd>
 <dt>Returns:</dt>
 <dd>this builder</dd>
 </dl>

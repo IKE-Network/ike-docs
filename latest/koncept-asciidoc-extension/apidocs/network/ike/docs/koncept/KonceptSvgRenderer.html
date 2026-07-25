@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 93</div>
+<div class="about-language"><b>Koncept Extension</b> 94</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -59,6 +59,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind)" tabindex="0">render(String, String, KonceptKind)</a></li>
+<li><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind,boolean)" tabindex="0">render(String, String, KonceptKind, boolean)</a></li>
 <li><a href="#renderStampSigil(java.lang.String,java.lang.String)" tabindex="0">renderStampSigil(String, String)</a></li>
 <li><a href="#renderStampSpecimen(java.lang.String)" tabindex="0">renderStampSpecimen(String)</a></li>
 <li><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind)" tabindex="0">renderSigil(KonceptKind)</a></li>
@@ -112,25 +113,37 @@ SVG is used rather than HTML/CSS to ensure consistent rendering across HTML and 
 <div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind,boolean)" class="member-name-link">render</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label,
+ <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
+ boolean&nbsp;inactive)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Render an inline SVG badge for a Koncept reference — the no-computable-identity
+fallback, converged to the identicon-pill look (ike-issues#864): the spec's light
+pill, the small-caps IKE-blue label (struck through in the retired colour when
+<code>inactive</code>), and the leading kind sigil — no more solid-blue box, white text,
+or <code>K</code> prefix.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Render a component-kind sigil on its own at natural badge scale — see
 <a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)"><code>renderSigil(KonceptKind, double)</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderSigil(network.ike.docs.konceptcore.KonceptKind,double)" class="member-name-link">renderSigil</a><wbr>(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
  double&nbsp;scale)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Render a component-kind sigil on its own — no badge, no anchor, no name — as
 standalone inline SVG from the same locked constants the badge renderers use
 (<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind</code></a>'s glyph/colour data and the <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/StampSigilGeometry.html" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>StampSigilGeometry</code></a>
 pentagon), so a sigil shown in prose can never drift from the sigil shown in a
 badge.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSigil(java.lang.String,java.lang.String)" class="member-name-link">renderStampSigil</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSigil(java.lang.String,java.lang.String)" class="member-name-link">renderStampSigil</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Render a STAMP badge <em>without</em> an identicon — the no-computable-identity
 fallback (the identicon-bearing stamp chip is
 <code>KonceptInlineMacro#renderHtmlStampChip</code>): the locked gray pentagon (computed
@@ -138,9 +151,9 @@ from the shared <a href="https://github.com/IKE-Network/ike-docs/apidocs/network
 dots and a centre hub — beside the compact provenance text that stands in place of
 a name.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSpecimen(java.lang.String)" class="member-name-link">renderStampSpecimen</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#renderStampSpecimen(java.lang.String)" class="member-name-link">renderStampSpecimen</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Render a stamp chip as a <em>specimen</em> — the pentagon and compact provenance
 text, exactly as <a href="#renderStampSigil(java.lang.String,java.lang.String)"><code>renderStampSigil(String, String)</code></a> draws them, but with no
 anchor: for prose that shows what a stamp badge looks like (a "How to Read This
@@ -176,6 +189,32 @@ Guide" front matter) rather than referencing a glossary-curated component.</div>
 <dd><code>target</code> - the CamelCase koncept identifier (used for the anchor link)</dd>
 <dd><code>label</code> - the human-readable display label</dd>
 <dd><code>kind</code> - the component kind; <code>null</code> is treated as <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
+<dt>Returns:</dt>
+<dd>complete SVG+anchor HTML string suitable for inline passthrough</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind,boolean)">
+<h3>render</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">render</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;target,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;label,
+ <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptKind</a>&nbsp;kind,
+ boolean&nbsp;inactive)</span></div>
+<div class="block">Render an inline SVG badge for a Koncept reference — the no-computable-identity
+fallback, converged to the identicon-pill look (ike-issues#864): the spec's light
+pill, the small-caps IKE-blue label (struck through in the retired colour when
+<code>inactive</code>), and the leading kind sigil — no more solid-blue box, white text,
+or <code>K</code> prefix. Identicon-less by definition: this path only renders when no
+<code>PublicId</code> resolves, so there is nothing to draw an identicon from.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>target</code> - the CamelCase koncept identifier (used for the anchor link)</dd>
+<dd><code>label</code> - the human-readable display label</dd>
+<dd><code>kind</code> - the component kind; <code>null</code> is treated as <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptKind.html#CONCEPT" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptKind.CONCEPT</code></a></dd>
+<dd><code>inactive</code> - whether the referent's latest version is inactive (retired parity, #742)</dd>
 <dt>Returns:</dt>
 <dd>complete SVG+anchor HTML string suitable for inline passthrough</dd>
 </dl>

@@ -33,7 +33,7 @@ loadScripts(document, 'script');</script>
 <li><a href="search.html">Search</a></li>
 <li><a href="help-doc.html#index">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 93</div>
+<div class="about-language"><b>Koncept Extension</b> 94</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -286,6 +286,11 @@ inverting the <code>broader</code> taxonomy into children.</div>
 <dd>
 <div class="block">Sets the OWL IRI for the concept.</div>
 </dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#isInactive()" class="member-name-link">isInactive()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">Whether this koncept's latest version is inactive (retired) — the badge renders the
+retired treatment (#742 retired parity).</div>
+</dd>
 <dt><a href="network/ike/docs/koncept/KonceptDefinition.html#isMultiParent()" class="member-name-link">isMultiParent()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
 <dd>
 <div class="block">Whether this koncept has more than one stated is-a parent — the structural property
@@ -318,7 +323,7 @@ large, with a muted part label beneath each part.</div>
 <div class="block">Immutable definition of a Koncept, including natural language definition,
 description logic axiom, and optional terminology identifiers.</div>
 </dd>
-<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List, String, List, String, String, String, List, List, List, String, String, String, String, List)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List, String, List, String, String, String, String, List, List, List, String, String, String, String, List)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>KonceptDefinition</code> record class.</div>
 </dd>
@@ -624,6 +629,14 @@ identifier.</div>
 <dd>
 <div class="block">Render an inline SVG badge for a Koncept reference, honest about its kind.</div>
 </dd>
+<dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html#render(java.lang.String,java.lang.String,network.ike.docs.konceptcore.KonceptKind,boolean)" class="member-name-link">render(String, String, KonceptKind, boolean)</a> - Static method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSvgRenderer.html" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a></dt>
+<dd>
+<div class="block">Render an inline SVG badge for a Koncept reference — the no-computable-identity
+fallback, converged to the identicon-pill look (ike-issues#864): the spec's light
+pill, the small-caps IKE-blue label (struck through in the retired colour when
+<code>inactive</code>), and the leading kind sigil — no more solid-blue box, white text,
+or <code>K</code> prefix.</div>
+</dd>
 <dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html#renderSigil(network.ike.docs.konceptcore.KonceptKind)" class="member-name-link">renderSigil(KonceptKind)</a> - Static method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSvgRenderer.html" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a></dt>
 <dd>
 <div class="block">Render a component-kind sigil on its own at natural badge scale — see
@@ -713,6 +726,15 @@ inactive version.</div>
 <dt><a href="network/ike/docs/koncept/SnomedUuids.html" class="type-name-link" title="class in network.ike.docs.koncept">SnomedUuids</a> - Class in <a href="network/ike/docs/koncept/package-summary.html">network.ike.docs.koncept</a></dt>
 <dd>
 <div class="block">Derives the Tinkar PublicId UUID for a SNOMED CT concept from its SCTID.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#state()" class="member-name-link">state()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./network/ike/docs/koncept/KonceptDefinition.html#param-state"><code>state</code></a> record component.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.Builder.html#state(java.lang.String)" class="member-name-link">state(String)</a> - Method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></dt>
+<dd>
+<div class="block">Sets the lifecycle state of the koncept's latest version (<code>inactive</code> renders
+the retired treatment); <code>null</code> or absent means active.</div>
 </dd>
 <dt><a href="network/ike/docs/koncept/KonceptDefinition.html#status()" class="member-name-link">status()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
 <dd>
