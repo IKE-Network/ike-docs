@@ -1,12 +1,12 @@
 ---
-date_published: 2026-07-22
-date_modified: 2026-07-22
+date_published: 2026-07-24
+date_modified: 2026-07-24
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `docbook-xsl` 92, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `docbook-xsl` 93, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 

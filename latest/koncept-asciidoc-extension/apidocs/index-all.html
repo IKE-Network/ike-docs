@@ -33,7 +33,7 @@ loadScripts(document, 'script');</script>
 <li><a href="search.html">Search</a></li>
 <li><a href="help-doc.html#index">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 92</div>
+<div class="about-language"><b>Koncept Extension</b> 93</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -286,6 +286,11 @@ inverting the <code>broader</code> taxonomy into children.</div>
 <dd>
 <div class="block">Sets the OWL IRI for the concept.</div>
 </dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#isMultiParent()" class="member-name-link">isMultiParent()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">Whether this koncept has more than one stated is-a parent — the structural property
+the badge renders as the appended <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#MULTI_PARENT_GLYPH" title="class or interface in network.ike.docs.konceptcore" class="external-link">"\u22ce"</a> fork.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:K">K</h2>
 <dl class="index">
@@ -313,7 +318,7 @@ large, with a muted part label beneath each part.</div>
 <div class="block">Immutable definition of a Koncept, including natural language definition,
 description logic axiom, and optional terminology identifiers.</div>
 </dd>
-<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List, String, List, String, String, List, List, List, String, String, String, String, List)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.lang.String,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">KonceptDefinition(String, String, String, String, String, String, List, String, List, String, String, String, List, List, List, String, String, String, String, List)</a> - Constructor for record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>KonceptDefinition</code> record class.</div>
 </dd>
@@ -440,6 +445,11 @@ tutorial) can show the real marks instead of describing them.</div>
 <dt><a href="network/ike/docs/koncept/KonceptSigilInlineMacro.html#%3Cinit%3E()" class="member-name-link">KonceptSigilInlineMacro()</a> - Constructor for class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptSigilInlineMacro.html" title="class in network.ike.docs.koncept">KonceptSigilInlineMacro</a></dt>
 <dd>
 <div class="block">Creates a new inline macro processor instance.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#konceptStatus()" class="member-name-link">konceptStatus()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">The logical-definition status as the typed vocabulary — <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#NONE" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptStatus.NONE</code></a>
+when <a href="network/ike/docs/koncept/KonceptDefinition.html#status()"><code>KonceptDefinition.status()</code></a> is absent or unrecognised.</div>
 </dd>
 <dt><a href="network/ike/docs/koncept/KonceptSvgRenderer.html" class="type-name-link" title="class in network.ike.docs.koncept">KonceptSvgRenderer</a> - Class in <a href="network/ike/docs/koncept/package-summary.html">network.ike.docs.koncept</a></dt>
 <dd>
@@ -703,6 +713,15 @@ inactive version.</div>
 <dt><a href="network/ike/docs/koncept/SnomedUuids.html" class="type-name-link" title="class in network.ike.docs.koncept">SnomedUuids</a> - Class in <a href="network/ike/docs/koncept/package-summary.html">network.ike.docs.koncept</a></dt>
 <dd>
 <div class="block">Derives the Tinkar PublicId UUID for a SNOMED CT concept from its SCTID.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.html#status()" class="member-name-link">status()</a> - Method in record class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.html" title="class in network.ike.docs.koncept">KonceptDefinition</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./network/ike/docs/koncept/KonceptDefinition.html#param-status"><code>status</code></a> record component.</div>
+</dd>
+<dt><a href="network/ike/docs/koncept/KonceptDefinition.Builder.html#status(java.lang.String)" class="member-name-link">status(String)</a> - Method in class network.ike.docs.koncept.<a href="network/ike/docs/koncept/KonceptDefinition.Builder.html" title="class in network.ike.docs.koncept">KonceptDefinition.Builder</a></dt>
+<dd>
+<div class="block">Sets the logical-definition status name (<code>defined</code>, <code>primitive</code>,
+<code>root</code>); <code>null</code> or absent means no stated definition.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:T">T</h2>

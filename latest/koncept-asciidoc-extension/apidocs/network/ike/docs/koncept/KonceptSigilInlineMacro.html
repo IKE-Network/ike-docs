@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 92</div>
+<div class="about-language"><b>Koncept Extension</b> 93</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -118,20 +118,22 @@ a warning. On non-HTML backends the sigil degrades to its letter glyph, or the k
 name for the pentagon.
 <p>
 With a bracket label the macro renders a <em>specimen badge</em> instead of the bare
-sigil — the full badge form of that kind carrying the given text, unlinked and with no
-identicon, because a specimen shows what a badge of the kind looks like without
-claiming a reference to a curated component:
+sigil — the full badge form of that kind carrying the given text, unlinked, because a
+specimen shows what a badge of the kind looks like without claiming a glossary
+reference. A <code>uuid</code> attribute names the specimen's real referent, and the badge
+renders <em>in full</em> — sigil, identicon, label — honouring the anatomy rule that a
+sigil never stands alone (ike-issues#742 amendment):
 <pre>
-koncept-sigil:description[Uninitialized Component (SOLOR)]
-koncept-sigil:semantic[Gretel]
-koncept-sigil:stamp[Active · Inception · Tinkar Starter Data Author]
+koncept-sigil:description[label="Uninitialized Component (SOLOR)", uuid=6d3a2410-…]
+koncept-sigil:semantic[label="Gretel", uuid=1a5b28fd-…]
+koncept-sigil:stamp[label="Active · Inception · IKE Community", uuid=770cba9b-…]
 </pre>
-Letter kinds render the badge chip (sigil + small-caps label) via
-<code>KonceptInlineMacro.renderSpecimenChip(KonceptKind, String)</code>; a stamp renders the
-pentagon-and-provenance chip via
-<a href="KonceptSvgRenderer.html#renderStampSpecimen(java.lang.String)"><code>KonceptSvgRenderer.renderStampSpecimen(String)</code></a>. Keep specimen text real —
-drawn from actual knowledge-base content — so the guide never illustrates with
-invented values.
+Without a <code>uuid</code> the chip degrades to sigil + label (legacy form). Letter kinds
+render via <code>KonceptInlineMacro.renderSpecimenChip(KonceptKind, String)</code>; a stamp renders the
+pentagon-and-provenance chip via <code>KonceptInlineMacro.renderStampSpecimenChip(String, String, String)</code>
+(or <a href="KonceptSvgRenderer.html#renderStampSpecimen(java.lang.String)"><code>KonceptSvgRenderer.renderStampSpecimen(String)</code></a> without a uuid). Keep
+specimen text and uuids real — drawn from actual knowledge-base content — so the guide
+never illustrates with invented values.
 <p>
 A bare sigil accepts a <code>scale</code> attribute (<code>koncept-sigil:stamp[scale=1.5]</code>)
 for legend and teaching contexts where the mark should read larger than badge scale;
