@@ -29,6 +29,10 @@ import java.util.List;
  *                        absent means no stated definition — the badge stays bare
  *                        (ike-issues#742 design amendment, #940). Multi-parent is not a
  *                        status: it is derived from {@code broader}'s size
+ * @param state           Optional lifecycle state of the koncept's latest version;
+ *                        {@code inactive} renders the retired treatment — struck-through
+ *                        label in the retired colour (#742 retired parity, #864). Absent
+ *                        means active
  * @param section         Optional stable grouping key computed against the live knowledge
  *                        base (a taxonomy-subtree root's own identifier, or a positional
  *                        {@code ResidualN}/{@code Unclassified} bucket); the grouped
@@ -76,6 +80,7 @@ public record KonceptDefinition(
         String kind,
         List<String> broader,
         String status,
+        String state,
         String section,
         String since,
         List<String> comments,
@@ -165,6 +170,16 @@ public record KonceptDefinition(
     }
 
     /**
+     * Whether this koncept's latest version is inactive (retired) — the badge renders the
+     * retired treatment (#742 retired parity).
+     *
+     * @return {@code true} when {@link #state()} is {@code inactive}
+     */
+    public boolean isInactive() {
+        return "inactive".equalsIgnoreCase(state);
+    }
+
+    /**
      * This pattern's Model Features in presentation order — the single source of truth
      * behind every shape rendering (the {@code koncept-pattern-table} block macro and the
      * glossary's pattern-shape table): the referenced component, then each declared field
@@ -207,6 +222,7 @@ public record KonceptDefinition(
         private String kind;
         private List<String> broader;
         private String status;
+        private String state;
         private String section;
         private String since;
         private List<String> comments;
@@ -332,6 +348,18 @@ public record KonceptDefinition(
          */
         public Builder status(String status) {
             this.status = status;
+            return this;
+        }
+
+        /**
+         * Sets the lifecycle state of the koncept's latest version ({@code inactive} renders
+         * the retired treatment); {@code null} or absent means active.
+         *
+         * @param state the state name to set
+         * @return this builder
+         */
+        public Builder state(String state) {
+            this.state = state;
             return this;
         }
 
@@ -471,7 +499,7 @@ public record KonceptDefinition(
             List<String> seeAlsoList = seeAlso != null ? List.copyOf(seeAlso) : List.of();
             List<PatternField> fieldsList = fields != null ? List.copyOf(fields) : List.of();
             return new KonceptDefinition(identifier, label, definition, axiom, sctid, iri,
-                    uuidList, kind, broaderList, status, section, since, commentsList,
+                    uuidList, kind, broaderList, status, state, section, since, commentsList,
                     retiredCommentsList, seeAlsoList,
                     narrative, referencedComponentMeaning, referencedComponentPurpose,
                     referencedComponentExample, fieldsList);

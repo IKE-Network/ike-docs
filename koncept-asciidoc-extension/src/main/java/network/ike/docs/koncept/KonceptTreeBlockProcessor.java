@@ -319,8 +319,10 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
      */
     private String renderChip(Document doc, ParsedNode node) {
         KonceptResolver.Resolved r = resolve(doc, node);
-        String labelHtml = "<span class=\"koncept-label\" "
-                + "style=\"color:#2a5a8a;font-variant:small-caps;letter-spacing:0.02em;\">"
+        // Label + pill styles from the shared KonceptAppearance spec (#864), retired treatment
+        // included — a struck-through tree node reads as retired exactly like an inline badge.
+        String labelHtml = "<span class=\"koncept-label\" style=\""
+                + KonceptChipStyles.labelStyle(r.inactive()) + "\">"
                 + escapeXml(r.label()) + "</span>";
 
         // A stamp is provenance, never an identicon (ike-issues#638): the pentagon glyph + label.
@@ -336,7 +338,7 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
 
         if (r.idString().isEmpty()) {
             // Unresolved id (e.g. a nid at build time) — the authoring label carries the node, so a
-            // single unknown id never breaks the tree.
+            // single unknown id never breaks the tree. Neutral grey: identity is unknown here.
             return wrapLink(r.anchor(), r.identity(),
                     "<span class=\"koncept-chip\" style=\"display:inline;background:#eee;"
                             + "border-radius:0.5em;padding:0.12em 0.45em;\">" + sigil + labelHtml + "</span>");
@@ -345,11 +347,8 @@ public class KonceptTreeBlockProcessor extends BlockProcessor {
         // Identity in the identicon alt (best-effort plain-text-copy carrier) and the link title.
         String img = "<img class=\"koncept-identicon\" src=\"%s\" alt=\"%s\" "
                 .formatted(IdenticonRenderer.dataUri(r.idString().get()), escapeXml(r.identity()))
-                + "style=\"height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;"
-                + "image-rendering:pixelated;margin-right:0.3em;\"/>";
-        String chip = "<span class=\"koncept-chip\" style=\"display:inline;background:#e9eff6;"
-                + "border-radius:0.5em;padding:0.12em 0.45em;"
-                + "-webkit-box-decoration-break:clone;box-decoration-break:clone;\">"
+                + "style=\"" + KonceptChipStyles.identiconStyle() + "\"/>";
+        String chip = "<span class=\"koncept-chip\" style=\"" + KonceptChipStyles.pillStyle() + "\">"
                 + sigil + img + labelHtml + "</span>";
         return wrapLink(r.anchor(), r.identity(), chip);
     }

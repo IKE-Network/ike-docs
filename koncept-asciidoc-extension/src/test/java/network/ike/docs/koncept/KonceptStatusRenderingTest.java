@@ -80,6 +80,18 @@ class KonceptStatusRenderingTest {
     }
 
     @Test
+    void retiredConceptRendersStruckThroughInTheRetiredColour() {
+        String html = convert("k:RetiredConcept[]");
+
+        assertTrue(html.contains("text-decoration:line-through"),
+                "a retired referent's label is struck through (#742 parity, #864):\n" + html);
+        assertTrue(html.contains("#b00020"),
+                "…in the retired colour:\n" + html);
+        assertTrue(html.contains("koncept-status-primitive"),
+                "…and the status cluster still leads — retirement and status are orthogonal:\n" + html);
+    }
+
+    @Test
     void kindSigilWinsOverAStrayStatusField() {
         String html = convert("k:StatusedPattern[]");
 

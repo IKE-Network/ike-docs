@@ -139,8 +139,8 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
             // html5 and CSS-based PDF backends (Prince, AH, WeasyPrint).
             rendered = idString.isPresent()
                     ? renderHtmlIdenticon(renderLink, label, idString.get(), kind,
-                            resolved.status(), resolved.multiParent())
-                    : KonceptSvgRenderer.render(renderLink, label, kind);
+                            resolved.status(), resolved.multiParent(), resolved.inactive())
+                    : KonceptSvgRenderer.render(renderLink, label, kind, resolved.inactive());
         }
 
         // Return as inline passthrough (no further substitution)
@@ -153,29 +153,26 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
      * the glossary anchor.
      */
     private String renderHtmlIdenticon(String target, String label, String idString, KonceptKind kind,
-                                       KonceptStatus status, boolean multiParent) {
+                                       KonceptStatus status, boolean multiParent, boolean inactive) {
         String dataUri = IdenticonRenderer.dataUri(idString);
         // One leading mark (ike-issues#742 amendment): a letter kind prepends its coloured sigil;
         // a Koncept prepends its logical-status copula cluster (or stays truly bare). Self-contained
-        // inline styles — no dependency on koncept.css, which consuming documents may not link.
+        // inline styles from the shared KonceptAppearance spec (#864) — no dependency on
+        // koncept.css, which consuming documents may not link and which only mirrors the spec.
         String sigil = markHtml(kind, status, multiParent);
         // A soft rounded "chip" rendered with display:inline (NOT inline-block) so its vertical
-        // padding extends the tint visually but never changes the line box height. The chip holds the
-        // identicon (0.9em, balanced against small caps) and a small-caps IKE-blue label.
+        // padding extends the tint visually but never changes the line box height.
         return """
             <a href="#koncept-%s" class="koncept-ref koncept-identicon-ref" title="%s" \
             style="text-decoration:none;white-space:nowrap;">\
-            <span class="koncept-chip" style="display:inline;background:#e9eff6;\
-            border-radius:0.5em;padding:0.12em 0.45em;\
-            -webkit-box-decoration-break:clone;box-decoration-break:clone;">\
+            <span class="koncept-chip" style="%s">\
             %s<img class="koncept-identicon" src="%s" alt="%s identicon" \
-            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
-            image-rendering:pixelated;margin-right:0.3em;"/>\
-            <span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
-            letter-spacing:0.02em;">%s</span></span></a>\
+            style="%s"/>\
+            <span class="koncept-label" style="%s">%s</span></span></a>\
             """.formatted(
-                escapeXml(target), escapeXml(label), sigil, dataUri,
-                escapeXml(label), escapeXml(label)).strip();
+                escapeXml(target), escapeXml(label), KonceptChipStyles.pillStyle(), sigil, dataUri,
+                escapeXml(label), KonceptChipStyles.identiconStyle(),
+                KonceptChipStyles.labelStyle(inactive), escapeXml(label)).strip();
     }
 
     /**
@@ -225,16 +222,14 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         return """
             <a href="#koncept-%s" class="koncept-ref stamp-sigil" title="%s" \
             style="text-decoration:none;white-space:nowrap;">\
-            <span class="koncept-chip koncept-stamp-chip" style="display:inline;background:#ecebe8;\
-            border-radius:0.5em;padding:0.12em 0.45em;\
-            -webkit-box-decoration-break:clone;box-decoration-break:clone;">\
+            <span class="koncept-chip koncept-stamp-chip" style="%s">\
             %s<img class="koncept-identicon" src="%s" alt="%s identicon" \
-            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
-            image-rendering:pixelated;margin-right:0.3em;"/>\
+            style="%s"/>\
             <span class="koncept-label" style="color:#5a5750;">%s</span></span></a>\
             """.formatted(
-                escapeXml(target), escapeXml(label), pentagon, dataUri,
-                escapeXml(label), escapeXml(label)).strip();
+                escapeXml(target), escapeXml(label), KonceptChipStyles.stampChipStyle(),
+                pentagon, dataUri,
+                escapeXml(label), KonceptChipStyles.identiconStyle(), escapeXml(label)).strip();
     }
 
     /**
@@ -395,12 +390,10 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     static String renderSpecimenChip(KonceptKind kind, String label) {
         String sigil = kind.hasLetterGlyph() ? sigilSpanHtml(kind) : "";
         return """
-            <span class="koncept-chip koncept-specimen" style="display:inline;background:#e9eff6;\
-            border-radius:0.5em;padding:0.12em 0.45em;\
-            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
-            %s<span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
-            letter-spacing:0.02em;">%s</span></span>\
-            """.formatted(sigil, escapeXmlStatic(label)).strip();
+            <span class="koncept-chip koncept-specimen" style="%swhite-space:nowrap;">\
+            %s<span class="koncept-label" style="%s">%s</span></span>\
+            """.formatted(KonceptChipStyles.pillStyle(), sigil,
+                KonceptChipStyles.labelStyle(false), escapeXmlStatic(label)).strip();
     }
 
     /**
@@ -421,16 +414,14 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
                                      String identity) {
         String sigil = kind.hasLetterGlyph() ? sigilSpanHtml(kind) : "";
         return """
-            <span class="koncept-chip koncept-specimen" title="%s" style="display:inline;\
-            background:#e9eff6;border-radius:0.5em;padding:0.12em 0.45em;\
-            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
+            <span class="koncept-chip koncept-specimen" title="%s" style="%swhite-space:nowrap;">\
             %s<img class="koncept-identicon" src="%s" alt="%s" \
-            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
-            image-rendering:pixelated;margin-right:0.3em;"/>\
-            <span class="koncept-label" style="color:#2a5a8a;font-variant:small-caps;\
-            letter-spacing:0.02em;">%s</span></span>\
-            """.formatted(escapeXmlStatic(identity), sigil, IdenticonRenderer.dataUri(idString),
-                escapeXmlStatic(identity), escapeXmlStatic(label)).strip();
+            style="%s"/>\
+            <span class="koncept-label" style="%s">%s</span></span>\
+            """.formatted(escapeXmlStatic(identity), KonceptChipStyles.pillStyle(),
+                sigil, IdenticonRenderer.dataUri(idString),
+                escapeXmlStatic(identity), KonceptChipStyles.identiconStyle(),
+                KonceptChipStyles.labelStyle(false), escapeXmlStatic(label)).strip();
     }
 
     /**
@@ -450,14 +441,14 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
                 "height:0.95em;width:0.95em;vertical-align:-0.12em;margin-right:0.25em;");
         return """
             <span class="koncept-chip koncept-stamp-chip koncept-specimen" title="%s" \
-            style="display:inline;background:#ecebe8;border-radius:0.5em;padding:0.12em 0.45em;\
-            -webkit-box-decoration-break:clone;box-decoration-break:clone;white-space:nowrap;">\
+            style="%swhite-space:nowrap;">\
             %s<img class="koncept-identicon" src="%s" alt="%s" \
-            style="height:0.9em;width:0.9em;vertical-align:-0.12em;border-radius:2px;\
-            image-rendering:pixelated;margin-right:0.3em;"/>\
+            style="%s"/>\
             <span class="koncept-label" style="color:#5a5750;">%s</span></span>\
-            """.formatted(escapeXmlStatic(identity), pentagon, IdenticonRenderer.dataUri(idString),
-                escapeXmlStatic(identity), escapeXmlStatic(label)).strip();
+            """.formatted(escapeXmlStatic(identity), KonceptChipStyles.stampChipStyle(),
+                pentagon, IdenticonRenderer.dataUri(idString),
+                escapeXmlStatic(identity), KonceptChipStyles.identiconStyle(),
+                escapeXmlStatic(label)).strip();
     }
 
     /**

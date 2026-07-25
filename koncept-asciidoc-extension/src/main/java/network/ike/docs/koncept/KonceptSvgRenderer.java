@@ -1,5 +1,6 @@
 package network.ike.docs.koncept;
 
+import network.ike.docs.konceptcore.KonceptAppearance;
 import network.ike.docs.konceptcore.KonceptKind;
 import network.ike.docs.konceptcore.StampSigilGeometry;
 
@@ -20,26 +21,20 @@ public final class KonceptSvgRenderer {
 
     private KonceptSvgRenderer() {}
 
+    /** The one shared badge appearance (ike-issues#860/#864) the pill values read from. */
+    private static final KonceptAppearance SPEC = KonceptAppearance.defaults();
+
     /** Approximate character width for the sans-serif font at 12px. */
     private static final double CHAR_WIDTH = 7.2;
 
     /** Horizontal padding inside the badge. */
     private static final int PADDING_X = 8;
 
-    /** Width of the "K" prefix plus separator space. */
-    private static final int PREFIX_WIDTH = 18;
-
     /** Badge height. */
     private static final int HEIGHT = 22;
 
-    /** Badge corner radius. */
-    private static final int CORNER_RADIUS = 4;
-
-    /** Badge background color. */
-    private static final String BADGE_COLOR = "#2a5a8a";
-
-    /** Text color. */
-    private static final String TEXT_COLOR = "white";
+    /** Badge corner radius, from the spec. */
+    private static final int CORNER_RADIUS = (int) SPEC.cornerRadiusPx();
 
     /** Font family. */
     private static final String FONT_FAMILY = "sans-serif";
@@ -59,8 +54,8 @@ public final class KonceptSvgRenderer {
     /** Pentagon unit-radius as a fraction of the half-box — identical to the JavaFX {@code StampSigil}. Package-visible for {@link KonceptFigureRenderer}. */
     static final double STAMP_RADIUS_FRACTION = 0.92;
 
-    /** Gray provenance chip behind the stamp pentagon + text. Package-visible for {@link KonceptFigureRenderer}. */
-    static final String STAMP_CHIP_COLOR = "#ecebe8";
+    /** Gray provenance chip behind the stamp pentagon + text, from the spec. Package-visible for {@link KonceptFigureRenderer}. */
+    static final String STAMP_CHIP_COLOR = SPEC.pillFillStampHex();
 
     /** Dark-gray text for the stamp's compact provenance. Package-visible for {@link KonceptFigureRenderer}. */
     static final String STAMP_TEXT_COLOR = "#5a5750";
@@ -74,19 +69,40 @@ public final class KonceptSvgRenderer {
      * @return complete SVG+anchor HTML string suitable for inline passthrough
      */
     public static String render(String target, String label, KonceptKind kind) {
+        return render(target, label, kind, false);
+    }
+
+    /**
+     * Render an inline SVG badge for a Koncept reference — the no-computable-identity
+     * fallback, converged to the identicon-pill look (ike-issues#864): the spec's light
+     * pill, the small-caps IKE-blue label (struck through in the retired colour when
+     * {@code inactive}), and the leading kind sigil — no more solid-blue box, white text,
+     * or {@code K} prefix. Identicon-less by definition: this path only renders when no
+     * {@code PublicId} resolves, so there is nothing to draw an identicon from.
+     *
+     * @param target   the CamelCase koncept identifier (used for the anchor link)
+     * @param label    the human-readable display label
+     * @param kind     the component kind; {@code null} is treated as {@link KonceptKind#CONCEPT}
+     * @param inactive whether the referent's latest version is inactive (retired parity, #742)
+     * @return complete SVG+anchor HTML string suitable for inline passthrough
+     */
+    public static String render(String target, String label, KonceptKind kind, boolean inactive) {
         KonceptKind resolved = (kind == null) ? KonceptKind.CONCEPT : kind;
         if (resolved.isStamp()) {
             return renderStampSigil(target, label);
         }
         int labelWidth = (int) Math.ceil(label.length() * CHAR_WIDTH);
         int sigilW = resolved.hasLetterGlyph() ? SIGIL_WIDTH : 0;
-        int totalWidth = PADDING_X + sigilW + PREFIX_WIDTH + labelWidth + PADDING_X;
+        int totalWidth = PADDING_X + sigilW + labelWidth + PADDING_X;
 
         String sigil = resolved.hasLetterGlyph()
                 ? "<text x=\"%d\" y=\"%d\" fill=\"%s\" font-size=\"%d\" font-family=\"%s\" font-weight=\"bold\">%s</text>"
                         .formatted(PADDING_X, TEXT_BASELINE_Y, resolved.colorHex(), FONT_SIZE, FONT_FAMILY,
                                 escapeHtml(resolved.glyph()))
                 : "";
+        String labelFill = inactive ? SPEC.labelColorInactiveHex() : SPEC.labelColorHex();
+        String labelDecoration = inactive && SPEC.inactiveStrikethrough()
+                ? "text-decoration:line-through;" : "";
 
         return """
             <a href="#koncept-%s" class="koncept-ref" title="%s">\
@@ -96,19 +112,16 @@ public final class KonceptSvgRenderer {
             <rect rx="%d" ry="%d" width="%d" height="%d" fill="%s"/>\
             %s\
             <text x="%d" y="%d" fill="%s" font-size="%d" \
-            font-family="%s" font-weight="bold">K</text>\
-            <text x="%d" y="%d" fill="%s" font-size="%d" \
-            font-family="%s">%s</text>\
+            font-family="%s" style="font-variant:small-caps;%s">%s</text>\
             </svg></a>\
             """.formatted(
                 escapeHtml(target),
                 escapeHtml(label),
                 totalWidth, HEIGHT,
-                CORNER_RADIUS, CORNER_RADIUS, totalWidth, HEIGHT, BADGE_COLOR,
+                CORNER_RADIUS, CORNER_RADIUS, totalWidth, HEIGHT, SPEC.pillFillHex(),
                 sigil,
-                PADDING_X + sigilW, TEXT_BASELINE_Y, TEXT_COLOR, FONT_SIZE, FONT_FAMILY,
-                PADDING_X + sigilW + PREFIX_WIDTH, TEXT_BASELINE_Y,
-                TEXT_COLOR, FONT_SIZE, FONT_FAMILY,
+                PADDING_X + sigilW, TEXT_BASELINE_Y, labelFill, FONT_SIZE,
+                FONT_FAMILY, labelDecoration,
                 escapeHtml(label)
         ).strip();
     }

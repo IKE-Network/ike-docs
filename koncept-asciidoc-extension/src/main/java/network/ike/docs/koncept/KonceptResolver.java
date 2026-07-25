@@ -70,11 +70,13 @@ final class KonceptResolver {
      *                    reference, or a concept with no stated definition)
      * @param multiParent whether the concept has more than one stated parent (renders the
      *                    appended {@value KonceptStatus#MULTI_PARENT_GLYPH} fork)
+     * @param inactive    whether the referent's latest version is inactive — renders the
+     *                    retired treatment (#742 retired parity, #864)
      * @param anchor      the glossary anchor identifier when curated, else {@code null}
      * @param identity    the identity text (name · PublicId) for the identicon alt / link title
      */
     record Resolved(String label, Optional<String> idString, KonceptKind kind,
-                    KonceptStatus status, boolean multiParent,
+                    KonceptStatus status, boolean multiParent, boolean inactive,
                     String anchor, String identity) {
     }
 
@@ -150,6 +152,7 @@ final class KonceptResolver {
         KonceptKind konceptKind;
         KonceptStatus status;
         boolean multiParent;
+        boolean inactive;
         String anchor;
         List<UUID> uuids;
         if (def.isPresent()) {
@@ -161,6 +164,7 @@ final class KonceptResolver {
             // stray status: field appears on it.
             status = konceptKind == KonceptKind.CONCEPT ? d.konceptStatus() : KonceptStatus.NONE;
             multiParent = konceptKind == KonceptKind.CONCEPT && d.isMultiParent();
+            inactive = d.isInactive();
             label = bracket != null ? bracket
                     : (d.label() != null && !d.label().isBlank()
                         ? d.label() : KonceptInlineMacro.splitCamelCase(d.identifier()));
@@ -170,6 +174,7 @@ final class KonceptResolver {
             konceptKind = KonceptKind.CONCEPT;
             status = KonceptStatus.NONE;
             multiParent = false;
+            inactive = false;
             label = bracket != null ? bracket
                     : (kind == null ? KonceptInlineMacro.splitCamelCase(value) : value);
             uuids = uncuratedPublicId(kind, value);
@@ -177,7 +182,7 @@ final class KonceptResolver {
 
         Optional<String> idString = idsEnabled(doc) && !uuids.isEmpty()
                 ? Optional.of(KonceptIdentity.idString(uuids)) : Optional.empty();
-        return new Resolved(label, idString, konceptKind, status, multiParent, anchor,
+        return new Resolved(label, idString, konceptKind, status, multiParent, inactive, anchor,
                 identity(label, uuids, kind, value));
     }
 

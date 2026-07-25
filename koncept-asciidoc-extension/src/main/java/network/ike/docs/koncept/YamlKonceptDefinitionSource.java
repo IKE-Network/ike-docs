@@ -127,6 +127,7 @@ public class YamlKonceptDefinitionSource implements KonceptDefinitionSource {
                     .kind(stringField(fields, "kind"))
                     .broader(stringListField(fields, "broader"))
                     .status(stringField(fields, "status"))
+                    .state(stringField(fields, "state"))
                     .section(stringField(fields, "section"))
                     .since(stringField(fields, "since"))
                     .comments(stringListField(fields, "comments"))

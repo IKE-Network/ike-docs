@@ -1,5 +1,6 @@
 package network.ike.docs.koncept;
 
+import network.ike.docs.konceptcore.KonceptAppearance;
 import network.ike.docs.konceptcore.KonceptKind;
 import network.ike.docs.konceptcore.KonceptStatus;
 
@@ -48,7 +49,16 @@ final class KonceptGlossaryEntryRenderer {
         html.append("  <dt id=\"koncept-").append(escapeHtml(id)).append("\">");
         html.append(markHtml(defOpt));
         html.append(htmlIdenticonImg(defOpt));
-        html.append("<strong>").append(escapeHtml(label)).append("</strong>");
+        // Retired parity (#742/#864): a retired koncept's glossary heading is struck through
+        // in the retired colour, so the entry reads as retired before its first line.
+        boolean inactive = defOpt.map(KonceptDefinition::isInactive).orElse(false);
+        if (inactive) {
+            html.append("<strong style=\"text-decoration:line-through;color:")
+                .append(KonceptAppearance.defaults().labelColorInactiveHex()).append(";\">")
+                .append(escapeHtml(label)).append("</strong>");
+        } else {
+            html.append("<strong>").append(escapeHtml(label)).append("</strong>");
+        }
 
         if (konceptEntry != null && konceptEntry.getRefCount() > 1) {
             html.append(" <span class=\"koncept-ref-count\">(")
@@ -245,10 +255,11 @@ final class KonceptGlossaryEntryRenderer {
         String relLabel = relDef.map(KonceptDefinition::label)
                 .orElse(KonceptInlineMacro.splitCamelCase(relId));
         String img = markHtml(relDef) + htmlIdenticonImg(relDef);
+        boolean inactive = relDef.map(KonceptDefinition::isInactive).orElse(false);
         return "<a href=\"#koncept-" + escapeHtml(relId)
                 + "\" class=\"koncept-ref koncept-taxonomy-ref\" style=\"text-decoration:none;"
                 + "white-space:nowrap;\">" + img + "<span class=\"koncept-taxonomy-name\" "
-                + "style=\"font-variant:small-caps;color:#2a5a8a;\">" + escapeHtml(relLabel)
+                + "style=\"" + KonceptChipStyles.labelStyle(inactive) + "\">" + escapeHtml(relLabel)
                 + "</span></a>";
     }
 

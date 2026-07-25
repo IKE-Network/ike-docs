@@ -66,6 +66,12 @@ a.koncept-identicon-ref .koncept-label {
 .koncept-sigil-pattern     { color: #7a4fb5; }
 .koncept-sigil-unknown     { color: #b00020; }
 
+/* Pill/label values MIRROR the single-sourced KonceptAppearance.defaults() in koncept-core
+   (ike-issues#860/#864) — the renderers emit self-contained inline styles computed from the
+   record (KonceptChipStyles); these rules only restate them for documents that link this
+   stylesheet. Change the record first. Retired (#742 parity): struck-through label in
+   #b00020. */
+
 /* Koncept logical-status cluster (ike-issues#742 amendment): the leading copula from the
    concept's own stated EL++ expression — ≡ sufficiently defined, ⊑ primitive, ⊤ root — with
    the ⋎ fork appended for a multi-parent concept. Colours are set inline from KonceptStatus

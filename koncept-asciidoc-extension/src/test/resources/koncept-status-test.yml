@@ -34,6 +34,16 @@ Statusless:
   uuids:
     - "aaaaaaaa-4444-4000-8000-000000000004"
 
+RetiredConcept:
+  label: Retired Concept
+  definition: A concept whose latest version is inactive — renders the retired treatment.
+  axiom: "⊑ RootThing"
+  broader: [RootThing]
+  status: primitive
+  state: inactive
+  uuids:
+    - "aaaaaaaa-6666-4000-8000-000000000006"
+
 StatusedPattern:
   label: Statused Pattern
   definition: A pattern that (wrongly) carries a status field — the kind sigil must win.

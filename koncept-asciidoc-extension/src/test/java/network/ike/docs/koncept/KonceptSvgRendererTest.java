@@ -8,18 +8,32 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies the adoc SVG badge is honest about the component kind (ike-issues#638): a bare concept,
- * a coloured letter sigil for the others, and the locked gray pentagon for a stamp — the same
- * geometry the JavaFX node and the Java2D PNG render.
+ * Verifies the adoc SVG badge is honest about the component kind (ike-issues#638) and converged
+ * to the identicon-pill look (ike-issues#864): the spec's light pill with a small-caps IKE-blue
+ * label — no solid-blue box, white text, or {@code K} prefix — a coloured letter sigil for the
+ * marked kinds, the locked gray pentagon for a stamp, and the retired treatment for an inactive
+ * referent. The same values every other renderer reads from {@code KonceptAppearance}.
  */
 class KonceptSvgRendererTest {
 
     @Test
-    void conceptIsBareWithNoSigil() {
+    void conceptIsTheLightPillNotTheBlueKBox() {
         String svg = KonceptSvgRenderer.render("HeartFailure", "Heart Failure", KonceptKind.CONCEPT);
-        assertTrue(svg.contains(">K</text>"), "the concept badge keeps its K prefix");
+        assertFalse(svg.contains(">K</text>"), "the K prefix is retired (#864 convergence)");
+        assertTrue(svg.contains("fill=\"#e9eff6\""), "the pill is the spec's light fill");
+        assertTrue(svg.contains("fill=\"#2a5a8a\""), "the label is the spec's IKE blue");
+        assertTrue(svg.contains("font-variant:small-caps"), "the label renders in small caps");
+        assertTrue(svg.contains("rx=\"6\""), "the corner radius is the spec's 6");
         assertFalse(svg.contains("#b8860b"), "a concept carries no kind-sigil colour");
         assertFalse(svg.contains("<polygon"), "a concept is not a pentagon");
+    }
+
+    @Test
+    void retiredConceptStrikesThroughInTheRetiredColour() {
+        String svg = KonceptSvgRenderer.render("OldConcept", "Old Concept", KonceptKind.CONCEPT, true);
+        assertTrue(svg.contains("fill=\"#b00020\""), "the retired label colour (#742 parity)");
+        assertTrue(svg.contains("text-decoration:line-through"), "the dedicated retired signal");
+        assertFalse(svg.contains("fill=\"#2a5a8a\""), "not the active blue");
     }
 
     @Test
