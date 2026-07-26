@@ -52,7 +52,7 @@
         <dependency>
             <groupId>network.ike.docs</groupId>
             <artifactId>koncept-core</artifactId>
-            <version>96</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- AsciidoctorJ — provided at runtime by asciidoctor-maven-plugin -->
@@ -177,9 +177,9 @@
                     <doclint>all,-missing</doclint>
                     <quiet>true</quiet>
                     <show>protected</show>
-                    <doctitle>Koncept AsciiDoc Extension 96 API</doctitle>
+                    <doctitle>Koncept AsciiDoc Extension ${project.version} API</doctitle>
                     <windowtitle>Koncept Extension API</windowtitle>
-                    <header>&lt;b&gt;Koncept Extension&lt;/b&gt; 96</header>
+                    <header>&lt;b&gt;Koncept Extension&lt;/b&gt; ${project.version}</header>
                     <bottom>
                         Copyright &amp;copy; 2025 IKE Network.
                         Licensed under the Apache License, Version 2.0.
