@@ -1,6 +1,6 @@
 ---
-date_published: 2026-07-24
-date_modified: 2026-07-24
+date_published: 2026-07-25
+date_modified: 2026-07-25
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/plugins.html
 ---
 
@@ -9,7 +9,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/plugins.html
 | GroupId | ArtifactId | Version |
 | --- | --- | --- |
 | com.googlecode.maven-download-plugin | [download-maven-plugin](https://github.com/download-maven-plugin/download-maven-plugin)[1] | 1.13.0 |
-| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 237 |
+| network.ike.tooling | [ike-maven-plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] | 238 |
 | org.apache.maven.plugins | [maven-assembly-plugin](https://maven.apache.org/plugins/maven-assembly-plugin/)[3] | 3.7.1 |
 | org.apache.maven.plugins | [maven-clean-plugin](https://maven.apache.org/plugins/maven-clean-plugin/)[4] | 3.4.0 |
 | org.apache.maven.plugins | [maven-compiler-plugin](https://maven.apache.org/plugins/maven-compiler-plugin/)[5] | 3.14.0 |
