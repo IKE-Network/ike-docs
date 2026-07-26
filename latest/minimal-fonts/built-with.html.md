@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/built-with.html
 
 # Built With
 
-Open-source software that `minimal-fonts` 95 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `minimal-fonts` 96 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 

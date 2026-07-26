@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/built-with.html
 
 # Built With
 
-Open-source software that `koncept-asciidoc-extension` 95 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `koncept-asciidoc-extension` 96 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 
