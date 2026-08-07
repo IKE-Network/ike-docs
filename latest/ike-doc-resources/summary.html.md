@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-doc-resources |
-| Version | 99 |
+| Version | 100 |
 | Type | jar |
 | Java Version | 25 |
