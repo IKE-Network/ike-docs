@@ -1,12 +1,12 @@
 ---
-date_published: 2026-08-06
-date_modified: 2026-08-06
+date_published: 2026-08-10
+date_modified: 2026-08-10
 canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 ---
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `koncept-asciidoc-extension` 101, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `koncept-asciidoc-extension` 102, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -42,9 +42,9 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `koncept-core` | `101` |
-| `network.ike.tooling` | `ike-build-standards` | `243` |
-| `network.ike.tooling` | `ike-build-standards` | `243` |
+| `network.ike.docs` | `koncept-core` | `102` |
+| `network.ike.tooling` | `ike-build-standards` | `244` |
+| `network.ike.tooling` | `ike-build-standards` | `244` |
 | `org.asciidoctor` | `asciidoctorj` | `3.0.1` |
 | `org.asciidoctor` | `asciidoctorj-api` | `3.0.1` |
 | `org.yaml` | `snakeyaml` | `2.2` |
