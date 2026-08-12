@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StampRegistry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">StampRegistry.java</span></div><h1>StampRegistry.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The packet's stamp set (ike-issues#656): one STAMP per (range commit,
+ * status) pair, plus the uncommitted pair for working-tree marks. Emits
+ * reusable AsciiDoc footnotes — every emission carries the full text,
+ * so document order never matters; Asciidoctor reuses the first
+ * definition per id — and accumulates the used stamps for the packet's
+ * Stamp Register table.
+ *
+ * &lt;p&gt;Status is stated redundantly in the endnote for STAMP consistency:
+ * &lt;em&gt;Active&lt;/em&gt; for insertions and replacements (a replacement is a
+ * new Active version; its predecessor is covered by the successor's
+ * stamp), &lt;em&gt;Inactive&lt;/em&gt; for unpaired deletions. The remaining
+ * coordinates map to the git era as: Time = author date, Author =
+ * commit author, Module = the topic's domain, Path = the branch.
+ */
+public final class StampRegistry {
+
+<span class="nc" id="L26">    private static final Pattern TRAILER = Pattern.compile(</span>
+            &quot;^(?:Refs|Fixes):\\s*(\\S+#\\d+)\\s*$&quot;, Pattern.MULTILINE);
+
+    /**
+     * Marked-region status, stated redundantly in each endnote. The
+     * vocabulary is the STAMP status vocabulary — closed. Insertions
+     * and replacements are Active (a replacement is a new Active
+     * version; the struck predecessor is covered by its successor's
+     * stamp); unpaired deletions are Inactive.
+     */
+<span class="nc" id="L36">    public enum Status {</span>
+        /** A new or replacing version of the text. */
+<span class="nc" id="L38">        ACTIVE(&quot;Active&quot;),</span>
+        /** An unpaired deletion — an inactivation. */
+<span class="nc" id="L40">        INACTIVE(&quot;Inactive&quot;);</span>
+
+        private final String label;
+
+<span class="nc" id="L44">        Status(String label) {</span>
+<span class="nc" id="L45">            this.label = label;</span>
+<span class="nc" id="L46">        }</span>
+
+        /**
+         * The label as printed in endnotes and the register.
+         *
+         * @return the human label
+         */
+        public String label() {
+<span class="nc" id="L54">            return label;</span>
+        }
+    }
+
+    /**
+     * One stamp as used somewhere in the packet.
+     *
+     * @param footnoteId the reusable footnote id
+     * @param status     the redundant S coordinate
+     * @param time       the T coordinate (author date or render note)
+     * @param author     the A coordinate
+     * @param module     the M coordinate (topic domain)
+     * @param branch     the P coordinate (branch)
+     * @param commitId   the abbreviated commit id, or {@code &quot;worktree&quot;}
+     * @param refs       issue refs from the commit trailer, or empty
+     */
+<span class="nc" id="L70">    public record Stamp(String footnoteId, Status status, String time, String author,</span>
+                        String module, String branch, String commitId, String refs) {
+    }
+
+<span class="nc" id="L74">    private final Map&lt;String, GitSource.CommitMeta&gt; commitsById = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L75">    private final Map&lt;String, Stamp&gt; used = new LinkedHashMap&lt;&gt;();</span>
+    private final String branch;
+    private final String worktreeAuthor;
+    private final String renderDate;
+    private final String rangeLabel;
+
+    /**
+     * Create the registry for one packet.
+     *
+     * @param rangeCommits   the compared range's commits
+     * @param branch         the branch (STAMP path coordinate)
+     * @param worktreeAuthor author for uncommitted stamps
+     * @param renderDate     date used for uncommitted stamps' time
+     * @param rangeLabel     label for coarse attribution of unpaired
+     *                       deletions in committed ranges, e.g.
+     *                       {@code &quot;9a958f7..HEAD&quot;}
+     */
+    public StampRegistry(List&lt;GitSource.CommitMeta&gt; rangeCommits, String branch,
+<span class="nc" id="L93">                         String worktreeAuthor, String renderDate, String rangeLabel) {</span>
+<span class="nc" id="L94">        rangeCommits.forEach(c -&gt; commitsById.put(c.id(), c));</span>
+<span class="nc" id="L95">        this.branch = branch;</span>
+<span class="nc" id="L96">        this.worktreeAuthor = worktreeAuthor;</span>
+<span class="nc" id="L97">        this.renderDate = renderDate;</span>
+<span class="nc" id="L98">        this.rangeLabel = rangeLabel;</span>
+<span class="nc" id="L99">    }</span>
+
+    /**
+     * Whether the packet can carry more than one distinct stamp; when
+     * not, in-flow refs are suppressed and the cover states the single
+     * stamp once.
+     *
+     * @param hasUncommitted whether any compared content is uncommitted
+     * @return whether multiple stamps are possible
+     */
+    public boolean multipleStampsPossible(boolean hasUncommitted) {
+<span class="nc bnc" id="L110" title="All 4 branches missed.">        return commitsById.size() + (hasUncommitted ? 1 : 0) &gt; 1;</span>
+    }
+
+    /**
+     * Render the single stamp's coordinate line for the cover when
+     * in-flow refs are suppressed.
+     *
+     * @param module the module label to print
+     * @return the one-line stamp statement
+     */
+    public String singleStampLine(String module) {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        Stamp s = commitsById.isEmpty()</span>
+<span class="nc" id="L122">            ? stamp(GitSource.UNCOMMITTED, Status.ACTIVE, module)</span>
+<span class="nc" id="L123">            : stamp(commitsById.keySet().iterator().next(), Status.ACTIVE, module);</span>
+<span class="nc" id="L124">        return text(s);</span>
+    }
+
+    /**
+     * The reusable footnote macro for one attribution + status. Every
+     * call emits the full text; Asciidoctor keys reuse on the id.
+     *
+     * @param attribution an abbreviated commit id or
+     *                    {@link GitSource#UNCOMMITTED}
+     * @param status      the region's status
+     * @param module      the topic's domain
+     * @return the {@code footnote:id[text]} macro
+     */
+    public String footnote(String attribution, Status status, String module) {
+<span class="nc" id="L138">        Stamp s = stamp(attribution, status, module);</span>
+<span class="nc" id="L139">        used.putIfAbsent(s.footnoteId(), s);</span>
+<span class="nc" id="L140">        return &quot;footnote:&quot; + s.footnoteId() + &quot;[&quot; + text(s) + &quot;]&quot;;</span>
+    }
+
+    /**
+     * The stamps actually used in this packet, in first-use order.
+     *
+     * @return the used stamps
+     */
+    public List&lt;Stamp&gt; usedStamps() {
+<span class="nc" id="L149">        return List.copyOf(used.values());</span>
+    }
+
+    private Stamp stamp(String attribution, Status status, String module) {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (attribution == null) {</span>
+            // Unpaired deletion in a committed range: attribution is
+            // deliberately coarse in v1 (pickaxe search deferred, #656).
+<span class="nc" id="L156">            return new Stamp(&quot;stamp-range-&quot; + suffix(status), status,</span>
+                    &quot;within &quot; + rangeLabel, &quot;(range)&quot;, module, branch, &quot;range&quot;, &quot;&quot;);
+        }
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (GitSource.UNCOMMITTED.equals(attribution)) {</span>
+<span class="nc" id="L160">            return new Stamp(&quot;stamp-wt-&quot; + suffix(status), status,</span>
+                    &quot;uncommitted, as of &quot; + renderDate, worktreeAuthor,
+                    module, branch, &quot;worktree&quot;, &quot;&quot;);
+        }
+<span class="nc" id="L164">        GitSource.CommitMeta c = commitsById.get(attribution);</span>
+<span class="nc" id="L165">        String refs = &quot;&quot;;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (c != null) {</span>
+<span class="nc" id="L167">            Matcher m = TRAILER.matcher(c.fullMessage());</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">            refs = m.find() ? m.group(1) : &quot;&quot;;</span>
+        }
+<span class="nc" id="L170">        return new Stamp(&quot;stamp-&quot; + attribution + &quot;-&quot; + suffix(status), status,</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                c == null ? &quot;in range&quot; : c.date(),</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                c == null ? &quot;(range)&quot; : c.author(),</span>
+                module, branch, attribution, refs);
+    }
+
+    private static String suffix(Status status) {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        return status == Status.ACTIVE ? &quot;a&quot; : &quot;i&quot;;</span>
+    }
+
+    private static String text(Stamp s) {
+<span class="nc" id="L181">        StringBuilder sb = new StringBuilder(&quot;STAMP &quot;)</span>
+<span class="nc" id="L182">                .append(s.status().label())</span>
+<span class="nc" id="L183">                .append(&quot; · &quot;).append(s.time())</span>
+<span class="nc" id="L184">                .append(&quot; · &quot;).append(s.author())</span>
+<span class="nc" id="L185">                .append(&quot; · &quot;).append(s.module())</span>
+<span class="nc" id="L186">                .append(&quot; · &quot;).append(s.branch())</span>
+<span class="nc" id="L187">                .append(&quot; · &quot;).append(s.commitId());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (!s.refs().isEmpty()) {</span>
+<span class="nc" id="L189">            sb.append(&quot; · &quot;).append(s.refs());</span>
+        }
+<span class="nc" id="L191">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
