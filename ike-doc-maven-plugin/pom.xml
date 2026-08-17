@@ -14,7 +14,7 @@
 
   Build:    mvn install -pl ike-doc-maven-plugin -am
   Test:     mvn idoc:help -pl ike-doc-maven-plugin
-  Artifact: network.ike.docs:ike-doc-maven-plugin:${project.version}
+  Artifact: network.ike.docs:ike-doc-maven-plugin:105
 -->
 <project xmlns="http://maven.apache.org/POM/4.1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -177,7 +177,7 @@
         <dependency>
             <groupId>network.ike.docs</groupId>
             <artifactId>koncept-asciidoc-extension</artifactId>
-            <version>${project.version}</version>
+            <version>105</version>
         </dependency>
         <!-- Shared rendering resources on the plugin classpath so
              idoc:diff can self-provision the branded prawn theme when a
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>network.ike.docs</groupId>
             <artifactId>ike-doc-resources</artifactId>
-            <version>${project.version}</version>
+            <version>105</version>
         </dependency>
 
         <!-- Test -->
