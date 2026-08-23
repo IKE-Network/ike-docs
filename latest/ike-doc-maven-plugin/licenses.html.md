@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 107, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 108, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -45,13 +45,13 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `ike-doc-resources` | `107` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `107` |
-| `network.ike.docs` | `koncept-core` | `107` |
-| `network.ike.tooling` | `ike-build-standards` | `252` |
-| `network.ike.tooling` | `ike-build-standards` | `252` |
-| `network.ike.tooling` | `ike-build-standards` | `252` |
-| `network.ike.tooling` | `ike-maven-plugin-support` | `252` |
+| `network.ike.docs` | `ike-doc-resources` | `108` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `108` |
+| `network.ike.docs` | `koncept-core` | `108` |
+| `network.ike.tooling` | `ike-build-standards` | `253` |
+| `network.ike.tooling` | `ike-build-standards` | `253` |
+| `network.ike.tooling` | `ike-build-standards` | `253` |
+| `network.ike.tooling` | `ike-maven-plugin-support` | `253` |
 | `org.apache.maven` | `maven-api-annotations` | `4.0.0-rc-5` |
 | `org.apache.maven` | `maven-api-core` | `4.0.0-rc-5` |
 | `org.apache.maven` | `maven-api-di` | `4.0.0-rc-5` |
