@@ -33,8 +33,9 @@ import java.nio.file.Path;
  *
  * <p>Usage:
  * <pre>
- *   mvnw ike:adocstudio                          # default sidecar
- *   mvnw ike:adocstudio -Dadocstudio.outputDir=~/my-adoc-projects
+ *   mvnw idoc:adocstudio                          # default sidecar
+ *   mvnw idoc:adocstudio -Dadocstudio.outputDir=~/my-adoc-projects
+ *   mvnw idoc:adocstudio -Dadocstudio.exclude=topics,doc-diff-spike
  * </pre>
  *
  * <p>macOS only — the Swift runtime is required for NSURL bookmark
@@ -74,6 +75,19 @@ public class AdocStudioMojo implements org.apache.maven.api.plugin.Mojo {
     @Parameter(property = "adocstudio.outputDir",
                defaultValue = "${user.home}/Documents/ike-adoc-studio")
     private String outputDir;
+
+    /**
+     * Comma-separated module names to skip during discovery.
+     *
+     * <p>Defaults to {@code topics} — the topic library. It carries a
+     * {@code pom.xml} and an {@code src/docs/asciidoc/} tree like any
+     * assembly, but it is the fragment source those assemblies include
+     * rather than a document authored in Adoc Studio, and anchoring its
+     * ~930 files in one index defeats the narrow-anchor strategy.
+     */
+    @Parameter(property = "adocstudio.exclude",
+               defaultValue = "topics")
+    private String exclude;
 
     @Override
     public void execute() throws MojoException {
@@ -121,7 +135,7 @@ public class AdocStudioMojo implements org.apache.maven.api.plugin.Mojo {
 
         // ── Execute Swift script ─────────────────────────────
         try {
-            int exitCode = runSwift(scriptFile, source, output);
+            int exitCode = runSwift(scriptFile, source, output, exclude);
             if (exitCode != 0) {
                 throw new MojoException(
                         "Swift script exited with code " + exitCode);
@@ -163,13 +177,15 @@ public class AdocStudioMojo implements org.apache.maven.api.plugin.Mojo {
         }
     }
 
-    private int runSwift(Path scriptFile, Path source, Path output)
+    private int runSwift(Path scriptFile, Path source, Path output,
+                         String excludeList)
             throws IOException, InterruptedException {
 
         ProcessBuilder pb = new ProcessBuilder(
                 "swift", scriptFile.toString(),
                 source.toString(),
-                output.toString());
+                output.toString(),
+                excludeList == null ? "" : excludeList);
         pb.redirectErrorStream(false);
 
         Process proc = pb.start();

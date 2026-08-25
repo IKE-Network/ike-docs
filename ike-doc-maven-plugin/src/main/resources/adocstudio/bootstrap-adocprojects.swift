@@ -24,9 +24,11 @@ import Foundation
 
 guard CommandLine.arguments.count >= 3 else {
     fputs("""
-          Usage: bootstrap-adocprojects <source-dir> <output-dir>
+          Usage: bootstrap-adocprojects <source-dir> <output-dir> [exclude]
             source-dir : root of ike-lab-documents (contains assembly modules)
             output-dir : sidecar directory for .adocproject files
+            exclude    : comma-separated module names to skip
+                         (default: topics)
           
           """, stderr)
     exit(1)
@@ -36,6 +38,28 @@ let sourceDir = URL(fileURLWithPath: CommandLine.arguments[1])
                     .standardized
 let outputDir = URL(fileURLWithPath: CommandLine.arguments[2])
                     .standardized
+
+/// Module names to skip during discovery.
+///
+/// A module can look exactly like an assembly — pom.xml, an
+/// `src/docs/asciidoc/` tree, a `.asciidoctorconfig` — and still not be
+/// one. `topics` is the topic *library*: the fragments every assembly
+/// includes, not a document anyone authors here. Anchoring it drags ~930
+/// files into a single Adoc Studio index, the same indexing load the
+/// narrow-anchor strategy exists to avoid.
+///
+/// This is a name list rather than a structural test on purpose. Every
+/// module in ike-lab-documents shares the same packaging and config
+/// layout, and the one structural signal that separates library from
+/// assembly — depending on the `adoc`-classified topic zip — also
+/// excludes legitimate assemblies that simply do not consume topics
+/// (`doc-diff-spike`). An explicit list misclassifies nothing.
+let excluded: Set<String> = CommandLine.arguments.count >= 4
+    ? Set(CommandLine.arguments[3]
+            .components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty })
+    : ["topics"]
 
 let fm = FileManager.default
 
@@ -70,6 +94,11 @@ func discoverAssemblies() throws -> [Assembly] {
     for item in contents {
         guard (try? item.resourceValues(forKeys: [.isDirectoryKey])
                   .isDirectory) == true else { continue }
+
+        if excluded.contains(item.lastPathComponent) {
+            print("  \(item.lastPathComponent): skipped (excluded)")
+            continue
+        }
 
         let pom = item.appendingPathComponent("pom.xml")
         let adocDir = item.appendingPathComponent("src/docs/asciidoc")
@@ -124,6 +153,15 @@ func createBookmark(for url: URL) throws -> Data {
 
 /// Reads key-value attribute pairs from .asciidoctorconfig.
 /// Lines like `:key: value` become dictionary entries.
+///
+/// Values are expanded before being handed to Adoc Studio.
+/// `.asciidoctorconfig` is an IntelliJ AsciiDoc plugin convention and its
+/// paths are written against `{asciidoctorconfigdir}` — a token only that
+/// plugin defines. Passing it through verbatim leaves Adoc Studio with an
+/// unresolvable prefix, so every `include::{topics}/…` directive fails.
+/// Since the config file lives at the module root, `{asciidoctorconfigdir}`
+/// is exactly `moduleDir`; substituting the absolute path here is what makes
+/// includes resolve in the Adoc Studio preview.
 func parseAsciidoctorConfig(at moduleDir: URL) -> [String: String] {
     let configFile = moduleDir.appendingPathComponent(".asciidoctorconfig")
     guard let content = try? String(contentsOf: configFile, encoding: .utf8)
@@ -139,7 +177,9 @@ func parseAsciidoctorConfig(at moduleDir: URL) -> [String: String] {
         let value = String(trimmed[trimmed.index(after: endColon)...])
                         .trimmingCharacters(in: .whitespaces)
         if !key.isEmpty {
-            attrs[key] = value
+            attrs[key] = value.replacingOccurrences(
+                of: "{asciidoctorconfigdir}",
+                with: moduleDir.path)
         }
     }
     return attrs
@@ -192,7 +232,23 @@ func generateAdocProject(assembly: Assembly) throws -> Data {
     }
 
     // Read .asciidoctorconfig attributes (lives at the module root)
-    let attrs = parseAsciidoctorConfig(at: assembly.moduleDir)
+    let rawAttrs = parseAsciidoctorConfig(at: assembly.moduleDir)
+
+    // Adoc Studio does NOT store attributes as a plain [String: String].
+    // Each value is an object — {"overridable": Bool, "value": String} —
+    // and handing the decoder a bare string is a type mismatch that fails
+    // the whole project file with "The data couldn't be read because it
+    // isn't in the correct format." Verified against a project written by
+    // Adoc Studio 5.0 itself after setting an attribute through its
+    // Preview Settings UI.
+    //
+    // overridable=false makes the project attribute win over an assignment
+    // in the document header — the same precedence Maven relies on when it
+    // hard-sets `generated`, so the preview and the build agree.
+    var attrs: [String: [String: Any]] = [:]
+    for (key, value) in rawAttrs {
+        attrs[key] = ["overridable": false, "value": value]
+    }
 
     // Primary anchor: the authored source tree (narrow — usually <10 files).
     let sourceAnchor: [String: Any] = [
@@ -300,7 +356,7 @@ func generateAdocProject(assembly: Assembly) throws -> Data {
                         "pdfDisplayMode": "singlePageContinuous",
                         "pdfOptions": [
                             "appearance": "automatic",
-                            "attributes": [:] as [String: String],
+                            "attributes": attrs,
                             "margins": [
                                 "bottom": 2, "left": 2,
                                 "right": 2, "top": 2
