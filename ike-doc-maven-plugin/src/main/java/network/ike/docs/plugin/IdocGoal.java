@@ -21,9 +21,9 @@ import java.util.Optional;
  */
 public enum IdocGoal implements GoalRef {
 
-    /** {@code idoc:adocstudio} — edit the project in AsciiDocFX. */
+    /** {@code idoc:adocstudio} — generate Adoc Studio sidecar projects. */
     ADOCSTUDIO("adocstudio", AdocStudioMojo.class,
-            "Edit the project in AsciiDocFX."),
+            "Generate Adoc Studio sidecar projects for assembly modules."),
     /** {@code idoc:asciidoc} — render AsciiDoc to HTML, DocBook, and Prawn PDF. */
     ASCIIDOC("asciidoc", AsciidocMojo.class,
             "Render AsciiDoc to HTML, DocBook, and Prawn PDF."),
