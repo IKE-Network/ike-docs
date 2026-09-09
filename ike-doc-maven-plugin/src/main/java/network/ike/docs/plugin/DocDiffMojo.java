@@ -21,13 +21,16 @@ import org.asciidoctor.SafeMode;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -79,10 +82,13 @@ import java.util.Set;
  * <p>Both sides' content always renders through the <em>current</em>
  * toolchain — the diff is of knowledge, never of the renderer. Deleted
  * fragments are listed on the cover and in the registry delta rather
- * than rendered struck-through (v1 decision per #649). Diagram blocks
- * inside marked topics render as source listings in this goal's output;
- * full diagram fidelity comes from the regular pipeline render of a
- * packet wired as a doc module.
+ * than rendered struck-through (v1 decision per #649). Diagrams render
+ * through the pipeline's Kroki recipe; a changed diagram carries its
+ * source delta and the previous rendering. Files a marked topic pulls
+ * in by relative {@code include::} — diagram sources, shared snippets —
+ * are staged beside it under the same flat naming and the include
+ * re-pointed, so an include that resolves from the source tree
+ * resolves from the packet too (ike-issues#1096).
  *
  * <p>Outputs under {@code target/doc-diff/}: {@code asciidoc/} (the
  * generated packet sources), {@code html/}, and {@code pdf/} (prawn).
@@ -288,6 +294,15 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
             List<List<String>> anchorsByChange = new ArrayList<>();
             manifest.changes().forEach(c -> anchorsByChange.add(new ArrayList<>()));
 
+            // Include staging (#1096): a marked topic's include of another
+            // marked topic resolves to that topic's marked copy; anything
+            // else is staged once, on first sight, from the to side.
+            Set<String> markedPaths = new LinkedHashSet<>();
+            markCandidates.stream()
+                    .filter(c -> c.status() != ChangeStatus.DELETED)
+                    .forEach(c -> markedPaths.add(c.newPath()));
+            Map<String, String> stagedIncludes = new LinkedHashMap<>();
+
             for (GitSource.Change c : markCandidates) {
                 if (c.status() == ChangeStatus.DELETED) {
                     deleted.add(c.displayPath());
@@ -333,12 +348,14 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
                 AdocDiffMarker.MarkResult result = c.status() == ChangeStatus.ADDED
                         ? AdocDiffMarker.markAdded(newLines, from, addedStampRef)
                         : AdocDiffMarker.mark(oldLines, newLines, stampSource);
-                String outName = c.displayPath().substring(topicsPrefix.length()).replace('/', '-');
+                String outName = stagedName(c.displayPath(), topicsPrefix);
                 List<String> owners = ownerTitles(manifest, c.displayPath(), anchorsByChange, result);
                 List<String> marked = PacketAssembler.injectChangeTerms(result.lines(), owners);
                 if (!oldLines.isEmpty()) {
                     marked = AdocDiffMarker.withDiagramHistory(oldLines, marked);
                 }
+                marked = stageIncludes(git, marked, c.newPath(), topicsPrefix,
+                        markedPaths, stagedIncludes, diffDir);
                 Files.writeString(diffDir.resolve(outName),
                         String.join("\n", marked) + "\n", StandardCharsets.UTF_8);
                 topics.add(new PacketAssembler.TopicEntry(c, outName, result));
@@ -395,7 +412,89 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
             }
         } catch (IOException e) {
             throw new MojoException("idoc:diff failed: " + e.getMessage(), e);
+        } catch (UncheckedIOException e) {
+            throw new MojoException("idoc:diff failed: " + e.getCause().getMessage(), e.getCause());
         }
+    }
+
+    /**
+     * The flat file name a repository path takes under {@code _diff/}:
+     * the path below the topics prefix with its separators folded to
+     * dashes — the same rule for a marked topic and for a file it
+     * includes, so an include of a marked topic lands on the marked
+     * copy. A path outside the topics tree folds its whole
+     * repository-relative form, which keeps it clear of topic names.
+     *
+     * @param path         the repository-relative path
+     * @param topicsPrefix the topics tree prefix
+     * @return the staged file name
+     */
+    private static String stagedName(String path, String topicsPrefix) {
+        String rel = path.startsWith(topicsPrefix) ? path.substring(topicsPrefix.length()) : path;
+        return rel.replace('/', '-');
+    }
+
+    /**
+     * Re-point a staged fragment's relative includes at staged copies
+     * and write any copy not yet present (ike-issues#1096). Each target
+     * is read from the to side, staged under its
+     * {@link #stagedName flat name}, and scanned for includes of its
+     * own before it is written, so nested includes stage too. A target
+     * that is itself a marked topic is only re-pointed — its marked
+     * copy is the staged file. A target absent on the to side is
+     * reported and its include left as written, so the render names
+     * the source path the author will recognise.
+     *
+     * @param git            repository access
+     * @param lines          the fragment as it will be written
+     * @param sourcePath     the fragment's repository-relative path
+     * @param topicsPrefix   the topics tree prefix
+     * @param markedPaths    to-side paths of every marked topic
+     * @param staged         repository path → staged name of every
+     *                       include written so far (updated)
+     * @param diffDir        the staging directory
+     * @return the fragment with its includes re-pointed
+     * @throws IOException on repository access or write failure
+     */
+    private List<String> stageIncludes(GitSource git, List<String> lines, String sourcePath,
+                                       String topicsPrefix, Set<String> markedPaths,
+                                       Map<String, String> staged, Path diffDir)
+            throws IOException {
+        Map<String, String> pending = new LinkedHashMap<>();
+        PacketAssembler.IncludeRewrite rewrite = PacketAssembler.rewriteIncludes(
+                lines, sourcePath, path -> {
+                    String name = stagedName(path, topicsPrefix);
+                    if (markedPaths.contains(path) || staged.containsKey(path)
+                            || pending.containsKey(path)) {
+                        return name;
+                    }
+                    String text;
+                    try {
+                        text = git.read(to, path);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                    if (text == null) {
+                        getLog().warn("idoc:diff: " + sourcePath + " includes " + path
+                                + ", which is absent on the to side — include left as written");
+                        return null;
+                    }
+                    pending.put(path, text);
+                    return name;
+                });
+        for (Map.Entry<String, String> e : pending.entrySet()) {
+            String path = e.getKey();
+            String name = stagedName(path, topicsPrefix);
+            // Registered before the recursive scan so an include cycle
+            // terminates.
+            staged.put(path, name);
+            List<String> nested = stageIncludes(git, lines(e.getValue()), path, topicsPrefix,
+                    markedPaths, staged, diffDir);
+            Files.writeString(diffDir.resolve(name), String.join("\n", nested),
+                    StandardCharsets.UTF_8);
+            getLog().info("idoc:diff staged include " + path + " -> _diff/" + name);
+        }
+        return rewrite.lines();
     }
 
     /**

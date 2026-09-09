@@ -5,7 +5,12 @@ import com.github.difflib.patch.Patch;
 import com.github.difflib.DiffUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Composes the review packet's generated AsciiDoc (ike-issues#648):
@@ -99,6 +104,105 @@ public final class PacketAssembler {
             }
         }
         return null;
+    }
+
+    /** An {@code include::target[attrlist]} directive line. */
+    private static final Pattern INCLUDE = Pattern.compile(
+            "^include::([^\\[]+)\\[(.*)]\\s*$");
+
+    /** A URI scheme prefix — such targets are never repository paths. */
+    private static final Pattern URI_SCHEME = Pattern.compile("^[A-Za-z][A-Za-z0-9+.-]*://");
+
+    /**
+     * A staged fragment with its relative includes re-pointed at their
+     * staged copies (ike-issues#1096).
+     *
+     * @param lines   the fragment with each accepted include rewritten
+     * @param targets repository-relative include targets → staged file
+     *                name, in first-seen order; only targets the namer
+     *                accepted
+     */
+    public record IncludeRewrite(List<String> lines, Map<String, String> targets) {
+    }
+
+    /**
+     * Resolve an {@code include::} target the way the AsciiDoc
+     * preprocessor does — relative to the directory of the including
+     * file — into a repository-relative path.
+     *
+     * <p>Targets that cannot be resolved statically are reported as
+     * {@code null}: attribute references ({@code {topics}/…}), absolute
+     * paths, URIs, and relative paths that climb above the repository
+     * root.
+     *
+     * @param sourcePath the repository-relative path of the including
+     *                   file
+     * @param target     the include target as written
+     * @return the repository-relative path of the target, or
+     *         {@code null} when it cannot be resolved statically
+     */
+    public static String resolveInclude(String sourcePath, String target) {
+        if (target.isBlank() || target.contains("{") || target.startsWith("/")
+                || URI_SCHEME.matcher(target).find()) {
+            return null;
+        }
+        int slash = sourcePath.lastIndexOf('/');
+        String dir = slash < 0 ? "" : sourcePath.substring(0, slash);
+        List<String> segments = new ArrayList<>();
+        for (String seg : (dir.isEmpty() ? target : dir + "/" + target).split("/")) {
+            if (seg.isEmpty() || seg.equals(".")) {
+                continue;
+            }
+            if (seg.equals("..")) {
+                if (segments.isEmpty()) {
+                    return null;
+                }
+                segments.remove(segments.size() - 1);
+                continue;
+            }
+            segments.add(seg);
+        }
+        return segments.isEmpty() ? null : String.join("/", segments);
+    }
+
+    /**
+     * Re-point every statically resolvable {@code include::} line of a
+     * fragment staged under {@code _diff/} at the flat staged name of
+     * its target, so the include resolves from the staging directory
+     * exactly as it did from the source tree (ike-issues#1096). The
+     * attribute list is preserved; lines the namer declines, and
+     * targets {@link #resolveInclude} cannot resolve, are left as
+     * written.
+     *
+     * @param lines      the staged fragment
+     * @param sourcePath the fragment's repository-relative source path
+     * @param stagedName maps a resolved repository-relative target to
+     *                   its staged file name, or returns {@code null}
+     *                   to leave that include untouched
+     * @return the rewritten fragment (a new list) and the accepted
+     *         targets
+     */
+    public static IncludeRewrite rewriteIncludes(List<String> lines, String sourcePath,
+                                                 Function<String, String> stagedName) {
+        List<String> out = new ArrayList<>(lines.size());
+        Map<String, String> targets = new LinkedHashMap<>();
+        for (String l : lines) {
+            Matcher m = INCLUDE.matcher(l);
+            if (!m.matches()) {
+                out.add(l);
+                continue;
+            }
+            String path = resolveInclude(sourcePath, m.group(1).strip());
+            String name = path == null ? null
+                    : targets.containsKey(path) ? targets.get(path) : stagedName.apply(path);
+            if (name == null) {
+                out.add(l);
+                continue;
+            }
+            targets.put(path, name);
+            out.add("include::" + name + "[" + m.group(2) + "]");
+        }
+        return new IncludeRewrite(out, targets);
     }
 
     /**

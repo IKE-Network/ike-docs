@@ -151,7 +151,10 @@ every subproject able to generate one. Outputs land in
 `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the
 goal is self-contained, so a bare invocation on a fresh checkout
 produces a styled packet (branded typography when the pipeline fonts
-are unpacked; a bundled fallback theme otherwise).
+are unpacked; a bundled fallback theme otherwise). Files a marked topic
+pulls in by relative `include::` — diagram sources, shared snippets —
+are staged beside it, so an include that resolves from the source tree
+resolves from the packet too.
 
 Changes are first-class, named entities: author a `changes.yaml`
 beside the module pom (or at the repository root) with an id, title,
