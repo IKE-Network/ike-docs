@@ -10,8 +10,8 @@
 
 	<meta name="keywords" content="AsciiDoc,documentation pipeline,Maven,PDF,IKE Network,knowledge engineering" />
 	<meta name="generator" content="Maven Site Plugin, Doxia Site Renderer 2.0.0, Skin sentry-maven-skin 7.0.00, from asciidoc" />
-	<meta property="article:published_time" content="2026-08-23T00:00:00" />
-	<meta property="article:modified_time" content="2026-08-23T00:00:00" />
+	<meta property="article:published_time" content="2026-09-17T00:00:00" />
+	<meta property="article:modified_time" content="2026-09-17T00:00:00" />
 
 
 	<link rel="canonical" href="https://github.com/IKE-Network/ike-docs/index.html">
@@ -23,8 +23,8 @@
 	"@context": "https://schema.org",
 	"@type": "TechArticle",
 	"headline": "IKE Doc Maven Plugin",
-	"datePublished": "2026-08-23T00:00:00",
-	"dateModified": "2026-08-23T00:00:00",
+	"datePublished": "2026-09-17T00:00:00",
+	"dateModified": "2026-09-17T00:00:00",
 	"mainEntityOfPage": "https://github.com/IKE-Network/ike-docs/index.html",
 }
 </script>
@@ -86,13 +86,13 @@
 					<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
 							<span class="version-prefix">Version</span>
-							<span class="version">108</span>
+							<span class="version">109</span>
 						</div>
 					</div>
 					<div class="navbar-brand header-xxs visible-xs">
 						<div class="header-title">IKE Doc Maven Plugin</div>
 						<div class="header-subtitle">
-							Version <strong>108</strong>
+							Version <strong>109</strong>
 						</div>
 					</div>
 					<form class="navbar-form site-search site-search-xs visible-xs" ng-show="showSearchInput">
@@ -166,7 +166,7 @@
 
 					<div class="col-md-12">
 					<div class="page-header visible-print-block">
-							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 108
+							<h3><small>IKE Docs</small><br/>							IKE Doc Maven Plugin 109
 							</h3>
 						</div>
 								<div class="home-xs visible-xs">
@@ -290,7 +290,7 @@ mvn idoc:diff -Dike.diff.from=v1.2.3             # tag vs working tree
 mvn idoc:diff -Dike.diff.from=A -Dike.diff.to=B  # any two commits
 mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt</code></pre>
  </div>
- <p>The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an <strong>assembly</strong> module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in <code>target/doc-diff/</code> as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise).</p>
+ <p>The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an <strong>assembly</strong> module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in <code>target/doc-diff/</code> as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise). Files a marked topic pulls in by relative <code>include::</code> — diagram sources, shared snippets — are staged beside it, so an include that resolves from the source tree resolves from the packet too.</p>
  <p>Changes are first-class, named entities: author a <code>changes.yaml</code> beside the module pom (or at the repository root) with an id, title, one-line description, issue refs, and touched files per change — or, for commit-to-commit comparisons, let the goal derive entities by grouping the range’s commits on their <code>Refs:</code>/<code>Fixes:</code> trailers. The entities project into a Record of Changes, a Change Glossary, and an index-driven Change Index. Each change boundary also carries a STAMP endnote — Status (Active/Inactive), Time, Author, Module (topic domain), Path (branch) — collapsed per paragraph and tabulated in a Stamp Register.</p>
  <p>Design note: <code>dev-doc-diff-pipeline</code> in <code>ike-lab-documents/topics/</code>; epic <a href="https://github.com/IKE-Network/ike-issues/issues/648" class="externalLink">ike-issues#648</a><sup class="visible-print-inline">[4]</sup>.</p>
 </div>
@@ -362,7 +362,7 @@ mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt</code></
 								<li>[9] https://github.com/IKE-Network/ike-issues</li>
 								</ul>
 							</div>
-<div class="date">Date: <strong>2026-08-22 22:10:46 -0700</strong></div>
+<div class="date">Date: <strong>2026-09-17 12:52:30 -0700</strong></div>
 						</div>
 						</div>
 					</div>
@@ -441,9 +441,9 @@ mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt</code></
 	<footer class="footer">
 
 		<p class="footer-title" ng-class="{'text-center': $matchMedia.size == 'xs'}">
-			<strong>IKE Doc Maven Plugin 108</strong>
+			<strong>IKE Doc Maven Plugin 109</strong>
 			<span class="hidden-xs">|</span><br class="hidden-sm hidden-md hidden-lg"/>
-			Documentation as of <strong><time datetime="2026-08-23">2026-08-23</time></strong>
+			Documentation as of <strong><time datetime="2026-09-17">2026-09-17</time></strong>
 		</p>
 	<div class="visible-xs navbar navbar-inverse site-logo site-logo-xs">
 			<ul class="nav navbar-nav">

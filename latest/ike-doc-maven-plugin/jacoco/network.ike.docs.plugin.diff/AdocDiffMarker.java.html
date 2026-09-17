@@ -308,8 +308,8 @@ public final class AdocDiffMarker {
 <span class="pc bpc" id="L308" title="2 of 4 branches missed.">            while (open &lt; lines.size() &amp;&amp; lines.get(open).isBlank()) {</span>
 <span class="nc" id="L309">                open++;</span>
             }
-<span class="pc bpc" id="L311" title="2 of 4 branches missed.">            if (open &gt;= lines.size() || !lines.get(open).strip().equals(&quot;----&quot;)) {</span>
-<span class="nc" id="L312">                continue;</span>
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">            if (open &gt;= lines.size() || !lines.get(open).strip().equals(&quot;----&quot;)) {</span>
+<span class="fc" id="L312">                continue;</span>
             }
 <span class="fc" id="L314">            int close = open + 1;</span>
 <span class="pc bpc" id="L315" title="1 of 4 branches missed.">            while (close &lt; lines.size() &amp;&amp; !lines.get(close).strip().equals(&quot;----&quot;)) {</span>

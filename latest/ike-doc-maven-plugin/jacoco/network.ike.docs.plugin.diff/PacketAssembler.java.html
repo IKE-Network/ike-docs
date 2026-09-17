@@ -5,7 +5,12 @@ import com.github.difflib.patch.Patch;
 import com.github.difflib.DiffUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Composes the review packet's generated AsciiDoc (ike-issues#648):
@@ -29,7 +34,7 @@ public final class PacketAssembler {
      *                {@code _diff/}
      * @param result  the marker's output for this topic
      */
-<span class="nc" id="L32">    public record TopicEntry(GitSource.Change change, String outName,</span>
+<span class="nc" id="L37">    public record TopicEntry(GitSource.Change change, String outName,</span>
                              AdocDiffMarker.MarkResult result) {
     }
 
@@ -40,7 +45,7 @@ public final class PacketAssembler {
      * @param path        the repository-relative path
      * @param unifiedDiff the unified diff text
      */
-<span class="nc" id="L43">    public record ScaffoldEntry(String path, String unifiedDiff) {</span>
+<span class="nc" id="L48">    public record ScaffoldEntry(String path, String unifiedDiff) {</span>
     }
 
     /**
@@ -52,10 +57,10 @@ public final class PacketAssembler {
      * @return the unified diff text, without trailing newline
      */
     public static String unifiedDiff(String path, List&lt;String&gt; oldLines, List&lt;String&gt; newLines) {
-<span class="nc" id="L55">        Patch&lt;String&gt; patch = DiffUtils.diff(oldLines, newLines);</span>
-<span class="nc" id="L56">        List&lt;String&gt; diff = UnifiedDiffUtils.generateUnifiedDiff(</span>
+<span class="nc" id="L60">        Patch&lt;String&gt; patch = DiffUtils.diff(oldLines, newLines);</span>
+<span class="nc" id="L61">        List&lt;String&gt; diff = UnifiedDiffUtils.generateUnifiedDiff(</span>
                 &quot;a/&quot; + path, &quot;b/&quot; + path, oldLines, patch, 3);
-<span class="nc" id="L58">        return String.join(&quot;\n&quot;, diff);</span>
+<span class="nc" id="L63">        return String.join(&quot;\n&quot;, diff);</span>
     }
 
     /**
@@ -69,21 +74,21 @@ public final class PacketAssembler {
      * @return the fragment with terms injected (a new list)
      */
     public static List&lt;String&gt; injectChangeTerms(List&lt;String&gt; lines, List&lt;String&gt; changeTitles) {
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (changeTitles.isEmpty()) {</span>
-<span class="nc" id="L73">            return lines;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (changeTitles.isEmpty()) {</span>
+<span class="nc" id="L78">            return lines;</span>
         }
-<span class="nc" id="L75">        List&lt;String&gt; out = new ArrayList&lt;&gt;(lines.size() + changeTitles.size());</span>
-<span class="nc" id="L76">        boolean placed = false;</span>
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (String l : lines) {</span>
-<span class="nc" id="L78">            out.add(l);</span>
-<span class="nc bnc" id="L79" title="All 4 branches missed.">            if (!placed &amp;&amp; l.startsWith(&quot;= &quot;)) {</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">                for (String t : changeTitles) {</span>
-<span class="nc" id="L81">                    out.add(&quot;indexterm:[change, \&quot;&quot; + t.replace(&quot;\&quot;&quot;, &quot;'&quot;) + &quot;\&quot;]&quot;);</span>
-<span class="nc" id="L82">                }</span>
-<span class="nc" id="L83">                placed = true;</span>
+<span class="nc" id="L80">        List&lt;String&gt; out = new ArrayList&lt;&gt;(lines.size() + changeTitles.size());</span>
+<span class="nc" id="L81">        boolean placed = false;</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (String l : lines) {</span>
+<span class="nc" id="L83">            out.add(l);</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">            if (!placed &amp;&amp; l.startsWith(&quot;= &quot;)) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                for (String t : changeTitles) {</span>
+<span class="nc" id="L86">                    out.add(&quot;indexterm:[change, \&quot;&quot; + t.replace(&quot;\&quot;&quot;, &quot;'&quot;) + &quot;\&quot;]&quot;);</span>
+<span class="nc" id="L87">                }</span>
+<span class="nc" id="L88">                placed = true;</span>
             }
-<span class="nc" id="L85">        }</span>
-<span class="nc" id="L86">        return out;</span>
+<span class="nc" id="L90">        }</span>
+<span class="nc" id="L91">        return out;</span>
     }
 
     /**
@@ -93,12 +98,111 @@ public final class PacketAssembler {
      * @return the anchor id, or {@code null} when none is present
      */
     public static String anchorOf(List&lt;String&gt; lines) {
-<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (String l : lines) {</span>
-<span class="nc bnc" id="L97" title="All 4 branches missed.">            if (l.startsWith(&quot;[[&quot;) &amp;&amp; l.endsWith(&quot;]]&quot;)) {</span>
-<span class="nc" id="L98">                return l.substring(2, l.length() - 2);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        for (String l : lines) {</span>
+<span class="nc bnc" id="L102" title="All 4 branches missed.">            if (l.startsWith(&quot;[[&quot;) &amp;&amp; l.endsWith(&quot;]]&quot;)) {</span>
+<span class="nc" id="L103">                return l.substring(2, l.length() - 2);</span>
             }
-<span class="nc" id="L100">        }</span>
-<span class="nc" id="L101">        return null;</span>
+<span class="nc" id="L105">        }</span>
+<span class="nc" id="L106">        return null;</span>
+    }
+
+    /** An {@code include::target[attrlist]} directive line. */
+<span class="fc" id="L110">    private static final Pattern INCLUDE = Pattern.compile(</span>
+            &quot;^include::([^\\[]+)\\[(.*)]\\s*$&quot;);
+
+    /** A URI scheme prefix — such targets are never repository paths. */
+<span class="fc" id="L114">    private static final Pattern URI_SCHEME = Pattern.compile(&quot;^[A-Za-z][A-Za-z0-9+.-]*://&quot;);</span>
+
+    /**
+     * A staged fragment with its relative includes re-pointed at their
+     * staged copies (ike-issues#1096).
+     *
+     * @param lines   the fragment with each accepted include rewritten
+     * @param targets repository-relative include targets → staged file
+     *                name, in first-seen order; only targets the namer
+     *                accepted
+     */
+<span class="fc" id="L125">    public record IncludeRewrite(List&lt;String&gt; lines, Map&lt;String, String&gt; targets) {</span>
+    }
+
+    /**
+     * Resolve an {@code include::} target the way the AsciiDoc
+     * preprocessor does — relative to the directory of the including
+     * file — into a repository-relative path.
+     *
+     * &lt;p&gt;Targets that cannot be resolved statically are reported as
+     * {@code null}: attribute references ({@code {topics}/…}), absolute
+     * paths, URIs, and relative paths that climb above the repository
+     * root.
+     *
+     * @param sourcePath the repository-relative path of the including
+     *                   file
+     * @param target     the include target as written
+     * @return the repository-relative path of the target, or
+     *         {@code null} when it cannot be resolved statically
+     */
+    public static String resolveInclude(String sourcePath, String target) {
+<span class="pc bpc" id="L145" title="1 of 6 branches missed.">        if (target.isBlank() || target.contains(&quot;{&quot;) || target.startsWith(&quot;/&quot;)</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                || URI_SCHEME.matcher(target).find()) {</span>
+<span class="fc" id="L147">            return null;</span>
+        }
+<span class="fc" id="L149">        int slash = sourcePath.lastIndexOf('/');</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        String dir = slash &lt; 0 ? &quot;&quot; : sourcePath.substring(0, slash);</span>
+<span class="fc" id="L151">        List&lt;String&gt; segments = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L152" title="All 4 branches covered.">        for (String seg : (dir.isEmpty() ? target : dir + &quot;/&quot; + target).split(&quot;/&quot;)) {</span>
+<span class="pc bpc" id="L153" title="1 of 4 branches missed.">            if (seg.isEmpty() || seg.equals(&quot;.&quot;)) {</span>
+<span class="fc" id="L154">                continue;</span>
+            }
+<span class="fc bfc" id="L156" title="All 2 branches covered.">            if (seg.equals(&quot;..&quot;)) {</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                if (segments.isEmpty()) {</span>
+<span class="fc" id="L158">                    return null;</span>
+                }
+<span class="fc" id="L160">                segments.remove(segments.size() - 1);</span>
+<span class="fc" id="L161">                continue;</span>
+            }
+<span class="fc" id="L163">            segments.add(seg);</span>
+        }
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        return segments.isEmpty() ? null : String.join(&quot;/&quot;, segments);</span>
+    }
+
+    /**
+     * Re-point every statically resolvable {@code include::} line of a
+     * fragment staged under {@code _diff/} at the flat staged name of
+     * its target, so the include resolves from the staging directory
+     * exactly as it did from the source tree (ike-issues#1096). The
+     * attribute list is preserved; lines the namer declines, and
+     * targets {@link #resolveInclude} cannot resolve, are left as
+     * written.
+     *
+     * @param lines      the staged fragment
+     * @param sourcePath the fragment's repository-relative source path
+     * @param stagedName maps a resolved repository-relative target to
+     *                   its staged file name, or returns {@code null}
+     *                   to leave that include untouched
+     * @return the rewritten fragment (a new list) and the accepted
+     *         targets
+     */
+    public static IncludeRewrite rewriteIncludes(List&lt;String&gt; lines, String sourcePath,
+                                                 Function&lt;String, String&gt; stagedName) {
+<span class="fc" id="L187">        List&lt;String&gt; out = new ArrayList&lt;&gt;(lines.size());</span>
+<span class="fc" id="L188">        Map&lt;String, String&gt; targets = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        for (String l : lines) {</span>
+<span class="fc" id="L190">            Matcher m = INCLUDE.matcher(l);</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">            if (!m.matches()) {</span>
+<span class="fc" id="L192">                out.add(l);</span>
+<span class="fc" id="L193">                continue;</span>
+            }
+<span class="fc" id="L195">            String path = resolveInclude(sourcePath, m.group(1).strip());</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">            String name = path == null ? null</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                    : targets.containsKey(path) ? targets.get(path) : stagedName.apply(path);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            if (name == null) {</span>
+<span class="fc" id="L199">                out.add(l);</span>
+<span class="fc" id="L200">                continue;</span>
+            }
+<span class="fc" id="L202">            targets.put(path, name);</span>
+<span class="fc" id="L203">            out.add(&quot;include::&quot; + name + &quot;[&quot; + m.group(2) + &quot;]&quot;);</span>
+<span class="fc" id="L204">        }</span>
+<span class="fc" id="L205">        return new IncludeRewrite(out, targets);</span>
     }
 
     /**
@@ -128,125 +232,125 @@ public final class PacketAssembler {
                                    List&lt;ScaffoldEntry&gt; scaffolds,
                                    String singleStampLine,
                                    List&lt;StampRegistry.Stamp&gt; stampsUsed) {
-<span class="nc" id="L131">        StringBuilder m = new StringBuilder();</span>
-<span class="nc" id="L132">        m.append(&quot;= &quot;).append(title).append('\n')</span>
-<span class="nc" id="L133">         .append(&quot;:doctype: book\n:toc: left\n:toclevels: 1\n:sectnums!:\n&quot;)</span>
-<span class="nc" id="L134">         .append(&quot;:icons: font\n:source-highlighter: rouge\n\n&quot;)</span>
-<span class="nc" id="L135">         .append(&quot;ifdef::backend-html5[]\n++++\n&lt;style&gt;\n&quot;)</span>
-<span class="nc" id="L136">         .append(&quot;span.diff-ins{color:#1a7f37;background:#e6ffec;}\n&quot;)</span>
-<span class="nc" id="L137">         .append(&quot;span.diff-del{color:#cf222e;background:#ffebe9;text-decoration:line-through;}\n&quot;)</span>
-<span class="nc" id="L138">         .append(&quot;span.diff-meta{color:#6e40c9;}\n&quot;)</span>
-<span class="nc" id="L139">         .append(&quot;&lt;/style&gt;\n++++\nendif::[]\n\n&quot;);</span>
+<span class="nc" id="L235">        StringBuilder m = new StringBuilder();</span>
+<span class="nc" id="L236">        m.append(&quot;= &quot;).append(title).append('\n')</span>
+<span class="nc" id="L237">         .append(&quot;:doctype: book\n:toc: left\n:toclevels: 1\n:sectnums!:\n&quot;)</span>
+<span class="nc" id="L238">         .append(&quot;:icons: font\n:source-highlighter: rouge\n\n&quot;)</span>
+<span class="nc" id="L239">         .append(&quot;ifdef::backend-html5[]\n++++\n&lt;style&gt;\n&quot;)</span>
+<span class="nc" id="L240">         .append(&quot;span.diff-ins{color:#1a7f37;background:#e6ffec;}\n&quot;)</span>
+<span class="nc" id="L241">         .append(&quot;span.diff-del{color:#cf222e;background:#ffebe9;text-decoration:line-through;}\n&quot;)</span>
+<span class="nc" id="L242">         .append(&quot;span.diff-meta{color:#6e40c9;}\n&quot;)</span>
+<span class="nc" id="L243">         .append(&quot;&lt;/style&gt;\n++++\nendif::[]\n\n&quot;);</span>
 
-<span class="nc" id="L141">        m.append(&quot;== How to Read This Packet\n\n&quot;)</span>
-<span class="nc" id="L142">         .append(&quot;Compared: `&quot;).append(fromLabel).append(&quot;` → `&quot;).append(toLabel).append(&quot;`.\n&quot;)</span>
-<span class="nc" id="L143">         .append(&quot;Each changed topic follows as its own chapter with inline markup:\n&quot;)</span>
-<span class="nc" id="L144">         .append(&quot;[.diff-ins]#inserted text renders like this#, and\n&quot;)</span>
-<span class="nc" id="L145">         .append(&quot;[.diff-del]#removed text renders like this#.\n&quot;)</span>
-<span class="nc" id="L146">         .append(&quot;[.diff-meta]#Metadata notes render like this# and carry changes the\n&quot;)</span>
-<span class="nc" id="L147">         .append(&quot;renderer cannot show inline (attributes, keywords, index terms,\n&quot;)</span>
-<span class="nc" id="L148">         .append(&quot;verbatim blocks).\n&quot;);</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (singleStampLine != null) {</span>
-<span class="nc" id="L150">            m.append(&quot;All changes in this packet carry one stamp — &quot;)</span>
-<span class="nc" id="L151">             .append(singleStampLine).append(&quot; — so per-change stamp endnotes are omitted.\n&quot;);</span>
-<span class="nc bnc" id="L152" title="All 2 branches missed.">        } else if (!stampsUsed.isEmpty()) {</span>
-<span class="nc" id="L153">            m.append(&quot;Superscript endnotes stamp each change boundary with its\n&quot;)</span>
-<span class="nc" id="L154">             .append(&quot;provenance coordinate; the Stamp Register at the back lists them.\n&quot;);</span>
+<span class="nc" id="L245">        m.append(&quot;== How to Read This Packet\n\n&quot;)</span>
+<span class="nc" id="L246">         .append(&quot;Compared: `&quot;).append(fromLabel).append(&quot;` → `&quot;).append(toLabel).append(&quot;`.\n&quot;)</span>
+<span class="nc" id="L247">         .append(&quot;Each changed topic follows as its own chapter with inline markup:\n&quot;)</span>
+<span class="nc" id="L248">         .append(&quot;[.diff-ins]#inserted text renders like this#, and\n&quot;)</span>
+<span class="nc" id="L249">         .append(&quot;[.diff-del]#removed text renders like this#.\n&quot;)</span>
+<span class="nc" id="L250">         .append(&quot;[.diff-meta]#Metadata notes render like this# and carry changes the\n&quot;)</span>
+<span class="nc" id="L251">         .append(&quot;renderer cannot show inline (attributes, keywords, index terms,\n&quot;)</span>
+<span class="nc" id="L252">         .append(&quot;verbatim blocks).\n&quot;);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (singleStampLine != null) {</span>
+<span class="nc" id="L254">            m.append(&quot;All changes in this packet carry one stamp — &quot;)</span>
+<span class="nc" id="L255">             .append(singleStampLine).append(&quot; — so per-change stamp endnotes are omitted.\n&quot;);</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        } else if (!stampsUsed.isEmpty()) {</span>
+<span class="nc" id="L257">            m.append(&quot;Superscript endnotes stamp each change boundary with its\n&quot;)</span>
+<span class="nc" id="L258">             .append(&quot;provenance coordinate; the Stamp Register at the back lists them.\n&quot;);</span>
         }
-<span class="nc" id="L156">        m.append('\n');</span>
+<span class="nc" id="L260">        m.append('\n');</span>
 
-<span class="nc" id="L158">        m.append(&quot;== Change Summary\n\n.Changed topics\n&quot;)</span>
-<span class="nc" id="L159">         .append(&quot;[cols=\&quot;4,1,1,1,1\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
-<span class="nc" id="L160">         .append(&quot;| Topic file | status | +words | -words | notes\n&quot;);</span>
-<span class="nc bnc" id="L161" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
-<span class="nc" id="L162">            m.append(&quot;| &quot;).append(t.change().displayPath())</span>
-<span class="nc" id="L163">             .append(&quot; | &quot;).append(t.change().status().name().toLowerCase())</span>
-<span class="nc" id="L164">             .append(&quot; | &quot;).append(t.result().insWords())</span>
-<span class="nc" id="L165">             .append(&quot; | &quot;).append(t.result().delWords())</span>
-<span class="nc" id="L166">             .append(&quot; | &quot;).append(t.result().notes().size()).append('\n');</span>
-<span class="nc" id="L167">        }</span>
-<span class="nc bnc" id="L168" title="All 2 branches missed.">        for (String d : deleted) {</span>
-<span class="nc" id="L169">            m.append(&quot;| &quot;).append(d).append(&quot; | deleted | 0 | — | —\n&quot;);</span>
-<span class="nc" id="L170">        }</span>
-<span class="nc" id="L171">        m.append(&quot;|===\n\n&quot;);</span>
+<span class="nc" id="L262">        m.append(&quot;== Change Summary\n\n.Changed topics\n&quot;)</span>
+<span class="nc" id="L263">         .append(&quot;[cols=\&quot;4,1,1,1,1\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L264">         .append(&quot;| Topic file | status | +words | -words | notes\n&quot;);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
+<span class="nc" id="L266">            m.append(&quot;| &quot;).append(t.change().displayPath())</span>
+<span class="nc" id="L267">             .append(&quot; | &quot;).append(t.change().status().name().toLowerCase())</span>
+<span class="nc" id="L268">             .append(&quot; | &quot;).append(t.result().insWords())</span>
+<span class="nc" id="L269">             .append(&quot; | &quot;).append(t.result().delWords())</span>
+<span class="nc" id="L270">             .append(&quot; | &quot;).append(t.result().notes().size()).append('\n');</span>
+<span class="nc" id="L271">        }</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        for (String d : deleted) {</span>
+<span class="nc" id="L273">            m.append(&quot;| &quot;).append(d).append(&quot; | deleted | 0 | — | —\n&quot;);</span>
+<span class="nc" id="L274">        }</span>
+<span class="nc" id="L275">        m.append(&quot;|===\n\n&quot;);</span>
 
-<span class="nc" id="L173">        m.append(&quot;== Record of Changes\n\n&quot;)</span>
-<span class="nc" id="L174">         .append(&quot;Each named change, with context links into the marked topics;\n&quot;)</span>
-<span class="nc" id="L175">         .append(&quot;the Change Index at the back resolves each change to its pages.\n\n&quot;)</span>
-<span class="nc" id="L176">         .append(&quot;[cols=\&quot;2,4,3\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
-<span class="nc" id="L177">         .append(&quot;| Change | Description | Context\n&quot;);</span>
-<span class="nc" id="L178">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
-<span class="nc bnc" id="L179" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
-<span class="nc" id="L180">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
-<span class="nc" id="L181">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
-<span class="nc bnc" id="L182" title="All 2 branches missed.">            String links = anchors.isEmpty()</span>
-<span class="nc" id="L183">                    ? &quot;(registry/assembly only)&quot;</span>
-<span class="nc" id="L184">                    : String.join(&quot;, &quot;, anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList());</span>
-<span class="nc" id="L185">            m.append(&quot;| *&quot;).append(c.title()).append(&quot;*\n`&quot;).append(c.id()).append('`')</span>
-<span class="nc" id="L186">             .append(refsSuffix(c))</span>
-<span class="nc" id="L187">             .append(&quot; | &quot;).append(c.description())</span>
-<span class="nc" id="L188">             .append(&quot; | &quot;).append(links).append('\n');</span>
+<span class="nc" id="L277">        m.append(&quot;== Record of Changes\n\n&quot;)</span>
+<span class="nc" id="L278">         .append(&quot;Each named change, with context links into the marked topics;\n&quot;)</span>
+<span class="nc" id="L279">         .append(&quot;the Change Index at the back resolves each change to its pages.\n\n&quot;)</span>
+<span class="nc" id="L280">         .append(&quot;[cols=\&quot;2,4,3\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L281">         .append(&quot;| Change | Description | Context\n&quot;);</span>
+<span class="nc" id="L282">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc" id="L284">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
+<span class="nc" id="L285">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            String links = anchors.isEmpty()</span>
+<span class="nc" id="L287">                    ? &quot;(registry/assembly only)&quot;</span>
+<span class="nc" id="L288">                    : String.join(&quot;, &quot;, anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList());</span>
+<span class="nc" id="L289">            m.append(&quot;| *&quot;).append(c.title()).append(&quot;*\n`&quot;).append(c.id()).append('`')</span>
+<span class="nc" id="L290">             .append(refsSuffix(c))</span>
+<span class="nc" id="L291">             .append(&quot; | &quot;).append(c.description())</span>
+<span class="nc" id="L292">             .append(&quot; | &quot;).append(links).append('\n');</span>
         }
-<span class="nc" id="L190">        m.append(&quot;|===\n\n&quot;);</span>
+<span class="nc" id="L294">        m.append(&quot;|===\n\n&quot;);</span>
 
-<span class="nc bnc" id="L192" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
-<span class="nc" id="L193">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/&quot;).append(t.outName())</span>
-<span class="nc" id="L194">             .append(&quot;[leveloffset=+1]\n\n&quot;);</span>
-<span class="nc" id="L195">        }</span>
-<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (hasRegistryDelta) {</span>
-<span class="nc" id="L197">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/registry-delta.adoc[leveloffset=+1]\n\n&quot;);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        for (TopicEntry t : topics) {</span>
+<span class="nc" id="L297">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/&quot;).append(t.outName())</span>
+<span class="nc" id="L298">             .append(&quot;[leveloffset=+1]\n\n&quot;);</span>
+<span class="nc" id="L299">        }</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        if (hasRegistryDelta) {</span>
+<span class="nc" id="L301">            m.append(&quot;&lt;&lt;&lt;\ninclude::_diff/registry-delta.adoc[leveloffset=+1]\n\n&quot;);</span>
         }
-<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (!scaffolds.isEmpty()) {</span>
-<span class="nc" id="L200">            m.append(&quot;&lt;&lt;&lt;\n== Assembly Scaffolding Changes\n\n&quot;)</span>
-<span class="nc" id="L201">             .append(&quot;Source diffs for assembly files (structural includes, not prose).\n\n&quot;);</span>
-<span class="nc bnc" id="L202" title="All 2 branches missed.">            for (ScaffoldEntry s : scaffolds) {</span>
-<span class="nc" id="L203">                m.append(&quot;=== &quot;).append(s.path()).append(&quot;\n\n[source,diff]\n-----\n&quot;)</span>
-<span class="nc" id="L204">                 .append(s.unifiedDiff()).append(&quot;\n-----\n\n&quot;);</span>
-<span class="nc" id="L205">            }</span>
-        }
-
-<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (!stampsUsed.isEmpty()) {</span>
-<span class="nc" id="L209">            m.append(&quot;&lt;&lt;&lt;\n== Stamp Register\n\n&quot;)</span>
-<span class="nc" id="L210">             .append(&quot;Every stamp used in this packet. S is stated redundantly —\n&quot;)</span>
-<span class="nc" id="L211">             .append(&quot;the marks already render it — for STAMP consistency.\n\n&quot;)</span>
-<span class="nc" id="L212">             .append(&quot;[cols=\&quot;1,2,2,1,1,1,2\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
-<span class="nc" id="L213">             .append(&quot;| S | Time | Author | Module | Path | Commit | Refs\n&quot;);</span>
-<span class="nc bnc" id="L214" title="All 2 branches missed.">            for (StampRegistry.Stamp s : stampsUsed) {</span>
-<span class="nc" id="L215">                m.append(&quot;| &quot;).append(s.status().label())</span>
-<span class="nc" id="L216">                 .append(&quot; | &quot;).append(s.time())</span>
-<span class="nc" id="L217">                 .append(&quot; | &quot;).append(s.author())</span>
-<span class="nc" id="L218">                 .append(&quot; | &quot;).append(s.module())</span>
-<span class="nc" id="L219">                 .append(&quot; | &quot;).append(s.branch())</span>
-<span class="nc" id="L220">                 .append(&quot; | `&quot;).append(s.commitId()).append('`')</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">                 .append(&quot; | &quot;).append(s.refs().isEmpty() ? &quot;—&quot; : s.refs())</span>
-<span class="nc" id="L222">                 .append('\n');</span>
-<span class="nc" id="L223">            }</span>
-<span class="nc" id="L224">            m.append(&quot;|===\n\n&quot;);</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (!scaffolds.isEmpty()) {</span>
+<span class="nc" id="L304">            m.append(&quot;&lt;&lt;&lt;\n== Assembly Scaffolding Changes\n\n&quot;)</span>
+<span class="nc" id="L305">             .append(&quot;Source diffs for assembly files (structural includes, not prose).\n\n&quot;);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">            for (ScaffoldEntry s : scaffolds) {</span>
+<span class="nc" id="L307">                m.append(&quot;=== &quot;).append(s.path()).append(&quot;\n\n[source,diff]\n-----\n&quot;)</span>
+<span class="nc" id="L308">                 .append(s.unifiedDiff()).append(&quot;\n-----\n\n&quot;);</span>
+<span class="nc" id="L309">            }</span>
         }
 
-<span class="nc" id="L227">        m.append(&quot;&lt;&lt;&lt;\n[glossary]\n== Change Glossary\n\n&quot;);</span>
-<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
-<span class="nc" id="L229">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
-<span class="nc" id="L230">            m.append(c.title()).append(&quot;::\n  &quot;).append(c.description()).append('\n');</span>
-<span class="nc" id="L231">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
-<span class="nc bnc" id="L232" title="All 2 branches missed.">            if (!anchors.isEmpty()) {</span>
-<span class="nc" id="L233">                m.append(&quot;  Context: &quot;)</span>
-<span class="nc" id="L234">                 .append(String.join(&quot;, &quot;,</span>
-<span class="nc" id="L235">                         anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList()))</span>
-<span class="nc" id="L236">                 .append(&quot;.\n&quot;);</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (!stampsUsed.isEmpty()) {</span>
+<span class="nc" id="L313">            m.append(&quot;&lt;&lt;&lt;\n== Stamp Register\n\n&quot;)</span>
+<span class="nc" id="L314">             .append(&quot;Every stamp used in this packet. S is stated redundantly —\n&quot;)</span>
+<span class="nc" id="L315">             .append(&quot;the marks already render it — for STAMP consistency.\n\n&quot;)</span>
+<span class="nc" id="L316">             .append(&quot;[cols=\&quot;1,2,2,1,1,1,2\&quot;, options=\&quot;header\&quot;]\n|===\n&quot;)</span>
+<span class="nc" id="L317">             .append(&quot;| S | Time | Author | Module | Path | Commit | Refs\n&quot;);</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">            for (StampRegistry.Stamp s : stampsUsed) {</span>
+<span class="nc" id="L319">                m.append(&quot;| &quot;).append(s.status().label())</span>
+<span class="nc" id="L320">                 .append(&quot; | &quot;).append(s.time())</span>
+<span class="nc" id="L321">                 .append(&quot; | &quot;).append(s.author())</span>
+<span class="nc" id="L322">                 .append(&quot; | &quot;).append(s.module())</span>
+<span class="nc" id="L323">                 .append(&quot; | &quot;).append(s.branch())</span>
+<span class="nc" id="L324">                 .append(&quot; | `&quot;).append(s.commitId()).append('`')</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                 .append(&quot; | &quot;).append(s.refs().isEmpty() ? &quot;—&quot; : s.refs())</span>
+<span class="nc" id="L326">                 .append('\n');</span>
+<span class="nc" id="L327">            }</span>
+<span class="nc" id="L328">            m.append(&quot;|===\n\n&quot;);</span>
+        }
+
+<span class="nc" id="L331">        m.append(&quot;&lt;&lt;&lt;\n[glossary]\n== Change Glossary\n\n&quot;);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc" id="L333">            ChangeManifest.ChangeEntity c = changes.get(i);</span>
+<span class="nc" id="L334">            m.append(c.title()).append(&quot;::\n  &quot;).append(c.description()).append('\n');</span>
+<span class="nc" id="L335">            List&lt;String&gt; anchors = anchorsByChange.get(i);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">            if (!anchors.isEmpty()) {</span>
+<span class="nc" id="L337">                m.append(&quot;  Context: &quot;)</span>
+<span class="nc" id="L338">                 .append(String.join(&quot;, &quot;,</span>
+<span class="nc" id="L339">                         anchors.stream().map(a -&gt; &quot;xref:&quot; + a + &quot;[]&quot;).toList()))</span>
+<span class="nc" id="L340">                 .append(&quot;.\n&quot;);</span>
             }
-<span class="nc" id="L238">            m.append('\n');</span>
+<span class="nc" id="L342">            m.append('\n');</span>
         }
 
-<span class="nc" id="L241">        m.append(&quot;&lt;&lt;&lt;\n[index]\n== Change Index\n&quot;);</span>
-<span class="nc" id="L242">        return m.toString();</span>
+<span class="nc" id="L345">        m.append(&quot;&lt;&lt;&lt;\n[index]\n== Change Index\n&quot;);</span>
+<span class="nc" id="L346">        return m.toString();</span>
     }
 
     private static String refsSuffix(ChangeManifest.ChangeEntity c) {
-<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (c.refs().isEmpty()) {</span>
-<span class="nc" id="L247">            return &quot;&quot;;</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        if (c.refs().isEmpty()) {</span>
+<span class="nc" id="L351">            return &quot;&quot;;</span>
         }
-<span class="nc" id="L249">        return &quot;\n_&quot; + String.join(&quot;, &quot;, c.refs()) + &quot;_&quot;;</span>
+<span class="nc" id="L353">        return &quot;\n_&quot; + String.join(&quot;, &quot;, c.refs()) + &quot;_&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

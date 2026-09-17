@@ -1,6 +1,6 @@
 ---
-date_published: 2026-08-22
-date_modified: 2026-08-22
+date_published: 2026-09-16
+date_modified: 2026-09-16
 canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 ---
 
@@ -53,7 +53,7 @@ mvn idoc:diff -Dike.diff.from=A -Dike.diff.to=B  # any two commits
 mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt
 ```
 
-The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an **assembly** module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise).
+The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an **assembly** module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise). Files a marked topic pulls in by relative `include::` — diagram sources, shared snippets — are staged beside it, so an include that resolves from the source tree resolves from the packet too.
 
 Changes are first-class, named entities: author a `changes.yaml` beside the module pom (or at the repository root) with an id, title, one-line description, issue refs, and touched files per change — or, for commit-to-commit comparisons, let the goal derive entities by grouping the range’s commits on their `Refs:`/`Fixes:` trailers. The entities project into a Record of Changes, a Change Glossary, and an index-driven Change Index. Each change boundary also carries a STAMP endnote — Status (Active/Inactive), Time, Author, Module (topic domain), Path (branch) — collapsed per paragraph and tabulated in a Stamp Register.
 
