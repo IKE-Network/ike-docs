@@ -1,6 +1,6 @@
 ---
-date_published: 2026-09-16
-date_modified: 2026-09-16
+date_published: 2026-09-18
+date_modified: 2026-09-18
 canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 ---
 
@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | ike-doc-maven-plugin |
-| Version | 109 |
+| Version | 110 |
 | Type | maven-plugin |
 | Java Version | 25 |

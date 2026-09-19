@@ -1,0 +1,22 @@
+# IKE Doc Maven Plugin
+
+> Maven plugin (prefix idoc:) driving the IKE documentation pipeline:
+> AsciiDoctorJ rendering, 6 PDF renderer dispatch, SVG/DocBook
+> post-processing, breadcrumb injection, and ike-doc packaging.
+
+## Reports
+
+- [IKE Doc Maven Plugin](https://github.com/IKE-Network/ike-docs/index.html.md)
+- [Project Summary](https://github.com/IKE-Network/ike-docs/summary.html.md)
+- [Maven Coordinates](https://github.com/IKE-Network/ike-docs/dependency-info.html.md)
+- [Project Plugins](https://github.com/IKE-Network/ike-docs/plugins.html.md)
+- [Project Plugin Management](https://github.com/IKE-Network/ike-docs/plugin-management.html.md)
+- [Project Distribution Management](https://github.com/IKE-Network/ike-docs/distribution-management.html.md)
+- [Project Information](https://github.com/IKE-Network/ike-docs/project-info.html.md)
+- [Generated Reports](https://github.com/IKE-Network/ike-docs/project-reports.html.md)
+
+## Other
+
+- [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
+- [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
+- [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)
