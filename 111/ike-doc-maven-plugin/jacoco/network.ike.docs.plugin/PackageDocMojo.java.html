@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PackageDocMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">PackageDocMojo.java</span></div><h1>PackageDocMojo.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import org.apache.maven.api.ProducedArtifact;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+import org.apache.maven.api.services.ArtifactManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+/**
+ * Package AsciiDoc sources as the primary artifact for {@code ike-doc} packaging.
+ *
+ * &lt;p&gt;Zips the contents of {@code src/docs/asciidoc/} into a {@code .zip}
+ * file and sets it as the project's primary artifact. This makes the
+ * AsciiDoc source the canonical artifact — rendered outputs (HTML, PDF)
+ * are attached as classifier artifacts by the rendering pipeline.
+ *
+ * &lt;p&gt;This goal is bound to the {@code package} phase in the
+ * {@code ike-doc} lifecycle mapping. It can also be invoked directly:
+ *
+ * &lt;pre&gt;
+ * mvn ike:package-doc
+ * &lt;/pre&gt;
+ */
+@Mojo(name = &quot;package-doc&quot;,
+      defaultPhase = &quot;package&quot;,
+      projectRequired = true)
+public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
+
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.plugin.Log log;
+    /**
+     * Access the Maven logger.
+     *
+     * @return the logger
+     */
+<span class="nc" id="L50">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+
+    /** The current project (injected by Maven 4). */
+    @org.apache.maven.api.di.Inject
+    private Project project;
+
+    /** The current Maven session (injected by Maven 4). */
+    @org.apache.maven.api.di.Inject
+    private Session session;
+
+    /**
+     * AsciiDoc source directory to package.
+     * Defaults to the standard IKE documentation source location.
+     */
+    @Parameter(property = &quot;ike.doc.sourceDir&quot;,
+               defaultValue = &quot;${project.basedir}/src/docs/asciidoc&quot;)
+    private File sourceDir;
+
+    /** Skip execution. */
+    @Parameter(property = &quot;ike.doc.skip&quot;, defaultValue = &quot;false&quot;)
+    private boolean skip;
+
+    /** Creates this goal instance. */
+<span class="nc" id="L73">    public PackageDocMojo() {}</span>
+
+    @Override
+    public void execute() throws MojoException {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L78">            getLog().info(&quot;package-doc: skipped&quot;);</span>
+<span class="nc" id="L79">            return;</span>
+        }
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (!sourceDir.isDirectory()) {</span>
+<span class="nc" id="L83">            getLog().warn(&quot;package-doc: source directory does not exist — &quot;</span>
+                    + sourceDir + &quot;. Producing empty artifact.&quot;);
+        }
+
+<span class="nc" id="L87">        Path source = sourceDir.toPath();</span>
+<span class="nc" id="L88">        String finalName = project.getBuild().getFinalName();</span>
+<span class="nc" id="L89">        Path outputDir = Path.of(project.getBuild().getDirectory());</span>
+<span class="nc" id="L90">        Path zipFile = outputDir.resolve(finalName + &quot;.zip&quot;);</span>
+
+        try {
+<span class="nc" id="L93">            Files.createDirectories(outputDir);</span>
+<span class="nc" id="L94">            int count = zipDirectory(source, zipFile);</span>
+<span class="nc" id="L95">            getLog().info(&quot;package-doc: packaged &quot; + count</span>
+<span class="nc" id="L96">                    + &quot; file(s) into &quot; + zipFile.getFileName());</span>
+<span class="nc" id="L97">        } catch (IOException e) {</span>
+<span class="nc" id="L98">            throw new MojoException(</span>
+                    &quot;Failed to create documentation archive&quot;, e);
+<span class="nc" id="L100">        }</span>
+
+        // Set the zip as this project's main artifact. For ike-doc
+        // packaging, the ArtifactHandler declared in components.xml
+        // gives the main artifact a .zip extension; we just supply
+        // the file.
+<span class="nc" id="L106">        ProducedArtifact mainArtifact = project.getMainArtifact()</span>
+<span class="nc" id="L107">                .orElseThrow(() -&gt; new MojoException(</span>
+                        &quot;package-doc: project has no main artifact. &quot;
+                                + &quot;Is packaging set to ike-doc?&quot;));
+<span class="nc" id="L110">        ArtifactManager artifactManager =</span>
+<span class="nc" id="L111">                session.getService(ArtifactManager.class);</span>
+<span class="nc" id="L112">        artifactManager.setPath(mainArtifact, zipFile);</span>
+<span class="nc" id="L113">    }</span>
+
+    // ── Pure testable function ───────────────────────────────────────
+
+    /**
+     * Zip the contents of a directory into a zip file.
+     *
+     * &lt;p&gt;If the source directory does not exist or is empty, an empty
+     * zip file is produced (valid for Maven install/deploy).
+     *
+     * @param sourceDir directory to zip (may not exist)
+     * @param zipFile   output zip file path
+     * @return number of files added to the zip
+     * @throws IOException if an I/O error occurs
+     */
+    static int zipDirectory(Path sourceDir, Path zipFile) throws IOException {
+<span class="fc" id="L129">        AtomicInteger count = new AtomicInteger();</span>
+<span class="fc" id="L130">        try (OutputStream fos = Files.newOutputStream(zipFile);</span>
+<span class="fc" id="L131">             ZipOutputStream zos = new ZipOutputStream(fos)) {</span>
+
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (Files.isDirectory(sourceDir)) {</span>
+<span class="fc" id="L134">                Files.walkFileTree(sourceDir, new SimpleFileVisitor&lt;&gt;() {</span>
+                    @Override
+                    public FileVisitResult visitFile(Path file,
+                            BasicFileAttributes attrs) throws IOException {
+<span class="fc" id="L138">                        String entryName = sourceDir.relativize(file)</span>
+<span class="fc" id="L139">                                .toString();</span>
+<span class="fc" id="L140">                        zos.putNextEntry(new ZipEntry(entryName));</span>
+<span class="fc" id="L141">                        Files.copy(file, zos);</span>
+<span class="fc" id="L142">                        zos.closeEntry();</span>
+<span class="fc" id="L143">                        count.incrementAndGet();</span>
+<span class="fc" id="L144">                        return FileVisitResult.CONTINUE;</span>
+                    }
+                });
+            }
+        }
+<span class="fc" id="L149">        return count.get();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

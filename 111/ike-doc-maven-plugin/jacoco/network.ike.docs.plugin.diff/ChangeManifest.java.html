@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangeManifest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">ChangeManifest.java</span></div><h1>ChangeManifest.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
+
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The change-entity manifest behind a review packet (ike-issues#648).
+ *
+ * &lt;p&gt;A change is a named, first-class entity: id, title, one-line
+ * description, issue refs, and the files it touches. For working-tree
+ * review the manifest is authored as {@code changes.yaml}; for
+ * commit-to-commit comparisons it can be derived by grouping the
+ * range's commits on their {@code Refs:}/{@code Fixes:} trailers
+ * (ike-issues#652) — an authored file, when present, always wins.
+ *
+ * &lt;p&gt;Expected YAML shape:
+ *
+ * &lt;pre&gt;{@code
+ * changes:
+ *   - id: chg-asg-sweep
+ *     title: &quot;ASG, not AST&quot;
+ *     description: &gt;
+ *       One reviewable sentence or two.
+ *     refs: [IKE-Network/ike-issues#648]
+ *     files:
+ *       - topics/src/docs/asciidoc/topics/arch/asg-substrate.adoc
+ * }&lt;/pre&gt;
+ */
+public final class ChangeManifest {
+
+<span class="fc" id="L42">    private static final Pattern TRAILER = Pattern.compile(</span>
+            &quot;^(?:Refs|Fixes):\\s*(\\S+#\\d+)\\s*$&quot;, Pattern.MULTILINE);
+
+    private final List&lt;ChangeEntity&gt; changes;
+
+<span class="fc" id="L47">    private ChangeManifest(List&lt;ChangeEntity&gt; changes) {</span>
+<span class="fc" id="L48">        this.changes = List.copyOf(changes);</span>
+<span class="fc" id="L49">    }</span>
+
+    /**
+     * One named change.
+     *
+     * @param id          stable kebab-case identifier
+     * @param title       short human title (used as glossary term and
+     *                    change-index entry)
+     * @param description one-or-two-sentence reviewable description
+     * @param refs        issue references, e.g.
+     *                    {@code IKE-Network/ike-issues#648}
+     * @param files       repository-relative files the change touches
+     */
+<span class="fc" id="L62">    public record ChangeEntity(String id, String title, String description,</span>
+                               List&lt;String&gt; refs, List&lt;String&gt; files) {
+    }
+
+    /**
+     * The manifest's change entities, in authored or derived order.
+     *
+     * @return the change entities
+     */
+    public List&lt;ChangeEntity&gt; changes() {
+<span class="fc" id="L72">        return changes;</span>
+    }
+
+    /**
+     * Build a manifest from already-constructed entities — used to merge
+     * trailer-derived entities for a committed range with a synthetic
+     * uncommitted entity when the to side is the working tree.
+     *
+     * @param changes the entities, in presentation order
+     * @return the manifest
+     */
+    public static ChangeManifest of(List&lt;ChangeEntity&gt; changes) {
+<span class="nc" id="L84">        return new ChangeManifest(changes);</span>
+    }
+
+    /**
+     * Load an authored manifest.
+     *
+     * @param yamlFile the {@code changes.yaml} path
+     * @return the manifest
+     * @throws IOException when the file cannot be read or parsed
+     */
+    public static ChangeManifest load(Path yamlFile) throws IOException {
+<span class="nc" id="L95">        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));</span>
+<span class="nc" id="L96">        Object root = yaml.load(Files.readString(yamlFile));</span>
+<span class="nc" id="L97">        List&lt;ChangeEntity&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L98" title="All 4 branches missed.">        if (root instanceof Map&lt;?, ?&gt; map &amp;&amp; map.get(&quot;changes&quot;) instanceof List&lt;?&gt; list) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            for (Object item : list) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                if (item instanceof Map&lt;?, ?&gt; m) {</span>
+<span class="nc" id="L101">                    out.add(new ChangeEntity(</span>
+<span class="nc" id="L102">                            str(m.get(&quot;id&quot;), &quot;change&quot;),</span>
+<span class="nc" id="L103">                            str(m.get(&quot;title&quot;), &quot;(untitled change)&quot;),</span>
+<span class="nc" id="L104">                            String.join(&quot; &quot;, str(m.get(&quot;description&quot;), &quot;&quot;).split(&quot;\\s+&quot;)).strip(),</span>
+<span class="nc" id="L105">                            strList(m.get(&quot;refs&quot;)),</span>
+<span class="nc" id="L106">                            strList(m.get(&quot;files&quot;))));</span>
+                }
+<span class="nc" id="L108">            }</span>
+        }
+<span class="nc" id="L110">        return new ChangeManifest(out);</span>
+    }
+
+    /**
+     * Derive a manifest from a commit range by grouping commits on
+     * their first {@code Refs:}/{@code Fixes:} trailer. Commits without
+     * a trailer become singleton changes named by their subject.
+     *
+     * @param commits the range's commits, oldest first
+     * @return the derived manifest
+     */
+    public static ChangeManifest derive(List&lt;GitSource.CommitMeta&gt; commits) {
+<span class="fc" id="L122">        Map&lt;String, List&lt;GitSource.CommitMeta&gt;&gt; groups = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        for (GitSource.CommitMeta c : commits) {</span>
+<span class="fc" id="L124">            groups.computeIfAbsent(groupKey(c), k -&gt; new ArrayList&lt;&gt;()).add(c);</span>
+<span class="fc" id="L125">        }</span>
+<span class="fc" id="L126">        List&lt;ChangeEntity&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        for (Map.Entry&lt;String, List&lt;GitSource.CommitMeta&gt;&gt; e : groups.entrySet()) {</span>
+<span class="fc" id="L128">            List&lt;GitSource.CommitMeta&gt; group = e.getValue();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            boolean byIssue = !e.getKey().startsWith(&quot;commit:&quot;);</span>
+<span class="fc" id="L130">            List&lt;String&gt; subjects = group.stream().map(GitSource.CommitMeta::subject).toList();</span>
+<span class="fc" id="L131">            List&lt;String&gt; files = group.stream()</span>
+<span class="fc" id="L132">                    .flatMap(c -&gt; c.files().stream())</span>
+<span class="fc" id="L133">                    .distinct()</span>
+<span class="fc" id="L134">                    .toList();</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            String id = byIssue</span>
+<span class="fc" id="L136">                    ? &quot;chg-&quot; + e.getKey().replaceAll(&quot;[^A-Za-z0-9]+&quot;, &quot;-&quot;).toLowerCase()</span>
+<span class="fc" id="L137">                    : &quot;chg-&quot; + group.get(0).id();</span>
+<span class="fc" id="L138">            out.add(new ChangeEntity(</span>
+                    id,
+<span class="fc" id="L140">                    subjects.get(0),</span>
+<span class="pc bpc" id="L141" title="1 of 4 branches missed.">                    byIssue &amp;&amp; subjects.size() &gt; 1</span>
+<span class="fc" id="L142">                            ? String.join(&quot;; &quot;, subjects)</span>
+<span class="fc" id="L143">                            : subjects.get(0),</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">                    byIssue ? List.of(e.getKey()) : List.of(),</span>
+                    files));
+<span class="fc" id="L146">        }</span>
+<span class="fc" id="L147">        return new ChangeManifest(out);</span>
+    }
+
+    /**
+     * Extract the grouping key for one commit: its first
+     * {@code Refs:}/{@code Fixes:} trailer target, or a per-commit key
+     * when no trailer is present.
+     *
+     * @param commit the commit metadata
+     * @return the grouping key
+     */
+    static String groupKey(GitSource.CommitMeta commit) {
+<span class="fc" id="L159">        Matcher m = TRAILER.matcher(commit.fullMessage());</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        return m.find() ? m.group(1) : &quot;commit:&quot; + commit.id();</span>
+    }
+
+    private static String str(Object o, String fallback) {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        return o == null ? fallback : String.valueOf(o);</span>
+    }
+
+    private static List&lt;String&gt; strList(Object o) {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (o instanceof List&lt;?&gt; list) {</span>
+<span class="nc" id="L169">            return list.stream().map(String::valueOf).toList();</span>
+        }
+<span class="nc" id="L171">        return List.of();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
