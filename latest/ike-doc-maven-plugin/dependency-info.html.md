@@ -1,6 +1,6 @@
 ---
-date_published: 2026-09-18
-date_modified: 2026-09-18
+date_published: 2026-09-24
+date_modified: 2026-09-24
 canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 ---
 
@@ -12,6 +12,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <plugin>
   <groupId>network.ike.docs</groupId>
   <artifactId>ike-doc-maven-plugin</artifactId>
-  <version>111</version>
+  <version>112</version>
 </plugin>
 ```
