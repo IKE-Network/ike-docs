@@ -1,6 +1,6 @@
 ---
-date_published: 2026-09-24
-date_modified: 2026-09-24
+date_published: 2026-09-26
+date_modified: 2026-09-26
 canonical_url: https://github.com/IKE-Network/ike-docs/project-info.html
 ---
 
@@ -15,3 +15,7 @@ This document provides an overview of the various documents and links that are p
 | [About](index.html)[2] | AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[]) with SVG badge rendering and auto-generated Referenced Koncepts glossary with description logic axiom display. |
 | [Summary](summary.html)[3] | This document lists other related information of this project |
 | [Dependencies](dependencies.html)[4] | This document lists the project's dependencies and provides information on each dependency. |
+| [Maven Coordinates](dependency-info.html)[5] | This document describes how to include this project as a dependency using various dependency management tools. |
+| [Plugins](plugins.html)[6] | This document lists the build plugins and the report plugins used by this project. |
+| [Plugin Management](plugin-management.html)[7] | This document lists the plugins that are defined through pluginManagement. |
+| [Distribution Management](distribution-management.html)[8] | This document provides informations on the distribution management of this project. |
