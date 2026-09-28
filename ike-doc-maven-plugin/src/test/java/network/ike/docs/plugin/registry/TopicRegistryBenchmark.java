@@ -1,4 +1,4 @@
-package network.ike.docs.plugin.ledger;
+package network.ike.docs.plugin.registry;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,21 +16,21 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Times each phase of a ledger build on a real directory, so a change to the
+ * Times each phase of a registry build on a real directory, so a change to the
  * reading strategy is judged by numbers. Not a test: run it by hand.
  *
  * <pre>
  *   java -cp target/classes:target/test-classes:&lt;snakeyaml.jar&gt; \
- *        network.ike.docs.plugin.ledger.LedgerBenchmark &lt;root&gt; [repetitions]
+ *        network.ike.docs.plugin.registry.TopicRegistryBenchmark &lt;root&gt; [repetitions]
  * </pre>
  *
  * <p>Reports the cold first run and the median of the warm runs, per phase,
  * in milliseconds. Phases are cumulative variants of the same work so the
  * cost of each step is the difference between neighbours.
  */
-public final class LedgerBenchmark {
+public final class TopicRegistryBenchmark {
 
-    private LedgerBenchmark() {
+    private TopicRegistryBenchmark() {
     }
 
     /**
@@ -87,27 +87,27 @@ public final class LedgerBenchmark {
                         throw new RuntimeException(e);
                     }
                 }).sum());
-        time("Ledger.scan (all of the above)", reps, () -> Ledger.scan(root, 1_000_000).topics().size());
+        time("TopicRegistry.scan (all of the above)", reps, () -> TopicRegistry.scan(root, 1_000_000).topics().size());
         time("scan + model", reps, () ->
-                Ledger.model(List.of(Ledger.scan(root, 1_000_000)), root, Instant.now()).size());
+                TopicRegistry.model(List.of(TopicRegistry.scan(root, 1_000_000)), root, Instant.now()).size());
         time("scan + model + yaml (string-built)", reps, () ->
-                Ledger.yaml(Ledger.model(List.of(Ledger.scan(root, 1_000_000)), root, Instant.now())).length());
+                TopicRegistry.yaml(TopicRegistry.model(List.of(TopicRegistry.scan(root, 1_000_000)), root, Instant.now())).length());
 
-        Path ledger = Files.createTempFile("ledger-bench", ".yaml");
-        Files.writeString(ledger, Ledger.yaml(Ledger.model(List.of(Ledger.scan(root, 1_000_000)), root, Instant.now())));
+        Path registry = Files.createTempFile("registry-bench", ".yaml");
+        Files.writeString(registry, TopicRegistry.yaml(TopicRegistry.model(List.of(TopicRegistry.scan(root, 1_000_000)), root, Instant.now())));
         Path one = files.get(files.size() / 2);
-        System.out.printf("ledger yaml bytes=%d%n", Files.size(ledger));
-        time("yaml load", reps, () -> Ledger.load(ledger).size());
+        System.out.printf("registry yaml bytes=%d%n", Files.size(registry));
+        time("yaml load", reps, () -> TopicRegistry.load(registry).size());
         time("yaml load + add 1 file", reps, () -> {
-            Map<String, Object> m = Ledger.load(ledger);
-            return Ledger.add(m, root, List.of(one), Instant.now()).size();
+            Map<String, Object> m = TopicRegistry.load(registry);
+            return TopicRegistry.add(m, root, List.of(one), Instant.now()).size();
         });
         time("yaml load + add 1 + yaml dump", reps, () -> {
-            Map<String, Object> m = Ledger.load(ledger);
-            Ledger.add(m, root, List.of(one), Instant.now());
-            return Ledger.yaml(m).length();
+            Map<String, Object> m = TopicRegistry.load(registry);
+            TopicRegistry.add(m, root, List.of(one), Instant.now());
+            return TopicRegistry.yaml(m).length();
         });
-        Files.deleteIfExists(ledger);
+        Files.deleteIfExists(registry);
     }
 
     private interface Work {
@@ -132,7 +132,7 @@ public final class LedgerBenchmark {
         Files.walkFileTree(root, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                return !dir.equals(root) && Ledger.SKIPPED_DIRS.contains(dir.getFileName().toString())
+                return !dir.equals(root) && TopicRegistry.SKIPPED_DIRS.contains(dir.getFileName().toString())
                         ? FileVisitResult.SKIP_SUBTREE : FileVisitResult.CONTINUE;
             }
 

@@ -29,8 +29,8 @@ in `ike-tooling`. The three plugins are deliberately separate —
 fans out across a workspace's checked-out subprojects.
 
 For people who work through Claude rather than a terminal,
-xref:ledger-guide.adoc[The Document Ledger: A Plain-Language Guide]
-walks through `idoc:ledger` with a tutorial and every action it offers.
+xref:topic-registry-guide.adoc[The Topic Registry: A Plain-Language Guide]
+walks through `idoc:topic-registry` with a tutorial and every action it offers.
 
 == Plugin shape
 
@@ -83,12 +83,12 @@ existence in `ike-parent`'s `doc-pipeline` profile.
   inline with insertion/deletion roles. See
   xref:_review_packets_idocdiff[Review packets] below.
 
-| `idoc:ledger`
+| `idoc:topic-registry`
 | Read the `:topic-*:` header of every AsciiDoc file under the
-  module's source root and write `target/doc-ledger.yaml`: the
-  storage structure and header metadata of the corpus, shaped like
-  `topic-registry.yaml`. See
-  xref:_document_ledger_idocledger[Document ledger] below.
+  module's source root and write `target/topic-registry.yaml`: the
+  topic registry, generated from the headers in
+  `IKE-TOPIC-REGISTRY.md`'s shape instead of kept by hand. See
+  xref:_topic_registry_idoctopic_registry[Topic registry] below.
 
 | `idoc:adocstudio`
 | Generate Adoc Studio sidecar projects for assembly modules.
@@ -181,50 +181,60 @@ Stamp Register.
 Design note: `dev-doc-diff-pipeline` in `ike-lab-documents/topics/`;
 epic link:https://github.com/IKE-Network/ike-issues/issues/648[ike-issues#648].
 
-[[_document_ledger_idocledger]]
-== Document ledger (`idoc:ledger`)
+[[_topic_registry_idoctopic_registry]]
+== Topic registry (`idoc:topic-registry`)
 
-A topic library's `topic-registry.yaml` is authored; the ledger is
-derived. `idoc:ledger` reads the `:topic-*:` attribute block, the
-anchor and the level-1 heading of every `.adoc` file under the
-module's `src/docs/asciidoc` -- plain line parsing, no AsciidoctorJ --
-and writes `target/doc-ledger.yaml`: one entry per topic (`id`,
-`file`, `title`, `type`, `status`, `provenance`, `keywords`,
-`char-count`, `anchor`, `header`) grouped by directory, the files that
-declare no topic id (assemblies and indexes, with their include
-counts), and a findings list. The field names are the registry's, so
-the two can be compared field by field. The same structure is printed
-to the build log as a tree. Symbolic links are never followed (a linked
-`.adoc` is a finding), files are parsed in parallel, and the YAML is
-written directly, so a 20,000-file module rebuilds in well under a
-second.
+`idoc:topic-registry` is the topic registry's build-time revision:
+the registry keeps the shape `IKE-TOPIC-REGISTRY.md` gives it and is
+now generated from the files on every run instead of typed by hand.
+The goal reads the `:topic-*:`
+attribute block, the anchor and the level-1 heading of every `.adoc`
+file under the module's `src/docs/asciidoc` -- plain line parsing, no
+AsciidoctorJ -- and writes `target/topic-registry.yaml` in the shape
+`IKE-TOPIC-REGISTRY.md` gives the registry: `registry-version`,
+`generated`, `topic-count`, then `domains`, one per id prefix, each
+with its topics in id order (`id`, `file`, `title`, `type`, `keywords`,
+`status`, `char-count`, `related`, `summary`, and what the header adds:
+`provenance`, `anchor`, `header`, ...). After the domains come
+`assemblies` (files with `include::` lines, with their counts),
+`other-files`, and a findings list. The file that was kept by hand at
+`src/docs/asciidoc/topic-registry.yaml` is no longer maintained; the
+goal never reads or writes it. What a header cannot say is not
+generated: domain titles
+and descriptions, assembly `sections` and `topic-refs`, and
+`dependencies` unless a header declares them. The same structure is
+printed to the build log as a directory tree. Symbolic links are never
+followed (a linked `.adoc` is a finding), files are parsed in parallel,
+and the YAML is written directly, so a 20,000-file module rebuilds in
+well under a second.
 
 [source,bash]
 ----
-mvn idoc:ledger                                  # the module's src/docs/asciidoc
-mvn idoc:ledger -Dike.ledger.roots=a,b           # other roots, comma-separated
-mvn idoc:ledger -Dike.ledger.output=/tmp/l.yaml  # write elsewhere
-mvn idoc:ledger -Dike.ledger.add=topics/x/new.adoc   # add an ingested file, no rescan
+mvn idoc:topic-registry                                          # the module's src/docs/asciidoc
+mvn idoc:topic-registry -Dike.topic-registry.roots=a,b           # other roots, comma-separated
+mvn idoc:topic-registry -Dike.topic-registry.output=/tmp/r.yaml  # write elsewhere
+mvn idoc:topic-registry -Dike.topic-registry.add=topics/x/new.adoc   # add an ingested file, no rescan
 ----
 
-With `-Dike.ledger.add=` (comma-separated files, relative to the
-module or absolute) the named files are parsed alone and merged into
-the existing ledger: placed in their directory group in path order,
-counted, and checked for a duplicate id against the ids the ledger
+With `-Dike.topic-registry.add=` (comma-separated files, relative to
+the module or absolute) the named files are parsed alone and merged
+into the existing registry: placed in their domain in id order,
+counted, and checked for a duplicate id against the ids the registry
 already holds. An entry for the same file is replaced, so re-ingesting
 a document is safe. Files that were deleted are not noticed this way;
-a run without `add` re-derives everything, and runs when no ledger
-exists yet.
+a run without `add` re-derives everything, and runs when no generated
+registry exists yet.
 
 Header findings -- a missing required attribute, an anchor that does
 not match the id, an unknown type or status, the same id in two files
--- are reported in the ledger and the log and do not fail the build.
+-- are reported in the registry and the log and do not fail the build.
 A module without `src/docs/asciidoc` is skipped with one line, so the
-goal can run from a reactor root. `-Dike.skip.ledger=true` skips it.
+goal can run from a reactor root. `-Dike.skip.topic-registry=true`
+skips it.
 
 The goal's default phase is `validate`, so a POM that declares an
-execution of it gets a fresh ledger on every build, `mvn clean install`
-included, and findings still do not fail that build:
+execution of it gets a fresh registry on every build, `mvn clean
+install` included, and findings still do not fail that build:
 
 [source,xml]
 ----
@@ -233,8 +243,8 @@ included, and findings still do not fail that build:
   <artifactId>ike-doc-maven-plugin</artifactId>
   <executions>
     <execution>
-      <id>ledger</id>
-      <goals><goal>ledger</goal></goals>
+      <id>topic-registry</id>
+      <goals><goal>topic-registry</goal></goals>
     </execution>
   </executions>
 </plugin>

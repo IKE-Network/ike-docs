@@ -1,4 +1,4 @@
-package network.ike.docs.plugin.ledger;
+package network.ike.docs.plugin.registry;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

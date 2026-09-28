@@ -45,12 +45,6 @@ public enum IdocGoal implements GoalRef {
     /** {@code idoc:inject-breadcrumb} — inject breadcrumbs into rendered HTML. */
     INJECT_BREADCRUMB("inject-breadcrumb", InjectBreadcrumbMojo.class,
             "Inject breadcrumb navigation into rendered HTML."),
-    /** {@code idoc:ledger} — write the document ledger from topic headers. */
-    LEDGER("ledger", LedgerMojo.class,
-            "Read the :topic-*: header of every AsciiDoc file under the "
-                    + "module's source root and write target/doc-ledger.yaml: "
-                    + "the storage structure and header metadata of the corpus, "
-                    + "shaped like topic-registry.yaml."),
     /** {@code idoc:lint-site} — lint src/site/site.xml for IKE theme/breadcrumb drift (#319). */
     LINT_SITE("lint-site", LintSiteMojo.class,
             "Lint src/site/site.xml for IKE Network theme + "
@@ -71,7 +65,13 @@ public enum IdocGoal implements GoalRef {
             "Render AsciiDoc to PDF via a configured renderer."),
     /** {@code idoc:scan-logs} — scan renderer logs for warnings and errors. */
     SCAN_LOGS("scan-logs", ScanRendererLogsMojo.class,
-            "Scan renderer logs for warnings and errors.");
+            "Scan renderer logs for warnings and errors."),
+    /** {@code idoc:topic-registry} — generate the topic registry from the files. */
+    TOPIC_REGISTRY("topic-registry", TopicRegistryMojo.class,
+            "Read the :topic-*: header of every AsciiDoc file under the "
+                    + "module's source root and write target/topic-registry.yaml: "
+                    + "the topic registry, generated from the headers in "
+                    + "IKE-TOPIC-REGISTRY.md's shape instead of kept by hand.");
 
     /** Shared {@code idoc:} prefix for all goals in this plugin. */
     public static final String PLUGIN_PREFIX = "idoc";

@@ -1,4 +1,4 @@
-package network.ike.docs.plugin.ledger;
+package network.ike.docs.plugin.registry;
 
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -24,20 +24,22 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * The document ledger: every AsciiDoc file under a scan root, parsed by
- * {@link TopicHeader}, grouped by directory, with the findings the headers
- * raise. Topic fragments carry their {@code :topic-*:} metadata; every file,
- * topic or not, carries its title, document attributes and include count. Pure Java with no Maven dependency, so it is testable without a
- * build; {@code LedgerMojo} is the wiring around it.
- *
- * <p>The YAML the ledger produces uses {@code topic-registry.yaml}'s field
- * names ({@code id}, {@code file}, {@code title}, {@code type},
- * {@code status}, {@code keywords}, {@code char-count}, {@code related},
- * {@code summary}) so the two can be compared field by field.
+ * The generated topic registry: every AsciiDoc file under a scan root, parsed
+ * by {@link TopicHeader}, in the shape {@code IKE-TOPIC-REGISTRY.md} gives
+ * {@code topic-registry.yaml}: topics grouped into domains by the prefix of
+ * their id, each with the registry's field names ({@code id}, {@code file},
+ * {@code title}, {@code type}, {@code keywords}, {@code status},
+ * {@code char-count}, {@code related}, {@code summary}), then what a build can
+ * add on top: assemblies and plain files with their document attributes, the
+ * findings the headers raise, and a generation stamp. This is the registry's
+ * build-time revision: generated from the files on every run where, before it,
+ * the same registry was kept by hand at {@code src/docs/asciidoc/topic-registry.yaml}.
+ * Pure Java with no Maven dependency, so it is testable without a build;
+ * {@code TopicRegistryMojo} is the wiring around it.
  *
  * @since 109
  */
-public final class Ledger {
+public final class TopicRegistry {
 
     /** Directory names never entered by the scan. */
     public static final Set<String> SKIPPED_DIRS = Set.of("target", ".git", "node_modules");
@@ -54,7 +56,7 @@ public final class Ledger {
                        List<String> findings) {
     }
 
-    private Ledger() {
+    private TopicRegistry() {
     }
 
     /**
@@ -99,7 +101,7 @@ public final class Ledger {
         });
         if (files.size() > maxFiles) {
             throw new IllegalStateException("More than " + maxFiles + " .adoc files under "
-                    + real + "; raise -Dike.ledger.maxFiles or narrow -Dike.ledger.roots");
+                    + real + "; raise -Dike.topic-registry.maxFiles or narrow -Dike.topic-registry.roots");
         }
         files.sort((a, b) -> real.relativize(a).toString().compareTo(real.relativize(b).toString()));
 
@@ -143,67 +145,95 @@ public final class Ledger {
     }
 
     /**
-     * The ledger as an ordered map, ready for YAML.
+     * The domain a topic belongs to: the part of its id before the first
+     * hyphen, the {@code {domain-prefix}-{slug}} rule of
+     * {@code IKE-TOPIC-REGISTRY.md}.
      *
-     * @param scans the scanned roots
-     * @param base  the directory paths in the ledger are made relative to
-     *              (the module base directory)
-     * @param now   the generation instant
-     * @return the ledger model
+     * @param id the topic id
+     * @return the domain id, or the whole id when it has no hyphen
      */
-    public static Map<String, Object> model(List<Scan> scans, Path base, Instant now) {
-        Map<String, Object> ledger = new LinkedHashMap<>();
-        ledger.put("generated", now.truncatedTo(ChronoUnit.SECONDS).toString());
-        ledger.put("scanned-from", base.toAbsolutePath().normalize().toString());
-        List<Object> roots = new ArrayList<>();
-        List<String> findings = new ArrayList<>();
-        for (Scan scan : scans) {
-            Map<String, Object> rootEntry = new LinkedHashMap<>();
-            rootEntry.put("root", relativeTo(base, scan.root()));
-            rootEntry.put("files", scan.topics().size() + scan.others().size());
-            rootEntry.put("topics", scan.topics().size());
-            Map<String, List<TopicHeader>> byDir = new TreeMap<>();
-            for (TopicHeader t : scan.topics()) {
-                byDir.computeIfAbsent(directoryOf(t.file()), k -> new ArrayList<>()).add(t);
-            }
-            List<Object> directories = new ArrayList<>();
-            for (Map.Entry<String, List<TopicHeader>> e : byDir.entrySet()) {
-                Map<String, Object> dir = new LinkedHashMap<>();
-                dir.put("dir", e.getKey().isEmpty() ? "." : e.getKey());
-                List<Object> entries = new ArrayList<>();
-                for (TopicHeader t : e.getValue()) {
-                    entries.add(topicEntry(t));
-                }
-                dir.put("topics", entries);
-                directories.add(dir);
-            }
-            rootEntry.put("directories", directories);
-            List<Object> otherFiles = new ArrayList<>();
-            for (TopicHeader o : scan.others()) {
-                otherFiles.add(otherEntry(o));
-            }
-            rootEntry.put("other-files", otherFiles);
-            roots.add(rootEntry);
-            findings.addAll(scan.findings());
-        }
-        ledger.put("roots", roots);
-        ledger.put("findings", findings);
-        return ledger;
+    public static String domainOf(String id) {
+        int i = id.indexOf('-');
+        return i <= 0 ? id : id.substring(0, i);
     }
 
     /**
-     * Render the ledger model as YAML in the registry's block style: two-space
+     * The registry as an ordered map, ready for YAML: the schema's keys first
+     * ({@code registry-version}, {@code generated}, {@code topic-count},
+     * {@code domains} with their {@code topics}), then {@code assemblies},
+     * {@code other-files} and {@code findings}. Topics are grouped by
+     * {@link #domainOf domain} and sorted by id. A file path is relative to
+     * its root, prefixed with the root when several roots were scanned.
+     *
+     * @param scans the scanned roots
+     * @param base  the directory root paths are made relative to (the module
+     *              base directory)
+     * @param now   the generation instant
+     * @return the registry model
+     */
+    public static Map<String, Object> model(List<Scan> scans, Path base, Instant now) {
+        Map<String, Object> registry = new LinkedHashMap<>();
+        registry.put("registry-version", "1.2");
+        registry.put("generated", now.truncatedTo(ChronoUnit.SECONDS).toString());
+        registry.put("scanned-from", base.toAbsolutePath().normalize().toString());
+        List<String> roots = new ArrayList<>();
+        for (Scan scan : scans) {
+            roots.add(relativeTo(base, scan.root()));
+        }
+        registry.put("roots", roots);
+        boolean prefix = scans.size() > 1;
+        TreeMap<String, List<Map<String, Object>>> domains = new TreeMap<>();
+        List<Object> assemblies = new ArrayList<>();
+        List<Object> otherFiles = new ArrayList<>();
+        List<String> findings = new ArrayList<>();
+        int files = 0;
+        int topics = 0;
+        for (int i = 0; i < scans.size(); i++) {
+            Scan scan = scans.get(i);
+            String rootPrefix = prefix ? roots.get(i) + "/" : "";
+            files += scan.topics().size() + scan.others().size();
+            topics += scan.topics().size();
+            for (TopicHeader t : scan.topics()) {
+                domains.computeIfAbsent(domainOf(t.id()), k -> new ArrayList<>())
+                        .add(topicEntry(t, rootPrefix + t.file()));
+            }
+            for (TopicHeader o : scan.others()) {
+                (o.includes() > 0 ? assemblies : otherFiles).add(otherEntry(o, rootPrefix + o.file()));
+            }
+            for (String f : scan.findings()) {
+                findings.add(rootPrefix + f);
+            }
+        }
+        registry.put("topic-count", topics);
+        registry.put("file-count", files);
+        List<Object> domainList = new ArrayList<>();
+        for (Map.Entry<String, List<Map<String, Object>>> e : domains.entrySet()) {
+            Map<String, Object> domain = new LinkedHashMap<>();
+            domain.put("id", e.getKey());
+            e.getValue().sort((x, y) -> String.valueOf(x.get("id")).compareTo(String.valueOf(y.get("id"))));
+            domain.put("topics", e.getValue());
+            domainList.add(domain);
+        }
+        registry.put("domains", domainList);
+        registry.put("assemblies", assemblies);
+        registry.put("other-files", otherFiles);
+        registry.put("findings", findings);
+        return registry;
+    }
+
+    /**
+     * Render the registry model as YAML in the registry's block style: two-space
      * indent, sequences indented under their key, one scalar per line. Written
      * directly rather than through SnakeYAML's emitter, which cost 40 percent
      * of a large run and about 45 ms of class loading on every small one; the
      * output round-trips through {@link #load} unchanged.
      *
-     * @param model the ledger model from {@link #model}
+     * @param model the registry model from {@link #model}
      * @return the YAML text
      */
     public static String yaml(Map<String, Object> model) {
         StringBuilder sb = new StringBuilder(1 << 16);
-        sb.append("# doc-ledger.yaml, generated by idoc:ledger. Do not edit or commit.\n");
+        sb.append("# topic-registry.yaml, generated by idoc:topic-registry from the files. Do not edit.\n");
         emitMap(sb, model, 0);
         return sb.toString();
     }
@@ -396,22 +426,23 @@ public final class Ledger {
     }
 
     /**
-     * Read a ledger written by {@link #yaml(Map)} back into its model.
+     * Read a registry written by {@link #yaml(Map)} back into its model.
      *
-     * @param ledgerFile the ledger file
+     * @param registryFile the generated registry file
      * @return the model, with the same shape {@link #model} produces
-     * @throws IOException if the file cannot be read or is not a ledger
+     * @throws IOException if the file cannot be read or is not a generated registry
      */
-    public static Map<String, Object> load(Path ledgerFile) throws IOException {
+    public static Map<String, Object> load(Path registryFile) throws IOException {
         LoaderOptions options = new LoaderOptions();
-        // SnakeYAML refuses documents over 3 MB by default; a ledger of a few
+        // SnakeYAML refuses documents over 3 MB by default; a registry of a few
         // thousand topics is larger than that. 256 MB is far above any corpus.
         options.setCodePointLimit(256 * 1024 * 1024);
         Yaml yaml = new Yaml(new SafeConstructor(options));
-        try (Reader reader = Files.newBufferedReader(ledgerFile, StandardCharsets.UTF_8)) {
+        try (Reader reader = Files.newBufferedReader(registryFile, StandardCharsets.UTF_8)) {
             Object loaded = yaml.load(reader);
-            if (!(loaded instanceof Map<?, ?> map) || !(map.get("roots") instanceof List<?>)) {
-                throw new IOException("Not a ledger: " + ledgerFile);
+            if (!(loaded instanceof Map<?, ?> map) || !(map.get("domains") instanceof List<?>)
+                    || !(map.get("roots") instanceof List<?>)) {
+                throw new IOException("Not a generated topic registry: " + registryFile);
             }
             @SuppressWarnings("unchecked")
             Map<String, Object> model = (Map<String, Object>) map;
@@ -420,28 +451,32 @@ public final class Ledger {
     }
 
     /**
-     * Add files to an existing ledger, or refresh their entries, without
-     * rescanning the roots: each file is parsed alone, placed in its directory
-     * group in path order, counted, and checked for a duplicate id against the
-     * ids the ledger already holds. An entry for the same file is replaced, so
-     * a re-ingested document is safe to add again. Files the ledger lists but
+     * Add files to an existing registry, or refresh their entries, without
+     * rescanning the roots: each file is parsed alone, placed in its domain in
+     * id order, counted, and checked for a duplicate id against the ids the
+     * registry already holds. An entry for the same file is replaced, so a
+     * re-ingested document is safe to add again. Files the registry lists but
      * that no longer exist are not noticed here; a full scan is.
      *
-     * @param model the ledger model, from {@link #model} or {@link #load};
+     * @param model the registry model, from {@link #model} or {@link #load};
      *              updated in place
-     * @param base  the module base directory the ledger's roots are relative to
+     * @param base  the module base directory the registry's roots are relative to
      * @param files the files to add, relative to {@code base} or absolute; each
-     *              must be an {@code .adoc} file under one of the ledger's roots
+     *              must be an {@code .adoc} file under one of the registry's roots
      * @param now   the update instant, recorded as {@code generated}
      * @return the parsed headers of the added files, in the order given
      * @throws IOException              if a file cannot be read
      * @throws IllegalArgumentException if a file is missing, is not AsciiDoc,
-     *                                  or lies under none of the ledger's roots
+     *                                  or lies under none of the registry's roots
      */
     @SuppressWarnings("unchecked")
     public static List<TopicHeader> add(Map<String, Object> model, Path base, List<Path> files,
                                         Instant now) throws IOException {
-        List<Map<String, Object>> roots = (List<Map<String, Object>>) model.get("roots");
+        List<String> roots = new ArrayList<>();
+        for (Object r : (List<Object>) model.get("roots")) {
+            roots.add(String.valueOf(r));
+        }
+        boolean prefix = roots.size() > 1;
         List<String> findings = new ArrayList<>();
         for (Object f : (List<Object>) model.getOrDefault("findings", List.of())) {
             findings.add(String.valueOf(f));
@@ -456,43 +491,40 @@ public final class Ledger {
                 throw new IllegalArgumentException("Not an AsciiDoc file: " + abs);
             }
             Path real = abs.toRealPath();
-            Map<String, Object> rootEntry = null;
+            String rootName = null;
             Path rootPath = null;
-            List<String> rootNames = new ArrayList<>();
-            for (Map<String, Object> r : roots) {
-                String name = String.valueOf(r.get("root"));
-                rootNames.add(name);
+            for (String name : roots) {
                 Path candidate = base.resolve(name);
                 if (Files.isDirectory(candidate) && real.startsWith(candidate.toRealPath())) {
-                    rootEntry = r;
+                    rootName = name;
                     rootPath = candidate.toRealPath();
                     break;
                 }
             }
-            if (rootEntry == null) {
-                throw new IllegalArgumentException(abs + " is under none of the ledger's roots "
-                        + rootNames + "; run a full idoc:ledger instead");
+            if (rootName == null) {
+                throw new IllegalArgumentException(abs + " is under none of the registry's roots "
+                        + roots + "; run a full idoc:topic-registry instead");
             }
             TopicHeader header = TopicHeader.parse(real, rootPath);
-            String relative = header.file();
-            remove(rootEntry, relative);
-            findings.removeIf(f -> f.startsWith(relative + ": "));
+            String fileValue = (prefix ? rootName + "/" : "") + header.file();
+            remove(model, fileValue);
+            findings.removeIf(f -> f.startsWith(fileValue + ": "));
             if (header.topic()) {
-                String earlier = fileDeclaring(roots, header.id());
+                String earlier = fileDeclaring(model, header.id());
                 if (earlier != null) {
-                    findings.add(relative + ": duplicate id '" + header.id()
+                    findings.add(fileValue + ": duplicate id '" + header.id()
                             + "', already declared by " + earlier);
                 }
-                insertTopic(rootEntry, header);
+                insertTopic(model, header, fileValue);
             } else {
-                insertOther(rootEntry, header);
+                insertOther(model, header, fileValue);
             }
             for (String f : header.findings()) {
-                findings.add(relative + ": " + f);
+                findings.add(fileValue + ": " + f);
             }
-            recount(rootEntry);
             added.add(header);
         }
+        recount(model);
         model.put("generated", now.truncatedTo(ChronoUnit.SECONDS).toString());
         model.put("findings", findings);
         return added;
@@ -503,86 +535,84 @@ public final class Ledger {
         return (List<Map<String, Object>>) holder.computeIfAbsent(key, k -> new ArrayList<>());
     }
 
-    private static void remove(Map<String, Object> rootEntry, String relative) {
-        for (Iterator<Map<String, Object>> it = listOf(rootEntry, "directories").iterator(); it.hasNext();) {
-            Map<String, Object> dir = it.next();
-            List<Map<String, Object>> topics = listOf(dir, "topics");
-            topics.removeIf(t -> relative.equals(t.get("file")));
+    private static void remove(Map<String, Object> model, String fileValue) {
+        for (Iterator<Map<String, Object>> it = listOf(model, "domains").iterator(); it.hasNext();) {
+            Map<String, Object> domain = it.next();
+            List<Map<String, Object>> topics = listOf(domain, "topics");
+            topics.removeIf(t -> fileValue.equals(t.get("file")));
             if (topics.isEmpty()) {
                 it.remove();
             }
         }
-        listOf(rootEntry, "other-files").removeIf(o -> relative.equals(o.get("file")));
+        listOf(model, "assemblies").removeIf(o -> fileValue.equals(o.get("file")));
+        listOf(model, "other-files").removeIf(o -> fileValue.equals(o.get("file")));
     }
 
-    private static String fileDeclaring(List<Map<String, Object>> roots, String id) {
-        for (Map<String, Object> r : roots) {
-            for (Map<String, Object> dir : listOf(r, "directories")) {
-                for (Map<String, Object> t : listOf(dir, "topics")) {
-                    if (id.equals(t.get("id"))) {
-                        return String.valueOf(t.get("file"));
-                    }
+    private static String fileDeclaring(Map<String, Object> model, String id) {
+        for (Map<String, Object> domain : listOf(model, "domains")) {
+            for (Map<String, Object> t : listOf(domain, "topics")) {
+                if (id.equals(t.get("id"))) {
+                    return String.valueOf(t.get("file"));
                 }
             }
         }
         return null;
     }
 
-    private static void insertTopic(Map<String, Object> rootEntry, TopicHeader header) {
-        List<Map<String, Object>> dirs = listOf(rootEntry, "directories");
-        String dirName = directoryOf(header.file());
-        String key = dirName.isEmpty() ? "." : dirName;
-        Map<String, Object> group = null;
+    private static void insertTopic(Map<String, Object> model, TopicHeader header, String fileValue) {
+        List<Map<String, Object>> domains = listOf(model, "domains");
+        String key = domainOf(header.id());
+        Map<String, Object> domain = null;
         int position = 0;
-        for (int i = 0; i < dirs.size(); i++) {
-            String d = String.valueOf(dirs.get(i).get("dir"));
+        for (int i = 0; i < domains.size(); i++) {
+            String d = String.valueOf(domains.get(i).get("id"));
             if (d.equals(key)) {
-                group = dirs.get(i);
+                domain = domains.get(i);
                 break;
             }
             if (d.compareTo(key) < 0) {
                 position = i + 1;
             }
         }
-        if (group == null) {
-            group = new LinkedHashMap<>();
-            group.put("dir", key);
-            group.put("topics", new ArrayList<>());
-            dirs.add(position, group);
+        if (domain == null) {
+            domain = new LinkedHashMap<>();
+            domain.put("id", key);
+            domain.put("topics", new ArrayList<>());
+            domains.add(position, domain);
         }
-        List<Map<String, Object>> topics = listOf(group, "topics");
+        List<Map<String, Object>> topics = listOf(domain, "topics");
         int at = 0;
         while (at < topics.size()
-                && String.valueOf(topics.get(at).get("file")).compareTo(header.file()) < 0) {
+                && String.valueOf(topics.get(at).get("id")).compareTo(header.id()) <= 0) {
             at++;
         }
-        topics.add(at, topicEntry(header));
+        topics.add(at, topicEntry(header, fileValue));
     }
 
-    private static void insertOther(Map<String, Object> rootEntry, TopicHeader header) {
-        List<Map<String, Object>> others = listOf(rootEntry, "other-files");
+    private static void insertOther(Map<String, Object> model, TopicHeader header, String fileValue) {
+        List<Map<String, Object>> list = listOf(model, header.includes() > 0 ? "assemblies" : "other-files");
         int at = 0;
-        while (at < others.size()
-                && String.valueOf(others.get(at).get("file")).compareTo(header.file()) < 0) {
+        while (at < list.size()
+                && String.valueOf(list.get(at).get("file")).compareTo(fileValue) < 0) {
             at++;
         }
-        others.add(at, otherEntry(header));
+        list.add(at, otherEntry(header, fileValue));
     }
 
-    private static void recount(Map<String, Object> rootEntry) {
+    private static void recount(Map<String, Object> model) {
         int topics = 0;
-        for (Map<String, Object> dir : listOf(rootEntry, "directories")) {
-            topics += listOf(dir, "topics").size();
+        for (Map<String, Object> domain : listOf(model, "domains")) {
+            topics += listOf(domain, "topics").size();
         }
-        int others = listOf(rootEntry, "other-files").size();
-        rootEntry.put("files", topics + others);
-        rootEntry.put("topics", topics);
+        model.put("topic-count", topics);
+        model.put("file-count", topics + listOf(model, "assemblies").size()
+                + listOf(model, "other-files").size());
     }
 
-    private static Map<String, Object> otherEntry(TopicHeader o) {
+    /** An assembly or plain file: its path, title, document attributes and include count. */
+    private static Map<String, Object> otherEntry(TopicHeader o, String fileValue) {
         Map<String, Object> entry = new LinkedHashMap<>();
-        entry.put("file", o.file());
-        entry.put("kind", o.includes() > 0 ? "assembly" : "plain");
+        entry.put("file", fileValue);
         if (o.title() != null) {
             entry.put("title", o.title());
             if (o.level() != 1) {
@@ -592,37 +622,47 @@ public final class Ledger {
         if (!o.documentAttributes().isEmpty()) {
             entry.put("attributes", new LinkedHashMap<>(o.documentAttributes()));
         }
-        entry.put("includes", o.includes());
+        if (o.includes() > 0) {
+            entry.put("includes", o.includes());
+        }
         return entry;
     }
 
-    private static Map<String, Object> topicEntry(TopicHeader t) {
+    /**
+     * One topic in the registry's field order ({@code id}, {@code file},
+     * {@code title}, {@code type}, {@code keywords}, {@code status},
+     * {@code char-count}, {@code dependencies}, {@code related},
+     * {@code summary}, {@code supersedes}, {@code notes}), then what the
+     * header adds: provenance, scope note, citation, license, the anchor and
+     * header verdicts, unknown {@code :topic-*:} attributes under
+     * {@code extra}, document attributes, and the include count.
+     */
+    private static Map<String, Object> topicEntry(TopicHeader t, String fileValue) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("id", t.id());
-        entry.put("file", t.file());
+        entry.put("file", fileValue);
         if (t.title() != null) {
             entry.put("title", t.title());
         }
         putIfPresent(entry, "type", t.attributes().get("type"));
-        putIfPresent(entry, "status", t.attributes().get("status"));
-        putIfPresent(entry, "provenance", t.attributes().get("provenance"));
         entry.put("keywords", t.keywords());
+        putIfPresent(entry, "status", t.attributes().get("status"));
+        entry.put("char-count", t.charCount());
+        putListIfPresent(entry, "dependencies", t.attributes().get("dependencies"));
+        putListIfPresent(entry, "related", t.attributes().get("related"));
         putIfPresent(entry, "summary", t.attributes().get("summary"));
-        putIfPresent(entry, "scope-note", t.attributes().get("scope-note"));
-        String related = t.attributes().get("related");
-        if (related != null && !related.isBlank()) {
-            entry.put("related", split(related));
-        }
+        putIfPresent(entry, "supersedes", t.attributes().get("supersedes"));
         putIfPresent(entry, "notes", t.attributes().get("notes"));
+        putIfPresent(entry, "provenance", t.attributes().get("provenance"));
+        putIfPresent(entry, "scope-note", t.attributes().get("scope-note"));
         putIfPresent(entry, "citation", t.attributes().get("citation"));
         putIfPresent(entry, "license", t.attributes().get("license"));
-        entry.put("char-count", t.charCount());
         entry.put("anchor", t.anchor());
         List<String> missing = t.missingRequired();
         entry.put("header", missing.isEmpty() ? "complete" : "missing: " + String.join(", ", missing));
         Map<String, String> extra = new LinkedHashMap<>();
-        Set<String> known = Set.of("id", "type", "status", "provenance", "keywords", "summary",
-                "scope-note", "related", "notes", "citation", "license");
+        Set<String> known = Set.of("id", "type", "keywords", "status", "dependencies", "related",
+                "summary", "supersedes", "notes", "provenance", "scope-note", "citation", "license");
         for (Map.Entry<String, String> a : t.attributes().entrySet()) {
             if (!known.contains(a.getKey())) {
                 extra.put(a.getKey(), a.getValue());
@@ -643,6 +683,12 @@ public final class Ledger {
     private static void putIfPresent(Map<String, Object> entry, String key, String value) {
         if (value != null && !value.isBlank()) {
             entry.put(key, value);
+        }
+    }
+
+    private static void putListIfPresent(Map<String, Object> entry, String key, String value) {
+        if (value != null && !value.isBlank()) {
+            entry.put(key, split(value));
         }
     }
 
