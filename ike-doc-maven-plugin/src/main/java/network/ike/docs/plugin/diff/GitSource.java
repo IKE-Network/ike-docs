@@ -11,6 +11,7 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.IOException;
@@ -161,74 +162,35 @@ public final class GitSource implements AutoCloseable {
     }
 
     /**
-     * List the immediate {@code .yaml} children of a directory on a
-     * side — used to enumerate per-domain registry files on both sides
-     * of the comparison.
+     * List every file under a directory on a side whose name ends with a
+     * suffix, recursively — used to read all topic headers and assembly
+     * include lines as they stand on each side of the comparison, so the
+     * topic registry can be generated for that side. {@code target/} and
+     * dot-directories are skipped.
      *
-     * @param ref a committish, or {@link #WORKTREE}
-     * @param dir the repository-relative directory
-     * @return the repository-relative file paths found
+     * @param ref    a committish, or {@link #WORKTREE}
+     * @param dir    the repository-relative directory, or {@code ""} for
+     *               the whole repository
+     * @param suffix the file-name suffix to match, e.g. {@code .adoc}
+     * @return the repository-relative file paths found, sorted
      * @throws IOException on repository access failure
      */
-    public List<String> listYaml(String ref, String dir) throws IOException {
+    public List<String> listFiles(String ref, String dir, String suffix) throws IOException {
         List<String> out = new ArrayList<>();
         if (WORKTREE.equals(ref)) {
-            Path d = workTree().resolve(dir);
+            Path root = workTree();
+            Path d = dir.isEmpty() ? root : root.resolve(dir);
             if (Files.isDirectory(d)) {
-                try (Stream<Path> stream = Files.list(d)) {
-                    stream.filter(p -> p.getFileName().toString().endsWith(".yaml"))
+                try (Stream<Path> stream = Files.walk(d)) {
+                    stream.filter(Files::isRegularFile)
+                            .map(p -> root.relativize(p).toString()
+                                    .replace(java.io.File.separatorChar, '/'))
+                            .filter(p -> p.endsWith(suffix) && !skipped(p))
                             .sorted()
-                            .forEach(p -> out.add(dir + "/" + p.getFileName()));
+                            .forEach(out::add);
                 }
             }
             return out;
-        }
-        ObjectId commitId = repo.resolve(ref + "^{commit}");
-        if (commitId == null) {
-            throw new IOException("Cannot resolve ref: " + ref);
-        }
-        try (RevWalk walk = new RevWalk(repo)) {
-            RevCommit commit = walk.parseCommit(commitId);
-            try (TreeWalk tw = TreeWalk.forPath(repo, dir, commit.getTree())) {
-                if (tw == null || !tw.isSubtree()) {
-                    return out;
-                }
-                tw.enterSubtree();
-                while (tw.next()) {
-                    if (tw.getPathString().endsWith(".yaml")) {
-                        out.add(tw.getPathString());
-                    }
-                }
-            }
-        }
-        return out;
-    }
-
-    /**
-     * Find the first path on a side that ends with the given suffix —
-     * used to discover the topic-registry source root from an assembly
-     * module (ike-issues#649 subproject scoping).
-     *
-     * @param ref    a committish, or {@link #WORKTREE}
-     * @param suffix the path suffix to match, e.g.
-     *               {@code src/docs/asciidoc/topic-registry.yaml}
-     * @return the first matching repository-relative path in walk
-     *         order, or {@code null} when none matches
-     * @throws IOException on repository access failure
-     */
-    public String findPath(String ref, String suffix) throws IOException {
-        if (WORKTREE.equals(ref)) {
-            Path root = workTree();
-            try (Stream<Path> stream = Files.walk(root)) {
-                return stream
-                        .filter(Files::isRegularFile)
-                        .map(p -> root.relativize(p).toString().replace(java.io.File.separatorChar, '/'))
-                        .filter(p -> p.endsWith(suffix) && !p.contains("/target/")
-                                && !p.startsWith(".") && !p.contains("/."))
-                        .sorted()
-                        .findFirst()
-                        .orElse(null);
-            }
         }
         ObjectId commitId = repo.resolve(ref + "^{commit}");
         if (commitId == null) {
@@ -239,13 +201,23 @@ public final class GitSource implements AutoCloseable {
             RevCommit commit = walk.parseCommit(commitId);
             tw.addTree(commit.getTree());
             tw.setRecursive(true);
+            if (!dir.isEmpty()) {
+                tw.setFilter(PathFilter.create(dir));
+            }
             while (tw.next()) {
-                if (tw.getPathString().endsWith(suffix)) {
-                    return tw.getPathString();
+                String p = tw.getPathString();
+                if (p.endsWith(suffix) && !skipped(p)) {
+                    out.add(p);
                 }
             }
         }
-        return null;
+        out.sort(null);
+        return out;
+    }
+
+    private static boolean skipped(String path) {
+        return path.startsWith("target/") || path.contains("/target/")
+                || path.startsWith(".") || path.contains("/.");
     }
 
     /**

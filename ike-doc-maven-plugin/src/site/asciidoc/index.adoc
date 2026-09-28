@@ -155,10 +155,13 @@ mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt
 ----
 
 The goal works at the Maven subproject level: a topics-library module
-yields the corpus packet (with an entry-keyed topic-registry delta);
-an *assembly* module yields the projection of the diff onto its
-registry membership; an aggregator invocation produces a packet for
-every subproject able to generate one. Outputs land in
+(one whose source root holds `topics/`) yields the corpus packet (with
+an entry-keyed topic-registry delta); an *assembly* module yields the
+projection of the diff onto the topics its `include::` lines name; an
+aggregator invocation produces a packet for every subproject able to
+generate one. The registry on each side is generated from the files on
+that side, as `idoc:topic-registry` would; no hand-kept registry file
+is read. Outputs land in
 `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the
 goal is self-contained, so a bare invocation on a fresh checkout
 produces a styled packet (branded typography when the pipeline fonts
@@ -198,8 +201,9 @@ with its topics in id order (`id`, `file`, `title`, `type`, `keywords`,
 `provenance`, `anchor`, `header`, ...). After the domains come
 `assemblies` (files with `include::` lines, with their counts),
 `other-files`, and a findings list. The file that was kept by hand at
-`src/docs/asciidoc/topic-registry.yaml` is no longer maintained; the
-goal never reads or writes it. What a header cannot say is not
+`src/docs/asciidoc/topic-registry.yaml` is no longer maintained; neither
+this goal nor `idoc:diff` reads it, so it can be deleted once its values
+are moved into topic headers. What a header cannot say is not
 generated: domain titles
 and descriptions, assembly `sections` and `topic-refs`, and
 `dependencies` unless a header declares them. The same structure is

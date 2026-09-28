@@ -636,8 +636,14 @@ public final class TopicRegistry {
      * header adds: provenance, scope note, citation, license, the anchor and
      * header verdicts, unknown {@code :topic-*:} attributes under
      * {@code extra}, document attributes, and the include count.
+     * Shared with {@code idoc:diff}, which generates the registry for each
+     * side of a comparison in this same shape.
+     *
+     * @param t         the parsed topic header
+     * @param fileValue the file path to record
+     * @return the registry entry
      */
-    private static Map<String, Object> topicEntry(TopicHeader t, String fileValue) {
+    public static Map<String, Object> topicEntry(TopicHeader t, String fileValue) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("id", t.id());
         entry.put("file", fileValue);
