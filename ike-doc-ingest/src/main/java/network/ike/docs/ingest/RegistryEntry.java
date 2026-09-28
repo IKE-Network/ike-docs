@@ -26,6 +26,12 @@ import java.util.List;
 /// @param dependencies topic ids this topic depends on
 /// @param related     related topic ids
 /// @param summary     one-paragraph summary
+///
+/// @deprecated The topic registry is generated from topic headers by
+///     `idoc:topic-registry` (IKE-TOPIC-REGISTRY); a hand-kept registry
+///     shard is never read. Put registry metadata in the fragment's
+///     header through {@link TopicFragment#attributes()} instead.
+@Deprecated(forRemoval = true)
 public record RegistryEntry(
         String id,
         String file,
