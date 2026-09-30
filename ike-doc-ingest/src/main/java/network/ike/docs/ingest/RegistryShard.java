@@ -17,6 +17,12 @@ import java.util.List;
 ///                      typically includes the source citation
 /// @param entries       the topic entries in the shard, in stable
 ///                      sort order
+///
+/// @deprecated The topic registry is generated from topic headers by
+///     `idoc:topic-registry` (IKE-TOPIC-REGISTRY); a hand-kept registry
+///     shard is never read. Put registry metadata in the fragment's
+///     header through {@link TopicFragment#attributes()} instead.
+@Deprecated(forRemoval = true)
 public record RegistryShard(
         String shardId,
         String title,

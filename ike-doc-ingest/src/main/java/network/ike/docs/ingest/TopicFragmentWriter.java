@@ -3,6 +3,7 @@ package network.ike.docs.ingest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 /// Serialize {@link TopicFragment} value objects to AsciiDoc files
 /// with the IKE-ASCIIDOC-FRAGMENT standard header.
@@ -21,6 +22,8 @@ import java.nio.file.Path;
 /// :topic-citation: {provenance.citation}
 /// :topic-license: {provenance.license}
 /// :topic-keywords: kw1, kw2, ...
+/// :topic-{key}: {value}        (one per TopicFragment.attributes entry, in order;
+///   long values continue on lines ending in " \\")
 ///
 /// [[{topicId}]]
 /// = {title}
@@ -73,6 +76,13 @@ public final class TopicFragmentWriter {
             sb.append(":topic-keywords: ").append(String.join(", ", fragment.keywords())).append("\n");
         }
 
+        for (Map.Entry<String, String> a : fragment.attributes().entrySet()) {
+            String value = a.getValue() == null ? "" : a.getValue().replaceAll("\\s+", " ").strip();
+            if (!value.isEmpty()) {
+                sb.append(attributeLine("topic-" + a.getKey(), value));
+            }
+        }
+
         sb.append("\n");
         sb.append("[[").append(fragment.topicId()).append("]]\n");
         sb.append("= ").append(stripNewlines(fragment.title())).append("\n\n");
@@ -86,6 +96,31 @@ public final class TopicFragmentWriter {
 
         return sb.toString();
     }
+
+    /// Render one header attribute, wrapping a long value at word
+    /// boundaries onto continuation lines that end in ` \` and are
+    /// indented two spaces, so each line stays near {@link #WRAP}
+    /// characters.
+    ///
+    /// @param name  the attribute name, e.g. `topic-summary`
+    /// @param value the single-line value
+    /// @return the attribute line(s), newline-terminated
+    static String attributeLine(String name, String value) {
+        StringBuilder out = new StringBuilder();
+        StringBuilder line = new StringBuilder(":").append(name).append(":");
+        for (String word : value.split(" ")) {
+            if (line.length() + 1 + word.length() > WRAP && !line.toString().isBlank()
+                    && !line.toString().endsWith(":")) {
+                out.append(line).append(" \\\n");
+                line = new StringBuilder(" ");
+            }
+            line.append(' ').append(word);
+        }
+        return out.append(line).append('\n').toString();
+    }
+
+    /// Target width of a wrapped header attribute line.
+    static final int WRAP = 92;
 
     private static String stripNewlines(String s) {
         return s == null ? "" : s.replace("\n", " ");
