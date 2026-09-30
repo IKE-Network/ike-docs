@@ -46,15 +46,19 @@ import java.util.Set;
  * module it runs in:
  *
  * <ul>
- *   <li><b>Topics-library module</b> (its source root holds
- *       {@code topic-registry.yaml}): the corpus packet — every changed
- *       fragment, the full registry delta including each assembly's
- *       membership changes, and the module's own scaffolding.</li>
+ *   <li><b>Topics-library module</b> (its source root holds a
+ *       {@code topics/} directory of fragments): the corpus packet —
+ *       every changed fragment, the full registry delta including each
+ *       assembly's membership changes, and the module's own
+ *       scaffolding. The registry on each side is generated from the
+ *       {@code :topic-*:} headers as they stand on that side, exactly
+ *       as {@code idoc:topic-registry} would; no hand-kept registry
+ *       file is read.</li>
  *   <li><b>Assembly module</b>: the packet is the <em>projection</em>
  *       of the corpus diff onto this assembly — changed topics
- *       intersected with the assembly's flattened {@code topic-refs}
- *       (assembly id defaults to the artifactId; topic ids resolve to
- *       files through the per-domain registries), plus the module's own
+ *       intersected with the topics the assembly's {@code include::}
+ *       lines name (assembly id defaults to the artifactId, which by
+ *       convention is the module directory), plus the module's own
  *       master-file scaffolding diff and a membership delta for just
  *       this assembly. Topics deleted in range are reported by the
  *       membership delta rather than projected.</li>
@@ -99,7 +103,6 @@ import java.util.Set;
 @Mojo(name = "diff")
 public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
 
-    private static final String REGISTRY_SUFFIX = "src/docs/asciidoc/topic-registry.yaml";
 
     @org.apache.maven.api.di.Inject
     private org.apache.maven.api.plugin.Log log;
@@ -204,8 +207,9 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
             }
             String srcRel = workTree.relativize(srcAbs).toString().replace(File.separatorChar, '/');
 
-            boolean corpus = git.read(to, srcRel + "/topic-registry.yaml") != null;
-            String registryRoot = corpus ? srcRel : discoverRegistryRoot(git);
+            boolean corpus = !git.listFiles(to, srcRel + "/topics", ".adoc").isEmpty();
+            String registryRoot = corpus ? srcRel : RegistryIndex.findRoot(git, to);
+            RegistryIndex toIndex = RegistryIndex.load(git, to, registryRoot);
 
             List<GitSource.Change> own = git.changes(from, to, srcRel + "/", ".adoc");
             String topicsPrefix = (corpus ? srcRel : registryRoot) == null
@@ -223,17 +227,16 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
                 scaffoldCandidates = own.stream()
                         .filter(c -> !c.displayPath().startsWith(topicsPrefix)).toList();
             } else if (registryRoot != null) {
-                RegistryIndex index = RegistryIndex.load(git, to, registryRoot);
-                List<String> refs = index.assemblyRefs(assemblyId);
+                List<String> refs = toIndex.assemblyRefs(assemblyId);
                 if (refs == null) {
                     getLog().warn("idoc:diff: assembly '" + assemblyId
-                            + "' is not registered in " + registryRoot
-                            + "/topic-registry/assemblies.yaml — scaffolding-only packet");
+                            + "' includes no topic from " + registryRoot
+                            + " — scaffolding-only packet");
                     markCandidates = List.of();
                 } else {
                     Set<String> included = new LinkedHashSet<>();
                     for (String ref : refs) {
-                        String file = index.topicFile(ref);
+                        String file = toIndex.topicFile(ref);
                         if (file != null) {
                             included.add(registryRoot + "/" + file);
                         }
@@ -243,7 +246,8 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
                             .filter(c -> included.contains(c.displayPath()))
                             .toList();
                     membershipDelta = RegistryIndex.membershipDelta(
-                            git, from, to, registryRoot, assemblyId);
+                            RegistryIndex.load(git, from, registryRoot), toIndex,
+                            from, to, assemblyId);
                     packetTitle = title + " — " + assemblyId;
                 }
                 scaffoldCandidates = own;
@@ -255,12 +259,10 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
             }
 
             if (topics != null && !topics.isBlank()) {
-                RegistryIndex index = registryRoot == null
-                        ? null : RegistryIndex.load(git, to, registryRoot);
                 Set<String> wanted = new LinkedHashSet<>();
                 for (String token : topics.split(",")) {
                     String t = token.strip();
-                    String file = index == null ? null : index.topicFile(t);
+                    String file = toIndex.topicFile(t);
                     wanted.add(file != null ? registryRoot + "/" + file : t);
                 }
                 markCandidates = markCandidates.stream()
@@ -377,7 +379,7 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
 
             boolean hasRegistry;
             if (corpus) {
-                hasRegistry = writeRegistryDelta(git, srcRel, diffDir);
+                hasRegistry = writeRegistryDelta(git, srcRel, toIndex, diffDir);
             } else if (membershipDelta != null && !membershipDelta.isEmpty()) {
                 Files.writeString(diffDir.resolve("registry-delta.adoc"),
                         membershipDelta, StandardCharsets.UTF_8);
@@ -515,23 +517,6 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
         return slash > 0 ? rest.substring(0, slash) : "(doc)";
     }
 
-    /**
-     * Locate the topic-registry source root anywhere in the repository
-     * on the to side, so an assembly module can resolve its membership.
-     *
-     * @param git repository access
-     * @return the registry's source root (repository-relative), or
-     *         {@code null} when the repository has no registry
-     * @throws IOException on repository access failure
-     */
-    private String discoverRegistryRoot(GitSource git) throws IOException {
-        String found = git.findPath(to, REGISTRY_SUFFIX);
-        if (found == null) {
-            return null;
-        }
-        return found.substring(0, found.length() - "/topic-registry.yaml".length());
-    }
-
     private ChangeManifest resolveManifest(GitSource git, List<GitSource.Change> marked,
                                            List<GitSource.Change> own) throws IOException {
         if (changesFile != null && changesFile.isFile()) {
@@ -599,14 +584,10 @@ public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {
         return owners;
     }
 
-    private boolean writeRegistryDelta(GitSource git, String srcRel, Path diffDir)
-            throws IOException {
-        String root = srcRel + "/topic-registry.yaml";
-        if (git.read(from, root) == null && git.read(to, root) == null) {
-            return false;
-        }
-        String delta = new RegistryDelta(git, from, to)
-                .render(root, srcRel + "/topic-registry");
+    private boolean writeRegistryDelta(GitSource git, String srcRel, RegistryIndex toIndex,
+                                       Path diffDir) throws IOException {
+        String delta = new RegistryDelta(from, to)
+                .render(RegistryIndex.load(git, from, srcRel), toIndex);
         if (delta.isEmpty()) {
             return false;
         }
