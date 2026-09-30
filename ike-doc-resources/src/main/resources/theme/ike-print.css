@@ -303,9 +303,11 @@ a {
     text-decoration: none;
 }
 
-/* In print, show the URL after external links */
-a[href^="http"]::after,
-a[href^="https"]::after {
+/* In print, show the URL after external links whose text is not the URL
+   itself. Asciidoctor marks an autolink whose text is its own address with
+   class="bare"; appending the address to those printed it twice. */
+a[href^="http"]:not(.bare)::after,
+a[href^="https"]:not(.bare)::after {
     content: " (" attr(href) ")";
     font-size: 8pt;
     color: #999999;
