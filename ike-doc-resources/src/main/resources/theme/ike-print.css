@@ -546,6 +546,20 @@ table.colophon-credits td {
     text-align: center !important;
 }
 
+/* A figure's callout number taken up in the text, drawn as the same
+   badge the figure draws. Markup: [.figure-callout]#13#           */
+.figure-callout {
+    background-color: #eb6834;
+    color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.78em;
+    font-style: normal;
+    font-weight: bold;
+    padding: 0.1em 0.5em;
+    border-radius: 0.6em;
+    white-space: nowrap;
+}
+
 
 /* ── Blockquotes ───────────────────────────────────────────────── */
 
