@@ -10,6 +10,12 @@ import java.nio.file.Path;
 /// The emitted YAML uses two-space indentation and emits only the
 /// fields a registry consumer needs. Fields whose value is empty
 /// (empty string or empty list) are skipped to keep the file readable.
+///
+/// @deprecated The topic registry is generated from topic headers by
+///     `idoc:topic-registry` (IKE-TOPIC-REGISTRY); a hand-kept registry
+///     shard is never read. Put registry metadata in the fragment's
+///     header through {@link TopicFragment#attributes()} instead.
+@Deprecated(forRemoval = true)
 public final class RegistryShardWriter {
 
     /// Write the shard to {@code target}, creating parent directories

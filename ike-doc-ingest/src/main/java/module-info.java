@@ -9,9 +9,12 @@
 ///   and TGZ extraction
 /// - {@link network.ike.docs.ingest.TopicFragmentWriter} — emit
 ///   AsciiDoc topic fragments with IKE-INGEST §"External Source
-///   Ingestion" provenance attributes
-/// - {@link network.ike.docs.ingest.RegistryShardWriter} — emit IKE
-///   topic-registry shard YAML per IKE-TOPIC-REGISTRY
+///   Ingestion" provenance attributes and any further `:topic-*:`
+///   header attributes (summary, notes, related, …)
+/// - {@link network.ike.docs.ingest.RegistryShardWriter} — deprecated:
+///   the topic registry is now generated from topic headers, so put
+///   registry metadata in {@link network.ike.docs.ingest.TopicFragment}
+///   attributes instead
 /// - {@link network.ike.docs.ingest.IncludesFileWriter} — emit
 ///   `_includes.adoc` assembly-composition manifests
 /// - {@link network.ike.docs.ingest.IngestUtil} — pure helpers
