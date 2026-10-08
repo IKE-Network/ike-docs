@@ -110,6 +110,69 @@ class TopicRegistryTest {
     }
 
     @Test
+    void scanFrom_keepsOnlyWhatTheRootFileReaches(@TempDir Path dir) throws IOException {
+        Path root = corpus(dir);
+
+        TopicRegistry.Scan scan = TopicRegistry.scanFrom(root, root.resolve("index.adoc"));
+
+        assertThat(scan.topics()).extracting(TopicHeader::id).containsExactly("arch-a", "arch-b", "arch-c");
+        assertThat(scan.others()).extracting(TopicHeader::file).containsExactly("index.adoc");
+        assertThat(scan.findings()).isEmpty();
+        // the full scan of the same root is unchanged
+        assertThat(TopicRegistry.scan(root, 100).topics()).hasSize(5);
+    }
+
+    @Test
+    void scanFrom_followsNestedIncludes_andStopsAtCycles(@TempDir Path dir) throws IOException {
+        Path root = corpus(dir);
+        Files.createDirectories(root.resolve("chapters"));
+        Files.writeString(root.resolve("book.adoc"), "= Book\n\ninclude::chapters/one.adoc[]\n");
+        Files.writeString(root.resolve("chapters/one.adoc"), """
+                == One
+
+                include::../topics/architecture/b.adoc[leveloffset=+1]
+                include::../book.adoc[]
+                include::one.adoc[]
+                """);
+
+        TopicRegistry.Scan scan = TopicRegistry.scanFrom(root, root.resolve("book.adoc"));
+
+        assertThat(scan.topics()).extracting(TopicHeader::id).containsExactly("arch-b");
+        assertThat(scan.others()).extracting(TopicHeader::file).containsExactly("book.adoc", "chapters/one.adoc");
+        assertThat(scan.findings()).isEmpty();
+    }
+
+    @Test
+    void scanFrom_reportsIncludesItCannotFollow(@TempDir Path dir) throws IOException {
+        Path root = corpus(dir);
+        Files.writeString(root.resolve("map.adoc"), """
+                = Map
+
+                include::{topicsdir}/architecture/a.adoc[]
+                include::topics/architecture/gone.adoc[]
+                include::diagram.puml[]
+                include::topics/architecture/c.adoc[]
+                """);
+
+        TopicRegistry.Scan scan = TopicRegistry.scanFrom(root, root.resolve("map.adoc"));
+
+        assertThat(scan.topics()).extracting(TopicHeader::id).containsExactly("arch-c");
+        assertThat(scan.findings()).containsExactly(
+                "map.adoc: include::topics/architecture/gone.adoc[] does not resolve to a file",
+                "map.adoc: include::{topicsdir}/architecture/a.adoc[] not followed"
+                        + " (attribute reference, absolute path, URI or above the root)");
+    }
+
+    @Test
+    void scanFrom_rejectsAFileOutsideTheRoot(@TempDir Path dir) throws IOException {
+        Path root = corpus(dir).resolve("topics");
+
+        assertThatThrownBy(() -> TopicRegistry.scanFrom(root, dir.resolve("index.adoc")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("is not under the registry root");
+    }
+
+    @Test
     void domainOf_isTheIdPrefixBeforeTheFirstHyphen() {
         assertThat(TopicRegistry.domainOf("arch-coord-versioning")).isEqualTo("arch");
         assertThat(TopicRegistry.domainOf("ext-fda-k031739-device-overview")).isEqualTo("ext");

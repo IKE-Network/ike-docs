@@ -42,7 +42,16 @@ import java.util.Map;
  *   mvn idoc:topic-registry -Dike.topic-registry.roots=a,b           # other roots, comma-separated
  *   mvn idoc:topic-registry -Dike.topic-registry.output=/tmp/r.yaml  # write elsewhere
  *   mvn idoc:topic-registry -Dike.topic-registry.add=topics/x/new.adoc   # add one ingested file, no rescan
+ *   mvn idoc:topic-registry -Dike.topic-registry.rootFile=src/docs/asciidoc/index.adoc  # only what index.adoc includes
  * </pre>
+ *
+ * <p>With {@code -Dike.topic-registry.rootFile} the registry holds that file
+ * and the {@code .adoc} files it reaches through {@code include::} lines,
+ * recursively; other files under the root are left out. The file must lie
+ * under one of the roots, and paths stay relative to that root. Includes that
+ * cannot be followed (an attribute reference such as {@code {topicsdir}/},
+ * an absolute path, a URI, a missing file) are findings. It cannot be combined
+ * with {@code add}.
  *
  * <p>With {@code -Dike.topic-registry.add} the named files are parsed alone
  * and merged into the existing registry: placed in their domain, counted, and
@@ -100,6 +109,15 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
     @Parameter(property = "ike.topic-registry.add")
     String add;
 
+    /**
+     * An {@code .adoc} file to build the registry from instead of scanning
+     * every file: the file and what it reaches through {@code include::}
+     * lines. Relative to the module base directory or absolute; it must lie
+     * under one of the {@link #roots}. Unset, the whole root is scanned.
+     */
+    @Parameter(property = "ike.topic-registry.rootFile")
+    String rootFile;
+
     /** Skip the goal. */
     @Parameter(property = "ike.skip.topic-registry", defaultValue = "false")
     boolean skip;
@@ -119,6 +137,11 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
         }
         long started = System.nanoTime();
         Path base = project.getBasedir();
+        boolean fromRootFile = rootFile != null && !rootFile.isBlank();
+        if (fromRootFile && add != null && !add.isBlank()) {
+            throw new MojoException("-Dike.topic-registry.rootFile and -Dike.topic-registry.add"
+                    + " cannot be combined; run with one or the other");
+        }
         if (add != null && !add.isBlank()) {
             if (Files.isRegularFile(output.toPath())) {
                 addToRegistry(base, output.toPath(), started);
@@ -134,7 +157,7 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
                 rootPaths.add(Path.of(r.strip()));
             }
         }
-        if (rootPaths.size() == 1 && rootPaths.get(0).toAbsolutePath().normalize()
+        if (!fromRootFile && rootPaths.size() == 1 && rootPaths.get(0).toAbsolutePath().normalize()
                 .equals(defaultRoot.toAbsolutePath().normalize())
                 && !Files.isDirectory(defaultRoot)) {
             getLog().info("idoc:topic-registry — no src/docs/asciidoc in " + base.getFileName()
@@ -143,17 +166,21 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
         }
 
         List<TopicRegistry.Scan> scans = new ArrayList<>();
-        for (Path root : rootPaths) {
-            if (!Files.isDirectory(root)) {
-                throw new MojoException("Registry root does not exist: " + root
-                        + " (check -Dike.topic-registry.roots)");
-            }
-            try {
-                scans.add(TopicRegistry.scan(root, maxFiles));
-            } catch (IOException e) {
-                throw new MojoException("Cannot scan " + root + ": " + e.getMessage(), e);
-            } catch (IllegalStateException e) {
-                throw new MojoException(e.getMessage(), e);
+        if (fromRootFile) {
+            scans.add(scanFromRootFile(base, rootPaths));
+        } else {
+            for (Path root : rootPaths) {
+                if (!Files.isDirectory(root)) {
+                    throw new MojoException("Registry root does not exist: " + root
+                            + " (check -Dike.topic-registry.roots)");
+                }
+                try {
+                    scans.add(TopicRegistry.scan(root, maxFiles));
+                } catch (IOException e) {
+                    throw new MojoException("Cannot scan " + root + ": " + e.getMessage(), e);
+                } catch (IllegalStateException e) {
+                    throw new MojoException(e.getMessage(), e);
+                }
             }
         }
 
@@ -185,6 +212,29 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
                 + " other file" + (others == 1 ? "" : "s") + ", " + findings
                 + " finding" + (findings == 1 ? "" : "s") + "; topic registry written to "
                 + shown(base, out) + " (" + millis + " ms)");
+    }
+
+    private TopicRegistry.Scan scanFromRootFile(Path base, List<Path> rootPaths) throws MojoException {
+        Path file = base.resolve(rootFile.strip());
+        if (!Files.isRegularFile(file)) {
+            throw new MojoException("Root file does not exist: " + file
+                    + " (check -Dike.topic-registry.rootFile)");
+        }
+        try {
+            Path realFile = file.toRealPath();
+            for (Path root : rootPaths) {
+                if (Files.isDirectory(root) && realFile.startsWith(root.toRealPath())) {
+                    getLog().info("idoc:topic-registry — from root file " + shown(base, file));
+                    return TopicRegistry.scanFrom(root, file);
+                }
+            }
+        } catch (IOException e) {
+            throw new MojoException("Cannot scan from " + file + ": " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new MojoException(e.getMessage(), e);
+        }
+        throw new MojoException("Root file " + file + " is under none of the registry roots "
+                + rootPaths + " (check -Dike.topic-registry.roots)");
     }
 
     private void addToRegistry(Path base, Path out, long started) throws MojoException {

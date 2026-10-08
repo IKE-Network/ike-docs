@@ -1,9 +1,11 @@
 package network.ike.docs.plugin.registry;
 
+import network.ike.docs.plugin.diff.PacketAssembler;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
@@ -15,7 +17,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -118,12 +123,84 @@ public final class TopicRegistry {
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }
+        return collect(real, headers, linkFindings);
+    }
 
+    /**
+     * Scan from one root file: the file and every {@code .adoc} file it
+     * reaches through {@code include::} lines, followed recursively and
+     * resolved relative to the including file as the AsciiDoc preprocessor
+     * does. Files under the root that are not reached are left out. An
+     * include whose target cannot be resolved statically (an attribute
+     * reference, an absolute path, a URI, a path above the root) or that
+     * names a missing file is a finding; a target that is not an
+     * {@code .adoc} file (a diagram, a CSV) is passed over. Each file is read
+     * once, so an include cycle ends.
+     *
+     * @param root     the scan root; registry paths are relative to it
+     * @param rootFile the {@code .adoc} file to start from, under {@code root}
+     * @return the scan result
+     * @throws IOException              if a file cannot be read
+     * @throws IllegalArgumentException if {@code rootFile} is not an
+     *                                  {@code .adoc} file under {@code root}
+     */
+    public static Scan scanFrom(Path root, Path rootFile) throws IOException {
+        Path real = root.toRealPath();
+        if (!Files.isRegularFile(rootFile) || !rootFile.getFileName().toString().endsWith(".adoc")) {
+            throw new IllegalArgumentException("Not an AsciiDoc file: " + rootFile);
+        }
+        Path start = rootFile.toRealPath();
+        if (!start.startsWith(real)) {
+            throw new IllegalArgumentException(rootFile + " is not under the registry root " + real);
+        }
+        String first = real.relativize(start).toString().replace(File.separatorChar, '/');
+        Set<String> seen = new HashSet<>(List.of(first));
+        Deque<String> queue = new ArrayDeque<>(List.of(first));
+        List<TopicHeader> headers = new ArrayList<>();
+        List<String> includeFindings = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            String relative = queue.removeFirst();
+            String content = Files.readString(real.resolve(relative), StandardCharsets.UTF_8);
+            headers.add(TopicHeader.parse(relative, content));
+            for (String line : content.lines().toList()) {
+                int bracket = line.indexOf('[');
+                if (!line.startsWith("include::") || bracket < 0) {
+                    continue;
+                }
+                String target = line.substring("include::".length(), bracket).strip();
+                String resolved = PacketAssembler.resolveInclude(relative, target);
+                if (resolved == null) {
+                    includeFindings.add(relative + ": include::" + target
+                            + "[] not followed (attribute reference, absolute path, URI or above the root)");
+                    continue;
+                }
+                if (!resolved.endsWith(".adoc") || !seen.add(resolved)) {
+                    continue;
+                }
+                Path file = real.resolve(resolved);
+                if (Files.isSymbolicLink(file)) {
+                    includeFindings.add(resolved + ": symbolic link, skipped");
+                } else if (!Files.isRegularFile(file)) {
+                    includeFindings.add(relative + ": include::" + target + "[] does not resolve to a file");
+                } else {
+                    queue.addLast(resolved);
+                }
+            }
+        }
+        headers.sort((a, b) -> a.file().compareTo(b.file()));
+        return collect(real, headers, includeFindings);
+    }
+
+    /**
+     * Group parsed headers into topics and other files and gather their
+     * findings, the part of a scan shared by {@link #scan} and
+     * {@link #scanFrom}.
+     */
+    private static Scan collect(Path real, List<TopicHeader> headers, List<String> earlyFindings) {
         List<TopicHeader> topics = new ArrayList<>();
         List<TopicHeader> others = new ArrayList<>();
-        List<String> findings = new ArrayList<>();
-        linkFindings.sort(null);
-        findings.addAll(linkFindings);
+        List<String> findings = new ArrayList<>(earlyFindings);
+        findings.sort(null);
         Map<String, String> firstFileById = new LinkedHashMap<>();
         for (TopicHeader header : headers) {
             String relative = header.file();
