@@ -135,8 +135,9 @@ public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
                     @Override
                     public FileVisitResult visitFile(Path file,
                             BasicFileAttributes attrs) throws IOException {
+                        // Zip entry names always use '/' (zip spec), whatever the OS.
                         String entryName = sourceDir.relativize(file)
-                                .toString();
+                                .toString().replace(File.separatorChar, '/');
                         zos.putNextEntry(new ZipEntry(entryName));
                         Files.copy(file, zos);
                         zos.closeEntry();
