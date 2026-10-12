@@ -135,18 +135,19 @@ public class PackageDocMojo implements org.apache.maven.api.plugin.Mojo {
                     @Override
                     public FileVisitResult visitFile(Path file,
                             BasicFileAttributes attrs) throws IOException {
-<span class="fc" id="L138">                        String entryName = sourceDir.relativize(file)</span>
-<span class="fc" id="L139">                                .toString();</span>
-<span class="fc" id="L140">                        zos.putNextEntry(new ZipEntry(entryName));</span>
-<span class="fc" id="L141">                        Files.copy(file, zos);</span>
-<span class="fc" id="L142">                        zos.closeEntry();</span>
-<span class="fc" id="L143">                        count.incrementAndGet();</span>
-<span class="fc" id="L144">                        return FileVisitResult.CONTINUE;</span>
+                        // Zip entry names always use '/' (zip spec), whatever the OS.
+<span class="fc" id="L139">                        String entryName = sourceDir.relativize(file)</span>
+<span class="fc" id="L140">                                .toString().replace(File.separatorChar, '/');</span>
+<span class="fc" id="L141">                        zos.putNextEntry(new ZipEntry(entryName));</span>
+<span class="fc" id="L142">                        Files.copy(file, zos);</span>
+<span class="fc" id="L143">                        zos.closeEntry();</span>
+<span class="fc" id="L144">                        count.incrementAndGet();</span>
+<span class="fc" id="L145">                        return FileVisitResult.CONTINUE;</span>
                     }
                 });
             }
         }
-<span class="fc" id="L149">        return count.get();</span>
+<span class="fc" id="L150">        return count.get();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -17,6 +17,7 @@
 
 ## Other
 
+- [The Topic Registry: A Plain-Language Guide](https://github.com/IKE-Network/ike-docs/topic-registry-guide.html.md)
 - [Dependencies (SBOM)](https://github.com/IKE-Network/ike-docs/dependencies.html.md)
 - [Licenses (SPDX)](https://github.com/IKE-Network/ike-docs/licenses.html.md)
 - [Built With](https://github.com/IKE-Network/ike-docs/built-with.html.md)

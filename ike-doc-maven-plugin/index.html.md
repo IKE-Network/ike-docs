@@ -1,6 +1,6 @@
 ---
-date_published: 2026-10-08
-date_modified: 2026-10-08
+date_published: 2026-10-11
+date_modified: 2026-10-11
 canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 ---
 
@@ -18,6 +18,8 @@ The `ike-doc-maven-plugin` provides the `idoc:*` goal prefix — AsciiDoc render
 
 For workspace-spanning goals (`ws:*` prefix), see the [ws plugin](https://ike.network/ike-platform/ike-workspace-maven-plugin/)[1] in `ike-platform`. For single-repo release orchestration (`ike:*`), see the [ike plugin](https://ike.network/ike-tooling/ike-maven-plugin/)[2] in `ike-tooling`. The three plugins are deliberately separate — `idoc:*` is doc rendering, `ike:*` is single-repo release, `ws:*` fans out across a workspace’s checked-out subprojects.
 
+For people who work through Claude rather than a terminal, [The Topic Registry: A Plain-Language Guide](topic-registry-guide.html)[3] walks through `idoc:topic-registry` with a tutorial and every action it offers.
+
 ## [#plugin-shape](#plugin-shape)Plugin shape
 
 This is a **regular Maven plugin** — no `<extensions>true</extensions>`, no custom `<packaging>` type registered via `META-INF/plexus/components.xml`, no participation in the build extension realm. Goals look up at execution time, the plugin’s `<version>` interpolates from `${ike-docs.version}` like any other managed plugin, and consumers inherit the version through ordinary `<pluginManagement>` indirection.
@@ -33,6 +35,7 @@ What this means for plugin consumers: nothing changes about how you **invoke** `
 | `idoc:asciidoc` | Render AsciiDoc sources via AsciidoctorJ — the heart of the doc pipeline. Handles IKE-specific renderer profiles (Prawn / Prince / AH / WeasyPrint / XEP / FOP / DocBook / single-page HTML). |
 | `idoc:render-pdf` | Wrapper around the five external PDF renderers (Prince, AH, FOP, WeasyPrint, XEP). Selects the active renderer per `-Dike.pdf.<name>=true` toggles set by the `doc-pipeline` profile. |
 | `idoc:diff` | Generate and render a **review packet**: every changed AsciiDoc topic between two refs (or a ref and the working tree), marked inline with insertion/deletion roles. See [Review packets](#review-packets-idocdiff) below. |
+| `idoc:topic-registry` | Read the `:topic-*:` header of every AsciiDoc file under the module’s source root and write `target/topic-registry.yaml`: the topic registry, generated from the headers in `IKE-TOPIC-REGISTRY.md’s shape instead of kept by hand. See [Topic registry](#topic-registry-idoctopic-registry) below. |
 | `idoc:adocstudio` | Generate Adoc Studio sidecar projects for assembly modules. |
 | `idoc:patch-docbook` | Patch the stock DocBook XSL 1.79.2 stylesheets to suppress two known Saxon warnings. Applied during the `docbook-xsl` artifact build. |
 | `idoc:fix-svg` | Remove bare `<rect/>` elements that Mermaid emits as artifacts in generated HTML — they cause rendering glitches in some browsers. |
@@ -40,7 +43,7 @@ What this means for plugin consumers: nothing changes about how you **invoke** `
 | `idoc:copy-default-pdf` | Promote one renderer’s PDF as the default. With multiple renderers producing output in `pdf-prince/`, `pdf-fop/`, etc., this picks the first available and copies it to a single canonical `pdf/` location. |
 | `idoc:prepare-renderer-output` | Create the per-renderer output directories (`pdf-prince/`, `pdf-fop/`, etc.) before the renderers run. |
 | `idoc:scan-logs` | Scan renderer log files (`renderer-*.log`) for error patterns and print a summary. Used after multi-renderer runs to flag failures fast. |
-| `idoc:package-doc` | Zip `src/docs/asciidoc/` and assign as primary artifact. Originally bound to the `<package>` phase of the retired `ike-doc` lifecycle; superseded by `maven-assembly-plugin’s `adoc` classifier execution in `ike-parent’s `doc-pipeline` profile. Retained at present pending a final decision in the open question on [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3]; may be removed in a follow-up. |
+| `idoc:package-doc` | Zip `src/docs/asciidoc/` and assign as primary artifact. Originally bound to the `<package>` phase of the retired `ike-doc` lifecycle; superseded by `maven-assembly-plugin’s `adoc` classifier execution in `ike-parent’s `doc-pipeline` profile. Retained at present pending a final decision in the open question on [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[4]; may be removed in a follow-up. |
 
 ## [#review-packets-idoc-diff](#review-packets-idoc-diff)Review packets (`idoc:diff`)
 
@@ -53,21 +56,51 @@ mvn idoc:diff -Dike.diff.from=A -Dike.diff.to=B  # any two commits
 mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt
 ```
 
-The goal works at the Maven subproject level: a topics-library module yields the corpus packet (with an entry-keyed topic-registry delta); an **assembly** module yields the projection of the diff onto its registry membership; an aggregator invocation produces a packet for every subproject able to generate one. Outputs land in `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise). Files a marked topic pulls in by relative `include::` — diagram sources, shared snippets — are staged beside it, so an include that resolves from the source tree resolves from the packet too.
+The goal works at the Maven subproject level: a topics-library module (one whose source root holds `topics/`) yields the corpus packet (with an entry-keyed topic-registry delta); an **assembly** module yields the projection of the diff onto the topics its `include::` lines name; an aggregator invocation produces a packet for every subproject able to generate one. The registry on each side is generated from the files on that side, as `idoc:topic-registry` would; no hand-kept registry file is read. Outputs land in `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the goal is self-contained, so a bare invocation on a fresh checkout produces a styled packet (branded typography when the pipeline fonts are unpacked; a bundled fallback theme otherwise). Files a marked topic pulls in by relative `include::` — diagram sources, shared snippets — are staged beside it, so an include that resolves from the source tree resolves from the packet too.
 
 Changes are first-class, named entities: author a `changes.yaml` beside the module pom (or at the repository root) with an id, title, one-line description, issue refs, and touched files per change — or, for commit-to-commit comparisons, let the goal derive entities by grouping the range’s commits on their `Refs:`/`Fixes:` trailers. The entities project into a Record of Changes, a Change Glossary, and an index-driven Change Index. Each change boundary also carries a STAMP endnote — Status (Active/Inactive), Time, Author, Module (topic domain), Path (branch) — collapsed per paragraph and tabulated in a Stamp Register.
 
-Design note: `dev-doc-diff-pipeline` in `ike-lab-documents/topics/`; epic [ike-issues#648](https://github.com/IKE-Network/ike-issues/issues/648)[4].
+Design note: `dev-doc-diff-pipeline` in `ike-lab-documents/topics/`; epic [ike-issues#648](https://github.com/IKE-Network/ike-issues/issues/648)[5].
+
+## [#topic-registry-idoc-topic-registry](#topic-registry-idoc-topic-registry)Topic registry (`idoc:topic-registry`)
+
+`idoc:topic-registry` is the topic registry’s build-time revision: the registry keeps the shape `IKE-TOPIC-REGISTRY.md` gives it and is now generated from the files on every run instead of typed by hand. The goal reads the `:topic-*:` attribute block, the anchor and the level-1 heading of every `.adoc` file under the module’s `src/docs/asciidoc` — plain line parsing, no AsciidoctorJ — and writes `target/topic-registry.yaml` in the shape `IKE-TOPIC-REGISTRY.md` gives the registry: `registry-version`, `generated`, `topic-count`, then `domains`, one per id prefix, each with its topics in id order (`id`, `file`, `title`, `type`, `keywords`, `status`, `char-count`, `related`, `summary`, and what the header adds: `provenance`, `anchor`, `header`, …​). After the domains come `assemblies` (files with `include::` lines, with their counts), `other-files`, and a findings list. The file that was kept by hand at `src/docs/asciidoc/topic-registry.yaml` is no longer maintained; neither this goal nor `idoc:diff` reads it, so it can be deleted once its values are moved into topic headers. What a header cannot say is not generated: domain titles and descriptions, assembly `sections` and `topic-refs`, and `dependencies` unless a header declares them. The same structure is printed to the build log as a directory tree. Symbolic links are never followed (a linked `.adoc` is a finding), files are parsed in parallel, and the YAML is written directly, so a 20,000-file module rebuilds in well under a second.
+
+```
+mvn idoc:topic-registry                                          # the module's src/docs/asciidoc
+mvn idoc:topic-registry -Dike.topic-registry.roots=a,b           # other roots, comma-separated
+mvn idoc:topic-registry -Dike.topic-registry.output=/tmp/r.yaml  # write elsewhere
+mvn idoc:topic-registry -Dike.topic-registry.add=topics/x/new.adoc   # add an ingested file, no rescan
+```
+
+With `-Dike.topic-registry.add=` (comma-separated files, relative to the module or absolute) the named files are parsed alone and merged into the existing registry: placed in their domain in id order, counted, and checked for a duplicate id against the ids the registry already holds. An entry for the same file is replaced, so re-ingesting a document is safe. Files that were deleted are not noticed this way; a run without `add` re-derives everything, and runs when no generated registry exists yet.
+
+Header findings — a missing required attribute, an anchor that does not match the id, an unknown type or status, the same id in two files — are reported in the registry and the log and do not fail the build. A module without `src/docs/asciidoc` is skipped with one line, so the goal can run from a reactor root. `-Dike.skip.topic-registry=true` skips it.
+
+The goal’s default phase is `validate`, so a POM that declares an execution of it gets a fresh registry on every build, `mvn clean install` included, and findings still do not fail that build:
+
+```
+<plugin>
+  <groupId>network.ike.docs</groupId>
+  <artifactId>ike-doc-maven-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>topic-registry</id>
+      <goals><goal>topic-registry</goal></goals>
+    </execution>
+  </executions>
+</plugin>
+```
 
 ## [#design-rationale](#design-rationale)Design rationale
 
-This plugin’s shape — regular plugin, no extensions, no custom packaging — is the result of a deliberate architectural decision documented in [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3] and the `dev-classifier-canonical-doc-shape` topic in `ike-lab-documents/topics/`. Brief summary, since the issue will eventually close and this page is what surviving teams will land on:
+This plugin’s shape — regular plugin, no extensions, no custom packaging — is the result of a deliberate architectural decision documented in [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[4] and the `dev-classifier-canonical-doc-shape` topic in `ike-lab-documents/topics/`. Brief summary, since the issue will eventually close and this page is what surviving teams will land on:
 
 ### [#why-no-extensions](#why-no-extensions)Why no extensions
 
 A plugin with `<extensions>true</extensions>` is loaded into the build extension realm at **project-load time** — during Maven’s “Scanning for projects” phase, before the Model Builder runs property interpolation. This means the plugin’s `<version>` in the POM cannot be a `${property}`; it must be a literal string.
 
-For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[5] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
+For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[6] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
 
 ### [#why-no-packagingike-doc-packaging](#why-no-packagingike-doc-packaging)Why no `<packaging>ike-doc</packaging>`
 
@@ -92,14 +125,14 @@ The classifier-canonical shape **is** fully Maven-canonical — every artifact d
 
 ### [#tracking](#tracking)Tracking
 
-- [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[3] — primary tracking issue (umbrella); subsumes #220, #236, #320.
-- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[6] — repo split that established the cross-repo boundary the extension realm was working around.
+- [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[4] — primary tracking issue (umbrella); subsumes #220, #236, #320.
+- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[7] — repo split that established the cross-repo boundary the extension realm was working around.
 - Design note: `dev-classifier-canonical-doc-shape` in `ike-lab-documents/topics/` (full Socratic discovery captured for posterity).
 
 ## [#see-also](#see-also)See also
 
 - [ike:* plugin in ike-tooling](https://ike.network/ike-tooling/ike-maven-plugin/)[2] — single-repo release orchestration.
 - [ws:* plugin in ike-platform](https://ike.network/ike-platform/ike-workspace-maven-plugin/)[1] — workspace-spanning goals.
-- [ike-docs reactor home](https://ike.network/ike-docs/)[7].
-- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[8].
-- [Issue tracker](https://github.com/IKE-Network/ike-issues)[9].
+- [ike-docs reactor home](https://ike.network/ike-docs/)[8].
+- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[9].
+- [Issue tracker](https://github.com/IKE-Network/ike-issues)[10].

@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DocDiffMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">DocDiffMojo.java</span></div><h1>DocDiffMojo.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import network.ike.docs.koncept.KonceptInlineMacro;
+import network.ike.docs.plugin.diff.AdocDiffMarker;
+import network.ike.docs.plugin.diff.ChangeManifest;
+import network.ike.docs.plugin.diff.ChangeStatus;
+import network.ike.docs.plugin.diff.GitSource;
+import network.ike.docs.plugin.diff.PacketAssembler;
+import network.ike.docs.plugin.diff.RegistryDelta;
+import network.ike.docs.plugin.diff.RegistryIndex;
+import network.ike.docs.plugin.diff.StampRegistry;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Attributes;
+import org.asciidoctor.AttributesBuilder;
+import org.asciidoctor.Options;
+import org.asciidoctor.SafeMode;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Generate and render a doc-diff &lt;em&gt;review packet&lt;/em&gt;: every changed
+ * AsciiDoc fragment between two refs (or a ref and the working tree),
+ * marked inline with {@code [.diff-ins]}/{@code [.diff-del]} roles and
+ * composed into a book with a cover summary, Record of Changes, Change
+ * Glossary, Change Index, registry delta, and assembly scaffolding
+ * diffs (ike-issues#648, #649, #650; design note
+ * {@code dev-doc-diff-pipeline} in ike-lab-documents).
+ *
+ * &lt;p&gt;The goal works at the Maven subproject level and adapts to the
+ * module it runs in:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;b&gt;Topics-library module&lt;/b&gt; (its source root holds a
+ *       {@code topics/} directory of fragments): the corpus packet —
+ *       every changed fragment, the full registry delta including each
+ *       assembly's membership changes, and the module's own
+ *       scaffolding. The registry on each side is generated from the
+ *       {@code :topic-*:} headers as they stand on that side, exactly
+ *       as {@code idoc:topic-registry} would; no hand-kept registry
+ *       file is read.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;Assembly module&lt;/b&gt;: the packet is the &lt;em&gt;projection&lt;/em&gt;
+ *       of the corpus diff onto this assembly — changed topics
+ *       intersected with the topics the assembly's {@code include::}
+ *       lines name (assembly id defaults to the artifactId, which by
+ *       convention is the module directory), plus the module's own
+ *       master-file scaffolding diff and a membership delta for just
+ *       this assembly. Topics deleted in range are reported by the
+ *       membership delta rather than projected.&lt;/li&gt;
+ *   &lt;li&gt;&lt;b&gt;Other modules&lt;/b&gt;: no source directory → skipped silently;
+ *       no changes → skipped with a note. Invoking the goal from the
+ *       aggregator therefore produces a packet for every subproject
+ *       able to generate one.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;Typical invocations:
+ *
+ * &lt;pre&gt;
+ *   mvn idoc:diff                                  # HEAD vs working tree
+ *   mvn idoc:diff -Dike.diff.from=v1.2.3           # tag vs working tree
+ *   mvn idoc:diff -Dike.diff.from=A -Dike.diff.to=B  # any two commits
+ * &lt;/pre&gt;
+ *
+ * &lt;p&gt;Change entities come from {@code changes.yaml} — looked up first
+ * beside the module pom, then at the repository work-tree root. For
+ * commit-to-commit comparisons without one, they are derived by
+ * grouping the range's commits on their {@code Refs:}/{@code Fixes:}
+ * trailers (ike-issues#652); a working-tree comparison without one gets
+ * a single synthetic &quot;uncommitted changes&quot; entity.
+ *
+ * &lt;p&gt;Both sides' content always renders through the &lt;em&gt;current&lt;/em&gt;
+ * toolchain — the diff is of knowledge, never of the renderer. Deleted
+ * fragments are listed on the cover and in the registry delta rather
+ * than rendered struck-through (v1 decision per #649). Diagrams render
+ * through the pipeline's Kroki recipe; a changed diagram carries its
+ * source delta and the previous rendering. Files a marked topic pulls
+ * in by relative {@code include::} — diagram sources, shared snippets —
+ * are staged beside it under the same flat naming and the include
+ * re-pointed, so an include that resolves from the source tree
+ * resolves from the packet too (ike-issues#1096).
+ *
+ * &lt;p&gt;Outputs under {@code target/doc-diff/}: {@code asciidoc/} (the
+ * generated packet sources), {@code html/}, and {@code pdf/} (prawn).
+ * Skip rendering with {@code -Dike.diff.render=false}.
+ *
+ * @see &lt;a href=&quot;https://github.com/IKE-Network/ike-issues/issues/648&quot;&gt;ike-issues#648&lt;/a&gt;
+ */
+@Mojo(name = &quot;diff&quot;)
+<span class="nc" id="L104">public class DocDiffMojo implements org.apache.maven.api.plugin.Mojo {</span>
+
+
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.plugin.Log log;
+
+    /**
+     * Access the Maven logger.
+     *
+     * @return the logger
+     */
+<span class="nc" id="L115">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+
+    /** The from side: any committish. */
+    @Parameter(property = &quot;ike.diff.from&quot;, defaultValue = &quot;HEAD&quot;)
+    String from;
+
+    /** The to side: any committish, or {@code WORKTREE} for the working tree. */
+    @Parameter(property = &quot;ike.diff.to&quot;, defaultValue = GitSource.WORKTREE)
+    String to;
+
+    /** The module's AsciiDoc source root. */
+    @Parameter(property = &quot;ike.diff.sourceDirectory&quot;,
+               defaultValue = &quot;${project.basedir}/src/docs/asciidoc&quot;)
+    File sourceDirectory;
+
+    /**
+     * Assembly id used for projection when this module is an assembly;
+     * by IKE naming convention this is the artifactId.
+     */
+    @Parameter(property = &quot;ike.diff.assemblyId&quot;, defaultValue = &quot;${project.artifactId}&quot;)
+    String assemblyId;
+
+    /**
+     * Optional comma-separated topic filter for a tighter packet —
+     * topic ids (resolved through the registry) or path suffixes. When
+     * set, only matching topics are marked; scaffolding and membership
+     * sections are unaffected. Meant for share-scoped excerpts; for a
+     * scope you reuse, register a small assembly instead and let the
+     * projection do this permanently.
+     */
+    @Parameter(property = &quot;ike.diff.topics&quot;)
+    String topics;
+
+    /** Authored change manifest; optional (see class javadoc). */
+    @Parameter(property = &quot;ike.diff.changesFile&quot;,
+               defaultValue = &quot;${project.basedir}/changes.yaml&quot;)
+    File changesFile;
+
+    /** Output root for generated sources and renders. */
+    @Parameter(property = &quot;ike.diff.outputDirectory&quot;,
+               defaultValue = &quot;${project.build.directory}/doc-diff&quot;)
+    File outputDirectory;
+
+    /**
+     * Prawn theme for the PDF render — by default the unpacked
+     * ike-doc-resources theme, which carries the diff roles.
+     */
+    @Parameter(property = &quot;ike.diff.pdfTheme&quot;,
+               defaultValue = &quot;${project.build.directory}/ike-doc-resources/theme/ike-default-theme.yml&quot;)
+    File pdfTheme;
+
+    /** Optional fonts directory passed to the PDF render when present. */
+    @Parameter(property = &quot;ike.diff.pdfFontsDir&quot;,
+               defaultValue = &quot;${project.build.directory}/fonts&quot;)
+    File pdfFontsDir;
+
+    /** Render HTML and PDF after generating sources. */
+    @Parameter(property = &quot;ike.diff.render&quot;, defaultValue = &quot;true&quot;)
+    boolean render;
+
+    /**
+     * Kroki diagram server URL — same property the pipeline render
+     * uses, so one override controls both goals.
+     */
+    @Parameter(property = &quot;ike.asciidoc.diagramServerUrl&quot;,
+               defaultValue = &quot;https://kroki.komet.sh&quot;)
+    String diagramServerUrl;
+
+    /** Title of the generated packet document. */
+    @Parameter(property = &quot;ike.diff.title&quot;,
+               defaultValue = &quot;Documentation Review Packet&quot;)
+    String title;
+
+    /**
+     * Stamp each change boundary with its provenance coordinate as a
+     * reusable endnote (ike-issues#656); auto-suppressed when the whole
+     * packet carries a single stamp, which is then stated on the cover.
+     */
+    @Parameter(property = &quot;ike.diff.stamps&quot;, defaultValue = &quot;true&quot;)
+    boolean stamps;
+
+    @Override
+    public void execute() throws MojoException {
+<span class="nc bnc" id="L198" title="All 4 branches missed.">        if (sourceDirectory == null || !sourceDirectory.isDirectory()) {</span>
+<span class="nc" id="L199">            getLog().info(&quot;idoc:diff: no src/docs/asciidoc in this module — skipping&quot;);</span>
+<span class="nc" id="L200">            return;</span>
+        }
+<span class="nc" id="L202">        try (GitSource git = GitSource.open(sourceDirectory.toPath().getParent())) {</span>
+<span class="nc" id="L203">            Path workTree = git.workTree();</span>
+<span class="nc" id="L204">            Path srcAbs = sourceDirectory.toPath().toAbsolutePath().normalize();</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">            if (!srcAbs.startsWith(workTree)) {</span>
+<span class="nc" id="L206">                throw new MojoException(&quot;sourceDirectory is outside the git work tree: &quot; + srcAbs);</span>
+            }
+<span class="nc" id="L208">            String srcRel = workTree.relativize(srcAbs).toString().replace(File.separatorChar, '/');</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            boolean corpus = !git.listFiles(to, srcRel + &quot;/topics&quot;, &quot;.adoc&quot;).isEmpty();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            String registryRoot = corpus ? srcRel : RegistryIndex.findRoot(git, to);</span>
+<span class="nc" id="L212">            RegistryIndex toIndex = RegistryIndex.load(git, to, registryRoot);</span>
+
+<span class="nc" id="L214">            List&lt;GitSource.Change&gt; own = git.changes(from, to, srcRel + &quot;/&quot;, &quot;.adoc&quot;);</span>
+<span class="nc bnc" id="L215" title="All 4 branches missed.">            String topicsPrefix = (corpus ? srcRel : registryRoot) == null</span>
+<span class="nc" id="L216">                    ? srcRel + &quot;/topics/&quot;</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                    : (corpus ? srcRel : registryRoot) + &quot;/topics/&quot;;</span>
+
+            List&lt;GitSource.Change&gt; markCandidates;
+            List&lt;GitSource.Change&gt; scaffoldCandidates;
+<span class="nc" id="L221">            String membershipDelta = null;</span>
+<span class="nc" id="L222">            String packetTitle = title;</span>
+
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            if (corpus) {</span>
+<span class="nc" id="L225">                markCandidates = own.stream()</span>
+<span class="nc" id="L226">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc" id="L227">                scaffoldCandidates = own.stream()</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">            } else if (registryRoot != null) {</span>
+<span class="nc" id="L230">                List&lt;String&gt; refs = toIndex.assemblyRefs(assemblyId);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                if (refs == null) {</span>
+<span class="nc" id="L232">                    getLog().warn(&quot;idoc:diff: assembly '&quot; + assemblyId</span>
+                            + &quot;' includes no topic from &quot; + registryRoot
+                            + &quot; — scaffolding-only packet&quot;);
+<span class="nc" id="L235">                    markCandidates = List.of();</span>
+                } else {
+<span class="nc" id="L237">                    Set&lt;String&gt; included = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">                    for (String ref : refs) {</span>
+<span class="nc" id="L239">                        String file = toIndex.topicFile(ref);</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                        if (file != null) {</span>
+<span class="nc" id="L241">                            included.add(registryRoot + &quot;/&quot; + file);</span>
+                        }
+<span class="nc" id="L243">                    }</span>
+<span class="nc" id="L244">                    markCandidates = git.changes(from, to, topicsPrefix, &quot;.adoc&quot;).stream()</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                            .filter(c -&gt; c.status() != ChangeStatus.DELETED)</span>
+<span class="nc" id="L246">                            .filter(c -&gt; included.contains(c.displayPath()))</span>
+<span class="nc" id="L247">                            .toList();</span>
+<span class="nc" id="L248">                    membershipDelta = RegistryIndex.membershipDelta(</span>
+<span class="nc" id="L249">                            RegistryIndex.load(git, from, registryRoot), toIndex,</span>
+                            from, to, assemblyId);
+<span class="nc" id="L251">                    packetTitle = title + &quot; — &quot; + assemblyId;</span>
+                }
+<span class="nc" id="L253">                scaffoldCandidates = own;</span>
+<span class="nc" id="L254">            } else {</span>
+<span class="nc" id="L255">                markCandidates = own.stream()</span>
+<span class="nc" id="L256">                        .filter(c -&gt; c.displayPath().startsWith(topicsPrefix)).toList();</span>
+<span class="nc" id="L257">                scaffoldCandidates = own.stream()</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                        .filter(c -&gt; !c.displayPath().startsWith(topicsPrefix)).toList();</span>
+            }
+
+<span class="nc bnc" id="L261" title="All 4 branches missed.">            if (topics != null &amp;&amp; !topics.isBlank()) {</span>
+<span class="nc" id="L262">                Set&lt;String&gt; wanted = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                for (String token : topics.split(&quot;,&quot;)) {</span>
+<span class="nc" id="L264">                    String t = token.strip();</span>
+<span class="nc" id="L265">                    String file = toIndex.topicFile(t);</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                    wanted.add(file != null ? registryRoot + &quot;/&quot; + file : t);</span>
+                }
+<span class="nc" id="L268">                markCandidates = markCandidates.stream()</span>
+<span class="nc" id="L269">                        .filter(c -&gt; wanted.stream().anyMatch(</span>
+<span class="nc bnc" id="L270" title="All 4 branches missed.">                                w -&gt; c.displayPath().equals(w) || c.displayPath().endsWith(w)))</span>
+<span class="nc" id="L271">                        .toList();</span>
+<span class="nc" id="L272">                getLog().info(&quot;idoc:diff topic filter active: &quot; + markCandidates.size()</span>
+                        + &quot; of the changed topics match &quot; + topics);
+            }
+
+<span class="nc" id="L276">            Path diffDir = outputDirectory.toPath().resolve(&quot;asciidoc/_diff&quot;);</span>
+<span class="nc" id="L277">            Files.createDirectories(diffDir);</span>
+
+<span class="nc" id="L279">            ChangeManifest manifest = resolveManifest(git, markCandidates, own);</span>
+
+            // Stamp registry (#656): one stamp per range commit plus one
+            // for uncommitted content; suppressed when only one exists.
+<span class="nc bnc" id="L283" title="All 2 branches missed.">            String stampToEnd = GitSource.WORKTREE.equals(to) ? &quot;HEAD&quot; : to;</span>
+<span class="nc" id="L284">            List&lt;GitSource.CommitMeta&gt; rangeCommits = git.commitsBetween(from, stampToEnd);</span>
+<span class="nc" id="L285">            Set&lt;String&gt; rangeIds = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L286">            rangeCommits.forEach(c -&gt; rangeIds.add(c.id()));</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            boolean hasUncommitted = GitSource.WORKTREE.equals(to)</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">                    &amp;&amp; !git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;).isEmpty();</span>
+<span class="nc" id="L289">            StampRegistry stampRegistry = new StampRegistry(rangeCommits, git.branch(),</span>
+<span class="nc" id="L290">                    git.userName(), java.time.LocalDate.now().toString(),</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                    from + &quot;..&quot; + (GitSource.WORKTREE.equals(to) ? &quot;worktree&quot; : to));</span>
+<span class="nc bnc" id="L292" title="All 4 branches missed.">            boolean stampsOn = stamps &amp;&amp; stampRegistry.multipleStampsPossible(hasUncommitted);</span>
+<span class="nc" id="L293">            List&lt;PacketAssembler.TopicEntry&gt; topics = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L294">            List&lt;String&gt; deleted = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L295">            List&lt;PacketAssembler.ScaffoldEntry&gt; scaffolds = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L296">            List&lt;List&lt;String&gt;&gt; anchorsByChange = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L297">            manifest.changes().forEach(c -&gt; anchorsByChange.add(new ArrayList&lt;&gt;()));</span>
+
+            // Include staging (#1096): a marked topic's include of another
+            // marked topic resolves to that topic's marked copy; anything
+            // else is staged once, on first sight, from the to side.
+<span class="nc" id="L302">            Set&lt;String&gt; markedPaths = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L303">            markCandidates.stream()</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                    .filter(c -&gt; c.status() != ChangeStatus.DELETED)</span>
+<span class="nc" id="L305">                    .forEach(c -&gt; markedPaths.add(c.newPath()));</span>
+<span class="nc" id="L306">            Map&lt;String, String&gt; stagedIncludes = new LinkedHashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            for (GitSource.Change c : markCandidates) {</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
+<span class="nc" id="L310">                    deleted.add(c.displayPath());</span>
+<span class="nc" id="L311">                    continue;</span>
+                }
+<span class="nc" id="L313">                List&lt;String&gt; newLines = lines(git.read(to, c.newPath()));</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.status() == ChangeStatus.ADDED</span>
+<span class="nc" id="L315">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
+<span class="nc" id="L316">                AdocDiffMarker.StampSource stampSource = null;</span>
+<span class="nc" id="L317">                String addedStampRef = null;</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">                if (stampsOn) {</span>
+<span class="nc" id="L319">                    String domain = domainOf(c.displayPath(), topicsPrefix);</span>
+<span class="nc" id="L320">                    List&lt;String&gt; lineIds = git.blameInRange(to, c.newPath(), rangeIds);</span>
+                    // blameInRange speaks precisely: a commit id, UNCOMMITTED,
+                    // or null (out of range / indexing gap) — null falls to the
+                    // coarse range stamp, never to uncommitted.
+<span class="nc" id="L324">                    boolean rangeEmpty = rangeCommits.isEmpty();</span>
+<span class="nc" id="L325">                    stampSource = new AdocDiffMarker.StampSource() {</span>
+                        @Override
+                        public String activeRef(int newLineIndex) {
+<span class="nc bnc" id="L328" title="All 4 branches missed.">                            String id = newLineIndex &gt;= 0 &amp;&amp; newLineIndex &lt; lineIds.size()</span>
+<span class="nc" id="L329">                                    ? lineIds.get(newLineIndex) : null;</span>
+<span class="nc" id="L330">                            return stampRegistry.footnote(id,</span>
+                                    StampRegistry.Status.ACTIVE, domain);
+                        }
+
+                        @Override
+                        public String inactiveRef() {
+                            // A pure deletion is attributable only coarsely:
+                            // to the range when one exists, else to the
+                            // working tree.
+<span class="nc" id="L339">                            return stampRegistry.footnote(</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                                    rangeEmpty ? GitSource.UNCOMMITTED : null,</span>
+                                    StampRegistry.Status.INACTIVE, domain);
+                        }
+                    };
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                    if (c.status() == ChangeStatus.ADDED) {</span>
+<span class="nc" id="L345">                        addedStampRef = stampRegistry.footnote(</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">                                lineIds.isEmpty() ? null : lineIds.get(0),</span>
+                                StampRegistry.Status.ACTIVE, domain);
+                    }
+                }
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                AdocDiffMarker.MarkResult result = c.status() == ChangeStatus.ADDED</span>
+<span class="nc" id="L351">                        ? AdocDiffMarker.markAdded(newLines, from, addedStampRef)</span>
+<span class="nc" id="L352">                        : AdocDiffMarker.mark(oldLines, newLines, stampSource);</span>
+<span class="nc" id="L353">                String outName = stagedName(c.displayPath(), topicsPrefix);</span>
+<span class="nc" id="L354">                List&lt;String&gt; owners = ownerTitles(manifest, c.displayPath(), anchorsByChange, result);</span>
+<span class="nc" id="L355">                List&lt;String&gt; marked = PacketAssembler.injectChangeTerms(result.lines(), owners);</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                if (!oldLines.isEmpty()) {</span>
+<span class="nc" id="L357">                    marked = AdocDiffMarker.withDiagramHistory(oldLines, marked);</span>
+                }
+<span class="nc" id="L359">                marked = stageIncludes(git, marked, c.newPath(), topicsPrefix,</span>
+                        markedPaths, stagedIncludes, diffDir);
+<span class="nc" id="L361">                Files.writeString(diffDir.resolve(outName),</span>
+<span class="nc" id="L362">                        String.join(&quot;\n&quot;, marked) + &quot;\n&quot;, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L363">                topics.add(new PacketAssembler.TopicEntry(c, outName, result));</span>
+<span class="nc" id="L364">                getLog().info(&quot;idoc:diff marked &quot; + c.displayPath() + &quot; (+&quot; + result.insWords()</span>
+<span class="nc" id="L365">                        + &quot;/-&quot; + result.delWords() + &quot;, &quot; + result.notes().size() + &quot; notes)&quot;);</span>
+<span class="nc" id="L366">            }</span>
+
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            for (GitSource.Change c : scaffoldCandidates) {</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">                if (c.status() == ChangeStatus.DELETED) {</span>
+<span class="nc" id="L370">                    deleted.add(c.displayPath());</span>
+<span class="nc" id="L371">                    continue;</span>
+                }
+<span class="nc bnc" id="L373" title="All 2 branches missed.">                List&lt;String&gt; oldLines = c.oldPath() == null</span>
+<span class="nc" id="L374">                        ? List.of() : lines(git.read(from, c.oldPath()));</span>
+<span class="nc" id="L375">                scaffolds.add(new PacketAssembler.ScaffoldEntry(c.displayPath(),</span>
+<span class="nc" id="L376">                        PacketAssembler.unifiedDiff(c.displayPath(), oldLines,</span>
+<span class="nc" id="L377">                                lines(git.read(to, c.newPath())))));</span>
+<span class="nc" id="L378">            }</span>
+
+            boolean hasRegistry;
+<span class="nc bnc" id="L381" title="All 2 branches missed.">            if (corpus) {</span>
+<span class="nc" id="L382">                hasRegistry = writeRegistryDelta(git, srcRel, toIndex, diffDir);</span>
+<span class="nc bnc" id="L383" title="All 4 branches missed.">            } else if (membershipDelta != null &amp;&amp; !membershipDelta.isEmpty()) {</span>
+<span class="nc" id="L384">                Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;),</span>
+                        membershipDelta, StandardCharsets.UTF_8);
+<span class="nc" id="L386">                hasRegistry = true;</span>
+            } else {
+<span class="nc" id="L388">                hasRegistry = false;</span>
+            }
+
+<span class="nc bnc" id="L391" title="All 8 branches missed.">            if (topics.isEmpty() &amp;&amp; deleted.isEmpty() &amp;&amp; scaffolds.isEmpty() &amp;&amp; !hasRegistry) {</span>
+<span class="nc" id="L392">                getLog().info(&quot;idoc:diff: no documentation changes between &quot; + from + &quot; and &quot;</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                        + (GitSource.WORKTREE.equals(to) ? &quot;the working tree&quot; : to)</span>
+                        + &quot; for this module — skipping packet&quot;);
+<span class="nc" id="L395">                return;</span>
+            }
+
+<span class="nc bnc" id="L398" title="All 4 branches missed.">            String singleStampLine = (stamps &amp;&amp; !stampsOn)</span>
+<span class="nc" id="L399">                    ? stampRegistry.singleStampLine(&quot;(packet)&quot;) : null;</span>
+<span class="nc" id="L400">            String master = PacketAssembler.masterDoc(packetTitle, from,</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">                    GitSource.WORKTREE.equals(to) ? &quot;working tree&quot; : to,</span>
+                    topics, deleted, manifest, anchorsByChange, hasRegistry, scaffolds,
+<span class="nc" id="L403">                    singleStampLine, stampRegistry.usedStamps());</span>
+<span class="nc" id="L404">            Path masterFile = outputDirectory.toPath().resolve(&quot;asciidoc/review-packet.adoc&quot;);</span>
+<span class="nc" id="L405">            Files.writeString(masterFile, master, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L406">            getLog().info(&quot;idoc:diff packet: &quot; + topics.size() + &quot; marked topics, &quot;</span>
+<span class="nc" id="L407">                    + deleted.size() + &quot; deleted, &quot; + scaffolds.size()</span>
+<span class="nc" id="L408">                    + &quot; scaffolding diffs, &quot; + manifest.changes().size() + &quot; change entities&quot;</span>
+<span class="nc bnc" id="L409" title="All 4 branches missed.">                    + (corpus ? &quot; [corpus]&quot; : membershipDelta != null</span>
+<span class="nc" id="L410">                            ? &quot; [assembly &quot; + assemblyId + &quot;]&quot; : &quot;&quot;));</span>
+
+<span class="nc bnc" id="L412" title="All 2 branches missed.">            if (render) {</span>
+<span class="nc" id="L413">                renderPacket(masterFile);</span>
+            }
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        } catch (IOException e) {</span>
+<span class="nc" id="L416">            throw new MojoException(&quot;idoc:diff failed: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L417">        } catch (UncheckedIOException e) {</span>
+<span class="nc" id="L418">            throw new MojoException(&quot;idoc:diff failed: &quot; + e.getCause().getMessage(), e.getCause());</span>
+<span class="nc" id="L419">        }</span>
+<span class="nc" id="L420">    }</span>
+
+    /**
+     * The flat file name a repository path takes under {@code _diff/}:
+     * the path below the topics prefix with its separators folded to
+     * dashes — the same rule for a marked topic and for a file it
+     * includes, so an include of a marked topic lands on the marked
+     * copy. A path outside the topics tree folds its whole
+     * repository-relative form, which keeps it clear of topic names.
+     *
+     * @param path         the repository-relative path
+     * @param topicsPrefix the topics tree prefix
+     * @return the staged file name
+     */
+    private static String stagedName(String path, String topicsPrefix) {
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        String rel = path.startsWith(topicsPrefix) ? path.substring(topicsPrefix.length()) : path;</span>
+<span class="nc" id="L436">        return rel.replace('/', '-');</span>
+    }
+
+    /**
+     * Re-point a staged fragment's relative includes at staged copies
+     * and write any copy not yet present (ike-issues#1096). Each target
+     * is read from the to side, staged under its
+     * {@link #stagedName flat name}, and scanned for includes of its
+     * own before it is written, so nested includes stage too. A target
+     * that is itself a marked topic is only re-pointed — its marked
+     * copy is the staged file. A target absent on the to side is
+     * reported and its include left as written, so the render names
+     * the source path the author will recognise.
+     *
+     * @param git            repository access
+     * @param lines          the fragment as it will be written
+     * @param sourcePath     the fragment's repository-relative path
+     * @param topicsPrefix   the topics tree prefix
+     * @param markedPaths    to-side paths of every marked topic
+     * @param staged         repository path → staged name of every
+     *                       include written so far (updated)
+     * @param diffDir        the staging directory
+     * @return the fragment with its includes re-pointed
+     * @throws IOException on repository access or write failure
+     */
+    private List&lt;String&gt; stageIncludes(GitSource git, List&lt;String&gt; lines, String sourcePath,
+                                       String topicsPrefix, Set&lt;String&gt; markedPaths,
+                                       Map&lt;String, String&gt; staged, Path diffDir)
+            throws IOException {
+<span class="nc" id="L465">        Map&lt;String, String&gt; pending = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L466">        PacketAssembler.IncludeRewrite rewrite = PacketAssembler.rewriteIncludes(</span>
+                lines, sourcePath, path -&gt; {
+<span class="nc" id="L468">                    String name = stagedName(path, topicsPrefix);</span>
+<span class="nc bnc" id="L469" title="All 4 branches missed.">                    if (markedPaths.contains(path) || staged.containsKey(path)</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">                            || pending.containsKey(path)) {</span>
+<span class="nc" id="L471">                        return name;</span>
+                    }
+                    String text;
+                    try {
+<span class="nc" id="L475">                        text = git.read(to, path);</span>
+<span class="nc" id="L476">                    } catch (IOException e) {</span>
+<span class="nc" id="L477">                        throw new UncheckedIOException(e);</span>
+<span class="nc" id="L478">                    }</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">                    if (text == null) {</span>
+<span class="nc" id="L480">                        getLog().warn(&quot;idoc:diff: &quot; + sourcePath + &quot; includes &quot; + path</span>
+                                + &quot;, which is absent on the to side — include left as written&quot;);
+<span class="nc" id="L482">                        return null;</span>
+                    }
+<span class="nc" id="L484">                    pending.put(path, text);</span>
+<span class="nc" id="L485">                    return name;</span>
+                });
+<span class="nc bnc" id="L487" title="All 2 branches missed.">        for (Map.Entry&lt;String, String&gt; e : pending.entrySet()) {</span>
+<span class="nc" id="L488">            String path = e.getKey();</span>
+<span class="nc" id="L489">            String name = stagedName(path, topicsPrefix);</span>
+            // Registered before the recursive scan so an include cycle
+            // terminates.
+<span class="nc" id="L492">            staged.put(path, name);</span>
+<span class="nc" id="L493">            List&lt;String&gt; nested = stageIncludes(git, lines(e.getValue()), path, topicsPrefix,</span>
+                    markedPaths, staged, diffDir);
+<span class="nc" id="L495">            Files.writeString(diffDir.resolve(name), String.join(&quot;\n&quot;, nested),</span>
+                    StandardCharsets.UTF_8);
+<span class="nc" id="L497">            getLog().info(&quot;idoc:diff staged include &quot; + path + &quot; -&gt; _diff/&quot; + name);</span>
+<span class="nc" id="L498">        }</span>
+<span class="nc" id="L499">        return rewrite.lines();</span>
+    }
+
+    /**
+     * The topic's domain — the STAMP module analogue — from its path
+     * under the topics prefix.
+     *
+     * @param displayPath  the repository-relative topic path
+     * @param topicsPrefix the topics tree prefix
+     * @return the domain directory name, or {@code &quot;(doc)&quot;} when the
+     *         path has no domain segment
+     */
+    private static String domainOf(String displayPath, String topicsPrefix) {
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        if (!displayPath.startsWith(topicsPrefix)) {</span>
+<span class="nc" id="L513">            return &quot;(doc)&quot;;</span>
+        }
+<span class="nc" id="L515">        String rest = displayPath.substring(topicsPrefix.length());</span>
+<span class="nc" id="L516">        int slash = rest.indexOf('/');</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">        return slash &gt; 0 ? rest.substring(0, slash) : &quot;(doc)&quot;;</span>
+    }
+
+    private ChangeManifest resolveManifest(GitSource git, List&lt;GitSource.Change&gt; marked,
+                                           List&lt;GitSource.Change&gt; own) throws IOException {
+<span class="nc bnc" id="L522" title="All 4 branches missed.">        if (changesFile != null &amp;&amp; changesFile.isFile()) {</span>
+<span class="nc" id="L523">            return ChangeManifest.load(changesFile.toPath());</span>
+        }
+<span class="nc" id="L525">        Path repoManifest = git.workTree().resolve(&quot;changes.yaml&quot;);</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">        if (Files.isRegularFile(repoManifest)) {</span>
+<span class="nc" id="L527">            return ChangeManifest.load(repoManifest);</span>
+        }
+<span class="nc bnc" id="L529" title="All 2 branches missed.">        if (!GitSource.WORKTREE.equals(to)) {</span>
+<span class="nc" id="L530">            return ChangeManifest.derive(git.commitsBetween(from, to));</span>
+        }
+        // Working-tree review without an authored manifest: derive entities
+        // from any committed part of the range (from..HEAD), then append one
+        // synthetic entity for the uncommitted remainder (HEAD..WORKTREE).
+<span class="nc" id="L535">        List&lt;GitSource.CommitMeta&gt; committed = git.commitsBetween(from, &quot;HEAD&quot;);</span>
+<span class="nc" id="L536">        Set&lt;String&gt; uncommitted = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L537">        git.changes(&quot;HEAD&quot;, GitSource.WORKTREE, &quot;&quot;, &quot;.adoc&quot;)</span>
+<span class="nc" id="L538">                .forEach(c -&gt; uncommitted.add(c.displayPath()));</span>
+<span class="nc bnc" id="L539" title="All 4 branches missed.">        if (committed.isEmpty() &amp;&amp; uncommitted.isEmpty()) {</span>
+<span class="nc" id="L540">            Set&lt;String&gt; files = new LinkedHashSet&lt;&gt;();</span>
+<span class="nc" id="L541">            marked.forEach(c -&gt; files.add(c.displayPath()));</span>
+<span class="nc" id="L542">            own.forEach(c -&gt; files.add(c.displayPath()));</span>
+<span class="nc" id="L543">            uncommitted.addAll(files);</span>
+        }
+<span class="nc" id="L545">        Path yaml = Files.createTempFile(&quot;doc-diff-synthetic&quot;, &quot;.yaml&quot;);</span>
+        try {
+<span class="nc" id="L547">            StringBuilder sb = new StringBuilder(&quot;changes:\n&quot;);</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">            if (!uncommitted.isEmpty()) {</span>
+<span class="nc" id="L549">                sb.append(&quot;  - id: chg-uncommitted\n&quot;)</span>
+<span class="nc" id="L550">                        .append(&quot;    title: \&quot;Uncommitted changes\&quot;\n&quot;)</span>
+<span class="nc" id="L551">                        .append(&quot;    description: &gt;\n&quot;)</span>
+<span class="nc" id="L552">                        .append(&quot;      Working-tree changes not yet committed on top of HEAD.\n&quot;)</span>
+<span class="nc" id="L553">                        .append(&quot;    files:\n&quot;);</span>
+<span class="nc" id="L554">                uncommitted.forEach(f -&gt; sb.append(&quot;      - &quot;).append(f).append('\n'));</span>
+            }
+<span class="nc" id="L556">            Files.writeString(yaml, sb.toString(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L557">            ChangeManifest synthetic = ChangeManifest.load(yaml);</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">            if (committed.isEmpty()) {</span>
+<span class="nc" id="L559">                return synthetic;</span>
+            }
+<span class="nc" id="L561">            List&lt;ChangeManifest.ChangeEntity&gt; merged =</span>
+<span class="nc" id="L562">                    new ArrayList&lt;&gt;(ChangeManifest.derive(committed).changes());</span>
+<span class="nc" id="L563">            merged.addAll(synthetic.changes());</span>
+<span class="nc" id="L564">            return ChangeManifest.of(merged);</span>
+        } finally {
+<span class="nc" id="L566">            Files.deleteIfExists(yaml);</span>
+        }
+    }
+
+    private List&lt;String&gt; ownerTitles(ChangeManifest manifest, String path,
+                                     List&lt;List&lt;String&gt;&gt; anchorsByChange,
+                                     AdocDiffMarker.MarkResult result) {
+<span class="nc" id="L573">        List&lt;String&gt; owners = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L574">        String anchor = PacketAssembler.anchorOf(result.lines());</span>
+<span class="nc" id="L575">        List&lt;ChangeManifest.ChangeEntity&gt; changes = manifest.changes();</span>
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        for (int i = 0; i &lt; changes.size(); i++) {</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">            if (changes.get(i).files().contains(path)) {</span>
+<span class="nc" id="L578">                owners.add(changes.get(i).title());</span>
+<span class="nc bnc" id="L579" title="All 2 branches missed.">                if (anchor != null) {</span>
+<span class="nc" id="L580">                    anchorsByChange.get(i).add(anchor);</span>
+                }
+            }
+        }
+<span class="nc" id="L584">        return owners;</span>
+    }
+
+    private boolean writeRegistryDelta(GitSource git, String srcRel, RegistryIndex toIndex,
+                                       Path diffDir) throws IOException {
+<span class="nc" id="L589">        String delta = new RegistryDelta(from, to)</span>
+<span class="nc" id="L590">                .render(RegistryIndex.load(git, from, srcRel), toIndex);</span>
+<span class="nc bnc" id="L591" title="All 2 branches missed.">        if (delta.isEmpty()) {</span>
+<span class="nc" id="L592">            return false;</span>
+        }
+<span class="nc" id="L594">        Files.writeString(diffDir.resolve(&quot;registry-delta.adoc&quot;), delta, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L595">        return true;</span>
+    }
+
+    private void renderPacket(Path masterFile) {
+<span class="nc" id="L599">        try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {</span>
+<span class="nc" id="L600">            asciidoctor.registerLogHandler(new AsciidocMojo.MavenLogHandler(getLog()));</span>
+<span class="nc" id="L601">            asciidoctor.requireLibrary(&quot;asciidoctor-diagram&quot;);</span>
+<span class="nc" id="L602">            asciidoctor.javaExtensionRegistry().inlineMacro(KonceptInlineMacro.class);</span>
+
+<span class="nc" id="L604">            Path htmlDir = outputDirectory.toPath().resolve(&quot;html&quot;);</span>
+<span class="nc" id="L605">            convert(asciidoctor, masterFile, &quot;html5&quot;, htmlDir, baseAttributes().build());</span>
+
+<span class="nc" id="L607">            AttributesBuilder pdfAttrs = baseAttributes();</span>
+<span class="nc" id="L608">            Path theme = resolvePdfTheme();</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">            if (theme != null) {</span>
+<span class="nc" id="L610">                pdfAttrs.attribute(&quot;pdf-theme&quot;, theme.toAbsolutePath().toString());</span>
+            }
+<span class="nc bnc" id="L612" title="All 4 branches missed.">            if (pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory()) {</span>
+<span class="nc" id="L613">                pdfAttrs.attribute(&quot;pdf-fontsdir&quot;, pdfFontsDir.getAbsolutePath());</span>
+            }
+<span class="nc" id="L615">            Path pdfDir = outputDirectory.toPath().resolve(&quot;pdf&quot;);</span>
+<span class="nc" id="L616">            convert(asciidoctor, masterFile, &quot;pdf&quot;, pdfDir, pdfAttrs.build());</span>
+        }
+<span class="nc" id="L618">    }</span>
+
+    /**
+     * Resolve the prawn theme for this run, making the goal
+     * self-contained (ike-issues#649): an explicit/unpacked theme wins;
+     * otherwise the branded theme is extracted from the plugin's own
+     * classpath when the pipeline fonts are present; otherwise a
+     * bundled fallback theme (stock typography, IKE diff roles) keeps a
+     * bare {@code mvn idoc:diff} fully styled on a fresh checkout.
+     *
+     * @return the theme file to use, or {@code null} when even the
+     *         fallback cannot be provisioned
+     */
+    private Path resolvePdfTheme() {
+<span class="nc bnc" id="L632" title="All 4 branches missed.">        if (pdfTheme != null &amp;&amp; pdfTheme.isFile()) {</span>
+<span class="nc" id="L633">            return pdfTheme.toPath();</span>
+        }
+<span class="nc bnc" id="L635" title="All 4 branches missed.">        boolean fontsAvailable = pdfFontsDir != null &amp;&amp; pdfFontsDir.isDirectory();</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">        String resource = fontsAvailable</span>
+<span class="nc" id="L637">                ? &quot;/theme/ike-default-theme.yml&quot;</span>
+<span class="nc" id="L638">                : &quot;/diff/diff-fallback-theme.yml&quot;;</span>
+        try {
+<span class="nc" id="L640">            Path dir = outputDirectory.toPath().resolve(&quot;.theme&quot;);</span>
+<span class="nc" id="L641">            Files.createDirectories(dir);</span>
+<span class="nc" id="L642">            Path target = dir.resolve(&quot;ike-default-theme.yml&quot;);</span>
+<span class="nc" id="L643">            try (InputStream in = DocDiffMojo.class.getResourceAsStream(resource)) {</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">                if (in == null) {</span>
+<span class="nc" id="L645">                    getLog().warn(&quot;idoc:diff: theme resource &quot; + resource</span>
+                            + &quot; not on plugin classpath — PDF renders unthemed&quot;);
+<span class="nc" id="L647">                    return null;</span>
+                }
+<span class="nc" id="L649">                Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">            }</span>
+<span class="nc bnc" id="L651" title="All 2 branches missed.">            getLog().info(&quot;idoc:diff theme: &quot; + (fontsAvailable</span>
+<span class="nc" id="L652">                    ? &quot;branded (self-provisioned from ike-doc-resources)&quot;</span>
+<span class="nc" id="L653">                    : &quot;fallback (stock typography + diff roles; run after a &quot;</span>
+                            + &quot;pipeline build for branded output)&quot;));
+<span class="nc" id="L655">            return target;</span>
+<span class="nc" id="L656">        } catch (IOException e) {</span>
+<span class="nc" id="L657">            getLog().warn(&quot;idoc:diff: theme provisioning failed — PDF renders unthemed: &quot;</span>
+<span class="nc" id="L658">                    + e.getMessage());</span>
+<span class="nc" id="L659">            return null;</span>
+        }
+    }
+
+    private AttributesBuilder baseAttributes() {
+<span class="nc" id="L664">        return Attributes.builder()</span>
+<span class="nc" id="L665">                .attribute(&quot;toc&quot;, &quot;left&quot;)</span>
+<span class="nc" id="L666">                .attribute(&quot;toclevels&quot;, &quot;1&quot;)</span>
+<span class="nc" id="L667">                .attribute(&quot;icons&quot;, &quot;font&quot;)</span>
+<span class="nc" id="L668">                .attribute(&quot;source-highlighter&quot;, &quot;rouge&quot;)</span>
+<span class="nc" id="L669">                .attribute(&quot;allow-uri-read&quot;, &quot;true&quot;)</span>
+                // Diagram rendering — same recipe as the pipeline render
+                // (kroki server, inline SVG, no PlantUML preprocessing).
+<span class="nc" id="L672">                .attribute(&quot;diagram-server-url&quot;, diagramServerUrl)</span>
+<span class="nc" id="L673">                .attribute(&quot;diagram-server-type&quot;, &quot;kroki_io&quot;)</span>
+<span class="nc" id="L674">                .attribute(&quot;diagram-format&quot;, &quot;svg&quot;)</span>
+<span class="nc" id="L675">                .attribute(&quot;diagram-svg-type&quot;, &quot;inline&quot;)</span>
+<span class="nc" id="L676">                .attribute(&quot;plantuml-preprocess&quot;, &quot;false&quot;)</span>
+<span class="nc" id="L677">                .attribute(&quot;preprocess&quot;, &quot;false&quot;);</span>
+    }
+
+    private void convert(Asciidoctor asciidoctor, Path masterFile, String backend,
+                         Path outDir, Attributes attrs) {
+        try {
+<span class="nc" id="L683">            Files.createDirectories(outDir);</span>
+<span class="nc" id="L684">            Options options = Options.builder()</span>
+<span class="nc" id="L685">                    .backend(backend)</span>
+<span class="nc" id="L686">                    .safe(SafeMode.UNSAFE)</span>
+<span class="nc" id="L687">                    .baseDir(masterFile.getParent().toFile())</span>
+<span class="nc" id="L688">                    .toDir(outDir.toFile())</span>
+<span class="nc" id="L689">                    .mkDirs(true)</span>
+<span class="nc" id="L690">                    .standalone(true)</span>
+<span class="nc" id="L691">                    .attributes(attrs)</span>
+<span class="nc" id="L692">                    .build();</span>
+<span class="nc" id="L693">            asciidoctor.convertFile(masterFile.toFile(), options);</span>
+<span class="nc" id="L694">            getLog().info(&quot;idoc:diff rendered &quot; + backend + &quot; -&gt; &quot; + outDir);</span>
+<span class="nc" id="L695">        } catch (RuntimeException | IOException e) {</span>
+<span class="nc" id="L696">            getLog().error(&quot;idoc:diff &quot; + backend + &quot; render failed — packet sources remain at &quot;</span>
+<span class="nc" id="L697">                    + masterFile.getParent() + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L698">        }</span>
+<span class="nc" id="L699">    }</span>
+
+    private static List&lt;String&gt; lines(String text) {
+<span class="nc bnc" id="L702" title="All 2 branches missed.">        return text == null ? List.of() : Arrays.asList(text.split(&quot;\n&quot;, -1));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

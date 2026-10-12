@@ -1,64 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistryIndex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.diff</a> &gt; <span class="el_source">RegistryIndex.java</span></div><h1>RegistryIndex.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.diff;
 
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
+import network.ike.docs.plugin.registry.TopicHeader;
+import network.ike.docs.plugin.registry.TopicRegistry;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * One side's view of the IKE topic registry: topic id → source file and
- * assembly id → flattened topic-refs. This is what lets an assembly
- * module's {@code idoc:diff} run &lt;em&gt;project&lt;/em&gt; the corpus diff onto
- * its own membership (ike-issues#649 scoping decision) — the registry,
- * not include-line parsing, is the source of truth for which topics an
- * assembly contains.
+ * One side's topic registry, generated from the files as they stand on
+ * that side of a doc-diff comparison: topics grouped by domain (each entry
+ * in the shape {@code idoc:topic-registry} writes, built from the
+ * {@code :topic-*:} header), and each assembly's topic membership read
+ * from its {@code include::} lines. No hand-kept registry file is read.
  *
- * &lt;p&gt;Also hosts the registry YAML shape helpers shared with
- * {@link RegistryDelta}.
+ * &lt;p&gt;This is what lets an assembly module's {@code idoc:diff} run
+ * &lt;em&gt;project&lt;/em&gt; the corpus diff onto its own membership
+ * (ike-issues#649), and what {@link RegistryDelta} compares.
  */
 public final class RegistryIndex {
 
+    /** An {@code include::} directive's target, up to the attribute list. */
+<span class="fc" id="L29">    private static final Pattern INCLUDE = Pattern.compile(&quot;^include::([^\\[]+)\\[&quot;, Pattern.MULTILINE);</span>
+
+    /** A leading attribute reference such as {@code {topicsdir}/}. */
+<span class="fc" id="L32">    private static final Pattern LEADING_ATTRIBUTE = Pattern.compile(&quot;^\\{[^}]+\\}/&quot;);</span>
+
+    private static final String SOURCE_ROOT = &quot;src/docs/asciidoc&quot;;
+
+    private final Map&lt;String, Map&lt;String, Map&lt;String, Object&gt;&gt;&gt; topicsByDomain;
     private final Map&lt;String, String&gt; topicFilesById;
     private final Map&lt;String, List&lt;String&gt;&gt; assemblyRefsById;
 
-    private RegistryIndex(Map&lt;String, String&gt; topicFilesById,
-<span class="nc" id="L30">                          Map&lt;String, List&lt;String&gt;&gt; assemblyRefsById) {</span>
-<span class="nc" id="L31">        this.topicFilesById = topicFilesById;</span>
-<span class="nc" id="L32">        this.assemblyRefsById = assemblyRefsById;</span>
-<span class="nc" id="L33">    }</span>
+    private RegistryIndex(Map&lt;String, Map&lt;String, Map&lt;String, Object&gt;&gt;&gt; topicsByDomain,
+                          Map&lt;String, String&gt; topicFilesById,
+<span class="fc" id="L42">                          Map&lt;String, List&lt;String&gt;&gt; assemblyRefsById) {</span>
+<span class="fc" id="L43">        this.topicsByDomain = topicsByDomain;</span>
+<span class="fc" id="L44">        this.topicFilesById = topicFilesById;</span>
+<span class="fc" id="L45">        this.assemblyRefsById = assemblyRefsById;</span>
+<span class="fc" id="L46">    }</span>
 
     /**
-     * Load the registry as it stands on one side of a comparison.
+     * Generate the registry as it stands on one side of a comparison.
      *
      * @param git          repository access
      * @param ref          the side to read ({@link GitSource#WORKTREE}
-     *                     or a committish) — projections use the to
-     *                     side, so membership reflects the state under
-     *                     review
-     * @param registryRoot repository-relative source root that contains
-     *                     {@code topic-registry.yaml} and
-     *                     {@code topic-registry/}
-     * @return the index (empty maps when no registry exists on that side)
+     *                     or a committish)
+     * @param registryRoot repository-relative source root of the topic
+     *                     library (the directory holding {@code topics/}),
+     *                     or {@code null} when the repository has none
+     * @return the index (empty when there is no topic library on that side)
      * @throws IOException on repository access failure
      */
     public static RegistryIndex load(GitSource git, String ref, String registryRoot)
             throws IOException {
-<span class="nc" id="L51">        Map&lt;String, String&gt; topics = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        for (String path : git.listYaml(ref, registryRoot + &quot;/topic-registry&quot;)) {</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (path.endsWith(&quot;/assemblies.yaml&quot;)) {</span>
-<span class="nc" id="L54">                continue;</span>
+<span class="fc" id="L62">        Map&lt;String, Map&lt;String, Map&lt;String, Object&gt;&gt;&gt; domains = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L63">        Map&lt;String, String&gt; files = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L64">        Map&lt;String, List&lt;String&gt;&gt; assemblies = new LinkedHashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (registryRoot == null) {</span>
+<span class="nc" id="L66">            return new RegistryIndex(domains, files, assemblies);</span>
+        }
+<span class="fc" id="L68">        String prefix = registryRoot + &quot;/&quot;;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (String path : git.listFiles(ref, registryRoot, &quot;.adoc&quot;)) {</span>
+<span class="fc" id="L70">            String relative = path.substring(prefix.length());</span>
+<span class="fc" id="L71">            TopicHeader header = TopicHeader.parse(relative, git.read(ref, path));</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">            if (!header.topic()) {</span>
+<span class="nc" id="L73">                continue;</span>
             }
-<span class="nc" id="L56">            topicsOf(parse(git.read(ref, path))).forEach((id, entry) -&gt;</span>
-<span class="nc" id="L57">                    topics.put(id, String.valueOf(entry.get(&quot;file&quot;))));</span>
-<span class="nc" id="L58">        }</span>
-<span class="nc" id="L59">        Map&lt;String, List&lt;String&gt;&gt; assemblies =</span>
-<span class="nc" id="L60">                assemblyRefsOf(parse(git.read(ref, registryRoot + &quot;/topic-registry/assemblies.yaml&quot;)));</span>
-<span class="nc" id="L61">        return new RegistryIndex(topics, assemblies);</span>
+<span class="fc" id="L75">            Map&lt;String, Object&gt; entry = TopicRegistry.topicEntry(header, relative);</span>
+            // Measured on every edit; the packet already shows content changes.
+<span class="fc" id="L77">            entry.remove(&quot;char-count&quot;);</span>
+<span class="fc" id="L78">            domains.computeIfAbsent(TopicRegistry.domainOf(header.id()), k -&gt; new LinkedHashMap&lt;&gt;())</span>
+<span class="fc" id="L79">                    .put(header.id(), entry);</span>
+<span class="fc" id="L80">            files.put(header.id(), relative);</span>
+<span class="fc" id="L81">        }</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (String path : git.listFiles(ref, &quot;&quot;, &quot;.adoc&quot;)) {</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (path.startsWith(prefix)) {</span>
+<span class="fc" id="L84">                continue;</span>
+            }
+<span class="fc" id="L86">            List&lt;String&gt; refs = resolve(includeTargets(git.read(ref, path)), files);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">            if (!refs.isEmpty()) {</span>
+<span class="fc" id="L88">                List&lt;String&gt; merged = assemblies.computeIfAbsent(assemblyIdOf(path), k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                refs.stream().filter(r -&gt; !merged.contains(r)).forEach(merged::add);</span>
+            }
+<span class="fc" id="L91">        }</span>
+<span class="fc" id="L92">        return new RegistryIndex(domains, files, assemblies);</span>
     }
 
     /**
@@ -70,134 +101,167 @@ public final class RegistryIndex {
      *         id is unknown
      */
     public String topicFile(String topicId) {
-<span class="nc" id="L73">        return topicFilesById.get(topicId);</span>
+<span class="fc" id="L104">        return topicFilesById.get(topicId);</span>
     }
 
     /**
-     * An assembly's flattened topic-refs, in document order.
+     * An assembly's topic membership, in include order.
      *
-     * @param assemblyId the assembly id (by IKE naming convention equal
-     *                   to the module's artifactId)
-     * @return the topic ids, or {@code null} when the assembly is not
-     *         registered
+     * @param assemblyId the assembly id: by IKE naming convention the
+     *                   module directory (and artifactId) holding the
+     *                   assembly's {@code src/docs/asciidoc}
+     * @return the topic ids, or {@code null} when no file of that
+     *         assembly includes a topic
      */
     public List&lt;String&gt; assemblyRefs(String assemblyId) {
-<span class="nc" id="L85">        return assemblyRefsById.get(assemblyId);</span>
+<span class="fc" id="L117">        return assemblyRefsById.get(assemblyId);</span>
     }
 
     /**
-     * Render one assembly's membership delta (topic-refs added and
-     * removed between two sides) as a small registry-delta partial for
-     * an assembly-projection packet.
+     * Topic entries grouped by domain, domains sorted, topics in file order.
      *
-     * @param git          repository access
-     * @param fromRef      the from side
-     * @param toRef        the to side (may be {@link GitSource#WORKTREE})
-     * @param registryRoot the registry source root
-     * @param assemblyId   the assembly to report on
+     * @return the entries keyed by domain, then by topic id
+     */
+    Map&lt;String, Map&lt;String, Map&lt;String, Object&gt;&gt;&gt; topicsByDomain() {
+<span class="fc" id="L126">        return topicsByDomain;</span>
+    }
+
+    /**
+     * Every assembly's topic membership.
+     *
+     * @return topic ids keyed by assembly id
+     */
+    Map&lt;String, List&lt;String&gt;&gt; assemblies() {
+<span class="fc" id="L135">        return assemblyRefsById;</span>
+    }
+
+    /**
+     * Render one assembly's membership delta (topics added to and removed
+     * from its includes between two sides) as a small registry-delta
+     * partial for an assembly-projection packet.
+     *
+     * @param oldIndex   the from side
+     * @param newIndex   the to side
+     * @param fromRef    the from-side ref, for the text
+     * @param toRef      the to-side ref (may be {@link GitSource#WORKTREE})
+     * @param assemblyId the assembly to report on
      * @return the partial's text with a level-1 title, or an empty
      *         string when this assembly's membership is unchanged
+     */
+    public static String membershipDelta(RegistryIndex oldIndex, RegistryIndex newIndex,
+                                         String fromRef, String toRef, String assemblyId) {
+<span class="fc" id="L153">        List&lt;String&gt; oldRefs = oldIndex.assemblyRefsById.getOrDefault(assemblyId, List.of());</span>
+<span class="fc" id="L154">        List&lt;String&gt; newRefs = newIndex.assemblyRefsById.getOrDefault(assemblyId, List.of());</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        List&lt;String&gt; plus = newRefs.stream().filter(r -&gt; !oldRefs.contains(r)).toList();</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        List&lt;String&gt; minus = oldRefs.stream().filter(r -&gt; !newRefs.contains(r)).toList();</span>
+<span class="pc bpc" id="L157" title="3 of 4 branches missed.">        if (plus.isEmpty() &amp;&amp; minus.isEmpty()) {</span>
+<span class="nc" id="L158">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L160">        StringBuilder sb = new StringBuilder(&quot;[[registry-delta]]\n= Membership Delta — &quot;)</span>
+<span class="fc" id="L161">                .append(assemblyId).append(&quot;\n\nTopics included by this assembly changed between &quot;)</span>
+<span class="fc" id="L162">                .append(fromRef).append(&quot; and &quot;)</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                .append(GitSource.WORKTREE.equals(toRef) ? &quot;the working tree&quot; : toRef)</span>
+<span class="fc" id="L164">                .append(&quot;.\n\n&quot;);</span>
+<span class="fc" id="L165">        plus.forEach(r -&gt; sb.append(&quot;* added `&quot;).append(r).append(&quot;`\n&quot;));</span>
+<span class="pc" id="L166">        minus.forEach(r -&gt; sb.append(&quot;* removed `&quot;).append(r).append(&quot;`\n&quot;));</span>
+<span class="fc" id="L167">        sb.append('\n');</span>
+<span class="fc" id="L168">        return sb.toString();</span>
+    }
+
+    /**
+     * The targets of a file's top-level {@code include::} directives, in
+     * document order, with leading attribute references such as
+     * {@code {topicsdir}/} and {@code ./} removed.
+     *
+     * @param content the file text, possibly {@code null}
+     * @return the normalized include targets
+     */
+    static List&lt;String&gt; includeTargets(String content) {
+<span class="fc" id="L180">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if (content == null) {</span>
+<span class="nc" id="L182">            return out;</span>
+        }
+<span class="fc" id="L184">        Matcher m = INCLUDE.matcher(content);</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L186">            String target = m.group(1).strip();</span>
+            String before;
+            do {
+<span class="fc" id="L189">                before = target;</span>
+<span class="fc" id="L190">                target = LEADING_ATTRIBUTE.matcher(target).replaceFirst(&quot;&quot;);</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                if (target.startsWith(&quot;./&quot;)) {</span>
+<span class="fc" id="L192">                    target = target.substring(2);</span>
+                }
+<span class="fc bfc" id="L194" title="All 2 branches covered.">            } while (!target.equals(before));</span>
+<span class="fc" id="L195">            out.add(target);</span>
+<span class="fc" id="L196">        }</span>
+<span class="fc" id="L197">        return out;</span>
+    }
+
+    /**
+     * Map include targets to topic ids by path: a target names a topic
+     * when it equals the topic's registry-root-relative file or ends with
+     * it (the assembly reaches the unpacked topic library through an
+     * attribute such as {@code {topicsdir}}).
+     *
+     * @param targets        normalized include targets
+     * @param topicFilesById topic files keyed by id
+     * @return the topic ids included, in order, without repeats
+     */
+    static List&lt;String&gt; resolve(List&lt;String&gt; targets, Map&lt;String, String&gt; topicFilesById) {
+<span class="fc" id="L211">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        for (String target : targets) {</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            for (Map.Entry&lt;String, String&gt; e : topicFilesById.entrySet()) {</span>
+<span class="fc" id="L214">                String file = e.getValue();</span>
+<span class="fc bfc" id="L215" title="All 6 branches covered.">                if ((target.equals(file) || target.endsWith(&quot;/&quot; + file)) &amp;&amp; !out.contains(e.getKey())) {</span>
+<span class="fc" id="L216">                    out.add(e.getKey());</span>
+<span class="fc" id="L217">                    break;</span>
+                }
+<span class="fc" id="L219">            }</span>
+<span class="fc" id="L220">        }</span>
+<span class="fc" id="L221">        return out;</span>
+    }
+
+    /**
+     * The assembly id of a file: the module directory that holds its
+     * {@code src/docs/asciidoc}, or the file's base name for a module at
+     * the repository root.
+     *
+     * @param path repository-relative file path
+     * @return the assembly id
+     */
+    static String assemblyIdOf(String path) {
+<span class="fc" id="L233">        int at = path.indexOf(&quot;/&quot; + SOURCE_ROOT + &quot;/&quot;);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        if (at &gt; 0) {</span>
+<span class="fc" id="L235">            String module = path.substring(0, at);</span>
+<span class="fc" id="L236">            return module.substring(module.lastIndexOf('/') + 1);</span>
+        }
+<span class="fc" id="L238">        String name = path.substring(path.lastIndexOf('/') + 1);</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        return name.endsWith(&quot;.adoc&quot;) ? name.substring(0, name.length() - &quot;.adoc&quot;.length()) : name;</span>
+    }
+
+    /**
+     * Find the topic library's source root on a side: the
+     * {@code …/src/docs/asciidoc} directory whose {@code topics/} holds
+     * {@code .adoc} files.
+     *
+     * @param git repository access
+     * @param ref the side to search
+     * @return the repository-relative source root, or {@code null} when
+     *         the repository has no topic library on that side
      * @throws IOException on repository access failure
      */
-    public static String membershipDelta(GitSource git, String fromRef, String toRef,
-                                         String registryRoot, String assemblyId)
-            throws IOException {
-<span class="nc" id="L105">        String path = registryRoot + &quot;/topic-registry/assemblies.yaml&quot;;</span>
-<span class="nc" id="L106">        List&lt;String&gt; oldRefs = assemblyRefsOf(parse(git.read(fromRef, path)))</span>
-<span class="nc" id="L107">                .getOrDefault(assemblyId, List.of());</span>
-<span class="nc" id="L108">        List&lt;String&gt; newRefs = assemblyRefsOf(parse(git.read(toRef, path)))</span>
-<span class="nc" id="L109">                .getOrDefault(assemblyId, List.of());</span>
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        List&lt;String&gt; plus = newRefs.stream().filter(r -&gt; !oldRefs.contains(r)).toList();</span>
-<span class="nc bnc" id="L111" title="All 2 branches missed.">        List&lt;String&gt; minus = oldRefs.stream().filter(r -&gt; !newRefs.contains(r)).toList();</span>
-<span class="nc bnc" id="L112" title="All 4 branches missed.">        if (plus.isEmpty() &amp;&amp; minus.isEmpty()) {</span>
-<span class="nc" id="L113">            return &quot;&quot;;</span>
-        }
-<span class="nc" id="L115">        StringBuilder sb = new StringBuilder(&quot;[[registry-delta]]\n= Membership Delta — &quot;)</span>
-<span class="nc" id="L116">                .append(assemblyId).append(&quot;\n\nTopic-refs changed for this assembly between &quot;)</span>
-<span class="nc" id="L117">                .append(fromRef).append(&quot; and &quot;)</span>
-<span class="nc bnc" id="L118" title="All 2 branches missed.">                .append(GitSource.WORKTREE.equals(toRef) ? &quot;the working tree&quot; : toRef)</span>
-<span class="nc" id="L119">                .append(&quot;.\n\n&quot;);</span>
-<span class="nc" id="L120">        plus.forEach(r -&gt; sb.append(&quot;* added `&quot;).append(r).append(&quot;`\n&quot;));</span>
-<span class="nc" id="L121">        minus.forEach(r -&gt; sb.append(&quot;* removed `&quot;).append(r).append(&quot;`\n&quot;));</span>
-<span class="nc" id="L122">        sb.append('\n');</span>
-<span class="nc" id="L123">        return sb.toString();</span>
-    }
-
-    /**
-     * Parse one YAML document with safe construction (registry files
-     * contain dates).
-     *
-     * @param text the YAML text, possibly {@code null}
-     * @return the parsed root, or {@code null} for absent/blank input
-     */
-    static Object parse(String text) {
-<span class="fc bfc" id="L134" title="All 4 branches covered.">        if (text == null || text.isBlank()) {</span>
-<span class="fc" id="L135">            return null;</span>
-        }
-<span class="fc" id="L137">        return new Yaml(new SafeConstructor(new LoaderOptions())).load(text);</span>
-    }
-
-    /**
-     * Extract a per-domain registry file's topics keyed by id. Accepts
-     * both the indented-fragment shape (a top-level sequence of one
-     * domain) and a root map with a {@code domains} list.
-     *
-     * @param root the parsed YAML root
-     * @return topic entries keyed by id (insertion-ordered)
-     */
-    @SuppressWarnings(&quot;unchecked&quot;)
-    static Map&lt;String, Map&lt;String, Object&gt;&gt; topicsOf(Object root) {
-<span class="fc" id="L150">        Map&lt;String, Map&lt;String, Object&gt;&gt; out = new LinkedHashMap&lt;&gt;();</span>
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        List&lt;?&gt; domains = root instanceof List&lt;?&gt; l ? l</span>
-<span class="nc bnc" id="L152" title="All 4 branches missed.">                : root instanceof Map&lt;?, ?&gt; m &amp;&amp; m.get(&quot;domains&quot;) instanceof List&lt;?&gt; l2 ? l2</span>
-<span class="pc" id="L153">                : List.of();</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">        for (Object d : domains) {</span>
-<span class="pc bpc" id="L155" title="2 of 4 branches missed.">            if (d instanceof Map&lt;?, ?&gt; dm &amp;&amp; dm.get(&quot;topics&quot;) instanceof List&lt;?&gt; ts) {</span>
-<span class="fc bfc" id="L156" title="All 2 branches covered.">                for (Object t : ts) {</span>
-<span class="pc bpc" id="L157" title="2 of 4 branches missed.">                    if (t instanceof Map&lt;?, ?&gt; tm &amp;&amp; tm.get(&quot;id&quot;) != null) {</span>
-<span class="fc" id="L158">                        out.put(String.valueOf(tm.get(&quot;id&quot;)), (Map&lt;String, Object&gt;) tm);</span>
-                    }
-<span class="fc" id="L160">                }</span>
+    public static String findRoot(GitSource git, String ref) throws IOException {
+<span class="fc" id="L254">        String marker = SOURCE_ROOT + &quot;/topics/&quot;;</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">        for (String path : git.listFiles(ref, &quot;&quot;, &quot;.adoc&quot;)) {</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">            if (path.startsWith(marker)) {</span>
+<span class="nc" id="L257">                return SOURCE_ROOT;</span>
             }
-<span class="fc" id="L162">        }</span>
-<span class="fc" id="L163">        return out;</span>
+<span class="fc" id="L259">            int at = path.indexOf(&quot;/&quot; + marker);</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">            if (at &gt; 0) {</span>
+<span class="fc" id="L261">                return path.substring(0, at + 1 + SOURCE_ROOT.length());</span>
+            }
+<span class="fc" id="L263">        }</span>
+<span class="nc" id="L264">        return null;</span>
     }
-
-    /**
-     * Extract every assembly's flattened topic-refs from a parsed
-     * {@code assemblies.yaml}. Accepts both a bare sequence and a root
-     * map with an {@code assemblies} list.
-     *
-     * @param root the parsed YAML root
-     * @return flattened refs keyed by assembly id
-     */
-    static Map&lt;String, List&lt;String&gt;&gt; assemblyRefsOf(Object root) {
-<span class="fc" id="L175">        Map&lt;String, List&lt;String&gt;&gt; out = new LinkedHashMap&lt;&gt;();</span>
-<span class="pc bpc" id="L176" title="3 of 4 branches missed.">        Object assemblies = root instanceof Map&lt;?, ?&gt; m &amp;&amp; m.get(&quot;assemblies&quot;) != null</span>
-<span class="pc" id="L177">                ? m.get(&quot;assemblies&quot;) : root;</span>
-<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (assemblies instanceof List&lt;?&gt; list) {</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">            for (Object a : list) {</span>
-<span class="pc bpc" id="L180" title="2 of 4 branches missed.">                if (a instanceof Map&lt;?, ?&gt; am &amp;&amp; am.get(&quot;id&quot;) != null) {</span>
-<span class="fc" id="L181">                    List&lt;String&gt; refs = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L182">                    collectRefs(am.get(&quot;sections&quot;), refs);</span>
-<span class="fc" id="L183">                    out.put(String.valueOf(am.get(&quot;id&quot;)), refs);</span>
-                }
-<span class="fc" id="L185">            }</span>
-        }
-<span class="fc" id="L187">        return out;</span>
-    }
-
-    private static void collectRefs(Object sections, List&lt;String&gt; refs) {
-<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (sections instanceof List&lt;?&gt; list) {</span>
-<span class="fc bfc" id="L192" title="All 2 branches covered.">            for (Object s : list) {</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">                if (s instanceof Map&lt;?, ?&gt; sm) {</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">                    if (sm.get(&quot;topic-refs&quot;) instanceof List&lt;?&gt; tr) {</span>
-<span class="fc" id="L195">                        tr.forEach(r -&gt; refs.add(String.valueOf(r)));</span>
-                    }
-<span class="fc" id="L197">                    collectRefs(sm.get(&quot;sections&quot;), refs);</span>
-                }
-<span class="fc" id="L199">            }</span>
-        }
-<span class="fc" id="L201">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
