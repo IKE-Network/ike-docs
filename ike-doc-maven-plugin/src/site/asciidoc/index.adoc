@@ -28,6 +28,10 @@ in `ike-tooling`. The three plugins are deliberately separate —
 `idoc:*` is doc rendering, `ike:*` is single-repo release, `ws:*`
 fans out across a workspace's checked-out subprojects.
 
+For people who work through Claude rather than a terminal,
+xref:topic-registry-guide.adoc[The Topic Registry: A Plain-Language Guide]
+walks through `idoc:topic-registry` with a tutorial and every action it offers.
+
 == Plugin shape
 
 This is a *regular Maven plugin* — no `<extensions>true</extensions>`,
@@ -78,6 +82,13 @@ existence in `ike-parent`'s `doc-pipeline` profile.
   topic between two refs (or a ref and the working tree), marked
   inline with insertion/deletion roles. See
   xref:_review_packets_idocdiff[Review packets] below.
+
+| `idoc:topic-registry`
+| Read the `:topic-*:` header of every AsciiDoc file under the
+  module's source root and write `target/topic-registry.yaml`: the
+  topic registry, generated from the headers in
+  `IKE-TOPIC-REGISTRY.md`'s shape instead of kept by hand. See
+  xref:_topic_registry_idoctopic_registry[Topic registry] below.
 
 | `idoc:adocstudio`
 | Generate Adoc Studio sidecar projects for assembly modules.
@@ -144,10 +155,13 @@ mvn idoc:diff -Dike.diff.topics=arch-overview    # share-scoped excerpt
 ----
 
 The goal works at the Maven subproject level: a topics-library module
-yields the corpus packet (with an entry-keyed topic-registry delta);
-an *assembly* module yields the projection of the diff onto its
-registry membership; an aggregator invocation produces a packet for
-every subproject able to generate one. Outputs land in
+(one whose source root holds `topics/`) yields the corpus packet (with
+an entry-keyed topic-registry delta); an *assembly* module yields the
+projection of the diff onto the topics its `include::` lines name; an
+aggregator invocation produces a packet for every subproject able to
+generate one. The registry on each side is generated from the files on
+that side, as `idoc:topic-registry` would; no hand-kept registry file
+is read. Outputs land in
 `target/doc-diff/` as packet sources, HTML, and a Prawn PDF — the
 goal is self-contained, so a bare invocation on a fresh checkout
 produces a styled packet (branded typography when the pipeline fonts
@@ -169,6 +183,76 @@ Stamp Register.
 
 Design note: `dev-doc-diff-pipeline` in `ike-lab-documents/topics/`;
 epic link:https://github.com/IKE-Network/ike-issues/issues/648[ike-issues#648].
+
+[[_topic_registry_idoctopic_registry]]
+== Topic registry (`idoc:topic-registry`)
+
+`idoc:topic-registry` is the topic registry's build-time revision:
+the registry keeps the shape `IKE-TOPIC-REGISTRY.md` gives it and is
+now generated from the files on every run instead of typed by hand.
+The goal reads the `:topic-*:`
+attribute block, the anchor and the level-1 heading of every `.adoc`
+file under the module's `src/docs/asciidoc` -- plain line parsing, no
+AsciidoctorJ -- and writes `target/topic-registry.yaml` in the shape
+`IKE-TOPIC-REGISTRY.md` gives the registry: `registry-version`,
+`generated`, `topic-count`, then `domains`, one per id prefix, each
+with its topics in id order (`id`, `file`, `title`, `type`, `keywords`,
+`status`, `char-count`, `related`, `summary`, and what the header adds:
+`provenance`, `anchor`, `header`, ...). After the domains come
+`assemblies` (files with `include::` lines, with their counts),
+`other-files`, and a findings list. The file that was kept by hand at
+`src/docs/asciidoc/topic-registry.yaml` is no longer maintained; neither
+this goal nor `idoc:diff` reads it, so it can be deleted once its values
+are moved into topic headers. What a header cannot say is not
+generated: domain titles
+and descriptions, assembly `sections` and `topic-refs`, and
+`dependencies` unless a header declares them. The same structure is
+printed to the build log as a directory tree. Symbolic links are never
+followed (a linked `.adoc` is a finding), files are parsed in parallel,
+and the YAML is written directly, so a 20,000-file module rebuilds in
+well under a second.
+
+[source,bash]
+----
+mvn idoc:topic-registry                                          # the module's src/docs/asciidoc
+mvn idoc:topic-registry -Dike.topic-registry.roots=a,b           # other roots, comma-separated
+mvn idoc:topic-registry -Dike.topic-registry.output=/tmp/r.yaml  # write elsewhere
+mvn idoc:topic-registry -Dike.topic-registry.add=topics/x/new.adoc   # add an ingested file, no rescan
+----
+
+With `-Dike.topic-registry.add=` (comma-separated files, relative to
+the module or absolute) the named files are parsed alone and merged
+into the existing registry: placed in their domain in id order,
+counted, and checked for a duplicate id against the ids the registry
+already holds. An entry for the same file is replaced, so re-ingesting
+a document is safe. Files that were deleted are not noticed this way;
+a run without `add` re-derives everything, and runs when no generated
+registry exists yet.
+
+Header findings -- a missing required attribute, an anchor that does
+not match the id, an unknown type or status, the same id in two files
+-- are reported in the registry and the log and do not fail the build.
+A module without `src/docs/asciidoc` is skipped with one line, so the
+goal can run from a reactor root. `-Dike.skip.topic-registry=true`
+skips it.
+
+The goal's default phase is `validate`, so a POM that declares an
+execution of it gets a fresh registry on every build, `mvn clean
+install` included, and findings still do not fail that build:
+
+[source,xml]
+----
+<plugin>
+  <groupId>network.ike.docs</groupId>
+  <artifactId>ike-doc-maven-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>topic-registry</id>
+      <goals><goal>topic-registry</goal></goals>
+    </execution>
+  </executions>
+</plugin>
+----
 
 == Design rationale
 

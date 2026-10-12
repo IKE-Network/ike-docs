@@ -1,41 +1,37 @@
 package network.ike.docs.plugin.diff;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Entry-keyed delta of the IKE topic registry between the two sides of
  * a doc-diff comparison, rendered as an AsciiDoc partial
- * (ike-issues#650).
+ * (ike-issues#650). Both sides are generated from the files on that side
+ * ({@link RegistryIndex#load}); no hand-kept registry is read.
  *
- * <p>Always keyed by entry id, never by line: the registry is YAML and
- * ids are its stable keys. Output is condensed for review —
- * {@code summary}/{@code notes} changes are flagged as rewritten rather
- * than reproduced, list fields report added/removed items, scalars
- * report old → new. Covers the per-domain files, the root index counts,
- * and assembly topic-ref membership.
+ * <p>Always keyed by entry id, never by line. Output is condensed for
+ * review — {@code summary}/{@code notes} changes are flagged as rewritten
+ * rather than reproduced, list fields report added/removed items, scalars
+ * report old → new. Covers per-domain topic entries, the topic counts,
+ * and assembly membership.
  */
 public final class RegistryDelta {
 
-    private final GitSource git;
     private final String fromRef;
     private final String toRef;
 
     /**
      * Create a delta generator over one comparison.
      *
-     * @param git     the repository access
      * @param fromRef the from-side ref
      * @param toRef   the to-side ref (may be {@link GitSource#WORKTREE})
      */
-    public RegistryDelta(GitSource git, String fromRef, String toRef) {
-        this.git = git;
+    public RegistryDelta(String fromRef, String toRef) {
         this.fromRef = fromRef;
         this.toRef = toRef;
     }
@@ -43,15 +39,12 @@ public final class RegistryDelta {
     /**
      * Render the delta as an AsciiDoc partial with a level-1 title.
      *
-     * @param rootRegistry repository-relative path of the thin root
-     *                     index ({@code …/topic-registry.yaml})
-     * @param registryDir  repository-relative directory of the
-     *                     per-domain files ({@code …/topic-registry})
+     * @param oldIndex the registry generated for the from side
+     * @param newIndex the registry generated for the to side
      * @return the partial's text, or an empty string when nothing in
      *         the registry changed
-     * @throws IOException on repository access failure
      */
-    public String render(String rootRegistry, String registryDir) throws IOException {
+    public String render(RegistryIndex oldIndex, RegistryIndex newIndex) {
         StringBuilder sb = new StringBuilder();
         sb.append("[[registry-delta]]\n= Registry Delta\n\n")
           .append("Entry-level changes to the topic registry, ")
@@ -60,24 +53,21 @@ public final class RegistryDelta {
           .append("Summary and notes fields are flagged as rewritten, not reproduced.\n\n");
         boolean any = false;
 
-        Set<String> files = new LinkedHashSet<>();
-        files.addAll(git.listYaml(fromRef, registryDir));
-        files.addAll(git.listYaml(toRef, registryDir));
-        for (String path : files) {
-            String name = path.substring(path.lastIndexOf('/') + 1);
-            if (name.equals("assemblies.yaml")) {
-                continue;
-            }
-            any |= domainDelta(sb, name.replace(".yaml", ""), path);
+        Set<String> domains = new TreeSet<>(oldIndex.topicsByDomain().keySet());
+        domains.addAll(newIndex.topicsByDomain().keySet());
+        for (String domain : domains) {
+            any |= domainDelta(sb, domain,
+                    oldIndex.topicsByDomain().getOrDefault(domain, Map.of()),
+                    newIndex.topicsByDomain().getOrDefault(domain, Map.of()));
         }
-        any |= rootDelta(sb, rootRegistry);
-        any |= assembliesDelta(sb, registryDir + "/assemblies.yaml");
+        any |= countDelta(sb, oldIndex, newIndex);
+        any |= assembliesDelta(sb, oldIndex.assemblies(), newIndex.assemblies());
         return any ? sb.toString() : "";
     }
 
-    private boolean domainDelta(StringBuilder sb, String domain, String path) throws IOException {
-        Map<String, Map<String, Object>> oldT = RegistryIndex.topicsOf(load(fromRef, path));
-        Map<String, Map<String, Object>> newT = RegistryIndex.topicsOf(load(toRef, path));
+    private boolean domainDelta(StringBuilder sb, String domain,
+                                Map<String, Map<String, Object>> oldT,
+                                Map<String, Map<String, Object>> newT) {
         List<String> added = newT.keySet().stream().filter(k -> !oldT.containsKey(k)).toList();
         List<String> removed = oldT.keySet().stream().filter(k -> !newT.containsKey(k)).toList();
         List<String> changed = newT.keySet().stream()
@@ -158,37 +148,39 @@ public final class RegistryDelta {
         return String.join("; ", parts);
     }
 
-    private boolean rootDelta(StringBuilder sb, String rootRegistry) throws IOException {
-        Object oldRoot = load(fromRef, rootRegistry);
-        Object newRoot = load(toRef, rootRegistry);
-        if (!(oldRoot instanceof Map<?, ?> om) || !(newRoot instanceof Map<?, ?> nm)) {
-            return false;
-        }
+    private boolean countDelta(StringBuilder sb, RegistryIndex oldIndex, RegistryIndex newIndex) {
         List<String> lines = new ArrayList<>();
-        if (!Objects.equals(om.get("topic-count"), nm.get("topic-count"))) {
-            lines.add("* total topic-count: " + om.get("topic-count")
-                    + " → " + nm.get("topic-count"));
+        int oldTotal = total(oldIndex);
+        int newTotal = total(newIndex);
+        if (oldTotal != newTotal) {
+            lines.add("* total topic-count: " + oldTotal + " → " + newTotal);
         }
-        Map<String, Object> oldCounts = domainCounts(om.get("domains"));
-        for (Map.Entry<String, Object> e : domainCounts(nm.get("domains")).entrySet()) {
-            Object o = oldCounts.get(e.getKey());
-            if (!Objects.equals(o, e.getValue())) {
-                lines.add("* " + e.getKey() + ": " + (o == null ? "new domain" : o)
-                        + " → " + e.getValue());
+        Set<String> domains = new TreeSet<>(oldIndex.topicsByDomain().keySet());
+        domains.addAll(newIndex.topicsByDomain().keySet());
+        for (String d : domains) {
+            Map<String, Map<String, Object>> o = oldIndex.topicsByDomain().get(d);
+            Map<String, Map<String, Object>> n = newIndex.topicsByDomain().get(d);
+            int oc = o == null ? 0 : o.size();
+            int nc = n == null ? 0 : n.size();
+            if (oc != nc) {
+                lines.add("* " + d + ": " + (o == null ? "new domain" : oc) + " → " + nc);
             }
         }
         if (lines.isEmpty()) {
             return false;
         }
-        sb.append("== Root index\n\n");
+        sb.append("== Topic counts\n\n");
         lines.forEach(l -> sb.append(l).append('\n'));
         sb.append('\n');
         return true;
     }
 
-    private boolean assembliesDelta(StringBuilder sb, String path) throws IOException {
-        Map<String, List<String>> oldRefs = RegistryIndex.assemblyRefsOf(load(fromRef, path));
-        Map<String, List<String>> newRefs = RegistryIndex.assemblyRefsOf(load(toRef, path));
+    private static int total(RegistryIndex index) {
+        return index.topicsByDomain().values().stream().mapToInt(Map::size).sum();
+    }
+
+    private boolean assembliesDelta(StringBuilder sb, Map<String, List<String>> oldRefs,
+                                    Map<String, List<String>> newRefs) {
         Set<String> ids = new LinkedHashSet<>(oldRefs.keySet());
         ids.addAll(newRefs.keySet());
         List<String> lines = new ArrayList<>();
@@ -212,26 +204,10 @@ public final class RegistryDelta {
         if (lines.isEmpty()) {
             return false;
         }
-        sb.append("== Assemblies (topic-refs)\n\n");
+        sb.append("== Assemblies (included topics)\n\n");
         lines.forEach(l -> sb.append(l).append('\n'));
         sb.append('\n');
         return true;
-    }
-
-    private Object load(String ref, String path) throws IOException {
-        return RegistryIndex.parse(git.read(ref, path));
-    }
-
-    private static Map<String, Object> domainCounts(Object domains) {
-        Map<String, Object> out = new LinkedHashMap<>();
-        if (domains instanceof List<?> list) {
-            for (Object d : list) {
-                if (d instanceof Map<?, ?> dm && dm.get("id") != null) {
-                    out.put(String.valueOf(dm.get("id")), dm.get("topic-count"));
-                }
-            }
-        }
-        return out;
     }
 
     private static String clip(Object o) {
