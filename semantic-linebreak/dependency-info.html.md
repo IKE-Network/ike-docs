@@ -1,6 +1,6 @@
 ---
-date_published: 2026-10-11
-date_modified: 2026-10-11
+date_published: 2026-10-14
+date_modified: 2026-10-14
 canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 ---
 
@@ -12,6 +12,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <plugin>
   <groupId>network.ike.docs</groupId>
   <artifactId>semantic-linebreak</artifactId>
-  <version>122</version>
+  <version>123</version>
 </plugin>
 ```
