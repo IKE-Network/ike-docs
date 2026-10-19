@@ -3,6 +3,7 @@ package network.ike.docs.plugin;
 import network.ike.docs.koncept.KonceptGlossaryProcessor;
 import network.ike.docs.koncept.KonceptInlineMacro;
 import network.ike.docs.koncept.KonceptTreeBlockProcessor;
+import network.ike.docs.typst.asciidoc.TypstConverter;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
@@ -112,6 +113,22 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
     /** Skip DocBook 5 backend. */
     @Parameter(property = "ike.skip.docbook", defaultValue = "true")
     boolean skipDocbook;
+
+    /**
+     * Skip the Typst backend ({@code .typ} source for {@code typst compile}).
+     * Off by default while the Typst print target is a spike
+     * (IKE-Network/ike-issues#1307).
+     */
+    @Parameter(property = "ike.skip.typst", defaultValue = "true")
+    boolean skipTypst;
+
+    /**
+     * The directory {@code typst compile --root} will be given: the converter
+     * emits image paths relative to it so Typst can read files outside the
+     * {@code .typ} file's own directory.
+     */
+    @Parameter(property = "ike.typst.root", defaultValue = "${basedir}")
+    File typstRoot;
 
     // ── HTML options ──────────────────────────────────────────────────
 
@@ -235,6 +252,11 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             asciidoctor.javaExtensionRegistry()
                     .inlineMacro(KonceptInlineMacro.class);
 
+            // The typst backend's converter (also discoverable through its SPI
+            // registration; registered here so the goal does not depend on
+            // ServiceLoader visibility inside the plugin realm).
+            asciidoctor.javaConverterRegistry().register(TypstConverter.class);
+
             // Register the [koncept-tree] block (indented Koncept chips; IKE-Network/ike-issues#827).
             // Safe for all backends — declines to a literal block outside the html5 family.
             asciidoctor.javaExtensionRegistry()
@@ -253,6 +275,9 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             }
             if (!skipDocbook) {
                 hadErrors |= !tryConvert(asciidoctor, Backend.DOCBOOK, false);
+            }
+            if (!skipTypst) {
+                hadErrors |= !tryConvert(asciidoctor, Backend.TYPST, false);
             }
             if (hadErrors && strict) {
                 throw new MojoException(
@@ -276,8 +301,10 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             convertBackend(asciidoctor, backend, singleFile);
             return true;
         } catch (MojoException e) {
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
             getLog().error("ike:asciidoc: " + backend + " conversion failed — "
-                    + e.getMessage());
+                    + e.getMessage() + (cause != e ? " (" + cause + ")" : ""));
+            getLog().debug("ike:asciidoc: " + backend + " conversion failure", cause);
             return false;
         }
     }
@@ -415,6 +442,11 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
                 ab.attribute("doctype", "book");
                 ab.attribute("ike-pdf-renderer", "docbook");
             }
+            case TYPST -> {
+                ab.attribute("ike-pdf-renderer", "typst");
+                File root = typstRoot != null ? typstRoot : sourceDirectory.getAbsoluteFile();
+                ab.attribute("typst-root", root.getAbsolutePath());
+            }
         }
 
         // Merge user-provided attributes (override defaults)
@@ -517,6 +549,7 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             case HTML -> "html";
             case PDF -> "pdf";
             case DOCBOOK -> "xml";
+            case TYPST -> "typ";
         };
     }
 
@@ -532,6 +565,7 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
                 case HTML -> !skipHtml;
                 case PDF -> !skipPrawn;
                 case DOCBOOK -> !skipDocbook;
+                case TYPST -> !skipTypst;
             };
             if (!shouldCheck) continue;
 

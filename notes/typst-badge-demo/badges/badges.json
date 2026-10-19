@@ -1,0 +1,8 @@
+[
+  {"name": "heart-failure", "label": "Heart Failure", "kind": "CONCEPT", "glyph": null, "glyphColor": null, "idString": "[\"f05fae71-345a-5f4b-9a3c-4588409fa692\"]"},
+  {"name": "mmhg", "label": "mmHg", "kind": "CONCEPT", "glyph": null, "glyphColor": null, "idString": "[\"55baecd4-96f1-59d5-9e22-3d795d9aa2ef\"]"},
+  {"name": "mild-npdr", "label": "Mild Non-Proliferative Diabetic Retinopathy", "kind": "CONCEPT", "glyph": null, "glyphColor": null, "idString": "[\"82b34139-21bc-52f4-ad59-eb87d27135e7\"]"},
+  {"name": "description-pattern", "label": "Description pattern", "kind": "PATTERN", "glyph": "P", "glyphColor": "#7a4fb5", "idString": "[\"a4de0039-2625-5842-8a4c-d1ce6aebf0ab\"]"},
+  {"name": "heart-failure-en", "label": "Heart failure (en)", "kind": "DESCRIPTION", "glyph": "D", "glyphColor": "#b8860b", "idString": "[\"f05fae71-345a-5f4b-9a3c-4588409fa692\"]"},
+  {"name": "example-stamp", "label": "Active · 2024-09-30 14:30 · KEC", "kind": "STAMP", "glyph": null, "glyphColor": "#888780", "idString": "[\"a1b2c3d4-0000-4000-8000-000000000001\"]"}
+]

@@ -21,12 +21,15 @@ import java.util.regex.Pattern;
  * pipeline into a single Maven goal with consistent configuration,
  * executable validation, and multi-document support.
  *
- * <p>Renderers fall into two families:
+ * <p>Renderers fall into three families:
  * <ul>
  *   <li><b>CSS-based</b> ({@code prince}, {@code ah}, {@code weasyprint})
  *       — convert print-layout HTML to PDF via CSS Paged Media</li>
  *   <li><b>FO-based</b> ({@code xep}, {@code fop})
  *       — convert XSL-FO to PDF</li>
+ *   <li><b>Typst</b> ({@code typst}) — compile {@code .typ} source written
+ *       by the {@code typst} backend with {@code typst compile --root
+ *       <rootDir> --font-path <fontPath>} (IKE-Network/ike-issues#1307)</li>
  * </ul>
  *
  * <p>By default, the goal discovers all input files in {@code inputDir}
@@ -67,7 +70,7 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
     /**
      * Renderer to use. One of: {@code prince}, {@code ah},
-     * {@code weasyprint}, {@code xep}, {@code fop}.
+     * {@code weasyprint}, {@code xep}, {@code fop}, {@code typst}.
      */
     @Parameter(property = "ike.renderer", required = true)
     private String renderer;
@@ -131,6 +134,30 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
      */
     @Parameter
     private String classpath;
+
+    // ── Typst renderer parameters ────────────────────────────────────
+
+    /**
+     * Root directory for {@code typst compile --root}: paths in the
+     * {@code .typ} source resolve against it, and Typst reads no file outside
+     * it. Defaults to {@code inputDir}; the {@code asciidoc} goal's
+     * {@code ike.typst.root} (the project base directory) is the matching
+     * value when images live outside the input directory.
+     */
+    @Parameter(property = "ike.typst.root")
+    private File rootDir;
+
+    /** Font directory for {@code typst compile --font-path}. */
+    @Parameter(property = "ike.typst.fontPath")
+    private File fontPath;
+
+    /**
+     * The Typst version this build expects, e.g. {@code 0.15.1}. When set,
+     * the renderer refuses a {@code typst} binary of another version rather
+     * than rendering with it, because Typst breaks between 0.x minors.
+     */
+    @Parameter(property = "ike.typst.version")
+    private String typstVersion;
 
     // ── Document selection ────────────────────────────────────────────
 
@@ -231,7 +258,9 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         /** RenderX XEP — XSL-FO. */
         XEP("java", ".fo"),
         /** Apache FOP — XSL-FO. */
-        FOP("java", ".fo");
+        FOP("java", ".fo"),
+        /** Typst — compiles {@code .typ} source. */
+        TYPST("typst", ".typ");
 
         final String defaultExecutable;
         final String inputExtension;
@@ -256,7 +285,26 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
             case WEASYPRINT -> buildWeasyprintCommand(exe, input, output);
             case XEP -> buildXepCommand(exe, input, output);
             case FOP -> buildFopCommand(exe, input, output);
+            case TYPST -> buildTypstCommand(exe, input, output);
         };
+    }
+
+    private List<String> buildTypstCommand(String exe,
+                                           Path input, Path output) {
+        ArrayList<String> cmd = new ArrayList<String>();
+        cmd.add(exe);
+        cmd.add("compile");
+        cmd.add("--root");
+        cmd.add((rootDir != null ? rootDir : inputDir).getAbsolutePath());
+        if (fontPath != null) {
+            cmd.add("--font-path");
+            cmd.add(fontPath.getAbsolutePath());
+        }
+        cmd.add("--format");
+        cmd.add("pdf");
+        cmd.add(input.toString());
+        cmd.add(output.toString());
+        return cmd;
     }
 
     private List<String> buildPrinceCommand(String exe,
@@ -467,9 +515,10 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
             case "weasyprint" -> RendererType.WEASYPRINT;
             case "xep" -> RendererType.XEP;
             case "fop" -> RendererType.FOP;
+            case "typst" -> RendererType.TYPST;
             default -> throw new MojoException(
                     "Unknown renderer: " + name
-                            + ". Supported: prince, ah, weasyprint, xep, fop");
+                            + ". Supported: prince, ah, weasyprint, xep, fop, typst");
         };
     }
 
@@ -505,6 +554,29 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
         } catch (IOException | InterruptedException e) {
             getLog().warn("Could not validate executable '" + exe
                     + "': " + e.getMessage());
+        }
+
+        if (type == RendererType.TYPST && typstVersion != null && !typstVersion.isEmpty()) {
+            String actual = typstVersionOf(exe);
+            if (!typstVersion.equals(actual)) {
+                throw new MojoException("Renderer typst is version " + actual
+                        + " but this build is pinned to " + typstVersion
+                        + " (ike.typst.version); Typst breaks between 0.x minors, so install "
+                        + "the pinned version or change the pin.");
+            }
+        }
+    }
+
+    /** The version {@code typst --version} reports ({@code "0.15.1"}), or {@code "unknown"}. */
+    private String typstVersionOf(String exe) {
+        try {
+            Process p = new ProcessBuilder(exe, "--version").redirectErrorStream(true).start();
+            String out = new String(p.getInputStream().readAllBytes()).strip();
+            p.waitFor();
+            Matcher m = Pattern.compile("typst\\s+(\\S+)").matcher(out);
+            return m.find() ? m.group(1) : "unknown";
+        } catch (IOException | InterruptedException e) {
+            return "unknown";
         }
     }
 

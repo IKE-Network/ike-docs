@@ -61,6 +61,10 @@ public class PrepareRendererOutputMojo implements org.apache.maven.api.plugin.Mo
     @Parameter(property = "ike.skip.fop", defaultValue = "true")
     boolean skipFop;
 
+    /** Skip Typst output directory (IKE-Network/ike-issues#1307). */
+    @Parameter(property = "ike.skip.typst", defaultValue = "true")
+    boolean skipTypst;
+
     /** Skip default PDF output directory. */
     @Parameter(property = "ike.skip.pdf-default", defaultValue = "false")
     boolean skipPdfDefault;
@@ -76,6 +80,7 @@ public class PrepareRendererOutputMojo implements org.apache.maven.api.plugin.Mo
         created += mkdirIf(!skipWeasyprint, "pdf-weasyprint");
         created += mkdirIf(!skipXep, "pdf-xep");
         created += mkdirIf(!skipFop, "pdf-fop");
+        created += mkdirIf(!skipTypst, "pdf-typst");
         created += mkdirIf(!skipPdfDefault, "pdf");
 
         if (created > 0) {
