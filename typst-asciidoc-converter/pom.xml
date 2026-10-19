@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+                             http://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>network.ike.docs</groupId>
+        <artifactId>ike-docs</artifactId>
+    </parent>
+
+    <artifactId>typst-asciidoc-converter</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Typst AsciiDoc Converter</name>
+    <url>https://github.com/IKE-Network/ike-docs</url>
+    <description>
+        AsciidoctorJ converter for the `typst` backend: walks the Asciidoctor
+        AST and emits Typst source (.typ) for the Typst print target
+        (IKE-Network/ike-issues#1307, design topic dev-document-surface-pages).
+        The network.ike.docs.typst package is the seed of the shared Typst
+        writer library (document setup, text escaping) that Komet's
+        block-model writer will consume as well.
+    </description>
+
+    <distributionManagement>
+        <repository>
+            <id>ike-staging</id>
+            <url>${deploy.staging.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ike-snapshots</id>
+            <url>${deploy.snapshot.url}</url>
+        </snapshotRepository>
+        <site>
+            <id>ike-site</id>
+            <url>https://ike.network/ike-docs/${project.artifactId}/</url>
+        </site>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Inherits java.version=25 from the parent. -->
+        <asciidoctorj.version>3.0.1</asciidoctorj.version>
+        <jruby.version>10.0.3.0</jruby.version>
+        <junit.version>5.10.2</junit.version>
+        <slf4j.version>2.0.12</slf4j.version>
+        <log4j.version>3.0.0-beta2</log4j.version>
+    </properties>
+
+    <dependencies>
+        <!-- AsciidoctorJ — provided at runtime by the doc plugin / asciidoctor-maven-plugin -->
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj</artifactId>
+            <version>${asciidoctorj.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>jruby-base</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby</artifactId>
+            <version>${jruby.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test: the real Koncept inline macro, so the badge path is exercised end to end. -->
+        <dependency>
+            <groupId>network.ike.docs</groupId>
+            <artifactId>koncept-asciidoc-extension</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin><artifactId>maven-clean-plugin</artifactId><version>3.4.0</version></plugin>
+                <plugin><artifactId>maven-resources-plugin</artifactId><version>3.3.1</version></plugin>
+                <plugin><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version></plugin>
+                <plugin><artifactId>maven-install-plugin</artifactId><version>3.1.3</version></plugin>
+                <plugin><artifactId>maven-deploy-plugin</artifactId><version>3.1.3</version></plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <!-- Suppress JFFI native access and Unsafe deprecation warnings -->
+                    <argLine>--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

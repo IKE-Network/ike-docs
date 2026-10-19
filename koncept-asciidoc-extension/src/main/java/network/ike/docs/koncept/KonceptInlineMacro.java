@@ -97,6 +97,20 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         String renderLink = KonceptResolver.anchorSlug(linkTarget);
         String backend = doc.getAttribute("backend", "html5").toString();
 
+        // Typst (ike-issues#1307 spike): hand the converter the label, kind and status as a
+        // role-tagged phrase node and let it draw the badge (TypstPageSetup's ike-koncept —
+        // for now the label in a rounded box). TODO(#1307): take the recommendation of the
+        // badge demo in ike-docs/notes/typst-badge-demo (renderer SVG vs native drawing).
+        if ("typst".equals(backend)) {
+            return createPhraseNode(parent, "quoted", label,
+                    Map.of("subs", ":none",
+                            "role", "koncept",
+                            "koncept-kind", kind.name(),
+                            "koncept-target", renderLink,
+                            "koncept-inactive", String.valueOf(resolved.inactive())),
+                    Map.of("type", "unquoted"));
+        }
+
         // A STAMP badge is provenance-shaped, not name-shaped: the pentagon sigil precedes the
         // STAMP's own identicon (the sigil is never bare — the identicon tells one STAMP from
         // another at a glance), and the compact provenance text stands in place of a name. Decided

@@ -179,6 +179,14 @@
             <artifactId>koncept-asciidoc-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- The typst backend's AsciidoctorJ converter (idoc:asciidoc with
+             ike.skip.typst=false writes .typ for idoc:render-pdf typst);
+             IKE-Network/ike-issues#1307. -->
+        <dependency>
+            <groupId>network.ike.docs</groupId>
+            <artifactId>typst-asciidoc-converter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Shared rendering resources on the plugin classpath so
              idoc:diff can self-provision the branded prawn theme when a
              pipeline build hasn't unpacked it (ike-issues#649). -->

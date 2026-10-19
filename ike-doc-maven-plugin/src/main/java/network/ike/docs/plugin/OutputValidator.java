@@ -76,6 +76,7 @@ public class OutputValidator {
             case HTML -> "*.html";
             case DOCBOOK -> "*.xml";
             case PDF -> null; // binary — skip
+            case TYPST -> "*.typ";
         };
 
         if (extension == null) {

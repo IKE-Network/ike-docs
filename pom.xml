@@ -217,6 +217,12 @@
         <ike.skip.weasyprint>true</ike.skip.weasyprint>
         <ike.skip.xep>true</ike.skip.xep>
         <ike.skip.fop>true</ike.skip.fop>
+        <!-- Typst print target (IKE-Network/ike-issues#1307): off while it
+             is a spike; -Dike.pdf.typst (profile pdf-typst) turns on the
+             typst backend and `typst compile` into pdf-typst/. -->
+        <ike.skip.typst>true</ike.skip.typst>
+        <typst.executable>typst</typst.executable>
+        <typst.version>0.15.1</typst.version>
         <ike.skip.pdf-default>false</ike.skip.pdf-default>
         <ike.skip.docbook>true</ike.skip.docbook>
         <ike.skip.adoc>true</ike.skip.adoc>
@@ -1710,6 +1716,27 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                     <logFile>${project.build.directory}/logs/renderer-fop.log</logFile>
                                 </configuration>
                             </execution>
+                            <!-- Typst: compiles the .typ the typst backend
+                                 wrote to typst/ (IKE-Network/ike-issues#1307).
+                                 The compile root is the project base
+                                 directory, the same root the asciidoc goal
+                                 gave the converter for image paths. -->
+                            <execution>
+                                <id>typst-to-pdf</id>
+                                <phase>package</phase>
+                                <goals><goal>render-pdf</goal></goals>
+                                <configuration>
+                                    <skip>${ike.skip.typst}</skip>
+                                    <renderer>typst</renderer>
+                                    <executable>${typst.executable}</executable>
+                                    <typstVersion>${typst.version}</typstVersion>
+                                    <inputDir>${asciidoc.output.directory}/typst</inputDir>
+                                    <outputDir>${asciidoc.output.directory}/pdf-typst</outputDir>
+                                    <rootDir>${project.basedir}</rootDir>
+                                    <fontPath>${fonts.output.directory}</fontPath>
+                                    <logFile>${project.build.directory}/logs/renderer-typst.log</logFile>
+                                </configuration>
+                            </execution>
 
                             <!-- ── copy-default-pdf (verify) ─────────────────── -->
                             <execution>
@@ -1869,6 +1896,17 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>zip-typst</id>
+                                <phase>package</phase>
+                                <goals><goal>single</goal></goals>
+                                <configuration>
+                                    <skipAssembly>${ike.skip.typst}</skipAssembly>
+                                    <descriptors>
+                                        <descriptor>${ike.assembly.directory}/typst.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>zip-pdf-default</id>
                                 <phase>verify</phase>
                                 <goals><goal>single</goal></goals>
@@ -2015,6 +2053,18 @@ IKE projects require Java 21+ (JRuby 10 baseline).
             </properties>
         </profile>
 
+        <!-- ── PDF via the typst backend → typst compile ──────────────── -->
+        <!-- IKE-Network/ike-issues#1307: the Typst print target, a spike.  -->
+        <profile>
+            <id>pdf-typst</id>
+            <activation>
+                <property><name>ike.pdf.typst</name></property>
+            </activation>
+            <properties>
+                <ike.skip.typst>false</ike.skip.typst>
+            </properties>
+        </profile>
+
         <!-- ── PDF via DocBook → XSL-FO → Apache FOP ─────────────────── -->
         <profile>
             <id>pdf-fop</id>
@@ -2069,6 +2119,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
                 <ike.skip.weasyprint>true</ike.skip.weasyprint>
                 <ike.skip.xep>true</ike.skip.xep>
                 <ike.skip.fop>true</ike.skip.fop>
+                <ike.skip.typst>true</ike.skip.typst>
                 <ike.skip.pdf-default>true</ike.skip.pdf-default>
                 <ike.skip.docbook>true</ike.skip.docbook>
             </properties>
@@ -2172,6 +2223,7 @@ IKE projects require Java 21+ (JRuby 10 baseline).
         <subproject>docbook-xsl</subproject>
         <subproject>koncept-core</subproject>
         <subproject>koncept-asciidoc-extension</subproject>
+        <subproject>typst-asciidoc-converter</subproject>
         <subproject>ike-doc-maven-plugin</subproject>
         <subproject>semantic-linebreak</subproject>
         <subproject>ike-doc-ingest</subproject>

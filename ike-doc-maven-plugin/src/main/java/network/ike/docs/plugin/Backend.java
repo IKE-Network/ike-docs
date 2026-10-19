@@ -15,7 +15,15 @@ public enum Backend {
     PDF("pdf", "pdf-prawn"),
 
     /** DocBook 5 — intermediate XML for XEP/FOP XSL-FO pipelines. */
-    DOCBOOK("docbook5", "docbook");
+    DOCBOOK("docbook5", "docbook"),
+
+    /**
+     * Typst — {@code .typ} source for the Typst print target, compiled by
+     * {@code typst compile} ({@link RenderPdfMojo.RendererType#TYPST}).
+     * Converter: {@code network.ike.docs.typst.asciidoc.TypstConverter}
+     * (IKE-Network/ike-issues#1307).
+     */
+    TYPST("typst", "typst");
 
     private final String asciidoctorName;
     private final String outputSubdir;
@@ -57,7 +65,7 @@ public enum Backend {
     /**
      * Parse a backend name (case-insensitive).
      *
-     * @param name one of: html, pdf, prawn, docbook
+     * @param name one of: html, pdf, prawn, docbook, typst
      * @return the matching backend
      * @throws IllegalArgumentException if name is not recognized
      */
@@ -66,9 +74,10 @@ public enum Backend {
             case "html", "html5" -> HTML;
             case "pdf", "prawn" -> PDF;
             case "docbook", "docbook5" -> DOCBOOK;
+            case "typst" -> TYPST;
             default -> throw new IllegalArgumentException(
                     "Unknown backend: " + name
-                            + ". Valid values: html, pdf, prawn, docbook");
+                            + ". Valid values: html, pdf, prawn, docbook, typst");
         };
     }
 }
