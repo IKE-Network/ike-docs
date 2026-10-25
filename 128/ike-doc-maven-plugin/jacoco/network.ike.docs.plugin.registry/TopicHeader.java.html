@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopicHeader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">TopicHeader.java</span></div><h1>TopicHeader.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * The parsed header of one AsciiDoc file: the {@code :topic-*:} attribute
+ * block, the anchor and the level-1 heading, read line by line without
+ * AsciidoctorJ. The layout is the one {@code IKE-ASCIIDOC-FRAGMENT.md}
+ * prescribes: an optional comment header, the attribute block (values may
+ * continue on the next line with a trailing backslash), a literal
+ * {@code [[anchor]]} equal to the topic id, then {@code = Title}.
+ *
+ * &lt;p&gt;A file with no {@code :topic-id:} before its heading is not a topic;
+ * it is recorded as an assembly (when it carries {@code include::} lines)
+ * or a plain file, with its title and document attributes, and gets no
+ * header findings. Every kind of module the doc pipeline renders is
+ * covered: topic libraries, assemblies, doc-only and hybrid projects.
+ *
+ * @param file       the file, relative to the scan root, with {@code /} separators
+ * @param topic      whether the file declares a {@code :topic-id:} before its heading
+ * @param id         the topic id, or {@code null} for a file that is not a topic
+ * @param title      the first heading's text: the level-1 heading for a topic;
+ *                   for any other file the first heading of any level, so a
+ *                   chapter file that starts at {@code ==} still has a title
+ * @param level      the heading level of {@link #title()} (1 for {@code =}),
+ *                   or 0 when the file has no heading
+ * @param attributes every {@code :topic-*:} attribute in declaration order,
+ *                   keyed without the {@code topic-} prefix
+ * @param documentAttributes every other {@code :name: value} attribute in the
+ *                   header, before the heading or in the contiguous block
+ *                   after it ({@code doctype}, {@code toc}, ...), in order
+ * @param anchor     {@code present}, {@code missing} or {@code mismatched}
+ *                   for a topic; {@code null} for other files
+ * @param charCount  characters from the anchor line (or the heading, when
+ *                   there is no anchor) to the end of the file
+ * @param includes   the number of {@code include::} lines in the file
+ * @param findings   what is wrong with the header, empty when nothing is
+ * @since 109
+ */
+<span class="fc" id="L48">public record TopicHeader(String file, boolean topic, String id, String title, int level,</span>
+                          Map&lt;String, String&gt; attributes, Map&lt;String, String&gt; documentAttributes,
+                          String anchor, long charCount, int includes, List&lt;String&gt; findings) {
+
+    /** Attributes every topic must declare, without the {@code topic-} prefix. */
+<span class="fc" id="L53">    public static final List&lt;String&gt; REQUIRED = List.of(&quot;id&quot;, &quot;type&quot;, &quot;status&quot;, &quot;keywords&quot;);</span>
+
+    /**
+     * The topic types {@code IKE-TOPIC-REGISTRY.md} allows, plus
+     * {@code procedure}, which {@code ike-doc-ingest} writes for task topics.
+     */
+<span class="fc" id="L59">    public static final Set&lt;String&gt; TYPES =</span>
+<span class="fc" id="L60">            Set.of(&quot;concept&quot;, &quot;task&quot;, &quot;procedure&quot;, &quot;reference&quot;, &quot;dialog&quot;);</span>
+
+    /** The topic statuses {@code IKE-TOPIC-REGISTRY.md} allows. */
+<span class="fc" id="L63">    public static final Set&lt;String&gt; STATUSES =</span>
+<span class="fc" id="L64">            Set.of(&quot;draft&quot;, &quot;proposed&quot;, &quot;review&quot;, &quot;published&quot;, &quot;deprecated&quot;);</span>
+
+    /**
+     * Parse one file.
+     *
+     * @param file the file to read, UTF-8
+     * @param root the scan root the file lies under; {@link #file()} is
+     *             expressed relative to it
+     * @return the parsed header
+     * @throws IOException if the file cannot be read
+     */
+    public static TopicHeader parse(Path file, Path root) throws IOException {
+<span class="fc" id="L76">        String relative = root.relativize(file).toString().replace('\\', '/');</span>
+<span class="fc" id="L77">        return parse(relative, Files.readString(file, StandardCharsets.UTF_8));</span>
+    }
+
+    /**
+     * Parse file content already in memory.
+     *
+     * @param relative the file's path relative to its scan root
+     * @param content  the file content
+     * @return the parsed header
+     */
+    public static TopicHeader parse(String relative, String content) {
+<span class="fc" id="L88">        List&lt;String&gt; lines = content.lines().toList();</span>
+<span class="fc" id="L89">        Map&lt;String, String&gt; attributes = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L90">        Map&lt;String, String&gt; documentAttributes = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L91">        String pendingName = null;</span>
+<span class="fc" id="L92">        StringBuilder pendingValue = null;</span>
+<span class="fc" id="L93">        String anchorText = null;</span>
+<span class="fc" id="L94">        int anchorIndex = -1;</span>
+<span class="fc" id="L95">        int headingIndex = -1;</span>
+<span class="fc" id="L96">        String title = null;</span>
+<span class="fc" id="L97">        int level = 0;</span>
+
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        for (int i = 0; i &lt; lines.size(); i++) {</span>
+<span class="fc" id="L100">            String line = lines.get(i);</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if (pendingName != null) {</span>
+<span class="fc" id="L102">                String text = line.strip();</span>
+<span class="fc" id="L103">                boolean continues = text.endsWith(&quot;\\&quot;);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">                String piece = continues ? text.substring(0, text.length() - 1).strip() : text;</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">                if (!piece.isEmpty()) {</span>
+<span class="fc" id="L106">                    pendingValue.append(' ').append(piece);</span>
+                }
+<span class="fc bfc" id="L108" title="All 2 branches covered.">                if (!continues) {</span>
+<span class="fc" id="L109">                    attributes.put(pendingName, pendingValue.toString().strip());</span>
+<span class="fc" id="L110">                    pendingName = null;</span>
+                }
+                continue;
+            }
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (line.startsWith(&quot;= &quot;)) {</span>
+<span class="fc" id="L115">                headingIndex = i;</span>
+<span class="fc" id="L116">                title = line.substring(2).strip();</span>
+<span class="fc" id="L117">                level = 1;</span>
+<span class="fc" id="L118">                break;</span>
+            }
+<span class="pc bpc" id="L120" title="2 of 6 branches missed.">            if (line.startsWith(&quot;==&quot;) &amp;&amp; headingIndex &lt; 0 &amp;&amp; !attributes.containsKey(&quot;id&quot;)) {</span>
+<span class="fc" id="L121">                int depth = 0;</span>
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">                while (depth &lt; line.length() &amp;&amp; line.charAt(depth) == '=') {</span>
+<span class="fc" id="L123">                    depth++;</span>
+                }
+<span class="pc bpc" id="L125" title="2 of 4 branches missed.">                if (depth &lt; line.length() &amp;&amp; line.charAt(depth) == ' ') {</span>
+<span class="fc" id="L126">                    headingIndex = i;</span>
+<span class="fc" id="L127">                    title = line.substring(depth + 1).strip();</span>
+<span class="fc" id="L128">                    level = depth;</span>
+<span class="fc" id="L129">                    break;</span>
+                }
+            }
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            if (line.startsWith(&quot;//&quot;)) {</span>
+<span class="fc" id="L133">                continue;</span>
+            }
+<span class="fc" id="L135">            String stripped = line.strip();</span>
+<span class="pc bpc" id="L136" title="2 of 6 branches missed.">            if (stripped.startsWith(&quot;[[&quot;) &amp;&amp; stripped.endsWith(&quot;]]&quot;) &amp;&amp; stripped.length() &gt; 4) {</span>
+<span class="fc" id="L137">                anchorText = stripped.substring(2, stripped.length() - 2).strip();</span>
+<span class="fc" id="L138">                anchorIndex = i;</span>
+<span class="fc" id="L139">                continue;</span>
+            }
+<span class="fc bfc" id="L141" title="All 2 branches covered.">            if (line.startsWith(&quot;:&quot;)) {</span>
+<span class="fc" id="L142">                int close = line.indexOf(':', 1);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">                if (close &gt; 1) {</span>
+<span class="fc" id="L144">                    String name = line.substring(1, close);</span>
+<span class="fc" id="L145">                    String value = line.substring(close + 1).strip();</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">                    if (name.startsWith(&quot;topic-&quot;)) {</span>
+<span class="fc" id="L147">                        String key = name.substring(&quot;topic-&quot;.length());</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                        if (value.endsWith(&quot;\\&quot;)) {</span>
+<span class="fc" id="L149">                            pendingName = key;</span>
+<span class="fc" id="L150">                            pendingValue = new StringBuilder(</span>
+<span class="fc" id="L151">                                    value.substring(0, value.length() - 1).strip());</span>
+                        } else {
+<span class="fc" id="L153">                            attributes.put(key, value);</span>
+                        }
+<span class="pc bnc" id="L155" title="All 4 branches missed.">                    } else if (!name.startsWith(&quot;!&quot;) &amp;&amp; !name.endsWith(&quot;!&quot;)) {</span>
+<span class="nc" id="L156">                        documentAttributes.put(name, value);</span>
+                    }
+                }
+            }
+        }
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        if (pendingName != null) {</span>
+<span class="nc" id="L162">            attributes.put(pendingName, pendingValue.toString().strip());</span>
+        }
+        // The AsciiDoc document header: attribute lines contiguous with the title.
+<span class="pc bpc" id="L165" title="1 of 4 branches missed.">        for (int i = headingIndex + 1; headingIndex &gt;= 0 &amp;&amp; i &lt; lines.size(); i++) {</span>
+<span class="fc" id="L166">            String line = lines.get(i);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">            if (!line.startsWith(&quot;:&quot;)) {</span>
+<span class="fc" id="L168">                break;</span>
+            }
+<span class="fc" id="L170">            int close = line.indexOf(':', 1);</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">            if (close &gt; 1) {</span>
+<span class="fc" id="L172">                String name = line.substring(1, close);</span>
+<span class="pc bpc" id="L173" title="3 of 6 branches missed.">                if (!name.startsWith(&quot;topic-&quot;) &amp;&amp; !name.startsWith(&quot;!&quot;) &amp;&amp; !name.endsWith(&quot;!&quot;)) {</span>
+<span class="fc" id="L174">                    documentAttributes.put(name, line.substring(close + 1).strip());</span>
+                }
+            }
+        }
+
+<span class="fc" id="L179">        int includes = 0;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        for (String line : lines) {</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">            if (line.startsWith(&quot;include::&quot;)) {</span>
+<span class="fc" id="L182">                includes++;</span>
+            }
+<span class="fc" id="L184">        }</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        int start = anchorIndex &gt;= 0 ? anchorIndex : Math.max(headingIndex, 0);</span>
+<span class="fc" id="L186">        long charCount = 0;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        for (int i = start; i &lt; lines.size(); i++) {</span>
+<span class="fc" id="L188">            charCount += lines.get(i).length() + 1;</span>
+        }
+
+<span class="fc" id="L191">        boolean topic = attributes.containsKey(&quot;id&quot;);</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (!topic) {</span>
+<span class="fc" id="L193">            return new TopicHeader(relative, false, null, title, level, attributes,</span>
+<span class="fc" id="L194">                    documentAttributes, null, charCount, includes, List.of());</span>
+        }
+<span class="fc" id="L196">        String id = attributes.get(&quot;id&quot;);</span>
+<span class="fc" id="L197">        List&lt;String&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L198">        List&lt;String&gt; missing = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        for (String required : REQUIRED) {</span>
+<span class="pc bpc" id="L200" title="1 of 4 branches missed.">            if (!attributes.containsKey(required) || attributes.get(required).isBlank()) {</span>
+<span class="fc" id="L201">                missing.add(required);</span>
+            }
+<span class="fc" id="L203">        }</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (String m : missing) {</span>
+<span class="fc" id="L205">            findings.add(&quot;missing required attribute :topic-&quot; + m + &quot;:&quot;);</span>
+<span class="fc" id="L206">        }</span>
+<span class="fc" id="L207">        String type = attributes.get(&quot;type&quot;);</span>
+<span class="pc bpc" id="L208" title="3 of 6 branches missed.">        if (type != null &amp;&amp; !type.isBlank() &amp;&amp; !TYPES.contains(type)) {</span>
+<span class="nc" id="L209">            findings.add(&quot;unknown type '&quot; + type + &quot;' (expected one of &quot; + sorted(TYPES) + &quot;)&quot;);</span>
+        }
+<span class="fc" id="L211">        String status = attributes.get(&quot;status&quot;);</span>
+<span class="pc bpc" id="L212" title="2 of 6 branches missed.">        if (status != null &amp;&amp; !status.isBlank() &amp;&amp; !STATUSES.contains(status)) {</span>
+<span class="nc" id="L213">            findings.add(&quot;unknown status '&quot; + status + &quot;' (expected one of &quot; + sorted(STATUSES) + &quot;)&quot;);</span>
+        }
+        String anchor;
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        if (anchorText == null) {</span>
+<span class="nc" id="L217">            anchor = &quot;missing&quot;;</span>
+<span class="nc" id="L218">            findings.add(&quot;no [[&quot; + id + &quot;]] anchor before the heading&quot;);</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        } else if (anchorText.equals(id)) {</span>
+<span class="fc" id="L220">            anchor = &quot;present&quot;;</span>
+        } else {
+<span class="fc" id="L222">            anchor = &quot;mismatched&quot;;</span>
+<span class="fc" id="L223">            findings.add(&quot;anchor [[&quot; + anchorText + &quot;]] does not match :topic-id: &quot; + id);</span>
+        }
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if (headingIndex &lt; 0) {</span>
+<span class="nc" id="L226">            findings.add(&quot;no level-1 heading (= Title)&quot;);</span>
+        }
+<span class="fc" id="L228">        return new TopicHeader(relative, true, id, title, level, attributes, documentAttributes,</span>
+<span class="fc" id="L229">                anchor, charCount, includes, List.copyOf(findings));</span>
+    }
+
+    /**
+     * The required attributes this header lacks, in the order of {@link #REQUIRED}.
+     *
+     * @return the missing attribute names without the {@code topic-} prefix
+     */
+    public List&lt;String&gt; missingRequired() {
+<span class="fc" id="L238">        List&lt;String&gt; missing = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        for (String required : REQUIRED) {</span>
+<span class="pc bpc" id="L240" title="1 of 4 branches missed.">            if (!attributes.containsKey(required) || attributes.get(required).isBlank()) {</span>
+<span class="fc" id="L241">                missing.add(required);</span>
+            }
+<span class="fc" id="L243">        }</span>
+<span class="fc" id="L244">        return missing;</span>
+    }
+
+    /**
+     * The {@code :topic-keywords:} value split on commas and trimmed.
+     *
+     * @return the keywords, empty when the attribute is absent
+     */
+    public List&lt;String&gt; keywords() {
+<span class="fc" id="L253">        String raw = attributes.get(&quot;keywords&quot;);</span>
+<span class="pc bpc" id="L254" title="2 of 4 branches missed.">        if (raw == null || raw.isBlank()) {</span>
+<span class="nc" id="L255">            return List.of();</span>
+        }
+<span class="fc" id="L257">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        for (String k : raw.split(&quot;,&quot;)) {</span>
+<span class="fc" id="L259">            String t = k.strip();</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">            if (!t.isEmpty()) {</span>
+<span class="fc" id="L261">                out.add(t);</span>
+            }
+        }
+<span class="fc" id="L264">        return out;</span>
+    }
+
+    private static List&lt;String&gt; sorted(Set&lt;String&gt; values) {
+<span class="nc" id="L268">        return values.stream().sorted().toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
