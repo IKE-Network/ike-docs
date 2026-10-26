@@ -12,14 +12,14 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>koncept-asciidoc-extension</artifactId>
-  <version>129</version>
+  <version>130</version>
 </dependency>
 ```
 
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="koncept-asciidoc-extension" rev="129">
+<dependency org="network.ike.docs" name="koncept-asciidoc-extension" rev="130">
   <artifact name="koncept-asciidoc-extension" type="jar" />
 </dependency>
 ```
@@ -28,24 +28,24 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='koncept-asciidoc-extension', version='129')
+@Grab(group='network.ike.docs', module='koncept-asciidoc-extension', version='130')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:koncept-asciidoc-extension:129'
+implementation 'network.ike.docs:koncept-asciidoc-extension:130'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "koncept-asciidoc-extension" % "129"
+libraryDependencies += "network.ike.docs" % "koncept-asciidoc-extension" % "130"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/koncept-asciidoc-extension "129"]
+[network.ike.docs/koncept-asciidoc-extension "130"]
 ```
