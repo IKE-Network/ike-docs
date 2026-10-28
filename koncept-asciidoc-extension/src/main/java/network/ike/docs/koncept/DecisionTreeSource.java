@@ -428,6 +428,11 @@ final class DecisionTreeSource {
                         !"[".equals(m.group(1)), !"]".equals(m.group(4)));
             } else if (List.of("from", "of", "in").contains(word.toLowerCase(Locale.ROOT))) {
                 mode = word.toLowerCase(Locale.ROOT);
+            } else if ("from".equals(mode) && derivationConcept == null
+                    && Derivation.of(new Concept(word, "", null)).isPresent()) {
+                // a derivation kind written bare after from, as it reads naturally and as the live
+                // surface's assistant writes it: from CumulativeHazard of ...
+                derivationConcept = new Concept(word, "", null);
             } else {
                 problems.add("line " + line.number() + ": an unexpected word: " + word);
             }

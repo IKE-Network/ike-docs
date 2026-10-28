@@ -284,6 +284,26 @@ class DecisionTreeBlockRenderingTest {
         assertFalse(html.contains("The tree has gaps"), () -> html);
     }
 
+    @Test
+    @DisplayName("A derivation kind written bare after from, as the live surface's assistant writes it, reads as the kind")
+    void readsBareDerivationKinds() {
+        String bare = ASSUMED_TREE
+                .replace("from k:Complement[] of", "from Complement of")
+                .replace("from k:CumulativeHazard[Cumulative hazard] of", "from CumulativeHazard of")
+                .replace("from k:BayesMarginal[Bayes marginal] of", "from BayesMarginal of")
+                .replace("from k:BayesPosterior[Bayes posterior] of", "from BayesPosterior of")
+                .replace("from k:Product[] of", "from Product of");
+        assertFalse(bare.contains("from k:"), "every kind is written bare");
+
+        Parsed parsed = DecisionTreeSource.parse(List.of(bare.split("\n")));
+
+        assertTrue(parsed.problems().isEmpty(), () -> "problems: " + parsed.problems());
+        DecisionTreeRollback rollback = DecisionTreeRollback.of(parsed.root(), 100_000);
+        assertTrue(rollback.findings().isEmpty(), () -> "findings: " + rollback.findings());
+        assertEquals(3_880, rollback.value(parsed.root().children.get(0)).orElseThrow().lower(), 1.0);
+        assertEquals(4_188, rollback.value(parsed.root().children.get(1)).orElseThrow().lower(), 1.0);
+    }
+
     private static String convert(String adoc) {
         Options options = Options.builder()
                 .safe(SafeMode.UNSAFE)
