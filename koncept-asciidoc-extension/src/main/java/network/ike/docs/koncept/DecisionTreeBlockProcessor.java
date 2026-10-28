@@ -92,6 +92,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         List<String> source = new ArrayList<>();
         source.addAll(figure(parsed.root(), rollback, symbol, title));
         source.add("");
+        source.addAll(assumptions(parsed.root(), rollback, symbol));
         source.addAll(table(rollback, symbol));
         List<String> problems = new ArrayList<>(parsed.problems());
         problems.addAll(rollback.findings());
@@ -236,6 +237,33 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         return value.map(v -> DecisionTreeFormat.html(DecisionTreeFormat.money(v, symbol))).orElse("?");
     }
 
+    // ── The assumptions ──────────────────────────────────────────────────────
+
+    /** The stated parameters as the topics' table of model assumptions; nothing when the block states none. */
+    static List<String> assumptions(Node root, DecisionTreeRollback rollback, String symbol) {
+        List<String> source = new ArrayList<>();
+        List<DecisionTreeSource.Measure> stated = root.parameters().stream().filter(DecisionTreeSource.Measure::stated).toList();
+        if (stated.isEmpty()) {
+            return source;
+        }
+        source.add(".Model assumptions and default values");
+        source.add("[cols=\"3,1,2\", options=\"header\"]");
+        source.add("|===");
+        source.add("| Quantity | Value | Basis");
+        for (DecisionTreeSource.Measure parameter : stated) {
+            String value = parameter.semantic() == null
+                    ? DecisionTreeFormat.plain(parameter.bounds())
+                    : DecisionTreeFormat.plain(parameter.bounds()) + " " + parameter.semantic().shown();
+            String basis = parameter.basis() == null ? "" : parameter.basis()
+                    + (parameter.source() == null ? "" : ", " + parameter.source());
+            source.add("| " + DecisionTreeFormat.cell(parameter.name()) + " | " + DecisionTreeFormat.cell(value)
+                    + " | " + DecisionTreeFormat.cell(basis));
+        }
+        source.add("|===");
+        source.add("");
+        return source;
+    }
+
     // ── The worked table ─────────────────────────────────────────────────────
 
     /** The table where each badged number is worked from the inputs, in the order of the computation. */
@@ -246,9 +274,12 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         source.add("|===");
         source.add("| No. | What it is | How it is computed | Result");
         for (Step step : rollback.steps()) {
-            source.add("| [.figure-callout]#" + step.number() + "# | " + step.mark() + " " + chip(step.node())
-                    + " | " + DecisionTreeFormat.cell(step.how()) + " | "
-                    + DecisionTreeFormat.cell(DecisionTreeFormat.money(step.result(), symbol)) + " " + unit(step));
+            String result = step.node() == null
+                    ? DecisionTreeFormat.cell(DecisionTreeFormat.plain(step.result()))
+                    : DecisionTreeFormat.cell(DecisionTreeFormat.money(step.result(), symbol)) + " " + unit(step);
+            String what = step.node() == null ? DecisionTreeFormat.cell(step.what()) : step.mark() + " " + chip(step.node());
+            source.add("| [.figure-callout]#" + step.number() + "# | " + what
+                    + " | " + DecisionTreeFormat.cell(step.how()) + " | " + result);
         }
         source.add("|===");
         return source;

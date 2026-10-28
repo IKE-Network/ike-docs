@@ -58,7 +58,46 @@ final class DecisionTreeSource {
     enum Kind { DECISION, ALTERNATIVE, CHANCE, EVENT, OUTCOME }
 
     /** The kinds of measure a vertex carries. */
-    enum MeasureKind { PROBABILITY, MONEY, HEALTH }
+    enum MeasureKind { PROBABILITY, MONEY, HEALTH, PARAMETER }
+
+    /**
+     * The derivation kinds with native implementations, as the IKE starter set names them, known
+     * here by the identity the starter set gives each ({@code IkeConcept}) and by its bare name, so a
+     * block written with or without identities reads alike.
+     */
+    enum Derivation {
+        COMPLEMENT("Complement", 1),
+        PRODUCT("Product", -1),
+        CUMULATIVE_HAZARD("Cumulative hazard", 2),
+        BAYES_POSTERIOR("Bayes posterior", 3),
+        BAYES_MARGINAL("Bayes marginal", 3);
+
+        final String label;
+        /** The operands the kind reads, or -1 for two or more. */
+        final int arity;
+
+        Derivation(String label, int arity) {
+            this.label = label;
+            this.arity = arity;
+        }
+
+        /** The kind a concept token names: by its label or key, case and spaces aside. */
+        static Optional<Derivation> of(Concept concept) {
+            for (String name : new String[] {concept.label(), concept.key()}) {
+                if (name == null) {
+                    continue;
+                }
+                String bare = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
+                for (Derivation kind : values()) {
+                    String own = kind.label.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
+                    if (bare.equals(own) || bare.equals(own + "derivation")) {
+                        return Optional.of(kind);
+                    }
+                }
+            }
+            return Optional.empty();
+        }
+    }
 
     /** A concept as written: key and label are aids, the identifier is the identity. */
     record Concept(String key, String label, String identifier) {
@@ -109,6 +148,27 @@ final class DecisionTreeSource {
             return new Interval(1 - upper, 1 - lower, upperOpen, lowerOpen);
         }
 
+        /** The interval quotient, for a divisor that does not cross zero. */
+        Interval dividedBy(Interval divisor) {
+            if (divisor.lower <= 0 && divisor.upper >= 0) {
+                throw new ArithmeticException("a divisor crosses zero");
+            }
+            double[] q = {lower / divisor.lower, lower / divisor.upper, upper / divisor.lower, upper / divisor.upper};
+            boolean[] open = {lowerOpen || divisor.lowerOpen, lowerOpen || divisor.upperOpen,
+                    upperOpen || divisor.lowerOpen, upperOpen || divisor.upperOpen};
+            int least = 0;
+            int greatest = 0;
+            for (int i = 1; i < 4; i++) {
+                if (q[i] < q[least] || (q[i] == q[least] && !open[i])) {
+                    least = i;
+                }
+                if (q[i] > q[greatest] || (q[i] == q[greatest] && !open[i])) {
+                    greatest = i;
+                }
+            }
+            return new Interval(q[least], q[greatest], open[least], open[greatest]);
+        }
+
         Interval clip(double floor, double ceiling) {
             double lo = Math.max(floor, Math.min(ceiling, lower));
             double hi = Math.max(floor, Math.min(ceiling, upper));
@@ -126,9 +186,24 @@ final class DecisionTreeSource {
         }
     }
 
-    /** One measure a vertex carries. */
-    record Measure(MeasureKind kind, Interval bounds, Concept semantic, String basis, String source, String derived,
-                   int line) {
+    /**
+     * One measure a vertex carries: stated with bounds, or derived from a kind over the quantities
+     * it reads. A parameter also names the quantity it measures.
+     */
+    record Measure(MeasureKind kind, Interval bounds, Concept semantic, String basis, String source, Concept quantity,
+                   Derivation derivation, Concept derivationConcept, List<Concept> operands, int line) {
+        boolean stated() {
+            return bounds != null;
+        }
+
+        boolean derived() {
+            return derivationConcept != null;
+        }
+
+        /** What this measure is called in a worked table: its quantity, else its kind. */
+        String name() {
+            return quantity != null ? quantity.shown() : kind.name().toLowerCase(Locale.ROOT);
+        }
     }
 
     /** One vertex of the tree, with what it carries and what is beneath it. */
@@ -168,7 +243,11 @@ final class DecisionTreeSource {
         }
 
         List<Measure> costs() {
-            return measures.stream().filter(m -> m.kind() != MeasureKind.PROBABILITY).toList();
+            return measures.stream().filter(m -> m.kind() == MeasureKind.MONEY || m.kind() == MeasureKind.HEALTH).toList();
+        }
+
+        List<Measure> parameters() {
+            return measures.stream().filter(m -> m.kind() == MeasureKind.PARAMETER).toList();
         }
     }
 
@@ -294,6 +373,7 @@ final class DecisionTreeSource {
             case "probability", "p" -> MeasureKind.PROBABILITY;
             case "money" -> MeasureKind.MONEY;
             case "health" -> MeasureKind.HEALTH;
+            case "parameter" -> MeasureKind.PARAMETER;
             default -> null;
         };
         if (kind == null) {
@@ -303,23 +383,78 @@ final class DecisionTreeSource {
         if (!line.children().isEmpty()) {
             problems.add("line " + line.number() + ": a measure has nothing beneath it");
         }
-        String head = head(line.rest());
-        Matcher m = INTERVAL.matcher(head);
-        if (!m.matches()) {
-            problems.add("line " + line.number() + ": a measure begins with an interval, [lo,hi]: " + head);
+        boolean parameter = kind == MeasureKind.PARAMETER;
+        boolean share = parameter || kind == MeasureKind.PROBABILITY;
+        Interval bounds = null;
+        Concept quantity = null;
+        Concept derivationConcept = null;
+        List<Concept> operands = new ArrayList<>();
+        Concept unit = null;
+        String mode = "";
+        List<String> words = words(head(line.rest()));
+        for (int i = 0; i < words.size(); i++) {
+            String word = words.get(i);
+            if (word.startsWith("k:")) {
+                String text = word;
+                if (i + 1 < words.size() && words.get(i + 1).startsWith("@id=")) {
+                    text = word + " " + words.get(++i);
+                }
+                Optional<Concept> token = concept(text);
+                if (token.isEmpty()) {
+                    problems.add("line " + line.number() + ": not a k: token: " + text);
+                    continue;
+                }
+                switch (mode) {
+                    case "from" -> derivationConcept = token.get();
+                    case "of" -> operands.add(token.get());
+                    case "in" -> unit = token.get();
+                    default -> {
+                        if (parameter && quantity == null) {
+                            quantity = token.get();
+                        } else if (!parameter && unit == null && bounds != null) {
+                            unit = token.get();
+                        } else {
+                            problems.add("line " + line.number() + ": an unexpected token: " + text);
+                        }
+                    }
+                }
+            } else if (word.startsWith("[") || word.startsWith("(")) {
+                Matcher m = INTERVAL.matcher(word);
+                if (!m.matches()) {
+                    problems.add("line " + line.number() + ": not an interval: " + word);
+                    continue;
+                }
+                bounds = new Interval(bound(m.group(2), Double.NEGATIVE_INFINITY), bound(m.group(3), Double.POSITIVE_INFINITY),
+                        !"[".equals(m.group(1)), !"]".equals(m.group(4)));
+            } else if (List.of("from", "of", "in").contains(word.toLowerCase(Locale.ROOT))) {
+                mode = word.toLowerCase(Locale.ROOT);
+            } else {
+                problems.add("line " + line.number() + ": an unexpected word: " + word);
+            }
+        }
+        if (bounds == null && derivationConcept == null) {
+            problems.add("line " + line.number() + ": a measure begins with an interval, [lo,hi], or is derived from a kind: " + head(line.rest()));
             return;
         }
-        Interval bounds = new Interval(bound(m.group(2), Double.NEGATIVE_INFINITY), bound(m.group(3), Double.POSITIVE_INFINITY),
-                !"[".equals(m.group(1)), !"]".equals(m.group(4)));
-        String rest = m.group(5).strip();
-        Concept semantic = null;
-        if (!rest.isEmpty()) {
-            semantic = concept(rest).orElse(null);
-            if (semantic == null) {
-                problems.add("line " + line.number() + ": a measure semantic is not a k: token: " + rest);
+        if (bounds != null && derivationConcept != null) {
+            problems.add("line " + line.number() + ": a measure is stated or derived, not both");
+        }
+        Derivation derivation = null;
+        if (derivationConcept != null) {
+            derivation = Derivation.of(derivationConcept).orElse(null);
+            if (derivation == null) {
+                problems.add("line " + line.number() + ": a derivation names no kind the build can run: " + derivationConcept.shown());
+            } else if (derivation.arity >= 0 ? operands.size() != derivation.arity : operands.size() < 2) {
+                problems.add("line " + line.number() + ": a " + derivation.label.toLowerCase(Locale.ROOT) + " reads "
+                        + (derivation.arity >= 0 ? derivation.arity + "" : "two or more") + " operands, not " + operands.size());
             }
-        } else if (kind != MeasureKind.PROBABILITY) {
-            problems.add("line " + line.number() + ": a cost names its measure semantic after its interval");
+        }
+        if (parameter && quantity == null) {
+            problems.add("line " + line.number() + ": a parameter names its quantity");
+        }
+        if (unit == null && !share) {
+            problems.add("line " + line.number() + ": a cost names its measure semantic"
+                    + (derivationConcept != null ? " after in" : " after its interval"));
         }
         Map<String, String> attributes = attributes(line.rest());
         String basis = attributes.get("basis");
@@ -327,13 +462,16 @@ final class DecisionTreeSource {
             problems.add("line " + line.number() + ": a basis is estimated, cited or derived, not " + basis);
             basis = null;
         }
+        if (basis == null && derivationConcept != null) {
+            basis = "derived";
+        }
         attributes.keySet().forEach(name -> {
-            if (!List.of("basis", "source", "derived", "@vertex").contains(name)) {
+            if (!List.of("basis", "source", "@vertex").contains(name)) {
                 problems.add("line " + line.number() + ": unknown attribute of a measure: " + name);
             }
         });
-        node.measures.add(new Measure(kind, bounds, semantic, basis, attributes.get("source"), attributes.get("derived"),
-                line.number()));
+        node.measures.add(new Measure(kind, bounds, unit, basis, attributes.get("source"), quantity,
+                derivation, derivationConcept, List.copyOf(operands), line.number()));
     }
 
     private static double bound(String s, double unbounded) {

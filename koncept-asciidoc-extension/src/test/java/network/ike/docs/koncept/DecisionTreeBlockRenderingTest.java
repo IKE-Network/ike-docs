@@ -87,6 +87,65 @@ class DecisionTreeBlockRenderingTest {
                     outcome: k:Clear3[clear] @id=11111111-0000-4000-8000-000000000025
             """.formatted(USD, QALY);
 
+    /** The scan tree stated from its model assumptions alone: parameters, and every other number derived. */
+    static final String ASSUMED_TREE = """
+            decision: k:ScanNow[Scan now?] @id=11111111-0000-4000-8000-000000000001
+              parameter = [0.02,0.02] k:Reopening[Late reopening hazard in year 2] @id=q1 basis=estimated
+              parameter = [0.9,0.9] k:Sensitivity[MRA sensitivity] @id=q2 basis=cited source=kwee2007
+              parameter = [0.8,0.8] k:Specificity[MRA specificity] @id=q3 basis=cited source=kwee2007
+              parameter = k:FalseNegative[MRA false-negative rate] @id=q4 from k:Complement[] of k:Sensitivity[] @id=q2
+              parameter = k:FalsePositive[MRA false-positive rate] @id=q5 from k:Complement[] of k:Specificity[] @id=q3
+              parameter = [0.01,0.01] k:Hazard[Annual rupture risk of an untreated reopening] @id=q6
+              parameter = [20,20] k:Years[Years an untreated reopening stays at risk] @id=q7
+              parameter = k:Risk20[Twenty-year rupture risk] @id=q8 from k:CumulativeHazard[Cumulative hazard] of k:Hazard[] @id=q6 k:Years[] @id=q7
+              parameter = [150000,150000] k:RuptureCost[Cost of a rupture] @id=q9 in k:Usd[US dollar] @id=%1$s
+              parameter = [10,10] k:RuptureQaly[QALYs lost per rupture] @id=q10 in k:Qaly[QALY] @id=%2$s
+              parameter = [0.9,0.9] k:Removes[Share of rupture risk retreatment removes] @id=q11
+              parameter = k:Remains[Share of rupture risk retreatment leaves] @id=q12 from k:Complement[] of k:Removes[] @id=q11
+              alternative: k:Scan[scan] @id=11111111-0000-4000-8000-000000000002
+                money = [700,700] k:Usd[US dollar] @id=%1$s
+                health = [0.002,0.002] k:Qaly[QALY] @id=%2$s
+                chance: k:MraResult[MRA result] @id=11111111-0000-4000-8000-000000000003
+                  event: k:Positive[positive] @id=11111111-0000-4000-8000-000000000004
+                    p = from k:BayesMarginal[Bayes marginal] of k:Reopening[] @id=q1 k:Sensitivity[] @id=q2 k:FalsePositive[] @id=q5
+                    money = [5000,5000] k:Usd[US dollar] @id=%1$s
+                    health = [0.01,0.01] k:Qaly[QALY] @id=%2$s
+                    chance: k:Angiogram[Angiogram confirms?] @id=11111111-0000-4000-8000-000000000005
+                      event: k:Confirmed[reopening] @id=11111111-0000-4000-8000-000000000006
+                        p = from k:BayesPosterior[Bayes posterior] of k:Reopening[] @id=q1 k:Sensitivity[] @id=q2 k:FalsePositive[] @id=q5
+                        decision: k:Retreat[Retreat?] @id=11111111-0000-4000-8000-000000000007
+                          alternative: k:DoRetreat[retreat] @id=11111111-0000-4000-8000-000000000008
+                            money = [35000,35000] k:Usd[US dollar] @id=%1$s
+                            health = [0.15,0.15] k:Qaly[QALY] @id=%2$s
+                            outcome: k:RiskCut[risk cut] @id=11111111-0000-4000-8000-000000000009
+                              money = from k:Product[] of k:Remains[] @id=q12 k:Risk20[] @id=q8 k:RuptureCost[] @id=q9 in k:Usd[US dollar] @id=%1$s
+                              health = from k:Product[] of k:Remains[] @id=q12 k:Risk20[] @id=q8 k:RuptureQaly[] @id=q10 in k:Qaly[QALY] @id=%2$s
+                          alternative: k:Leave[leave] @id=11111111-0000-4000-8000-000000000010
+                            outcome: k:Untreated[rupture risk] @id=11111111-0000-4000-8000-000000000011
+                              money = from k:Product[] of k:Risk20[] @id=q8 k:RuptureCost[] @id=q9 in k:Usd[US dollar] @id=%1$s
+                              health = from k:Product[] of k:Risk20[] @id=q8 k:RuptureQaly[] @id=q10 in k:Qaly[QALY] @id=%2$s
+                      residual: k:NoReopening[no reopening] @id=11111111-0000-4000-8000-000000000012
+                        outcome: k:Clear[clear] @id=11111111-0000-4000-8000-000000000013
+                  residual: k:Negative[negative] @id=11111111-0000-4000-8000-000000000014
+                    chance: k:Missed[Reopening missed?] @id=11111111-0000-4000-8000-000000000015
+                      event: k:MissedReopening[reopening] @id=11111111-0000-4000-8000-000000000016
+                        p = from k:BayesPosterior[Bayes posterior] of k:Reopening[] @id=q1 k:FalseNegative[] @id=q4 k:Specificity[] @id=q3
+                        outcome: k:Untreated2[rupture risk] @id=11111111-0000-4000-8000-000000000017
+                          money = from k:Product[] of k:Risk20[] @id=q8 k:RuptureCost[] @id=q9 in k:Usd[US dollar] @id=%1$s
+                          health = from k:Product[] of k:Risk20[] @id=q8 k:RuptureQaly[] @id=q10 in k:Qaly[QALY] @id=%2$s
+                      residual: k:Fine[no reopening] @id=11111111-0000-4000-8000-000000000018
+                        outcome: k:Clear2[clear] @id=11111111-0000-4000-8000-000000000019
+              alternative: k:NoScan[no scan] @id=11111111-0000-4000-8000-000000000020
+                chance: k:Present[Reopening present?] @id=11111111-0000-4000-8000-000000000021
+                  event: k:Yes[reopening] @id=11111111-0000-4000-8000-000000000022
+                    p = [0.02,0.02]
+                    outcome: k:Untreated3[rupture risk] @id=11111111-0000-4000-8000-000000000023
+                      money = from k:Product[] of k:Risk20[] @id=q8 k:RuptureCost[] @id=q9 in k:Usd[US dollar] @id=%1$s
+                      health = from k:Product[] of k:Risk20[] @id=q8 k:RuptureQaly[] @id=q10 in k:Qaly[QALY] @id=%2$s
+                  residual: k:No[no reopening] @id=11111111-0000-4000-8000-000000000024
+                    outcome: k:Clear3[clear] @id=11111111-0000-4000-8000-000000000025
+            """.formatted(USD, QALY);
+
     private static Asciidoctor asciidoctor;
 
     @BeforeAll
@@ -193,6 +252,32 @@ class DecisionTreeBlockRenderingTest {
                 """);
         assertTrue(gaps.contains("The tree has gaps"), "a cost without a semantic is named");
         assertTrue(gaps.contains("digraph decision_tree"), "and the figure still renders");
+    }
+
+    @Test
+    @DisplayName("Stated from its assumptions alone, the block derives the worked numbers and tables the assumptions")
+    void assumptionsDeriveTheWorkedNumbers() {
+        Parsed parsed = DecisionTreeSource.parse(List.of(ASSUMED_TREE.split("\n")));
+        assertTrue(parsed.problems().isEmpty(), () -> "problems: " + parsed.problems());
+        Node root = parsed.root();
+        DecisionTreeRollback rollback = DecisionTreeRollback.of(root, 100_000);
+
+        assertTrue(rollback.findings().isEmpty(), () -> "findings: " + rollback.findings());
+        assertEquals(3_880, rollback.value(root.children.get(0)).orElseThrow().lower(), 1.0);
+        assertEquals(4_188, rollback.value(root.children.get(1)).orElseThrow().lower(), 1.0);
+        assertEquals(4, rollback.steps().stream().filter(step -> step.node() == null).count(),
+                "the four derived parameters are worked first");
+
+        String html = convert("""
+                [decision-tree]
+                ----
+                %s----
+                """.formatted(ASSUMED_TREE));
+        assertTrue(html.contains("Model assumptions and default values"), "the stated parameters are tabled");
+        assertTrue(html.contains("cited, kwee2007"), "with their basis and source");
+        assertTrue(html.contains("Cumulative hazard of"), "a derived parameter is worked in the table");
+        assertTrue(html.contains("3,880"), "and the figure carries the rolled-back value");
+        assertFalse(html.contains("The tree has gaps"), () -> html);
     }
 
     private static String convert(String adoc) {

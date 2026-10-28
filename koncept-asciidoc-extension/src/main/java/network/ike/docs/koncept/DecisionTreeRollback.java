@@ -15,6 +15,8 @@
  */
 package network.ike.docs.koncept;
 
+import network.ike.docs.koncept.DecisionTreeSource.Concept;
+import network.ike.docs.koncept.DecisionTreeSource.Derivation;
 import network.ike.docs.koncept.DecisionTreeSource.Interval;
 import network.ike.docs.koncept.DecisionTreeSource.Kind;
 import network.ike.docs.koncept.DecisionTreeSource.Measure;
@@ -22,9 +24,11 @@ import network.ike.docs.koncept.DecisionTreeSource.MeasureKind;
 import network.ike.docs.koncept.DecisionTreeSource.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -50,6 +54,10 @@ final class DecisionTreeRollback {
     private final Map<Node, Step> steps = new IdentityHashMap<>();
     private final List<Step> stepList = new ArrayList<>();
     private final List<String> findings = new ArrayList<>();
+    /** The parameters by the key of the quantity they measure: its identifier, else its label. */
+    private final Map<String, Measure> parameters = new HashMap<>();
+    private final Map<Measure, Optional<Interval>> measureValues = new IdentityHashMap<>();
+    private final List<Measure> evaluating = new ArrayList<>();
 
     private DecisionTreeRollback(double healthPrice) {
         this.healthPrice = healthPrice;
@@ -57,8 +65,108 @@ final class DecisionTreeRollback {
 
     static DecisionTreeRollback of(Node root, double healthPrice) {
         DecisionTreeRollback rollback = new DecisionTreeRollback(healthPrice);
+        for (Measure parameter : root.parameters()) {
+            if (parameter.quantity() != null) {
+                String key = quantityKey(parameter.quantity());
+                if (rollback.parameters.containsKey(key)) {
+                    rollback.findings.add("line " + parameter.line() + ": a quantity has two parameters");
+                } else {
+                    rollback.parameters.put(key, parameter);
+                }
+            }
+        }
+        // Parameters are worked first, in their stated order, so the table opens with the assumptions.
+        for (Measure parameter : root.parameters()) {
+            rollback.measure(parameter);
+        }
         rollback.compute(root);
         return rollback;
+    }
+
+    /** The key a quantity is referred to by: its identifier when it has one, else its label. */
+    static String quantityKey(Concept quantity) {
+        return quantity.identifier() != null ? quantity.identifier() : quantity.shown();
+    }
+
+    /** The parameters in stated order, for a table of assumptions. */
+    List<Measure> parameters(Node root) {
+        return root.parameters();
+    }
+
+    /** The value of a measure: stated, or derived from the parameters it reads. */
+    Optional<Interval> measure(Measure measure) {
+        if (measureValues.containsKey(measure)) {
+            return measureValues.get(measure);
+        }
+        Optional<Interval> value = evaluate(measure);
+        measureValues.put(measure, value);
+        return value;
+    }
+
+    private Optional<Interval> evaluate(Measure measure) {
+        if (measure.stated()) {
+            if (Double.isNaN(measure.bounds().lower())) {
+                return notDeterminableLine(measure.line(), "a measure has no bounds");
+            }
+            return Optional.of(measure.bounds());
+        }
+        if (!measure.derived() || measure.derivation() == null) {
+            return notDeterminableLine(measure.line(), "a derivation names no kind the build can run");
+        }
+        if (evaluating.contains(measure)) {
+            return notDeterminableLine(measure.line(), "a derivation reads itself");
+        }
+        evaluating.add(measure);
+        try {
+            List<Interval> values = new ArrayList<>();
+            StringBuilder how = new StringBuilder();
+            for (Concept operand : measure.operands()) {
+                Measure parameter = parameters.get(quantityKey(operand));
+                if (parameter == null) {
+                    return notDeterminableLine(measure.line(), "a derivation reads a quantity the tree has no parameter for: "
+                            + operand.shown());
+                }
+                Optional<Interval> value = measure(parameter);
+                if (value.isEmpty()) {
+                    return notDeterminableLine(measure.line(), "an operand of a derivation is not determinable: " + operand.shown());
+                }
+                values.add(value.get());
+                if (!how.isEmpty()) {
+                    how.append(", ");
+                }
+                how.append(parameter.name()).append(" ").append(DecisionTreeFormat.plain(value.get()));
+            }
+            Interval result = derive(measure.derivation(), values);
+            if (measure.kind() == MeasureKind.PARAMETER) {
+                step(measure, "", measure.name(), measure.derivation().label + " of " + how, result);
+            }
+            return Optional.of(result);
+        } finally {
+            evaluating.remove(measure);
+        }
+    }
+
+    /** The kinds, over bounds. */
+    static Interval derive(Derivation kind, List<Interval> v) {
+        return switch (kind) {
+            case COMPLEMENT -> v.get(0).complement();
+            case PRODUCT -> {
+                Interval product = v.get(0);
+                for (int i = 1; i < v.size(); i++) {
+                    product = product.times(v.get(i));
+                }
+                yield product;
+            }
+            case CUMULATIVE_HAZARD -> {
+                double lo = 1 - Math.pow(1 - v.get(0).lower(), v.get(1).lower());
+                double hi = 1 - Math.pow(1 - v.get(0).upper(), v.get(1).upper());
+                yield new Interval(Math.min(lo, hi), Math.max(lo, hi),
+                        v.get(0).lowerOpen() || v.get(1).lowerOpen(), v.get(0).upperOpen() || v.get(1).upperOpen());
+            }
+            case BAYES_POSTERIOR -> v.get(0).times(v.get(1))
+                    .dividedBy(v.get(0).times(v.get(1)).plus(v.get(0).complement().times(v.get(2)))).clip(0, 1);
+            case BAYES_MARGINAL -> v.get(0).times(v.get(1)).plus(v.get(0).complement().times(v.get(2))).clip(0, 1);
+        };
     }
 
     double healthPrice() {
@@ -157,11 +265,12 @@ final class DecisionTreeRollback {
             if (p.isEmpty()) {
                 return notDeterminable(event, "an event carries no probability and is not residual");
             }
-            if (Double.isNaN(p.get().bounds().lower())) {
-                return notDeterminable(event, "a probability has no bounds");
+            Optional<Interval> share = measure(p.get());
+            if (share.isEmpty()) {
+                return notDeterminable(event, "a probability is not determinable");
             }
-            eventShares.put(event, p.get().bounds());
-            others = others.plus(p.get().bounds());
+            eventShares.put(event, share.get());
+            others = others.plus(share.get());
         }
         if (residual != null) {
             eventShares.put(residual, others.complement().clip(0, 1));
@@ -233,15 +342,16 @@ final class DecisionTreeRollback {
     private Optional<Interval> costs(Node node) {
         Interval total = Interval.point(0);
         for (Measure cost : node.costs()) {
-            if (Double.isNaN(cost.bounds().lower())) {
-                return notDeterminable(node, "a cost has no bounds");
+            Optional<Interval> value = measure(cost);
+            if (value.isEmpty()) {
+                return notDeterminable(node, "a cost is not determinable");
             }
             if (cost.semantic() == null) {
                 return notDeterminable(node, "a cost names no measure semantic");
             }
             total = cost.kind() == MeasureKind.MONEY
-                    ? total.plus(cost.bounds())
-                    : total.plus(cost.bounds().times(Interval.point(healthPrice)));
+                    ? total.plus(value.get())
+                    : total.plus(value.get().times(Interval.point(healthPrice)));
         }
         return Optional.of(total);
     }
@@ -252,10 +362,15 @@ final class DecisionTreeRollback {
             if (!how.isEmpty()) {
                 how.append(" + ");
             }
+            String amount = measure(cost).map(DecisionTreeFormat::plain).orElse("?");
+            if (cost.derived() && cost.derivation() != null) {
+                amount = cost.derivation().label.toLowerCase(Locale.ROOT) + " of "
+                        + String.join(", ", cost.operands().stream().map(Concept::shown).toList()) + " = " + amount;
+            }
             if (cost.kind() == MeasureKind.MONEY) {
-                how.append(DecisionTreeFormat.plain(cost.bounds())).append(" billed");
+                how.append(amount).append(" billed");
             } else {
-                how.append(DecisionTreeFormat.plain(cost.bounds())).append(" ")
+                how.append(amount).append(" ")
                         .append(cost.semantic() == null ? "health" : cost.semantic().shown())
                         .append(" × ").append(DecisionTreeFormat.plain(Interval.point(healthPrice)));
             }
@@ -267,6 +382,15 @@ final class DecisionTreeRollback {
         Step step = new Step(stepList.size() + 1, node, mark, what, how, result);
         steps.put(node, step);
         stepList.add(step);
+    }
+
+    private void step(Measure measure, String mark, String what, String how, Interval result) {
+        stepList.add(new Step(stepList.size() + 1, null, mark, what, how, result));
+    }
+
+    private Optional<Interval> notDeterminableLine(int line, String why) {
+        findings.add("line " + line + ": " + why);
+        return Optional.empty();
     }
 
     private Optional<Interval> notDeterminable(Node node, String why) {
