@@ -265,8 +265,12 @@ class DecisionTreeBlockRenderingTest {
         assertTrue(rollback.findings().isEmpty(), () -> "findings: " + rollback.findings());
         assertEquals(3_880, rollback.value(root.children.get(0)).orElseThrow().lower(), 1.0);
         assertEquals(4_188, rollback.value(root.children.get(1)).orElseThrow().lower(), 1.0);
-        assertEquals(4, rollback.steps().stream().filter(step -> step.node() == null).count(),
-                "the four derived parameters are worked first");
+        assertEquals(7, rollback.steps().stream().filter(step -> step.node() == null).count(),
+                "the four derived parameters and the three derived shares are worked");
+        assertTrue(rollback.steps().subList(0, 4).stream().allMatch(step -> step.node() == null && !step.what().startsWith("% ")),
+                "the parameters come first");
+        assertTrue(rollback.steps().stream().anyMatch(step -> step.what().equals("% positive") && step.share()),
+                "the positive-scan share is worked under its event");
 
         String html = convert("""
                 [decision-tree]

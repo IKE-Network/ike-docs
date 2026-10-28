@@ -43,7 +43,7 @@ import java.util.Optional;
 final class DecisionTreeRollback {
 
     /** One worked number: its callout, the node it belongs to, what it is, how it is computed, and the result. */
-    record Step(int number, Node node, String mark, String what, String how, Interval result) {
+    record Step(int number, Node node, String mark, String what, String how, Interval result, boolean share) {
     }
 
     private final double healthPrice;
@@ -57,6 +57,8 @@ final class DecisionTreeRollback {
     /** The parameters by the key of the quantity they measure: its identifier, else its label. */
     private final Map<String, Measure> parameters = new HashMap<>();
     private final Map<Measure, Optional<Interval>> measureValues = new IdentityHashMap<>();
+    /** The event a probability sits on, so a derived share is worked under the event's name. */
+    private final Map<Measure, String> owners = new IdentityHashMap<>();
     private final List<Measure> evaluating = new ArrayList<>();
 
     private DecisionTreeRollback(double healthPrice) {
@@ -137,8 +139,11 @@ final class DecisionTreeRollback {
                 how.append(parameter.name()).append(" ").append(DecisionTreeFormat.plain(value.get()));
             }
             Interval result = derive(measure.derivation(), values);
-            if (measure.kind() == MeasureKind.PARAMETER) {
-                step(measure, "", measure.name(), measure.derivation().label + " of " + how, result);
+            if (measure.kind() == MeasureKind.PARAMETER || measure.kind() == MeasureKind.PROBABILITY) {
+                String what = measure.kind() == MeasureKind.PROBABILITY
+                        ? "% " + owners.getOrDefault(measure, "probability") : measure.name();
+                step(measure, "", what, measure.derivation().label + " of " + how, result,
+                        measure.semantic() == null);
             }
             return Optional.of(result);
         } finally {
@@ -265,6 +270,7 @@ final class DecisionTreeRollback {
             if (p.isEmpty()) {
                 return notDeterminable(event, "an event carries no probability and is not residual");
             }
+            owners.put(p.get(), DecisionTreeFormat.label(event));
             Optional<Interval> share = measure(p.get());
             if (share.isEmpty()) {
                 return notDeterminable(event, "a probability is not determinable");
@@ -379,13 +385,13 @@ final class DecisionTreeRollback {
     }
 
     private void step(Node node, String mark, String what, String how, Interval result) {
-        Step step = new Step(stepList.size() + 1, node, mark, what, how, result);
+        Step step = new Step(stepList.size() + 1, node, mark, what, how, result, false);
         steps.put(node, step);
         stepList.add(step);
     }
 
-    private void step(Measure measure, String mark, String what, String how, Interval result) {
-        stepList.add(new Step(stepList.size() + 1, null, mark, what, how, result));
+    private void step(Measure measure, String mark, String what, String how, Interval result, boolean share) {
+        stepList.add(new Step(stepList.size() + 1, null, mark, what, how, result, share));
     }
 
     private Optional<Interval> notDeterminableLine(int line, String why) {

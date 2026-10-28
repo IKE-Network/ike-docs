@@ -275,7 +275,8 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         source.add("| No. | What it is | How it is computed | Result");
         for (Step step : rollback.steps()) {
             String result = step.node() == null
-                    ? DecisionTreeFormat.cell(DecisionTreeFormat.plain(step.result()))
+                    ? DecisionTreeFormat.cell(step.share() ? DecisionTreeFormat.percent(step.result())
+                            : DecisionTreeFormat.plain(step.result()))
                     : DecisionTreeFormat.cell(DecisionTreeFormat.money(step.result(), symbol)) + " " + unit(step);
             String what = step.node() == null ? DecisionTreeFormat.cell(step.what()) : step.mark() + " " + chip(step.node());
             source.add("| [.figure-callout]#" + step.number() + "# | " + what
