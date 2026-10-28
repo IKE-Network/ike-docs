@@ -48,6 +48,14 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .block(KonceptTreeBlockProcessor.class);
 
+        // The [decision-tree] block: the static projection of the decision-tree block the
+        // assistant surface renders live (dev-decision-tree-blocks) — the Graphviz figure the
+        // regulatory topics hand-write and the worked table beneath it, generated from the
+        // block. Re-parses AsciiDoc, so it is backend-agnostic; the figure renders through
+        // asciidoctor-diagram where the build has it.
+        asciidoctor.javaExtensionRegistry()
+                .block(DecisionTreeBlockProcessor.class);
+
         // The koncept-narrative::Identifier[] block macro: splices a koncept's curated,
         // long-form narrative field into the document as real AsciiDoc source, re-parsed so
         // embedded k: chips resolve normally (IKE-Network/ike-issues#879). Safe for all
