@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 132</div>
+<div class="about-language"><b>Koncept Extension</b> 133</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -97,11 +97,13 @@ loadScripts(document, 'script');</script>
 <div class="block">The <code>[decision-tree]</code> block in the documentation build (<code>dev-decision-tree-blocks</code>):
 the static projection of the block the assistant surface renders live. It reads the block
 store-free (<a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/DecisionTreeSource.html" title="class or interface in network.ike.docs.koncept" class="external-link"><code>DecisionTreeSource</code></a>), rolls it back at a health price
-(<a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/DecisionTreeRollback.html" title="class or interface in network.ike.docs.koncept" class="external-link"><code>DecisionTreeRollback</code></a>), and re-parses two things in the block's place: the Graphviz
-figure the regulatory decision analysis topics hand-write, a square where someone chooses, a
-circle where the world decides, a leaf where the consequences are counted, every number badged
-with a callout; and the worked table beneath it, where each callout's number is computed from
-the inputs, generated rather than maintained.
+(<a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/DecisionTreeRollback.html" title="class or interface in network.ike.docs.koncept" class="external-link"><code>DecisionTreeRollback</code></a>), sweeps every stated value one way (<a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/DecisionTreeSweep.html" title="class or interface in network.ike.docs.koncept" class="external-link"><code>DecisionTreeSweep</code></a>),
+and puts in the block's place what Komet draws: the tree as decision analysts draw it, left to
+right, a square where someone chooses, a circle where the world decides, a triangle where the
+consequences are counted, the rolled-back cost at every glyph, the chosen alternative heavy
+(<a href="https://ike.network/ike-docs/koncept-asciidoc-extension/apidocs/network/ike/docs/koncept/DecisionTreeFigures.html" title="class or interface in network.ike.docs.koncept" class="external-link"><code>DecisionTreeFigures</code></a>); beneath it the tornado of the sweep, one bar per value; then the
+worked table, where each orange callout's number is computed from the inputs, generated rather
+than maintained.
 
 <pre>
 [decision-tree, health-price=100000, symbol="$", title="Should this patient have a scan in year 2?"]
@@ -111,10 +113,11 @@ decision: k:ScanNow[Scan now?] @id=…
 ----
 </pre>
 
-The figure's <code>graphviz</code> block renders through asciidoctor-diagram where the build has it,
-as the topics' own figures do, and stands as its source listing where it does not. A block
-with no root decision renders as a literal block, so the text is visible, never dropped; a
-block with gaps renders with them named in a note.</div>
+The figures are self-contained SVG from the same geometry the live diagram lays out, with label
+widths estimated rather than measured: inline on the html5 family, so the text stays text and a
+wide tree scrolls; as a content-addressed file on Prawn, DocBook and Typst, where an image block
+is what those converters place. A block with no root decision renders as a literal block, so the
+text is visible, never dropped; a block with gaps renders with them named in a note.</div>
 </div>
 </section>
 <section class="summary">

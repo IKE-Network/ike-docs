@@ -3,6 +3,7 @@
 import network.ike.docs.koncept.KonceptGlossaryProcessor;
 import network.ike.docs.koncept.KonceptInlineMacro;
 import network.ike.docs.koncept.KonceptTreeBlockProcessor;
+import network.ike.docs.typst.asciidoc.TypstConverter;
 import org.apache.maven.api.plugin.MojoException;
 import org.apache.maven.api.plugin.annotations.Mojo;
 import org.apache.maven.api.plugin.annotations.Parameter;
@@ -64,7 +65,7 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      *
      * @return the logger
      */
-<span class="nc" id="L67">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+<span class="nc" id="L68">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
 
     // ── Source / output ───────────────────────────────────────────────
 
@@ -113,6 +114,22 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
     @Parameter(property = &quot;ike.skip.docbook&quot;, defaultValue = &quot;true&quot;)
     boolean skipDocbook;
 
+    /**
+     * Skip the Typst backend ({@code .typ} source for {@code typst compile}).
+     * Off by default while the Typst print target is a spike
+     * (IKE-Network/ike-issues#1307).
+     */
+    @Parameter(property = &quot;ike.skip.typst&quot;, defaultValue = &quot;true&quot;)
+    boolean skipTypst;
+
+    /**
+     * The directory {@code typst compile --root} will be given: the converter
+     * emits image paths relative to it so Typst can read files outside the
+     * {@code .typ} file's own directory.
+     */
+    @Parameter(property = &quot;ike.typst.root&quot;, defaultValue = &quot;${basedir}&quot;)
+    File typstRoot;
+
     // ── HTML options ──────────────────────────────────────────────────
 
     /** TOC placement for HTML output. */
@@ -152,8 +169,8 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
     File sharedAsciidocDir;
 
     /** Ruby libraries to require. Defaults to asciidoctor-diagram. */
-<span class="nc" id="L155">    @Parameter</span>
-<span class="nc" id="L156">    List&lt;String&gt; requires = List.of(&quot;asciidoctor-diagram&quot;);</span>
+<span class="nc" id="L172">    @Parameter</span>
+<span class="nc" id="L173">    List&lt;String&gt; requires = List.of(&quot;asciidoctor-diagram&quot;);</span>
 
     // ── Document naming ───────────────────────────────────────────────
 
@@ -197,74 +214,82 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
     Map&lt;String, String&gt; attributes;
 
     /** Creates this goal instance. */
-<span class="nc" id="L200">    public AsciidocMojo() {}</span>
+<span class="nc" id="L217">    public AsciidocMojo() {}</span>
 
     @Override
     public void execute() throws MojoException {
-<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (skip) {</span>
-<span class="nc" id="L205">            getLog().info(&quot;ike:asciidoc skipped&quot;);</span>
-<span class="nc" id="L206">            return;</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L222">            getLog().info(&quot;ike:asciidoc skipped&quot;);</span>
+<span class="nc" id="L223">            return;</span>
         }
-<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (!sourceDirectory.isDirectory()) {</span>
-<span class="nc" id="L209">            getLog().info(&quot;ike:asciidoc: source directory does not exist, skipping — &quot;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (!sourceDirectory.isDirectory()) {</span>
+<span class="nc" id="L226">            getLog().info(&quot;ike:asciidoc: source directory does not exist, skipping — &quot;</span>
                     + sourceDirectory);
-<span class="nc" id="L211">            return;</span>
+<span class="nc" id="L228">            return;</span>
         }
 
-<span class="nc" id="L214">        getLog().info(&quot;ike:asciidoc — source: &quot; + sourceDirectory);</span>
+<span class="nc" id="L231">        getLog().info(&quot;ike:asciidoc — source: &quot; + sourceDirectory);</span>
 
         // Suppress JRuby/AsciidoctorJ java.util.logging output to stderr.
         // Our LogHandler routes messages through Maven's logger instead.
-<span class="nc" id="L218">        Logger asciidoctorLogger = Logger.getLogger(&quot;asciidoctor&quot;);</span>
-<span class="nc" id="L219">        asciidoctorLogger.setUseParentHandlers(false);</span>
-<span class="nc bnc" id="L220" title="All 2 branches missed.">        for (Handler h : asciidoctorLogger.getHandlers()) {</span>
-<span class="nc" id="L221">            asciidoctorLogger.removeHandler(h);</span>
+<span class="nc" id="L235">        Logger asciidoctorLogger = Logger.getLogger(&quot;asciidoctor&quot;);</span>
+<span class="nc" id="L236">        asciidoctorLogger.setUseParentHandlers(false);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        for (Handler h : asciidoctorLogger.getHandlers()) {</span>
+<span class="nc" id="L238">            asciidoctorLogger.removeHandler(h);</span>
         }
-<span class="nc" id="L223">        asciidoctorLogger.setLevel(Level.ALL);</span>
+<span class="nc" id="L240">        asciidoctorLogger.setLevel(Level.ALL);</span>
 
-<span class="nc" id="L225">        try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {</span>
+<span class="nc" id="L242">        try (Asciidoctor asciidoctor = Asciidoctor.Factory.create()) {</span>
             // Route AsciidoctorJ log messages through Maven's logger
-<span class="nc" id="L227">            asciidoctor.registerLogHandler(new MavenLogHandler(getLog()));</span>
+<span class="nc" id="L244">            asciidoctor.registerLogHandler(new MavenLogHandler(getLog()));</span>
 
             // Require Ruby libraries (e.g., asciidoctor-diagram)
-<span class="nc bnc" id="L230" title="All 4 branches missed.">            if (requires != null &amp;&amp; !requires.isEmpty()) {</span>
-<span class="nc" id="L231">                asciidoctor.requireLibrary(requires.toArray(new String[0]));</span>
+<span class="nc bnc" id="L247" title="All 4 branches missed.">            if (requires != null &amp;&amp; !requires.isEmpty()) {</span>
+<span class="nc" id="L248">                asciidoctor.requireLibrary(requires.toArray(new String[0]));</span>
             }
 
             // Register Koncept inline macro (safe for all backends)
-<span class="nc" id="L235">            asciidoctor.javaExtensionRegistry()</span>
-<span class="nc" id="L236">                    .inlineMacro(KonceptInlineMacro.class);</span>
+<span class="nc" id="L252">            asciidoctor.javaExtensionRegistry()</span>
+<span class="nc" id="L253">                    .inlineMacro(KonceptInlineMacro.class);</span>
+
+            // The typst backend's converter (also discoverable through its SPI
+            // registration; registered here so the goal does not depend on
+            // ServiceLoader visibility inside the plugin realm).
+<span class="nc" id="L258">            asciidoctor.javaConverterRegistry().register(TypstConverter.class);</span>
 
             // Register the [koncept-tree] block (indented Koncept chips; IKE-Network/ike-issues#827).
             // Safe for all backends — declines to a literal block outside the html5 family.
-<span class="nc" id="L240">            asciidoctor.javaExtensionRegistry()</span>
-<span class="nc" id="L241">                    .block(KonceptTreeBlockProcessor.class);</span>
+<span class="nc" id="L262">            asciidoctor.javaExtensionRegistry()</span>
+<span class="nc" id="L263">                    .block(KonceptTreeBlockProcessor.class);</span>
 
             // Convert each enabled backend
-<span class="nc" id="L244">            boolean hadErrors = false;</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">            if (!skipHtml) {</span>
-<span class="nc bnc" id="L246" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.HTML, false);</span>
+<span class="nc" id="L266">            boolean hadErrors = false;</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            if (!skipHtml) {</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.HTML, false);</span>
             }
-<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (!skipHtmlSingle) {</span>
-<span class="nc bnc" id="L249" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.HTML, true);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (!skipHtmlSingle) {</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.HTML, true);</span>
             }
-<span class="nc bnc" id="L251" title="All 2 branches missed.">            if (!skipPrawn) {</span>
-<span class="nc bnc" id="L252" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.PDF, false);</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">            if (!skipPrawn) {</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.PDF, false);</span>
             }
-<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (!skipDocbook) {</span>
-<span class="nc bnc" id="L255" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.DOCBOOK, false);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            if (!skipDocbook) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.DOCBOOK, false);</span>
             }
-<span class="nc bnc" id="L257" title="All 4 branches missed.">            if (hadErrors &amp;&amp; strict) {</span>
-<span class="nc" id="L258">                throw new MojoException(</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            if (!skipTypst) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                hadErrors |= !tryConvert(asciidoctor, Backend.TYPST, false);</span>
+            }
+<span class="nc bnc" id="L282" title="All 4 branches missed.">            if (hadErrors &amp;&amp; strict) {</span>
+<span class="nc" id="L283">                throw new MojoException(</span>
                         &quot;ike:asciidoc: one or more backends failed (strict mode)&quot;);
             }
         }
 
         // Validate outputs
-<span class="nc bnc" id="L264" title="All 2 branches missed.">        if (validate) {</span>
-<span class="nc" id="L265">            validateOutputs();</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (validate) {</span>
+<span class="nc" id="L290">            validateOutputs();</span>
         }
-<span class="nc" id="L267">    }</span>
+<span class="nc" id="L292">    }</span>
 
     /**
      * Attempt a backend conversion, logging errors instead of failing.
@@ -273,12 +298,14 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      */
     private boolean tryConvert(Asciidoctor asciidoctor, Backend backend, boolean singleFile) {
         try {
-<span class="nc" id="L276">            convertBackend(asciidoctor, backend, singleFile);</span>
-<span class="nc" id="L277">            return true;</span>
-<span class="nc" id="L278">        } catch (MojoException e) {</span>
-<span class="nc" id="L279">            getLog().error(&quot;ike:asciidoc: &quot; + backend + &quot; conversion failed — &quot;</span>
-<span class="nc" id="L280">                    + e.getMessage());</span>
-<span class="nc" id="L281">            return false;</span>
+<span class="nc" id="L301">            convertBackend(asciidoctor, backend, singleFile);</span>
+<span class="nc" id="L302">            return true;</span>
+<span class="nc" id="L303">        } catch (MojoException e) {</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">            Throwable cause = e.getCause() != null ? e.getCause() : e;</span>
+<span class="nc" id="L305">            getLog().error(&quot;ike:asciidoc: &quot; + backend + &quot; conversion failed — &quot;</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">                    + e.getMessage() + (cause != e ? &quot; (&quot; + cause + &quot;)&quot; : &quot;&quot;));</span>
+<span class="nc" id="L307">            getLog().debug(&quot;ike:asciidoc: &quot; + backend + &quot; conversion failure&quot;, cause);</span>
+<span class="nc" id="L308">            return false;</span>
         }
     }
 
@@ -293,136 +320,141 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
             throws MojoException {
 
         File outDir;
-<span class="nc bnc" id="L296" title="All 6 branches missed.">        if (!standalone &amp;&amp; backend == Backend.HTML &amp;&amp; !singleFile) {</span>
+<span class="nc bnc" id="L323" title="All 6 branches missed.">        if (!standalone &amp;&amp; backend == Backend.HTML &amp;&amp; !singleFile) {</span>
             // Embedded mode: write directly to outputDirectory for Doxia integration
-<span class="nc" id="L298">            outDir = outputDirectory;</span>
+<span class="nc" id="L325">            outDir = outputDirectory;</span>
         } else {
-<span class="nc bnc" id="L300" title="All 2 branches missed.">            String subdir = singleFile ? &quot;html-single&quot; : backend.outputSubdir();</span>
-<span class="nc" id="L301">            outDir = new File(outputDirectory, subdir);</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            String subdir = singleFile ? &quot;html-single&quot; : backend.outputSubdir();</span>
+<span class="nc" id="L328">            outDir = new File(outputDirectory, subdir);</span>
         }
-<span class="nc" id="L303">        outDir.mkdirs();</span>
+<span class="nc" id="L330">        outDir.mkdirs();</span>
 
-<span class="nc" id="L305">        getLog().info(&quot;  backend: &quot; + backend.asciidoctorName()</span>
-<span class="nc bnc" id="L306" title="All 2 branches missed.">                + (singleFile ? &quot; (single-file)&quot; : &quot;&quot;)</span>
+<span class="nc" id="L332">        getLog().info(&quot;  backend: &quot; + backend.asciidoctorName()</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                + (singleFile ? &quot; (single-file)&quot; : &quot;&quot;)</span>
                 + &quot; → &quot; + outDir);
 
         // Register/unregister postprocessor per backend
-<span class="nc bnc" id="L310" title="All 2 branches missed.">        if (backend.supportsPostprocessor()) {</span>
-<span class="nc" id="L311">            asciidoctor.javaExtensionRegistry()</span>
-<span class="nc" id="L312">                    .postprocessor(KonceptGlossaryProcessor.class);</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        if (backend.supportsPostprocessor()) {</span>
+<span class="nc" id="L338">            asciidoctor.javaExtensionRegistry()</span>
+<span class="nc" id="L339">                    .postprocessor(KonceptGlossaryProcessor.class);</span>
         }
 
         try {
-<span class="nc" id="L316">            Attributes attrs = buildAttributes(backend, singleFile);</span>
-<span class="nc" id="L317">            Options options = buildOptions(backend, outDir, attrs, singleFile);</span>
+<span class="nc" id="L343">            Attributes attrs = buildAttributes(backend, singleFile);</span>
+<span class="nc" id="L344">            Options options = buildOptions(backend, outDir, attrs, singleFile);</span>
 
-<span class="nc bnc" id="L319" title="All 6 branches missed.">            if (sourceDocumentName != null &amp;&amp; (singleFile || backend == Backend.PDF)) {</span>
+<span class="nc bnc" id="L346" title="All 6 branches missed.">            if (sourceDocumentName != null &amp;&amp; (singleFile || backend == Backend.PDF)) {</span>
                 // Single document conversion
-<span class="nc" id="L321">                File sourceFile = new File(sourceDirectory, sourceDocumentName);</span>
-<span class="nc bnc" id="L322" title="All 2 branches missed.">                if (!sourceFile.isFile()) {</span>
-<span class="nc" id="L323">                    throw new MojoException(</span>
+<span class="nc" id="L348">                File sourceFile = new File(sourceDirectory, sourceDocumentName);</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">                if (!sourceFile.isFile()) {</span>
+<span class="nc" id="L350">                    throw new MojoException(</span>
                             &quot;Source document not found: &quot; + sourceFile);
                 }
-<span class="nc" id="L326">                asciidoctor.convertFile(sourceFile, options);</span>
-<span class="nc" id="L327">            } else {</span>
+<span class="nc" id="L353">                asciidoctor.convertFile(sourceFile, options);</span>
+<span class="nc" id="L354">            } else {</span>
                 // Convert all .adoc files in source directory
-<span class="nc" id="L329">                List&lt;File&gt; sourceFiles = scanAsciiDocFiles(sourceDirectory.toPath());</span>
-<span class="nc bnc" id="L330" title="All 2 branches missed.">                for (File src : sourceFiles) {</span>
-<span class="nc" id="L331">                    asciidoctor.convertFile(src, options);</span>
-<span class="nc" id="L332">                }</span>
+<span class="nc" id="L356">                List&lt;File&gt; sourceFiles = scanAsciiDocFiles(sourceDirectory.toPath());</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">                for (File src : sourceFiles) {</span>
+<span class="nc" id="L358">                    asciidoctor.convertFile(src, options);</span>
+<span class="nc" id="L359">                }</span>
             }
             // Embedded mode: rename .html → .xhtml for Doxia XHTML parser
-<span class="nc bnc" id="L335" title="All 6 branches missed.">            if (!standalone &amp;&amp; backend == Backend.HTML &amp;&amp; !singleFile) {</span>
-<span class="nc" id="L336">                renameHtmlToXhtml(outDir);</span>
+<span class="nc bnc" id="L362" title="All 6 branches missed.">            if (!standalone &amp;&amp; backend == Backend.HTML &amp;&amp; !singleFile) {</span>
+<span class="nc" id="L363">                renameHtmlToXhtml(outDir);</span>
             }
-<span class="nc" id="L338">        } catch (MojoException e) {</span>
-<span class="nc" id="L339">            throw e;</span>
-<span class="nc" id="L340">        } catch (Exception e) {</span>
-<span class="nc" id="L341">            throw new MojoException(</span>
+<span class="nc" id="L365">        } catch (MojoException e) {</span>
+<span class="nc" id="L366">            throw e;</span>
+<span class="nc" id="L367">        } catch (Exception e) {</span>
+<span class="nc" id="L368">            throw new MojoException(</span>
                     &quot;AsciidoctorJ conversion failed for backend &quot; + backend, e);
         } finally {
             // Unregister postprocessor to prevent it from running on next backend
-<span class="nc bnc" id="L345" title="All 2 branches missed.">            if (backend.supportsPostprocessor()) {</span>
-<span class="nc" id="L346">                asciidoctor.unregisterAllExtensions();</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (backend.supportsPostprocessor()) {</span>
+<span class="nc" id="L373">                asciidoctor.unregisterAllExtensions();</span>
                 // Re-register the inline macro (unregisterAll removes everything)
-<span class="nc" id="L348">                asciidoctor.javaExtensionRegistry()</span>
-<span class="nc" id="L349">                        .inlineMacro(KonceptInlineMacro.class);</span>
+<span class="nc" id="L375">                asciidoctor.javaExtensionRegistry()</span>
+<span class="nc" id="L376">                        .inlineMacro(KonceptInlineMacro.class);</span>
             }
         }
-<span class="nc" id="L352">    }</span>
+<span class="nc" id="L379">    }</span>
 
     /**
      * Build the AsciiDoc attributes for a given backend.
      */
     private Attributes buildAttributes(Backend backend, boolean singleFile) {
-<span class="nc" id="L358">        AttributesBuilder ab = Attributes.builder();</span>
+<span class="nc" id="L385">        AttributesBuilder ab = Attributes.builder();</span>
 
         // Common attributes
-<span class="nc" id="L361">        ab.attribute(&quot;project-version&quot;, projectVersion);</span>
-<span class="nc" id="L362">        ab.attribute(&quot;project-name&quot;, projectName);</span>
-<span class="nc" id="L363">        ab.attribute(&quot;source-highlighter&quot;, &quot;coderay&quot;);</span>
-<span class="nc" id="L364">        ab.attribute(&quot;coderay-linenums-mode&quot;, &quot;table&quot;);</span>
-<span class="nc" id="L365">        ab.attribute(&quot;icons&quot;, &quot;font&quot;);</span>
-<span class="nc" id="L366">        ab.attribute(&quot;sectanchors&quot;, &quot;true&quot;);</span>
-<span class="nc" id="L367">        ab.attribute(&quot;idprefix&quot;, &quot;&quot;);</span>
-<span class="nc" id="L368">        ab.attribute(&quot;idseparator&quot;, &quot;-&quot;);</span>
-<span class="nc" id="L369">        ab.attribute(&quot;allow-uri-read&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L388">        ab.attribute(&quot;project-version&quot;, projectVersion);</span>
+<span class="nc" id="L389">        ab.attribute(&quot;project-name&quot;, projectName);</span>
+<span class="nc" id="L390">        ab.attribute(&quot;source-highlighter&quot;, &quot;coderay&quot;);</span>
+<span class="nc" id="L391">        ab.attribute(&quot;coderay-linenums-mode&quot;, &quot;table&quot;);</span>
+<span class="nc" id="L392">        ab.attribute(&quot;icons&quot;, &quot;font&quot;);</span>
+<span class="nc" id="L393">        ab.attribute(&quot;sectanchors&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L394">        ab.attribute(&quot;idprefix&quot;, &quot;&quot;);</span>
+<span class="nc" id="L395">        ab.attribute(&quot;idseparator&quot;, &quot;-&quot;);</span>
+<span class="nc" id="L396">        ab.attribute(&quot;allow-uri-read&quot;, &quot;true&quot;);</span>
 
         // Diagram attributes
-<span class="nc" id="L372">        ab.attribute(&quot;diagram-server-url&quot;, diagramServerUrl);</span>
-<span class="nc" id="L373">        ab.attribute(&quot;diagram-server-type&quot;, &quot;kroki_io&quot;);</span>
-<span class="nc" id="L374">        ab.attribute(&quot;diagram-format&quot;, &quot;svg&quot;);</span>
-<span class="nc" id="L375">        ab.attribute(&quot;diagram-svg-type&quot;, &quot;inline&quot;);</span>
+<span class="nc" id="L399">        ab.attribute(&quot;diagram-server-url&quot;, diagramServerUrl);</span>
+<span class="nc" id="L400">        ab.attribute(&quot;diagram-server-type&quot;, &quot;kroki_io&quot;);</span>
+<span class="nc" id="L401">        ab.attribute(&quot;diagram-format&quot;, &quot;svg&quot;);</span>
+<span class="nc" id="L402">        ab.attribute(&quot;diagram-svg-type&quot;, &quot;inline&quot;);</span>
         // Disable PlantUML preprocessing — requires a companion service
         // (/plantumlpreprocessor) that self-hosted Kroki typically lacks.
         // Preprocessing is only needed for !include directives; standard
         // PlantUML renders fine without it.
-<span class="nc" id="L380">        ab.attribute(&quot;plantuml-preprocess&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L407">        ab.attribute(&quot;plantuml-preprocess&quot;, &quot;false&quot;);</span>
         // Also set the non-prefixed form (block-level attribute override)
-<span class="nc" id="L382">        ab.attribute(&quot;preprocess&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L409">        ab.attribute(&quot;preprocess&quot;, &quot;false&quot;);</span>
 
         // Generated sources directory
-<span class="nc" id="L385">        ab.attribute(&quot;generated&quot;,</span>
-<span class="nc" id="L386">                new File(outputDirectory.getParentFile(), &quot;generated-sources/asciidoc&quot;)</span>
-<span class="nc" id="L387">                        .getAbsolutePath());</span>
-<span class="nc" id="L388">        ab.attribute(&quot;resources&quot;,</span>
-<span class="nc" id="L389">                new File(sourceDirectory.getParentFile(), &quot;resources&quot;).getAbsolutePath());</span>
+<span class="nc" id="L412">        ab.attribute(&quot;generated&quot;,</span>
+<span class="nc" id="L413">                new File(outputDirectory.getParentFile(), &quot;generated-sources/asciidoc&quot;)</span>
+<span class="nc" id="L414">                        .getAbsolutePath());</span>
+<span class="nc" id="L415">        ab.attribute(&quot;resources&quot;,</span>
+<span class="nc" id="L416">                new File(sourceDirectory.getParentFile(), &quot;resources&quot;).getAbsolutePath());</span>
 
         // Backend-specific attributes
-<span class="nc bnc" id="L392" title="All 4 branches missed.">        switch (backend) {</span>
+<span class="nc bnc" id="L419" title="All 5 branches missed.">        switch (backend) {</span>
             case HTML -&gt; {
-<span class="nc" id="L394">                ab.attribute(&quot;toc&quot;, htmlToc);</span>
-<span class="nc" id="L395">                ab.attribute(&quot;toclevels&quot;, String.valueOf(htmlTocLevels));</span>
-<span class="nc" id="L396">                ab.linkCss(false);</span>
-<span class="nc bnc" id="L397" title="All 2 branches missed.">                if (sharedAsciidocDir.isDirectory()) {</span>
-<span class="nc" id="L398">                    ab.attribute(&quot;docinfodir&quot;, sharedAsciidocDir.getAbsolutePath());</span>
-<span class="nc" id="L399">                    ab.attribute(&quot;docinfo&quot;, &quot;shared&quot;);</span>
+<span class="nc" id="L421">                ab.attribute(&quot;toc&quot;, htmlToc);</span>
+<span class="nc" id="L422">                ab.attribute(&quot;toclevels&quot;, String.valueOf(htmlTocLevels));</span>
+<span class="nc" id="L423">                ab.linkCss(false);</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">                if (sharedAsciidocDir.isDirectory()) {</span>
+<span class="nc" id="L425">                    ab.attribute(&quot;docinfodir&quot;, sharedAsciidocDir.getAbsolutePath());</span>
+<span class="nc" id="L426">                    ab.attribute(&quot;docinfo&quot;, &quot;shared&quot;);</span>
                 }
-<span class="nc" id="L401">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;html5&quot;);</span>
-<span class="nc bnc" id="L402" title="All 2 branches missed.">                if (singleFile) {</span>
-<span class="nc" id="L403">                    ab.dataUri(true);</span>
+<span class="nc" id="L428">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;html5&quot;);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">                if (singleFile) {</span>
+<span class="nc" id="L430">                    ab.dataUri(true);</span>
                 }
             }
             case PDF -&gt; {
-<span class="nc" id="L407">                ab.attribute(&quot;pdf-themesdir&quot;, pdfThemeDir.getAbsolutePath());</span>
-<span class="nc" id="L408">                ab.attribute(&quot;pdf-theme&quot;, pdfTheme);</span>
-<span class="nc" id="L409">                ab.attribute(&quot;pdf-fontsdir&quot;, pdfFontsDir.getAbsolutePath());</span>
-<span class="nc" id="L410">                ab.attribute(&quot;media&quot;, &quot;prepress&quot;);</span>
-<span class="nc" id="L411">                ab.attribute(&quot;optimize&quot;, &quot;true&quot;);</span>
-<span class="nc" id="L412">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;prawn&quot;);</span>
-<span class="nc" id="L413">            }</span>
+<span class="nc" id="L434">                ab.attribute(&quot;pdf-themesdir&quot;, pdfThemeDir.getAbsolutePath());</span>
+<span class="nc" id="L435">                ab.attribute(&quot;pdf-theme&quot;, pdfTheme);</span>
+<span class="nc" id="L436">                ab.attribute(&quot;pdf-fontsdir&quot;, pdfFontsDir.getAbsolutePath());</span>
+<span class="nc" id="L437">                ab.attribute(&quot;media&quot;, &quot;prepress&quot;);</span>
+<span class="nc" id="L438">                ab.attribute(&quot;optimize&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L439">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;prawn&quot;);</span>
+<span class="nc" id="L440">            }</span>
             case DOCBOOK -&gt; {
-<span class="nc" id="L415">                ab.attribute(&quot;doctype&quot;, &quot;book&quot;);</span>
-<span class="nc" id="L416">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;docbook&quot;);</span>
+<span class="nc" id="L442">                ab.attribute(&quot;doctype&quot;, &quot;book&quot;);</span>
+<span class="nc" id="L443">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;docbook&quot;);</span>
+<span class="nc" id="L444">            }</span>
+            case TYPST -&gt; {
+<span class="nc" id="L446">                ab.attribute(&quot;ike-pdf-renderer&quot;, &quot;typst&quot;);</span>
+<span class="nc bnc" id="L447" title="All 2 branches missed.">                File root = typstRoot != null ? typstRoot : sourceDirectory.getAbsoluteFile();</span>
+<span class="nc" id="L448">                ab.attribute(&quot;typst-root&quot;, root.getAbsolutePath());</span>
             }
         }
 
         // Merge user-provided attributes (override defaults)
-<span class="nc bnc" id="L421" title="All 2 branches missed.">        if (attributes != null) {</span>
-<span class="nc" id="L422">            attributes.forEach(ab::attribute);</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">        if (attributes != null) {</span>
+<span class="nc" id="L454">            attributes.forEach(ab::attribute);</span>
         }
 
-<span class="nc" id="L425">        return ab.build();</span>
+<span class="nc" id="L457">        return ab.build();</span>
     }
 
     /**
@@ -430,28 +462,28 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      */
     private Options buildOptions(Backend backend, File outDir,
                                  Attributes attrs, boolean singleFile) {
-<span class="nc" id="L433">        OptionsBuilder builder = Options.builder()</span>
-<span class="nc" id="L434">                .backend(backend.asciidoctorName())</span>
-<span class="nc" id="L435">                .toDir(outDir)</span>
-<span class="nc" id="L436">                .safe(SafeMode.UNSAFE)</span>
-<span class="nc" id="L437">                .mkDirs(true)</span>
-<span class="nc" id="L438">                .standalone(standalone)</span>
-<span class="nc" id="L439">                .baseDir(baseDir)</span>
-<span class="nc" id="L440">                .attributes(attrs);</span>
+<span class="nc" id="L465">        OptionsBuilder builder = Options.builder()</span>
+<span class="nc" id="L466">                .backend(backend.asciidoctorName())</span>
+<span class="nc" id="L467">                .toDir(outDir)</span>
+<span class="nc" id="L468">                .safe(SafeMode.UNSAFE)</span>
+<span class="nc" id="L469">                .mkDirs(true)</span>
+<span class="nc" id="L470">                .standalone(standalone)</span>
+<span class="nc" id="L471">                .baseDir(baseDir)</span>
+<span class="nc" id="L472">                .attributes(attrs);</span>
 
         // For single-document modes, name the output using documentName
         // (e.g., &quot;example-project.html&quot; instead of &quot;index.html&quot;)
-<span class="nc bnc" id="L444" title="All 6 branches missed.">        if (sourceDocumentName != null &amp;&amp; (singleFile || backend == Backend.PDF)) {</span>
-<span class="nc" id="L445">            builder.toFile(new File(outDir,</span>
-<span class="nc" id="L446">                    documentName + &quot;.&quot; + outputExtension(backend)));</span>
+<span class="nc bnc" id="L476" title="All 6 branches missed.">        if (sourceDocumentName != null &amp;&amp; (singleFile || backend == Backend.PDF)) {</span>
+<span class="nc" id="L477">            builder.toFile(new File(outDir,</span>
+<span class="nc" id="L478">                    documentName + &quot;.&quot; + outputExtension(backend)));</span>
         }
 
-<span class="nc" id="L449">        return builder.build();</span>
+<span class="nc" id="L481">        return builder.build();</span>
     }
 
     /** HTML void elements that must be self-closed for XHTML compliance. */
-<span class="nc" id="L453">    private static final java.util.regex.Pattern VOID_ELEMENT =</span>
-<span class="nc" id="L454">            java.util.regex.Pattern.compile(</span>
+<span class="nc" id="L485">    private static final java.util.regex.Pattern VOID_ELEMENT =</span>
+<span class="nc" id="L486">            java.util.regex.Pattern.compile(</span>
                     &quot;&lt;(area|base|br|col|embed|hr|img|input|link|meta|source|track|wbr)&quot;
                     + &quot;(\\s[^&gt;]*)?&gt;&quot;,
                     java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -463,37 +495,37 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      * discovers them in {@code generatedSiteDirectory/xhtml/}.
      */
     private void renameHtmlToXhtml(File dir) throws MojoException {
-<span class="nc" id="L466">        File[] htmlFiles = dir.listFiles((d, name) -&gt; name.endsWith(&quot;.html&quot;));</span>
-<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (htmlFiles == null) return;</span>
-<span class="nc bnc" id="L468" title="All 2 branches missed.">        for (File html : htmlFiles) {</span>
+<span class="nc" id="L498">        File[] htmlFiles = dir.listFiles((d, name) -&gt; name.endsWith(&quot;.html&quot;));</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        if (htmlFiles == null) return;</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        for (File html : htmlFiles) {</span>
             try {
-<span class="nc" id="L470">                String content = Files.readString(html.toPath());</span>
+<span class="nc" id="L502">                String content = Files.readString(html.toPath());</span>
                 // Self-close void elements: &lt;br&gt; → &lt;br/&gt;, &lt;col ...&gt; → &lt;col .../&gt;
-<span class="nc" id="L472">                content = VOID_ELEMENT.matcher(content).replaceAll(mr -&gt; {</span>
-<span class="nc" id="L473">                    String tag = mr.group(1);</span>
-<span class="nc" id="L474">                    String attrs = mr.group(2);</span>
-<span class="nc bnc" id="L475" title="All 4 branches missed.">                    if (attrs == null || attrs.isEmpty()) return &quot;&lt;&quot; + tag + &quot;/&gt;&quot;;</span>
+<span class="nc" id="L504">                content = VOID_ELEMENT.matcher(content).replaceAll(mr -&gt; {</span>
+<span class="nc" id="L505">                    String tag = mr.group(1);</span>
+<span class="nc" id="L506">                    String attrs = mr.group(2);</span>
+<span class="nc bnc" id="L507" title="All 4 branches missed.">                    if (attrs == null || attrs.isEmpty()) return &quot;&lt;&quot; + tag + &quot;/&gt;&quot;;</span>
                     // Strip trailing space before closing
-<span class="nc" id="L477">                    return &quot;&lt;&quot; + tag + attrs.stripTrailing() + &quot;/&gt;&quot;;</span>
+<span class="nc" id="L509">                    return &quot;&lt;&quot; + tag + attrs.stripTrailing() + &quot;/&gt;&quot;;</span>
                 });
                 // Wrap in root &lt;div&gt; with an &lt;h1&gt; title (Sentry skin
                 // expects h1 for navigation). Extract title from first
                 // &lt;h2&gt; if present, or use the filename.
-<span class="nc" id="L482">                String title = extractTitle(content, html.getName());</span>
-<span class="nc" id="L483">                String wrapped = &quot;&lt;div class=\&quot;ike-asciidoc\&quot;&gt;\n&quot;</span>
+<span class="nc" id="L514">                String title = extractTitle(content, html.getName());</span>
+<span class="nc" id="L515">                String wrapped = &quot;&lt;div class=\&quot;ike-asciidoc\&quot;&gt;\n&quot;</span>
                         + &quot;&lt;h1 id=\&quot;doc-title\&quot;&gt;&quot; + title + &quot;&lt;/h1&gt;\n&quot;
                         + content + &quot;\n&lt;/div&gt;\n&quot;;
-<span class="nc" id="L486">                String xhtmlName = html.getName().replaceFirst(&quot;\\.html$&quot;, &quot;.xhtml&quot;);</span>
-<span class="nc" id="L487">                Path xhtml = html.toPath().resolveSibling(xhtmlName);</span>
-<span class="nc" id="L488">                Files.writeString(xhtml, wrapped);</span>
-<span class="nc" id="L489">                Files.delete(html.toPath());</span>
-<span class="nc" id="L490">                getLog().debug(&quot;Wrapped and renamed &quot; + html.getName() + &quot; → &quot; + xhtmlName);</span>
-<span class="nc" id="L491">            } catch (IOException e) {</span>
-<span class="nc" id="L492">                throw new MojoException(</span>
+<span class="nc" id="L518">                String xhtmlName = html.getName().replaceFirst(&quot;\\.html$&quot;, &quot;.xhtml&quot;);</span>
+<span class="nc" id="L519">                Path xhtml = html.toPath().resolveSibling(xhtmlName);</span>
+<span class="nc" id="L520">                Files.writeString(xhtml, wrapped);</span>
+<span class="nc" id="L521">                Files.delete(html.toPath());</span>
+<span class="nc" id="L522">                getLog().debug(&quot;Wrapped and renamed &quot; + html.getName() + &quot; → &quot; + xhtmlName);</span>
+<span class="nc" id="L523">            } catch (IOException e) {</span>
+<span class="nc" id="L524">                throw new MojoException(</span>
                         &quot;Failed to convert &quot; + html + &quot; to XHTML&quot;, e);
-<span class="nc" id="L494">            }</span>
+<span class="nc" id="L526">            }</span>
         }
-<span class="nc" id="L496">    }</span>
+<span class="nc" id="L528">    }</span>
 
     /** Extract a title from embedded HTML content for use as the page h1. */
     private String extractTitle(String html, String fallbackFilename) {
@@ -504,19 +536,20 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
         // Asciidoctor puts in a &lt;h1&gt; with id=&quot;document-title&quot; even in
         // embedded mode if showtitle is set. Failing that, derive from
         // the source filename.
-<span class="nc" id="L507">        java.util.regex.Matcher h1 = java.util.regex.Pattern.compile(&quot;&lt;h1[^&gt;]*&gt;([^&lt;]+)&lt;/h1&gt;&quot;)</span>
-<span class="nc" id="L508">                .matcher(html);</span>
-<span class="nc bnc" id="L509" title="All 2 branches missed.">        if (h1.find()) return h1.group(1);</span>
+<span class="nc" id="L539">        java.util.regex.Matcher h1 = java.util.regex.Pattern.compile(&quot;&lt;h1[^&gt;]*&gt;([^&lt;]+)&lt;/h1&gt;&quot;)</span>
+<span class="nc" id="L540">                .matcher(html);</span>
+<span class="nc bnc" id="L541" title="All 2 branches missed.">        if (h1.find()) return h1.group(1);</span>
         // Fall back to filename without extension
-<span class="nc" id="L511">        return fallbackFilename.replaceFirst(&quot;\\.[^.]+$&quot;, &quot;&quot;)</span>
-<span class="nc" id="L512">                .replace('-', ' ').replace('_', ' ');</span>
+<span class="nc" id="L543">        return fallbackFilename.replaceFirst(&quot;\\.[^.]+$&quot;, &quot;&quot;)</span>
+<span class="nc" id="L544">                .replace('-', ' ').replace('_', ' ');</span>
     }
 
     private String outputExtension(Backend backend) {
-<span class="nc bnc" id="L516" title="All 3 branches missed.">        return switch (backend) {</span>
-<span class="nc" id="L517">            case HTML -&gt; &quot;html&quot;;</span>
-<span class="nc" id="L518">            case PDF -&gt; &quot;pdf&quot;;</span>
-<span class="nc" id="L519">            case DOCBOOK -&gt; &quot;xml&quot;;</span>
+<span class="nc bnc" id="L548" title="All 4 branches missed.">        return switch (backend) {</span>
+<span class="nc" id="L549">            case HTML -&gt; &quot;html&quot;;</span>
+<span class="nc" id="L550">            case PDF -&gt; &quot;pdf&quot;;</span>
+<span class="nc" id="L551">            case DOCBOOK -&gt; &quot;xml&quot;;</span>
+<span class="nc" id="L552">            case TYPST -&gt; &quot;typ&quot;;</span>
         };
     }
 
@@ -524,52 +557,53 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      * Run output validation on all generated directories.
      */
     private void validateOutputs() throws MojoException {
-<span class="nc" id="L527">        OutputValidator validator = new OutputValidator();</span>
-<span class="nc" id="L528">        List&lt;OutputValidator.Issue&gt; allIssues = new java.util.ArrayList&lt;&gt;();</span>
+<span class="nc" id="L560">        OutputValidator validator = new OutputValidator();</span>
+<span class="nc" id="L561">        List&lt;OutputValidator.Issue&gt; allIssues = new java.util.ArrayList&lt;&gt;();</span>
 
-<span class="nc bnc" id="L530" title="All 2 branches missed.">        for (Backend backend : Backend.values()) {</span>
-<span class="nc bnc" id="L531" title="All 3 branches missed.">            boolean shouldCheck = switch (backend) {</span>
-<span class="nc bnc" id="L532" title="All 2 branches missed.">                case HTML -&gt; !skipHtml;</span>
-<span class="nc bnc" id="L533" title="All 2 branches missed.">                case PDF -&gt; !skipPrawn;</span>
-<span class="nc bnc" id="L534" title="All 2 branches missed.">                case DOCBOOK -&gt; !skipDocbook;</span>
+<span class="nc bnc" id="L563" title="All 2 branches missed.">        for (Backend backend : Backend.values()) {</span>
+<span class="nc bnc" id="L564" title="All 4 branches missed.">            boolean shouldCheck = switch (backend) {</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">                case HTML -&gt; !skipHtml;</span>
+<span class="nc bnc" id="L566" title="All 2 branches missed.">                case PDF -&gt; !skipPrawn;</span>
+<span class="nc bnc" id="L567" title="All 2 branches missed.">                case DOCBOOK -&gt; !skipDocbook;</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">                case TYPST -&gt; !skipTypst;</span>
             };
-<span class="nc bnc" id="L536" title="All 2 branches missed.">            if (!shouldCheck) continue;</span>
+<span class="nc bnc" id="L570" title="All 2 branches missed.">            if (!shouldCheck) continue;</span>
 
-<span class="nc" id="L538">            Path dir = outputDirectory.toPath().resolve(backend.outputSubdir());</span>
+<span class="nc" id="L572">            Path dir = outputDirectory.toPath().resolve(backend.outputSubdir());</span>
             try {
-<span class="nc" id="L540">                List&lt;OutputValidator.Issue&gt; issues = validator.validate(dir, backend);</span>
-<span class="nc" id="L541">                allIssues.addAll(issues);</span>
-<span class="nc" id="L542">            } catch (IOException e) {</span>
-<span class="nc" id="L543">                getLog().warn(&quot;Validation failed for &quot; + dir + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L544">            }</span>
+<span class="nc" id="L574">                List&lt;OutputValidator.Issue&gt; issues = validator.validate(dir, backend);</span>
+<span class="nc" id="L575">                allIssues.addAll(issues);</span>
+<span class="nc" id="L576">            } catch (IOException e) {</span>
+<span class="nc" id="L577">                getLog().warn(&quot;Validation failed for &quot; + dir + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L578">            }</span>
         }
 
-<span class="nc bnc" id="L547" title="All 2 branches missed.">        if (!allIssues.isEmpty()) {</span>
-<span class="nc" id="L548">            long errors = allIssues.stream()</span>
-<span class="nc bnc" id="L549" title="All 2 branches missed.">                    .filter(i -&gt; i.severity() == OutputValidator.Severity.ERROR)</span>
-<span class="nc" id="L550">                    .count();</span>
-<span class="nc" id="L551">            long warnings = allIssues.stream()</span>
-<span class="nc bnc" id="L552" title="All 2 branches missed.">                    .filter(i -&gt; i.severity() == OutputValidator.Severity.WARNING)</span>
-<span class="nc" id="L553">                    .count();</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">        if (!allIssues.isEmpty()) {</span>
+<span class="nc" id="L582">            long errors = allIssues.stream()</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">                    .filter(i -&gt; i.severity() == OutputValidator.Severity.ERROR)</span>
+<span class="nc" id="L584">                    .count();</span>
+<span class="nc" id="L585">            long warnings = allIssues.stream()</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">                    .filter(i -&gt; i.severity() == OutputValidator.Severity.WARNING)</span>
+<span class="nc" id="L587">                    .count();</span>
 
-<span class="nc bnc" id="L555" title="All 2 branches missed.">            for (OutputValidator.Issue issue : allIssues) {</span>
-<span class="nc bnc" id="L556" title="All 2 branches missed.">                if (issue.severity() == OutputValidator.Severity.ERROR) {</span>
-<span class="nc" id="L557">                    getLog().error(issue.toString());</span>
+<span class="nc bnc" id="L589" title="All 2 branches missed.">            for (OutputValidator.Issue issue : allIssues) {</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">                if (issue.severity() == OutputValidator.Severity.ERROR) {</span>
+<span class="nc" id="L591">                    getLog().error(issue.toString());</span>
                 } else {
-<span class="nc" id="L559">                    getLog().warn(issue.toString());</span>
+<span class="nc" id="L593">                    getLog().warn(issue.toString());</span>
                 }
-<span class="nc" id="L561">            }</span>
+<span class="nc" id="L595">            }</span>
 
-<span class="nc" id="L563">            getLog().info(&quot;Validation: &quot; + errors + &quot; error(s), &quot; + warnings + &quot; warning(s)&quot;);</span>
+<span class="nc" id="L597">            getLog().info(&quot;Validation: &quot; + errors + &quot; error(s), &quot; + warnings + &quot; warning(s)&quot;);</span>
 
-<span class="nc bnc" id="L565" title="All 4 branches missed.">            if (strict &amp;&amp; errors &gt; 0) {</span>
-<span class="nc" id="L566">                throw new MojoException(</span>
+<span class="nc bnc" id="L599" title="All 4 branches missed.">            if (strict &amp;&amp; errors &gt; 0) {</span>
+<span class="nc" id="L600">                throw new MojoException(</span>
                         &quot;ike:asciidoc validation failed with &quot; + errors + &quot; error(s)&quot;);
             }
-<span class="nc" id="L569">        } else {</span>
-<span class="nc" id="L570">            getLog().info(&quot;Validation: clean&quot;);</span>
+<span class="nc" id="L603">        } else {</span>
+<span class="nc" id="L604">            getLog().info(&quot;Validation: clean&quot;);</span>
         }
-<span class="nc" id="L572">    }</span>
+<span class="nc" id="L606">    }</span>
 
     // ── Log handler ────────────────────────────────────────────────
 
@@ -581,39 +615,39 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
     static class MavenLogHandler implements LogHandler {
 
         private final Log log;
-<span class="nc" id="L584">        private final java.util.Set&lt;String&gt; seen = new java.util.HashSet&lt;&gt;();</span>
+<span class="nc" id="L618">        private final java.util.Set&lt;String&gt; seen = new java.util.HashSet&lt;&gt;();</span>
 
-<span class="nc" id="L586">        MavenLogHandler(Log log) {</span>
-<span class="nc" id="L587">            this.log = log;</span>
-<span class="nc" id="L588">        }</span>
+<span class="nc" id="L620">        MavenLogHandler(Log log) {</span>
+<span class="nc" id="L621">            this.log = log;</span>
+<span class="nc" id="L622">        }</span>
 
         @Override
         public void log(LogRecord record) {
-<span class="nc" id="L592">            String source = &quot;&quot;;</span>
-<span class="nc bnc" id="L593" title="All 4 branches missed.">            if (record.getCursor() != null &amp;&amp; record.getCursor().getFile() != null) {</span>
-<span class="nc" id="L594">                source = record.getCursor().getFile();</span>
-<span class="nc bnc" id="L595" title="All 2 branches missed.">                if (record.getCursor().getLineNumber() &gt; 0) {</span>
-<span class="nc" id="L596">                    source += &quot;:&quot; + record.getCursor().getLineNumber();</span>
+<span class="nc" id="L626">            String source = &quot;&quot;;</span>
+<span class="nc bnc" id="L627" title="All 4 branches missed.">            if (record.getCursor() != null &amp;&amp; record.getCursor().getFile() != null) {</span>
+<span class="nc" id="L628">                source = record.getCursor().getFile();</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">                if (record.getCursor().getLineNumber() &gt; 0) {</span>
+<span class="nc" id="L630">                    source += &quot;:&quot; + record.getCursor().getLineNumber();</span>
                 }
-<span class="nc" id="L598">                source += &quot; — &quot;;</span>
+<span class="nc" id="L632">                source += &quot; — &quot;;</span>
             }
-<span class="nc" id="L600">            String msg = source + record.getMessage();</span>
+<span class="nc" id="L634">            String msg = source + record.getMessage();</span>
 
             // Deduplicate: AsciidoctorJ logs the same error from parser and converter
-<span class="nc" id="L603">            String key = record.getSeverity() + &quot;|&quot; + msg;</span>
-<span class="nc bnc" id="L604" title="All 2 branches missed.">            if (!seen.add(key)) return;</span>
+<span class="nc" id="L637">            String key = record.getSeverity() + &quot;|&quot; + msg;</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">            if (!seen.add(key)) return;</span>
 
-<span class="nc" id="L606">            Severity severity = record.getSeverity();</span>
-<span class="nc bnc" id="L607" title="All 4 branches missed.">            if (severity == Severity.ERROR || severity == Severity.FATAL) {</span>
-<span class="nc" id="L608">                log.error(msg);</span>
-<span class="nc bnc" id="L609" title="All 2 branches missed.">            } else if (severity == Severity.WARN) {</span>
-<span class="nc" id="L610">                log.warn(msg);</span>
-<span class="nc bnc" id="L611" title="All 2 branches missed.">            } else if (severity == Severity.INFO) {</span>
-<span class="nc" id="L612">                log.info(msg);</span>
+<span class="nc" id="L640">            Severity severity = record.getSeverity();</span>
+<span class="nc bnc" id="L641" title="All 4 branches missed.">            if (severity == Severity.ERROR || severity == Severity.FATAL) {</span>
+<span class="nc" id="L642">                log.error(msg);</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">            } else if (severity == Severity.WARN) {</span>
+<span class="nc" id="L644">                log.warn(msg);</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">            } else if (severity == Severity.INFO) {</span>
+<span class="nc" id="L646">                log.info(msg);</span>
             } else {
-<span class="nc" id="L614">                log.debug(msg);</span>
+<span class="nc" id="L648">                log.debug(msg);</span>
             }
-<span class="nc" id="L616">        }</span>
+<span class="nc" id="L650">        }</span>
     }
 
     // ── File scanning ───────────────────────────────────────────────
@@ -627,21 +661,21 @@ public class AsciidocMojo implements org.apache.maven.api.plugin.Mojo {
      * @return list of .adoc files
      */
     static List&lt;File&gt; scanAsciiDocFiles(Path root) {
-<span class="nc" id="L630">        try (Stream&lt;Path&gt; stream = Files.walk(root)) {</span>
-<span class="nc" id="L631">            return stream</span>
-<span class="nc" id="L632">                    .filter(p -&gt; p.toString().endsWith(&quot;.adoc&quot;))</span>
-<span class="nc bnc" id="L633" title="All 2 branches missed.">                    .filter(p -&gt; !p.getFileName().toString().startsWith(&quot;_&quot;))</span>
-<span class="nc" id="L634">                    .filter(p -&gt; {</span>
+<span class="nc" id="L664">        try (Stream&lt;Path&gt; stream = Files.walk(root)) {</span>
+<span class="nc" id="L665">            return stream</span>
+<span class="nc" id="L666">                    .filter(p -&gt; p.toString().endsWith(&quot;.adoc&quot;))</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">                    .filter(p -&gt; !p.getFileName().toString().startsWith(&quot;_&quot;))</span>
+<span class="nc" id="L668">                    .filter(p -&gt; {</span>
                         // Exclude files in _partial directories
-<span class="nc bnc" id="L636" title="All 2 branches missed.">                        for (Path part : root.relativize(p)) {</span>
-<span class="nc bnc" id="L637" title="All 2 branches missed.">                            if (part.toString().startsWith(&quot;_&quot;)) return false;</span>
-<span class="nc" id="L638">                        }</span>
-<span class="nc" id="L639">                        return true;</span>
+<span class="nc bnc" id="L670" title="All 2 branches missed.">                        for (Path part : root.relativize(p)) {</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">                            if (part.toString().startsWith(&quot;_&quot;)) return false;</span>
+<span class="nc" id="L672">                        }</span>
+<span class="nc" id="L673">                        return true;</span>
                     })
-<span class="nc" id="L641">                    .map(Path::toFile)</span>
-<span class="nc" id="L642">                    .toList();</span>
-<span class="nc" id="L643">        } catch (IOException e) {</span>
-<span class="nc" id="L644">            throw new RuntimeException(&quot;Failed to scan &quot; + root, e);</span>
+<span class="nc" id="L675">                    .map(Path::toFile)</span>
+<span class="nc" id="L676">                    .toList();</span>
+<span class="nc" id="L677">        } catch (IOException e) {</span>
+<span class="nc" id="L678">            throw new RuntimeException(&quot;Failed to scan &quot; + root, e);</span>
         }
     }
 }
