@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -201,13 +202,22 @@ class DecisionTreeBlockRenderingTest {
                 %s----
                 """.formatted(SCAN_TREE));
 
-        assertTrue(html.contains("digraph decision_tree"), "the figure's Graphviz source is emitted");
-        assertTrue(html.contains("shape=box"), "a decision is a square");
-        assertTrue(html.contains("shape=circle"), "a chance is a circle");
-        assertTrue(html.contains("shape=plaintext"), "an outcome is a leaf");
-        assertTrue(html.contains("3,880"), "the scan's rolled-back value is on the figure");
-        assertTrue(html.contains("4,188"), "and the no-scan value");
-        assertTrue(html.contains("Should this patient have a scan in year 2?"), "the title is the figure's");
+        assertTrue(html.contains("<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"decision-tree\""), "the tree is inline SVG");
+        assertEquals(2, count(html, "class=\"glyph decision\""), "a square for each decision");
+        assertEquals(4, count(html, "class=\"glyph chance\""), "a circle for each chance");
+        assertEquals(7, count(html, "class=\"glyph outcome\""), "a triangle for each outcome");
+        assertEquals(12, count(html, "<polyline class=\"run"), "an elbow for each branch");
+        assertEquals(2, count(html, "class=\"run chosen\""), "the chosen alternatives are heavy");
+        assertEquals(4, count(html, "class=\"barred\""), "the rejected alternatives are barred");
+        assertTrue(html.contains("\u21D2 $3,880"), "the scan's rolled-back value is on the figure");
+        assertTrue(html.contains("\u21D2 $4,188"), "and the no-scan value");
+        assertTrue(html.contains("class=\"callout-number\""), "every worked number carries its callout");
+        assertTrue(html.contains("Figure 1. Should this patient have a scan in year 2?"), "the title is the figure's");
+        assertTrue(html.contains("class=\"decision-tornado\""), "the tornado follows the tree");
+        assertTrue(html.contains("Figure 2. How far each value"), "as a numbered figure");
+        assertTrue(html.contains("flips at 1,008"), "the scan's cost flips the choice where the lab says");
+        assertTrue(html.contains("overflow-x: auto"), "a wide tree scrolls");
+        assertTrue(html.contains("A square is a choice"), "the legend follows the tree");
         assertTrue(html.contains("Where each number on the tree comes from"), "the worked table follows");
         assertTrue(html.contains("figure-callout"), "with the topic's callouts");
         assertTrue(html.contains("The square takes the cheaper"), "and the decision's working");
@@ -226,7 +236,9 @@ class DecisionTreeBlockRenderingTest {
                 """.formatted(SCAN_TREE));
 
         assertTrue(html.contains("50,000 a year of healthy life"), "the legend names the price");
-        assertTrue(html.contains("if no scan: $") && html.contains("✓"), "a course is chosen");
+        assertTrue(html.contains("\u2713 chosen"), "a course is chosen");
+        Node root = DecisionTreeSource.parse(List.of(SCAN_TREE.split("\n"))).root();
+        assertEquals(root.children.get(1), DecisionTreeRollback.of(root, 50_000).chosen(root).orElseThrow(), "not scanning");
         assertEquals(50_000, DecisionTreeBlockProcessor.price("50,000"));
         assertEquals(100_000, DecisionTreeBlockProcessor.price(null));
     }
@@ -251,7 +263,9 @@ class DecisionTreeBlockRenderingTest {
                 ----
                 """);
         assertTrue(gaps.contains("The tree has gaps"), "a cost without a semantic is named");
-        assertTrue(gaps.contains("digraph decision_tree"), "and the figure still renders");
+        assertTrue(gaps.contains("class=\"decision-tree\""), "and the figure still renders");
+        assertTrue(gaps.contains("stroke-dasharray"), "with the undeterminable node dashed");
+        assertFalse(gaps.contains("decision-tornado"), "nothing to sweep until the tree is determinable");
     }
 
     @Test
@@ -302,6 +316,48 @@ class DecisionTreeBlockRenderingTest {
         assertTrue(rollback.findings().isEmpty(), () -> "findings: " + rollback.findings());
         assertEquals(3_880, rollback.value(parsed.root().children.get(0)).orElseThrow().lower(), 1.0);
         assertEquals(4_188, rollback.value(parsed.root().children.get(1)).orElseThrow().lower(), 1.0);
+    }
+
+    @Test
+    @DisplayName("The sweep moves every stated value one way, finds the flips, and the Typst twin draws the same bars")
+    void sweepAndTornado() {
+        Node root = DecisionTreeSource.parse(List.of(SCAN_TREE.split("\n"))).root();
+        DecisionTreeSweep sweep = DecisionTreeSweep.of(root, 100_000, DecisionTreeSweep.DEFAULT_STEPS);
+        assertEquals(3_880, sweep.baseRoot(), 1.0);
+        assertEquals(root.children.get(0), sweep.baseChosen().orElseThrow());
+        DecisionTreeSource.Measure scanCost = root.children.get(0).costs().get(0);
+        DecisionTreeSweep.Swing swing = sweep.swing(scanCost).orElseThrow();
+        assertFalse(swing.stated(), "a point swings over an assumed range");
+        assertEquals(350, swing.range().lower(), 1e-9);
+        assertEquals(1_400, swing.range().upper(), 1e-9);
+        DecisionTreeSweep.Flip flip = swing.flipsAt(root).get(0);
+        assertEquals(1_008, flip.at(), 2.0, "the choice flips when the scan is dearer by 308");
+        assertEquals(root.children.get(0), flip.chosenBelow());
+        assertEquals(root.children.get(1), flip.chosenAbove());
+        DecisionTreeSweep.Swing price = sweep.swing(DecisionTreeSweep.HEALTH_PRICE).orElseThrow();
+        double breakEven = price.flipsAt(root).get(0).at();
+        assertTrue(breakEven > 80_000 && breakEven < 90_000, "break-even " + breakEven);
+        for (int i = 1; i < sweep.swings().size(); i++) {
+            assertTrue(sweep.swings().get(i - 1).width() >= sweep.swings().get(i).width(), "longest first");
+        }
+        DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(sweep), 640,
+                cost -> DecisionTreeFigures.money(cost, "$"));
+        String typst = DecisionFigureTypst.write(tornado);
+        assertTrue(typst.startsWith("// decision-tornado\n#box(width: 640pt"), typst.substring(0, 40));
+        assertTrue(typst.contains("\"flips at 1,008\""));
+        assertTrue(typst.contains("\"base $3,880\""));
+        String tree = DecisionFigureTypst.write(DecisionTreeFigures.tree(root, DecisionTreeRollback.of(root, 100_000), "$",
+                Optional.of(sweep)));
+        assertTrue(tree.contains("thickness: 2.6pt"), "the chosen alternative is heavy in print too");
+        assertTrue(tree.contains("\"\u25B2\""), "a value that flips the root is marked");
+    }
+
+    private static int count(String text, String part) {
+        int count = 0;
+        for (int at = text.indexOf(part); at >= 0; at = text.indexOf(part, at + part.length())) {
+            count++;
+        }
+        return count;
     }
 
     private static String convert(String adoc) {

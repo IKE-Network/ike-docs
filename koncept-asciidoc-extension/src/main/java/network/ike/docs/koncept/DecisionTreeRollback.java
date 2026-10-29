@@ -60,13 +60,24 @@ final class DecisionTreeRollback {
     /** The event a probability sits on, so a derived share is worked under the event's name. */
     private final Map<Measure, String> owners = new IdentityHashMap<>();
     private final List<Measure> evaluating = new ArrayList<>();
+    /** Stated measures read at other bounds than the block states, by identity: what a sweep moves. */
+    private final Map<Measure, Interval> overrides = new IdentityHashMap<>();
 
     private DecisionTreeRollback(double healthPrice) {
         this.healthPrice = healthPrice;
     }
 
     static DecisionTreeRollback of(Node root, double healthPrice) {
+        return of(root, healthPrice, Map.of());
+    }
+
+    /**
+     * Rolls the tree back with some stated measures at other bounds, by identity, every other
+     * measure as the block states it: one step of a one-way sweep.
+     */
+    static DecisionTreeRollback of(Node root, double healthPrice, Map<Measure, Interval> overrides) {
         DecisionTreeRollback rollback = new DecisionTreeRollback(healthPrice);
+        rollback.overrides.putAll(overrides);
         for (Measure parameter : root.parameters()) {
             if (parameter.quantity() != null) {
                 String key = quantityKey(parameter.quantity());
@@ -107,6 +118,9 @@ final class DecisionTreeRollback {
 
     private Optional<Interval> evaluate(Measure measure) {
         if (measure.stated()) {
+            if (overrides.containsKey(measure)) {
+                return Optional.of(overrides.get(measure));
+            }
             if (Double.isNaN(measure.bounds().lower())) {
                 return notDeterminableLine(measure.line(), "a measure has no bounds");
             }

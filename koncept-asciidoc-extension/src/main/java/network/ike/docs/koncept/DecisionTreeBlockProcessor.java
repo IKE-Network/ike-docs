@@ -17,21 +17,28 @@ package network.ike.docs.koncept;
 
 import network.ike.docs.koncept.DecisionTreeRollback.Step;
 import network.ike.docs.koncept.DecisionTreeSource.Concept;
-import network.ike.docs.koncept.DecisionTreeSource.Interval;
-import network.ike.docs.koncept.DecisionTreeSource.Kind;
 import network.ike.docs.koncept.DecisionTreeSource.Node;
 import network.ike.docs.koncept.DecisionTreeSource.Parsed;
+import org.asciidoctor.ast.Block;
+import org.asciidoctor.ast.ContentModel;
+import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.BlockProcessor;
-import org.asciidoctor.ast.ContentModel;
 import org.asciidoctor.extension.Contexts;
 import org.asciidoctor.extension.Name;
 import org.asciidoctor.extension.Reader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,11 +48,13 @@ import java.util.UUID;
  * The {@code [decision-tree]} block in the documentation build ({@code dev-decision-tree-blocks}):
  * the static projection of the block the assistant surface renders live. It reads the block
  * store-free ({@link DecisionTreeSource}), rolls it back at a health price
- * ({@link DecisionTreeRollback}), and re-parses two things in the block's place: the Graphviz
- * figure the regulatory decision analysis topics hand-write, a square where someone chooses, a
- * circle where the world decides, a leaf where the consequences are counted, every number badged
- * with a callout; and the worked table beneath it, where each callout's number is computed from
- * the inputs, generated rather than maintained.
+ * ({@link DecisionTreeRollback}), sweeps every stated value one way ({@link DecisionTreeSweep}),
+ * and puts in the block's place what Komet draws: the tree as decision analysts draw it, left to
+ * right, a square where someone chooses, a circle where the world decides, a triangle where the
+ * consequences are counted, the rolled-back cost at every glyph, the chosen alternative heavy
+ * ({@link DecisionTreeFigures}); beneath it the tornado of the sweep, one bar per value; then the
+ * worked table, where each orange callout's number is computed from the inputs, generated rather
+ * than maintained.
  *
  * <pre>
  * [decision-tree, health-price=100000, symbol="$", title="Should this patient have a scan in year 2?"]
@@ -55,10 +64,11 @@ import java.util.UUID;
  * ----
  * </pre>
  *
- * The figure's {@code graphviz} block renders through asciidoctor-diagram where the build has it,
- * as the topics' own figures do, and stands as its source listing where it does not. A block
- * with no root decision renders as a literal block, so the text is visible, never dropped; a
- * block with gaps renders with them named in a note.
+ * The figures are self-contained SVG from the same geometry the live diagram lays out, with label
+ * widths estimated rather than measured: inline on the html5 family, so the text stays text and a
+ * wide tree scrolls; as a content-addressed file on Prawn, DocBook and Typst, where an image block
+ * is what those converters place. A block with no root decision renders as a literal block, so the
+ * text is visible, never dropped; a block with gaps renders with them named in a note.
  */
 @Name("decision-tree")
 @Contexts(Contexts.LISTING)
@@ -70,7 +80,10 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
     /** The default price of a year of healthy life: the regulatory topics' central value. */
     static final double DEFAULT_HEALTH_PRICE = 100_000;
 
-    private static final String BADGE = "<TD BGCOLOR=\"#eb6834\" STYLE=\"rounded\"><FONT COLOR=\"white\" POINT-SIZE=\"9\"><B>%d</B></FONT></TD>";
+    /** The tornado's width, in figure units: the html5 family's text column. */
+    static final double TORNADO_WIDTH = 640;
+
+    private static final Path FILE_DIR = Path.of(System.getProperty("java.io.tmpdir"), "ike-koncept-figures");
 
     /** Creates a new block processor instance. */
     public DecisionTreeBlockProcessor() {
@@ -86,13 +99,27 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         }
         double price = price(attributes.get("health-price"));
         String symbol = attributes.get("symbol") == null ? "$" : String.valueOf(attributes.get("symbol"));
-        String title = attributes.get("title") == null ? null : String.valueOf(attributes.get("title"));
-        DecisionTreeRollback rollback = DecisionTreeRollback.of(parsed.root(), price);
+        String title = attributes.get("title") == null ? "The decision as a tree" : String.valueOf(attributes.get("title"));
+        Node root = parsed.root();
+        DecisionTreeRollback rollback = DecisionTreeRollback.of(root, price);
+        Optional<DecisionTreeSweep> sweep = rollback.value(root).isPresent()
+                ? Optional.of(DecisionTreeSweep.of(root, price, DecisionTreeSweep.DEFAULT_STEPS))
+                : Optional.empty();
 
+        StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
+        Document doc = parent.getDocument();
+        container.append(figure(container, doc,
+                DecisionFigureSvg.write(DecisionTreeFigures.tree(root, rollback, symbol, sweep)), title, "decision-tree"));
+        parseContent(container, legend(rollback, symbol));
+        sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
+            DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s), TORNADO_WIDTH,
+                    cost -> DecisionTreeFigures.money(cost, symbol));
+            container.append(figure(container, doc, DecisionFigureSvg.write(tornado),
+                    "How far each value, moved on its own across its range, swings the expected cost at the root",
+                    "decision-tornado"));
+        });
         List<String> source = new ArrayList<>();
-        source.addAll(figure(parsed.root(), rollback, symbol, title));
-        source.add("");
-        source.addAll(assumptions(parsed.root(), rollback, symbol));
+        source.addAll(assumptions(root, rollback, symbol));
         source.addAll(table(rollback, symbol));
         List<String> problems = new ArrayList<>(parsed.problems());
         problems.addAll(rollback.findings());
@@ -100,7 +127,6 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             source.add("");
             source.add("NOTE: The tree has gaps: " + String.join("; ", problems) + ".");
         }
-        StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
         parseContent(container, source);
         return container;
     }
@@ -116,125 +142,69 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         }
     }
 
-    // ── The figure ───────────────────────────────────────────────────────────
+    // ── The figures ──────────────────────────────────────────────────────────
 
-    /** The Graphviz block: nodes for decisions, chances and outcomes, branches as edges. */
-    static List<String> figure(Node root, DecisionTreeRollback rollback, String symbol, String title) {
-        Map<Node, String> ids = new IdentityHashMap<>();
-        List<String> body = new ArrayList<>();
-        List<String> edges = new ArrayList<>();
-        StringBuilder legend = new StringBuilder();
-        legend.append("† the cost of what is done on that branch  ")
-                .append("‡ the expected cost the leaf is left with  ")
-                .append("§ the expected cost still ahead  ")
-                .append("% the share who leave a circle by that branch; ")
-                .append("health counted at ").append(symbol).append(DecisionTreeFormat.money(rollback.healthPrice()))
-                .append(" a year of healthy life; a number in an orange badge is worked in the table");
-        emit(root, rollback, symbol, ids, body, edges);
-
-        List<String> source = new ArrayList<>();
-        if (title != null && !title.isBlank()) {
-            source.add("." + title);
+    /**
+     * A captioned, numbered figure of an SVG: inline on the html5 family, in a block that scrolls
+     * when the tree is wider than the column; an image block over a content-addressed file where
+     * the converter places files (Prawn, DocBook, Typst).
+     */
+    private Block figure(StructuralNode parent, Document doc, String svg, String title, String role) {
+        String backend = doc.getAttribute("backend", "html5").toString();
+        boolean fileBackend = "pdf".equals(backend) || "docbook5".equals(backend) || "docbook".equals(backend)
+                || "typst".equals(backend);
+        String caption = doc.getAttribute("figure-caption", "Figure") + " " + doc.getAndIncrementCounter("figure-number") + ". ";
+        if (fileBackend) {
+            Map<String, Object> imageAttrs = new HashMap<>();
+            imageAttrs.put("target", svgFile(role, svg));
+            imageAttrs.put("alt", title);
+            Block image = createBlock(parent, "image", "", imageAttrs);
+            image.setTitle(title);
+            image.setCaption(caption);
+            image.addRole(role);
+            return image;
         }
-        source.add("[graphviz]");
-        source.add("----");
-        source.add("digraph decision_tree {");
-        source.add("  rankdir=TB; nodesep=0.18; ranksep=0.4;");
-        source.add("  node [fontname=\"Helvetica\", fontsize=11, color=\"#52514e\"];");
-        source.add("  edge [fontname=\"Helvetica\", fontsize=10, color=\"#52514e\"];");
-        source.add("  label=\"" + legend.toString().replace("\"", "\\\"") + "\"; labelloc=b; labeljust=l;"
-                + " fontname=\"Helvetica\"; fontsize=10; fontcolor=\"#52514e\";");
-        source.addAll(body);
-        source.addAll(edges);
-        source.add("}");
-        source.add("----");
-        return source;
+        String html = "<div class=\"imageblock " + role + "\">\n<div class=\"content\" style=\"overflow-x: auto\">\n"
+                + svg + "</div>\n<div class=\"title\">" + DecisionTreeFormat.html(caption + title) + "</div>\n</div>";
+        return createBlock(parent, "pass", html, new HashMap<>());
     }
 
-    private static String id(Node node, Map<Node, String> ids) {
-        return ids.computeIfAbsent(node, n -> "n" + ids.size());
-    }
-
-    private static void emit(Node node, DecisionTreeRollback rollback, String symbol, Map<Node, String> ids,
-                             List<String> body, List<String> edges) {
-        String id = id(node, ids);
-        switch (node.kind) {
-            case DECISION -> {
-                StringBuilder rows = new StringBuilder();
-                for (Node alternative : node.children) {
-                    if (alternative.kind != Kind.ALTERNATIVE) {
-                        continue;
-                    }
-                    if (!rows.isEmpty()) {
-                        rows.append("<BR/>");
-                    }
-                    rows.append("if ").append(DecisionTreeFormat.html(alternative.label())).append(": ")
-                            .append(value(rollback.value(alternative), symbol)).append("§");
-                    if (rollback.chosen(node).filter(c -> c == alternative).isPresent()) {
-                        rows.append(" ✓");
-                    }
-                }
-                body.add("  " + id + " [shape=box, style=filled, fillcolor=\"#e8f0fb\", label=<"
-                        + table(rollback.step(node), node.label(), rows.toString()) + ">];");
-                for (Node alternative : node.children) {
-                    if (alternative.kind == Kind.ALTERNATIVE) {
-                        branch(node, alternative, rollback, symbol, ids, body, edges);
-                    }
-                }
+    /** The SVG written to a content-addressed file, so identical figures share one and re-runs are stable. */
+    static String svgFile(String role, String svg) {
+        try {
+            Files.createDirectories(FILE_DIR);
+            Path file = FILE_DIR.resolve(role + "-" + shortHash(svg) + ".svg");
+            if (!Files.exists(file)) {
+                Files.writeString(file, svg, StandardCharsets.UTF_8);
             }
-            case CHANCE -> {
-                body.add("  " + id + " [shape=circle, fixedsize=true, width=1.7, margin=0.02, label=<"
-                        + table(rollback.step(node), node.label(), "from here:<BR/>" + value(rollback.value(node), symbol) + "§")
-                        + ">];");
-                for (Node event : node.children) {
-                    if (event.kind == Kind.EVENT) {
-                        branch(node, event, rollback, symbol, ids, body, edges);
-                    }
-                }
+            return file.toAbsolutePath().toString();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to write the " + role + " figure", e);
+        }
+    }
+
+    private static String shortHash(String s) {
+        try {
+            byte[] h = MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                sb.append(String.format("%02x", h[i]));
             }
-            case OUTCOME -> body.add("  " + id + " [shape=plaintext, label=<"
-                    + table(rollback.step(node), node.label(), value(rollback.value(node), symbol) + "‡") + ">];");
-            case ALTERNATIVE, EVENT -> throw new IllegalStateException("a branch is an edge, not a node");
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    /** A branch as an edge from its node to what it leads to, labelled with its name, share and cost. */
-    private static void branch(Node from, Node branch, DecisionTreeRollback rollback, String symbol, Map<Node, String> ids,
-                               List<String> body, List<String> edges) {
-        Optional<Node> next = branch.next();
-        String target;
-        if (next.isPresent()) {
-            emit(next.get(), rollback, symbol, ids, body, edges);
-            target = id(next.get(), ids);
-        } else {
-            target = id(branch, ids);
-            body.add("  " + target + " [shape=plaintext, label=<" + table(Optional.empty(), "",
-                    value(rollback.value(branch), symbol) + "‡") + ">];");
-        }
-        StringBuilder first = new StringBuilder(DecisionTreeFormat.html(branch.label()));
-        if (branch.kind == Kind.EVENT) {
-            rollback.share(branch).ifPresent(share -> first.append(' ').append(DecisionTreeFormat.percent(share)));
-        } else {
-            first.append(':');
-        }
-        String second = branch.costs().isEmpty() ? ""
-                : value(rollback.branchCost(branch), symbol) + "†";
-        edges.add("  " + id(from, ids) + " -> " + target + " [label=<" + table(rollback.step(branch), first.toString(), second) + ">];");
-    }
-
-    /** A two-row HTML-like label: badge and heading, then the detail. */
-    private static String table(Optional<Step> step, String heading, String detail) {
-        StringBuilder sb = new StringBuilder("<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"1\"><TR>");
-        sb.append(step.map(s -> String.format(BADGE, s.number())).orElse("<TD></TD>"));
-        sb.append("<TD ALIGN=\"LEFT\">").append(heading).append("</TD></TR>");
-        if (detail != null && !detail.isEmpty()) {
-            sb.append("<TR><TD></TD><TD ALIGN=\"LEFT\" BALIGN=\"LEFT\">").append(detail).append("</TD></TR>");
-        }
-        return sb.append("</TABLE>").toString();
-    }
-
-    private static String value(Optional<Interval> value, String symbol) {
-        return value.map(v -> DecisionTreeFormat.html(DecisionTreeFormat.money(v, symbol))).orElse("?");
+    /** How to read the tree: one paragraph after it, in the topics' words. */
+    static List<String> legend(DecisionTreeRollback rollback, String symbol) {
+        return List.of("A square is a choice, a circle is a chance, and a triangle is where the consequences are counted."
+                + " The figure after \u21D2 is the expected cost still ahead of a patient who reaches that point, health"
+                + " counted at " + symbol + DecisionTreeFormat.money(rollback.healthPrice()) + " a year of healthy life;"
+                + " a branch's own costs are beneath its run, and a probability is the share who leave a circle by that"
+                + " branch. The heavy branch is the alternative the rollback chooses, and a barred one is rejected."
+                + " A number in an orange callout is worked in the table beneath, under the same callout; a small"
+                + " triangle marks a value whose range holds a flip of the choice at the root.", "");
     }
 
     // ── The assumptions ──────────────────────────────────────────────────────
