@@ -188,7 +188,8 @@ final class DecisionTreeSource {
 
     /**
      * One measure a vertex carries: stated with bounds, or derived from a kind over the quantities
-     * it reads. A parameter also names the quantity it measures.
+     * it reads, or read as it is from one parameter ({@code from} the quantity alone, no kind and
+     * no operands). A parameter also names the quantity it measures.
      */
     record Measure(MeasureKind kind, Interval bounds, Concept semantic, String basis, String source, Concept quantity,
                    Derivation derivation, Concept derivationConcept, List<Concept> operands, int line) {
@@ -198,6 +199,11 @@ final class DecisionTreeSource {
 
         boolean derived() {
             return derivationConcept != null;
+        }
+
+        /** Whether the measure takes one parameter's value as it is: from a quantity, no kind. */
+        boolean readsAParameter() {
+            return derivationConcept != null && derivation == null && operands.isEmpty();
         }
 
         /** What this measure is called in a worked table: its quantity, else its kind. */
@@ -447,8 +453,10 @@ final class DecisionTreeSource {
         Derivation derivation = null;
         if (derivationConcept != null) {
             derivation = Derivation.of(derivationConcept).orElse(null);
-            if (derivation == null) {
+            if (derivation == null && !operands.isEmpty()) {
                 problems.add("line " + line.number() + ": a derivation names no kind the build can run: " + derivationConcept.shown());
+            } else if (derivation == null) {
+                // from a quantity alone, with nothing after of: the measure reads that parameter as it is
             } else if (derivation.arity >= 0 ? operands.size() != derivation.arity : operands.size() < 2) {
                 problems.add("line " + line.number() + ": a " + derivation.label.toLowerCase(Locale.ROOT) + " reads "
                         + (derivation.arity >= 0 ? derivation.arity + "" : "two or more") + " operands, not " + operands.size());

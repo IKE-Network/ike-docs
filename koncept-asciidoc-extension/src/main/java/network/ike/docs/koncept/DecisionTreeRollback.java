@@ -126,6 +126,28 @@ final class DecisionTreeRollback {
             }
             return Optional.of(measure.bounds());
         }
+        if (measure.readsAParameter()) {
+            Measure parameter = parameters.get(quantityKey(measure.derivationConcept()));
+            if (parameter == null) {
+                return notDeterminableLine(measure.line(), "a measure reads a quantity the tree has no parameter for: "
+                        + measure.derivationConcept().shown());
+            }
+            if (evaluating.contains(measure)) {
+                return notDeterminableLine(measure.line(), "a derivation reads itself");
+            }
+            evaluating.add(measure);
+            try {
+                Optional<Interval> value = this.measure(parameter);
+                if (value.isEmpty()) {
+                    return notDeterminableLine(measure.line(), "the parameter a measure reads is not determinable: "
+                            + measure.derivationConcept().shown());
+                }
+                // nothing is computed: the parameter's own callout is the number's working
+                return value;
+            } finally {
+                evaluating.remove(measure);
+            }
+        }
         if (!measure.derived() || measure.derivation() == null) {
             return notDeterminableLine(measure.line(), "a derivation names no kind the build can run");
         }
