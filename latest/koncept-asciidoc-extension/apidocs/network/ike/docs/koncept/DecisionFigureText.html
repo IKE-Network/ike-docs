@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 133</div>
+<div class="about-language"><b>Koncept Extension</b> 134</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -82,6 +82,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#fit(java.lang.String,double,boolean,double)" tabindex="0">fit(String, double, boolean, double)</a></li>
 <li><a href="#wrap(java.lang.String,double,double)" tabindex="0">wrap(String, double, double)</a></li>
 <li><a href="#value(double)" tabindex="0">value(double)</a></li>
+<li><a href="#shown(double,boolean,boolean)" tabindex="0">shown(double, boolean, boolean)</a></li>
 <li><a href="#length(double)" tabindex="0">length(double)</a></li>
 </ol>
 </li>
@@ -214,24 +215,31 @@ figure's palette and number formats, which the live JavaFX surface shares.
 <div class="block">The height of a line of text of a size, as the builders space lines.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#value(double)" class="member-name-link">value</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#shown(double,boolean,boolean)" class="member-name-link">shown</a><wbr>(double&nbsp;value,
+ boolean&nbsp;computed,
+ boolean&nbsp;money)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A measure's value as its chip shows it, as the live surface shows it.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#value(double)" class="member-name-link">value</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">A measure's value as a threshold or a caption reads it: whole above a hundred, two decimals
 above one, four beneath, since a flip found by bisection is only as exact as its range.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#width(java.lang.String,double,boolean)" class="member-name-link">width</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#width(java.lang.String,double,boolean)" class="member-name-link">width</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
  double&nbsp;size,
  boolean&nbsp;bold)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">The estimated width of a run of text: each character by its class in a Helvetica-like
 face, bold a twentieth wider, a space between words narrow.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#wrap(java.lang.String,double,double)" class="member-name-link">wrap</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#wrap(java.lang.String,double,double)" class="member-name-link">wrap</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
  double&nbsp;size,
  double&nbsp;maxWidth)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">The text broken into lines no wider than a width, at spaces.</div>
 </div>
 </div>
@@ -536,6 +544,20 @@ face, bold a twentieth wider, a space between words narrow.</div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">value</span><wbr><span class="parameters">(double&nbsp;value)</span></div>
 <div class="block">A measure's value as a threshold or a caption reads it: whole above a hundred, two decimals
 above one, four beneath, since a flip found by bisection is only as exact as its range.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="shown(double,boolean,boolean)">
+<h3>shown</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">shown</span><wbr><span class="parameters">(double&nbsp;value,
+ boolean&nbsp;computed,
+ boolean&nbsp;money)</span></div>
+<div class="block">A measure's value as its chip shows it, as the live surface shows it. A stated number
+prints as the block wrote it and no wider; a computed one is held to what its inputs can
+carry: money to the whole unit of its currency, a share or a quantity to three significant
+figures, since a product of two-figure assumptions never earns a fifth decimal.</div>
 </div>
 </section>
 </li>

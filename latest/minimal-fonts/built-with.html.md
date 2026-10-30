@@ -1,12 +1,12 @@
 ---
-date_published: 2026-10-28
-date_modified: 2026-10-28
+date_published: 2026-10-29
+date_modified: 2026-10-29
 canonical_url: https://github.com/IKE-Network/ike-minimal-fonts/built-with.html
 ---
 
 # Built With
 
-Open-source software that `minimal-fonts` 133 depends on, links against, ships within, or invokes at runtime.
+Open-source software that `minimal-fonts` 134 depends on, links against, ships within, or invokes at runtime.
 
 Three layers of attribution ship with each release:
 

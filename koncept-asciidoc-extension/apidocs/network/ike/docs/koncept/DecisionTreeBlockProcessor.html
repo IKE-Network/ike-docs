@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 133</div>
+<div class="about-language"><b>Koncept Extension</b> 134</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -113,11 +113,14 @@ decision: k:ScanNow[Scan now?] @id=…
 ----
 </pre>
 
-The figures are self-contained SVG from the same geometry the live diagram lays out, with label
-widths estimated rather than measured: inline on the html5 family, so the text stays text and a
-wide tree scrolls; as a content-addressed file on Prawn, DocBook and Typst, where an image block
-is what those converters place. A block with no root decision renders as a literal block, so the
-text is visible, never dropped; a block with gaps renders with them named in a note.</div>
+The figures are drawn from the same geometry the live diagram lays out, with label widths
+estimated rather than measured: as self-contained SVG, inline on the html5 family, so the text
+stays text and a wide tree scrolls, and as a content-addressed file on Prawn and DocBook, where
+an image block is what those converters place; on the Typst backend as native Typst drawing code
+(<a href="DecisionFigureTypst.html" title="class in network.ike.docs.koncept"><code>DecisionFigureTypst</code></a>), handed to the converter in a passthrough block with the role
+<code>typst</code>, so the print pipeline draws the figure with the document's own text and never
+through an embedded image. A block with no root decision renders as a literal block, so the text
+is visible, never dropped; a block with gaps renders with them named in a note.</div>
 </div>
 </section>
 <section class="summary">
