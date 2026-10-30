@@ -80,7 +80,7 @@
         <dependency>
             <groupId>network.ike.docs</groupId>
             <artifactId>koncept-asciidoc-extension</artifactId>
-            <version>${project.version}</version>
+            <version>134</version>
             <scope>test</scope>
         </dependency>
         <dependency>
