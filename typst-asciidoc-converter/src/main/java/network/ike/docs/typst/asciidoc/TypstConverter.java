@@ -50,9 +50,15 @@ import java.util.TreeMap;
  * header row, footnotes (native {@code footnote}), in-document cross
  * references ({@code link} to a label), index terms (as {@code metadata}
  * labelled {@code <ike-index>}), bibliography anchors and citations (plain),
- * images ({@code image()} in a {@code figure}) and {@code stem} blocks
- * (LaTeX through the mitex package). Anything else renders as a visibly
- * marked literal fallback, never silently dropped.
+ * images ({@code image()} in a {@code figure}), {@code stem} blocks
+ * (LaTeX through the mitex package) and passthrough blocks with the role
+ * {@code typst}, whose content is Typst source placed verbatim: titled, it
+ * is a captioned {@code figure}; with the role {@code drawing} as well, it
+ * is fitted to the column through {@code ike-drawing}, which is how the
+ * {@code [decision-tree]} block's tree and tornado arrive from
+ * {@code koncept-asciidoc-extension}. Anything else, a passthrough of
+ * HTML included, renders as a visibly marked literal fallback, never
+ * silently dropped.
  *
  * <p>Koncept inline macros arrive as {@code quoted} phrase nodes carrying the
  * role {@code koncept} (see {@code KonceptInlineMacro}'s typst branch) and
@@ -62,6 +68,10 @@ import java.util.TreeMap;
 public class TypstConverter extends StringConverter {
 
     private static final String ROLE_KONCEPT = "koncept";
+    /** A passthrough block whose content is Typst source. */
+    private static final String ROLE_TYPST = "typst";
+    /** A Typst passthrough block whose content is a drawing to fit to the column. */
+    private static final String ROLE_DRAWING = "drawing";
 
     /**
      * Creates the converter for one document.
@@ -99,6 +109,7 @@ public class TypstConverter extends StringConverter {
             case "table" -> convertTable((Table) node);
             case "image" -> convertImage((StructuralNode) node);
             case "stem" -> convertStem((StructuralNode) node);
+            case "pass" -> convertPass((StructuralNode) node);
             case "thematic_break" -> "#line(length: 100%, stroke: 0.5pt + luma(160))\n\n";
             case "page_break" -> "#pagebreak()\n\n";
             case "toc" -> "#outline()\n\n";
@@ -511,6 +522,37 @@ public class TypstConverter extends StringConverter {
             return sb.append(unconverted(node, "stem (asciimath)")).toString();
         }
         sb.append("#mitex(").append(TypstText.string(source)).append(')');
+        if (node.getId() != null) {
+            sb.append(' ').append(TypstText.label(node.getId()));
+        }
+        return sb.append("\n\n").toString();
+    }
+
+    // ── Passthrough ──────────────────────────────────────────────────
+
+    /**
+     * A passthrough block with the role {@code typst} is Typst source, placed as it is: a titled
+     * one inside a {@code figure} with the title as its caption, and one with the role
+     * {@code drawing} as well inside {@code ike-drawing}, which sets the drawing in the sans
+     * face and shrinks it to the column when it is wider. The {@code [decision-tree]} block's
+     * figures come this way. Any other passthrough is for another backend, and falls back.
+     */
+    private String convertPass(StructuralNode node) {
+        if (!node.hasRole(ROLE_TYPST)) {
+            return unconverted(node, "pass");
+        }
+        String body = node.getContent() == null ? "" : node.getContent().toString().strip();
+        if (node.hasRole(ROLE_DRAWING)) {
+            body = "#ike-drawing[\n" + body + "\n]";
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean titled = node.getTitle() != null && !node.getTitle().isEmpty();
+        if (titled) {
+            sb.append("#figure(\n  [\n").append(body).append("\n  ],\n  caption: [")
+                    .append(TypstText.markup(node.getTitle())).append("],\n)");
+        } else {
+            sb.append(body);
+        }
         if (node.getId() != null) {
             sb.append(' ').append(TypstText.label(node.getId()));
         }

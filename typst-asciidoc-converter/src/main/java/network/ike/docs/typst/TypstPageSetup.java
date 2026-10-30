@@ -116,6 +116,17 @@ public final class TypstPageSetup {
                   text(fill: rgb("#b00020"), size: 0.9em)[#ctx: #body])
                 #let ike-xref-unresolved(id, body) = text(fill: rgb("#9a3b3b"))[#body#super[?]]
                 #let ike-index(..terms) = [#metadata((index: terms.pos())) <ike-index>]
+                // A drawing placed by its own coordinates (a decision tree, its tornado): set in the sans face its
+                // label widths were estimated for, and scaled down, never up, to the column when it is wider.
+                #let ike-drawing(body) = layout(size => {
+                  let drawing = text(font: "Noto Sans", body)
+                  let natural = measure(drawing).width
+                  if natural > size.width {
+                    scale(size.width / natural * 100%%, reflow: true, drawing)
+                  } else {
+                    drawing
+                  }
+                })
                 // TODO(#1307): the badge demo in ike-docs/notes/typst-badge-demo compares the renderer's SVG
                 // against a native Typst drawing with identicon; take its recommendation here. Until then a
                 // Koncept is its label in a rounded box in the pill colours of KonceptAppearance.defaults().
