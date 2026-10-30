@@ -64,11 +64,14 @@ import java.util.UUID;
  * ----
  * </pre>
  *
- * The figures are self-contained SVG from the same geometry the live diagram lays out, with label
- * widths estimated rather than measured: inline on the html5 family, so the text stays text and a
- * wide tree scrolls; as a content-addressed file on Prawn, DocBook and Typst, where an image block
- * is what those converters place. A block with no root decision renders as a literal block, so the
- * text is visible, never dropped; a block with gaps renders with them named in a note.
+ * The figures are drawn from the same geometry the live diagram lays out, with label widths
+ * estimated rather than measured: as self-contained SVG, inline on the html5 family, so the text
+ * stays text and a wide tree scrolls, and as a content-addressed file on Prawn and DocBook, where
+ * an image block is what those converters place; on the Typst backend as native Typst drawing code
+ * ({@link DecisionFigureTypst}), handed to the converter in a passthrough block with the role
+ * {@code typst}, so the print pipeline draws the figure with the document's own text and never
+ * through an embedded image. A block with no root decision renders as a literal block, so the text
+ * is visible, never dropped; a block with gaps renders with them named in a note.
  */
 @Name("decision-tree")
 @Contexts(Contexts.LISTING)
@@ -82,6 +85,19 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
 
     /** The tornado's width, in figure units: the html5 family's text column. */
     static final double TORNADO_WIDTH = 640;
+
+    /**
+     * The tornado's width on the Typst backend, in points: a little under the text column of the
+     * converter's A4 page setup (210 mm less 24 mm inside and 18 mm outside), so the bars take the
+     * column and the drawing is never shrunk to fit it.
+     */
+    static final double TYPST_TORNADO_WIDTH = 470;
+
+    /** The role a passthrough block carries when its content is Typst source for the converter. */
+    static final String ROLE_TYPST = "typst";
+
+    /** The role a Typst passthrough block carries when its content is a drawing to fit to the column. */
+    static final String ROLE_DRAWING = "drawing";
 
     private static final Path FILE_DIR = Path.of(System.getProperty("java.io.tmpdir"), "ike-koncept-figures");
 
@@ -108,15 +124,14 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
 
         StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
         Document doc = parent.getDocument();
-        container.append(figure(container, doc,
-                DecisionFigureSvg.write(DecisionTreeFigures.tree(root, rollback, symbol, sweep)), title, "decision-tree"));
+        boolean typst = isTypst(doc);
+        container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep), title));
         parseContent(container, legend(rollback, symbol));
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
-            DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s), TORNADO_WIDTH,
-                    cost -> DecisionTreeFigures.money(cost, symbol));
-            container.append(figure(container, doc, DecisionFigureSvg.write(tornado),
-                    "How far each value, moved on its own across its range, swings the expected cost at the root",
-                    "decision-tornado"));
+            DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s),
+                    typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
+            container.append(figure(container, doc, tornado,
+                    "How far each value, moved on its own across its range, swings the expected cost at the root"));
         });
         List<String> source = new ArrayList<>();
         source.addAll(assumptions(root, rollback, symbol));
@@ -144,16 +159,32 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
 
     // ── The figures ──────────────────────────────────────────────────────────
 
+    private static boolean isTypst(Document doc) {
+        return "typst".equals(doc.getAttribute("backend", "html5").toString());
+    }
+
     /**
-     * A captioned, numbered figure of an SVG: inline on the html5 family, in a block that scrolls
-     * when the tree is wider than the column; an image block over a content-addressed file where
-     * the converter places files (Prawn, DocBook, Typst).
+     * A captioned, numbered figure: the SVG inline on the html5 family, in a block that scrolls
+     * when the tree is wider than the column; an image block over a content-addressed SVG file
+     * where the converter places files (Prawn, DocBook); on Typst the figure's own drawing code
+     * in a passthrough block with the roles {@code typst} and {@code drawing}, which the converter
+     * places verbatim, captioned, and fitted to the column.
      */
-    private Block figure(StructuralNode parent, Document doc, String svg, String title, String role) {
+    private Block figure(StructuralNode parent, Document doc, DecisionFigure figure, String title) {
         String backend = doc.getAttribute("backend", "html5").toString();
-        boolean fileBackend = "pdf".equals(backend) || "docbook5".equals(backend) || "docbook".equals(backend)
-                || "typst".equals(backend);
+        String role = figure.role();
+        boolean fileBackend = "pdf".equals(backend) || "docbook5".equals(backend) || "docbook".equals(backend);
         String caption = doc.getAttribute("figure-caption", "Figure") + " " + doc.getAndIncrementCounter("figure-number") + ". ";
+        if (isTypst(doc)) {
+            Block pass = createBlock(parent, "pass", DecisionFigureTypst.write(figure), new HashMap<>());
+            pass.setTitle(title);
+            pass.setCaption(caption);
+            pass.addRole(ROLE_TYPST);
+            pass.addRole(ROLE_DRAWING);
+            pass.addRole(role);
+            return pass;
+        }
+        String svg = DecisionFigureSvg.write(figure);
         if (fileBackend) {
             Map<String, Object> imageAttrs = new HashMap<>();
             imageAttrs.put("target", svgFile(role, svg));

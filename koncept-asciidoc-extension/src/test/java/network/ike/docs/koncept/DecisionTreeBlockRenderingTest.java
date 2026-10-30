@@ -20,11 +20,16 @@ import network.ike.docs.koncept.DecisionTreeSource.Parsed;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
+import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.StructuralNode;
+import org.asciidoctor.converter.ConverterFor;
+import org.asciidoctor.converter.StringConverter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,6 +159,35 @@ class DecisionTreeBlockRenderingTest {
         asciidoctor = Asciidoctor.Factory.create();
         asciidoctor.javaExtensionRegistry().block(DecisionTreeBlockProcessor.class);
         asciidoctor.javaExtensionRegistry().inlineMacro(KonceptInlineMacro.class);
+        asciidoctor.javaConverterRegistry().register(PassthroughConverter.class);
+    }
+
+    /**
+     * A stand-in for the {@code typst} backend, which lives in {@code typst-asciidoc-converter}
+     * above this module in the reactor: it writes every passthrough block as its roles, its title
+     * and its content, and everything else as its content, so a test can read what the processor
+     * hands the real converter. The real pipeline, end to end, is {@code DecisionTreeTypstTest}
+     * beside the converter.
+     */
+    @ConverterFor(value = "typst", suffix = ".typ")
+    public static class PassthroughConverter extends StringConverter {
+
+        public PassthroughConverter(String backend, Map<String, Object> opts) {
+            super(backend, opts);
+        }
+
+        @Override
+        public String convert(ContentNode node, String transform, Map<Object, Object> opts) {
+            if (!(node instanceof StructuralNode block)) {
+                return "";
+            }
+            String kind = transform != null ? transform : node.getNodeName();
+            Object content = block.getContent();
+            if ("pass".equals(kind)) {
+                return "pass[" + String.join(" ", block.getRoles()) + "][" + block.getTitle() + "]\n" + content + "\n";
+            }
+            return content == null ? "" : content + "\n";
+        }
     }
 
     @Test
@@ -350,6 +384,29 @@ class DecisionTreeBlockRenderingTest {
                 Optional.of(sweep)));
         assertTrue(tree.contains("thickness: 2.6pt"), "the chosen alternative is heavy in print too");
         assertTrue(tree.contains("\"\u25B2\""), "a value that flips the root is marked");
+    }
+
+    @Test
+    @DisplayName("On the typst backend the block hands the converter its figures as Typst drawing code, never an image")
+    void typstBackendHandsOverNativeDrawings() {
+        String typst = asciidoctor.convert("""
+                [decision-tree, title="Should this patient have a scan in year 2?"]
+                ----
+                %s----
+                """.formatted(SCAN_TREE), Options.builder().safe(SafeMode.UNSAFE).backend("typst").build());
+
+        assertTrue(typst.contains("pass[typst drawing decision-tree][Should this patient have a scan in year 2?]\n// decision-tree\n#box(width: "),
+                "the tree is a titled passthrough of Typst code with the roles the converter reads:\n" + typst);
+        assertTrue(typst.contains("\"scan\""), "the alternatives are named");
+        assertTrue(typst.contains("\"no scan\""));
+        assertTrue(typst.contains("\"\u21D2 $3,880\""), "the scan's rolled-back value is on the tree");
+        assertTrue(typst.contains("\"\u21D2 $4,188\""), "and the no-scan value");
+        assertTrue(typst.contains("thickness: 2.6pt"), "the chosen alternative is heavy");
+        assertTrue(typst.contains("pass[typst drawing decision-tornado][How far each value"), "the tornado follows the tree");
+        assertTrue(typst.contains("#box(width: 470pt"), "drawn to the Typst page's column");
+        assertTrue(typst.contains("\"flips at 1,008\""), "and marks the flip at the scan cost the lab says");
+        assertFalse(typst.contains(".svg"), "no SVG file stands in for a figure:\n" + typst);
+        assertTrue(typst.contains("A square is a choice"), "the legend still follows the tree");
     }
 
     private static int count(String text, String part) {
