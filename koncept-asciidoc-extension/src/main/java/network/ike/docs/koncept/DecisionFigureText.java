@@ -15,6 +15,9 @@
  */
 package network.ike.docs.koncept;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -153,6 +156,48 @@ public final class DecisionFigureText {
             return String.format(Locale.ROOT, "%.2f", value);
         }
         return String.format(Locale.ROOT, "%.4f", value);
+    }
+
+    /**
+     * A measure's value as its chip shows it, as the live surface shows it. A stated number
+     * prints as the block wrote it and no wider; a computed one is held to what its inputs can
+     * carry: money to the whole unit of its currency, a share or a quantity to three significant
+     * figures, since a product of two-figure assumptions never earns a fifth decimal.
+     */
+    public static String shown(double value, boolean computed, boolean money) {
+        if (Double.isNaN(value)) {
+            return "?";
+        }
+        if (Double.isInfinite(value)) {
+            return value > 0 ? "∞" : "−∞";
+        }
+        if (computed && money) {
+            return String.format(Locale.ROOT, "%,d", Math.round(value));
+        }
+        BigDecimal number = computed
+                ? new BigDecimal(value).round(new MathContext(3, RoundingMode.HALF_UP))
+                : BigDecimal.valueOf(value);
+        return group(number.stripTrailingZeros());
+    }
+
+    /** A plain decimal with its thousands grouped. */
+    private static String group(BigDecimal number) {
+        String plain = number.toPlainString();
+        int dot = plain.indexOf('.');
+        String whole = dot < 0 ? plain : plain.substring(0, dot);
+        String fraction = dot < 0 ? "" : plain.substring(dot);
+        boolean negative = whole.startsWith("-");
+        if (negative) {
+            whole = whole.substring(1);
+        }
+        StringBuilder grouped = new StringBuilder();
+        for (int i = 0; i < whole.length(); i++) {
+            if (i > 0 && (whole.length() - i) % 3 == 0) {
+                grouped.append(',');
+            }
+            grouped.append(whole.charAt(i));
+        }
+        return (negative ? "-" : "") + grouped + fraction;
     }
 
     /** A length as the writers print it: at most two decimals, no trailing zeros. */
