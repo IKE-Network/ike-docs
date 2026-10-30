@@ -278,7 +278,7 @@ final class DecisionTreeFigures {
         /** A measure as its chip reads: the word, the bounds, and a mark when its range holds a flip of the root's choice. */
         private List<Span> chip(String word, Measure measure) {
             Optional<Interval> bounds = rollback.measure(measure);
-            String shown = bounds.map(DecisionTreeFigures::bounds).orElse("?");
+            String shown = bounds.map(b -> bounds(b, measure.derived(), "money".equals(word))).orElse("?");
             String colour = bounds.isEmpty() ? DecisionFigureText.GAP
                     : measure.derived() ? DecisionFigureText.DERIVED : DecisionFigureText.INK;
             List<Span> spans = new ArrayList<>();
@@ -417,20 +417,15 @@ final class DecisionTreeFigures {
     }
 
     /** A measure's bounds as its chip prints them, which is how the live surface's {@code Bounds} prints: whole, or to four places. */
-    static String bounds(Interval interval) {
+    /** An interval as a chip prints it: a stated number as written, a computed one no wider than it earns. */
+    static String bounds(Interval interval, boolean computed, boolean money) {
         if (interval.isPoint()) {
-            return number(interval.lower());
+            return DecisionFigureText.shown(interval.lower(), computed, money);
         }
-        return (interval.lowerOpen() ? "(" : "[") + number(interval.lower()) + ", " + number(interval.upper())
-                + (interval.upperOpen() ? ")" : "]");
+        return (interval.lowerOpen() ? "(" : "[") + DecisionFigureText.shown(interval.lower(), computed, money) + ", "
+                + DecisionFigureText.shown(interval.upper(), computed, money) + (interval.upperOpen() ? ")" : "]");
     }
 
-    private static String number(double value) {
-        if (value == Math.rint(value) && Math.abs(value) < 1e15) {
-            return String.format(Locale.ROOT, "%,d", (long) value);
-        }
-        return String.format(Locale.ROOT, "%,.4f", value);
-    }
 
     /** The step that worked a node's number, for a callout; package-visible for the processor's legend. */
     static Optional<Step> step(DecisionTreeRollback rollback, Node node) {
