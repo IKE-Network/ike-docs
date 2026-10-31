@@ -578,11 +578,12 @@ final class DecisionTreeSource {
                     quoted = true;
                     word.append(c);
                 }
-                case '[' -> {
+                case '[', '(' -> {
+                    // a bracket opens a label or an interval; a parenthesis an open-ended one, so [0,5) is one word
                     depth++;
                     word.append(c);
                 }
-                case ']' -> {
+                case ']', ')' -> {
                     depth = Math.max(0, depth - 1);
                     word.append(c);
                 }

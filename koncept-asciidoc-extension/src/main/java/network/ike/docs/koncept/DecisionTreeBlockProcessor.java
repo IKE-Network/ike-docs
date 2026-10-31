@@ -117,6 +117,9 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         String symbol = attributes.get("symbol") == null ? "$" : String.valueOf(attributes.get("symbol"));
         String title = attributes.get("title") == null ? "The decision as a tree" : String.valueOf(attributes.get("title"));
         Node root = parsed.root();
+        // a share a calculate block earlier in the document computed becomes a parameter the tree
+        // states no line for (dev-calculator-blocks); the text never carries the number
+        DocumentCalculations.of(parent.getDocument()).inject(root);
         DecisionTreeRollback rollback = DecisionTreeRollback.of(root, price);
         Optional<DecisionTreeSweep> sweep = rollback.value(root).isPresent()
                 ? Optional.of(DecisionTreeSweep.of(root, price, DecisionTreeSweep.DEFAULT_STEPS))
@@ -159,7 +162,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
 
     // ── The figures ──────────────────────────────────────────────────────────
 
-    private static boolean isTypst(Document doc) {
+    static boolean isTypst(Document doc) {
         return "typst".equals(doc.getAttribute("backend", "html5").toString());
     }
 
@@ -171,12 +174,17 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
      * places verbatim, captioned, and fitted to the column.
      */
     private Block figure(StructuralNode parent, Document doc, DecisionFigure figure, String title) {
+        return figure(this, parent, doc, figure, title);
+    }
+
+    /** A figure for any block processor of this family: a pass block on typst, an image file on the file backends, inline SVG otherwise. */
+    static Block figure(BlockProcessor processor, StructuralNode parent, Document doc, DecisionFigure figure, String title) {
         String backend = doc.getAttribute("backend", "html5").toString();
         String role = figure.role();
         boolean fileBackend = "pdf".equals(backend) || "docbook5".equals(backend) || "docbook".equals(backend);
         String caption = doc.getAttribute("figure-caption", "Figure") + " " + doc.getAndIncrementCounter("figure-number") + ". ";
         if (isTypst(doc)) {
-            Block pass = createBlock(parent, "pass", DecisionFigureTypst.write(figure), new HashMap<>());
+            Block pass = processor.createBlock(parent, "pass", DecisionFigureTypst.write(figure), new HashMap<>());
             pass.setTitle(title);
             pass.setCaption(caption);
             pass.addRole(ROLE_TYPST);
@@ -189,7 +197,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             Map<String, Object> imageAttrs = new HashMap<>();
             imageAttrs.put("target", svgFile(role, svg));
             imageAttrs.put("alt", title);
-            Block image = createBlock(parent, "image", "", imageAttrs);
+            Block image = processor.createBlock(parent, "image", "", imageAttrs);
             image.setTitle(title);
             image.setCaption(caption);
             image.addRole(role);
@@ -197,7 +205,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         }
         String html = "<div class=\"imageblock " + role + "\">\n<div class=\"content\" style=\"overflow-x: auto\">\n"
                 + svg + "</div>\n<div class=\"title\">" + DecisionTreeFormat.html(caption + title) + "</div>\n</div>";
-        return createBlock(parent, "pass", html, new HashMap<>());
+        return processor.createBlock(parent, "pass", html, new HashMap<>());
     }
 
     /** The SVG written to a content-addressed file, so identical figures share one and re-runs are stable. */

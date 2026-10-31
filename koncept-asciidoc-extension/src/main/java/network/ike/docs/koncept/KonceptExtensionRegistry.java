@@ -56,6 +56,15 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         asciidoctor.javaExtensionRegistry()
                 .block(DecisionTreeBlockProcessor.class);
 
+        // The [calculator] and [calculate] blocks: the static projection of the calculator profile
+        // the assistant surface renders live (dev-calculator-blocks) — the method's inputs as a
+        // table, the record's input rail, result and tornado, and the share a tree later in the
+        // document reads as a parameter. Backend-agnostic, as the decision tree is.
+        asciidoctor.javaExtensionRegistry()
+                .block(CalculatorBlockProcessor.class);
+        asciidoctor.javaExtensionRegistry()
+                .block(CalculateBlockProcessor.class);
+
         // The koncept-narrative::Identifier[] block macro: splices a koncept's curated,
         // long-form narrative field into the document as real AsciiDoc source, re-parsed so
         // embedded k: chips resolve normally (IKE-Network/ike-issues#879). Safe for all
