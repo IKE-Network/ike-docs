@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:175dfdd7-168c-3a60-9c92-335588112ebc" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:c9be8105-e855-3017-9d79-a9fc5dfc8d16" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@134?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@135?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-asciidoc-extension</name>
-      <version>134</version>
+      <version>135</version>
       <description>AsciidoctorJ extension providing inline Koncept markup (k:ConceptName[])
         with SVG badge rendering and auto-generated Referenced Koncepts glossary
         with description logic axiom display.</description>
@@ -40,7 +40,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@134?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-asciidoc-extension@135?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -60,31 +60,31 @@
     </properties>
   </metadata>
   <components>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-core@134?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/koncept-core@135?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>koncept-core</name>
-      <version>134</version>
+      <version>135</version>
       <description>Rendering-agnostic Koncept core (ike-issues#623): the shared, JavaFX-free component-kind
         scheme (KonceptKind) and the locked stamp-sigil pentagon geometry (StampSigilGeometry),
         consumed by the koncept AsciiDoc extension and — downstream in the release cascade — by Komet.</description>
       <scope>required</scope>
       <hashes>
-        <hash alg="MD5">d052d59c2f7e4362e6074ea3f0c63e14</hash>
-        <hash alg="SHA-1">b6101850c679749be7f2a71bc316930a94333ce0</hash>
-        <hash alg="SHA-256">ca9f3e75ba4995953c17cda70a81051c6e58ac1560f6bec374860ec2a7431d28</hash>
-        <hash alg="SHA-512">6afacba10f95a18e719d34482ea6f2d7a8c28be5fad18e3c71773e9fb545ee6bc1e8bda791192462304898c6115a5d2719941004abaa393b4ef96a5d450c65ee</hash>
-        <hash alg="SHA-384">57da2f2e533cb7ffae552e435e6abe2f177cdc6824158d762b19f16a896700406fd216378291c7b1de6f15745a8f503a</hash>
-        <hash alg="SHA3-384">a69cf3d1838878305bc085f2d2377bec3471a15a24fcdd28bdfd7b08007088b0ad151886880c3b234aaaf8011fd447cf</hash>
-        <hash alg="SHA3-256">0cbe9fbc9f41e664b18a66b304c13791b4ec82f51ad95417c47091b7bf272810</hash>
-        <hash alg="SHA3-512">5c2035e9f90212ea2b43d00fa8d82aa7d570044cf410271a7a38ea775bc84c5093597c678dd08ce01eb00bd1744939c2848edb7b6d745e6d047877d57fb037f0</hash>
+        <hash alg="MD5">200a8b28b58999a02171c731ec20a839</hash>
+        <hash alg="SHA-1">1752afaca2b9d5ffbb09c26d9b21be36cd3178a7</hash>
+        <hash alg="SHA-256">abf4addad3522c2bd095193e617d1a4398731f4757ed19a71f7065c4ae0d7f7a</hash>
+        <hash alg="SHA-512">09a798bde0f36bdfbd428837c928495cd3902a51d13874d15008ac1ad85d817f9e3b2a01cdcb022191a89b71c3d4c6b4bdeeb5351207009d32fdd1509838cc69</hash>
+        <hash alg="SHA-384">91dabf19eaf21b506e6937358c6532e622c703ed5028c751e6ff841a67ffaaaeab2e0490532f1696dc49488bcfc8f735</hash>
+        <hash alg="SHA3-384">3c02a12c6e0f54a242ef87ef0803f8b0be257797e4f315035e31fa38d8641e39e687754a89a6fb84df6b81a69750842d</hash>
+        <hash alg="SHA3-256">8feee3f50855ee80e7edcc37f9fde5ae7db01b82080bca292b1949b828a72b4c</hash>
+        <hash alg="SHA3-512">2addc53b35a9735838baf483ca2fc10fd38042ed8c8c61df78ab764d26b4ea0914939ca25833789826958930a6c2300f880987b4528b7d649de396cc0cc4f32d</hash>
       </hashes>
       <licenses>
         <license>
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/koncept-core@134?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/koncept-core@135?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -1399,8 +1399,8 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@134?type=jar">
-      <dependency ref="pkg:maven/network.ike.docs/koncept-core@134?type=jar"/>
+    <dependency ref="pkg:maven/network.ike.docs/koncept-asciidoc-extension@135?type=jar">
+      <dependency ref="pkg:maven/network.ike.docs/koncept-core@135?type=jar"/>
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
       <dependency ref="pkg:maven/org.yaml/snakeyaml@2.2?type=jar"/>
@@ -1410,7 +1410,7 @@
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@275?classifier=site-theme&amp;type=zip"/>
       <dependency ref="pkg:maven/network.ike.tooling/ike-build-standards@275?classifier=built-with&amp;type=zip"/>
     </dependency>
-    <dependency ref="pkg:maven/network.ike.docs/koncept-core@134?type=jar"/>
+    <dependency ref="pkg:maven/network.ike.docs/koncept-core@135?type=jar"/>
     <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar">
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj-api@3.0.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>

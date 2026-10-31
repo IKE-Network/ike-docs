@@ -8,7 +8,7 @@ IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker.MarkResult,0,15
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker.State,0,53,0,12,0,13,0,9,0,3
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,ChangeStatus,27,0,0,0,5,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.TopicEntry,12,0,0,0,1,0,1,0,1,0
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker,77,1274,45,139,20,251,41,78,0,27
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker,76,1290,44,144,20,254,40,82,0,28
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,GitSource.CommitMeta,0,21,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,RegistryIndex,33,451,13,39,6,85,13,32,1,18
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.ScaffoldEntry,9,0,0,0,1,0,1,0,1,0

@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopicRegistry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">TopicRegistry.java</span></div><h1>TopicRegistry.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import network.ike.docs.plugin.diff.PacketAssembler;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+/**
+ * The generated topic registry: every AsciiDoc file under a scan root, parsed
+ * by {@link TopicHeader}, in the shape {@code IKE-TOPIC-REGISTRY.md} gives
+ * {@code topic-registry.yaml}: topics grouped into domains by the prefix of
+ * their id, each with the registry's field names ({@code id}, {@code file},
+ * {@code title}, {@code type}, {@code keywords}, {@code status},
+ * {@code char-count}, {@code related}, {@code summary}), then what a build can
+ * add on top: assemblies and plain files with their document attributes, the
+ * findings the headers raise, and a generation stamp. This is the registry's
+ * build-time revision: generated from the files on every run where, before it,
+ * the same registry was kept by hand at {@code src/docs/asciidoc/topic-registry.yaml}.
+ * Pure Java with no Maven dependency, so it is testable without a build;
+ * {@code TopicRegistryMojo} is the wiring around it.
+ *
+ * @since 109
+ */
+public final class TopicRegistry {
+
+    /** Directory names never entered by the scan. */
+<span class="fc" id="L50">    public static final Set&lt;String&gt; SKIPPED_DIRS = Set.of(&quot;target&quot;, &quot;.git&quot;, &quot;node_modules&quot;);</span>
+
+    /**
+     * One scan root's result.
+     *
+     * @param root     the root that was scanned
+     * @param topics   the files that declare a {@code :topic-id:}, in path order
+     * @param others   the files that do not, in path order
+     * @param findings every finding, each prefixed with the file it concerns
+     */
+<span class="fc" id="L60">    public record Scan(Path root, List&lt;TopicHeader&gt; topics, List&lt;TopicHeader&gt; others,</span>
+                       List&lt;String&gt; findings) {
+    }
+
+    private TopicRegistry() {
+    }
+
+    /**
+     * Scan one root.
+     *
+     * @param root     the directory to scan
+     * @param maxFiles the most {@code .adoc} files the scan will accept
+     * @return the scan result
+     * @throws IOException           if the tree cannot be read
+     * @throws IllegalStateException if the root holds more than {@code maxFiles}
+     *                               {@code .adoc} files
+     */
+    public static Scan scan(Path root, int maxFiles) throws IOException {
+<span class="fc" id="L78">        Path real = root.toRealPath();</span>
+<span class="fc" id="L79">        List&lt;Path&gt; files = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">        List&lt;String&gt; linkFindings = new ArrayList&lt;&gt;();</span>
+        // Links are never followed, so containment holds without resolving each
+        // file's real path (which cost as much as parsing); a linked .adoc is
+        // reported and skipped instead.
+<span class="fc" id="L84">        Files.walkFileTree(real, new SimpleFileVisitor&lt;&gt;() {</span>
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+<span class="fc bfc" id="L87" title="All 4 branches covered.">                if (!dir.equals(real) &amp;&amp; SKIPPED_DIRS.contains(dir.getFileName().toString())) {</span>
+<span class="fc" id="L88">                    return FileVisitResult.SKIP_SUBTREE;</span>
+                }
+<span class="fc" id="L90">                return FileVisitResult.CONTINUE;</span>
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                if (!file.getFileName().toString().endsWith(&quot;.adoc&quot;)) {</span>
+<span class="nc" id="L96">                    return FileVisitResult.CONTINUE;</span>
+                }
+<span class="fc bfc" id="L98" title="All 2 branches covered.">                if (attrs.isSymbolicLink()) {</span>
+<span class="fc" id="L99">                    linkFindings.add(real.relativize(file).toString().replace('\\', '/')</span>
+                            + &quot;: symbolic link, skipped&quot;);
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                } else if (attrs.isRegularFile()) {</span>
+<span class="fc" id="L102">                    files.add(file);</span>
+                }
+<span class="fc" id="L104">                return FileVisitResult.CONTINUE;</span>
+            }
+        });
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (files.size() &gt; maxFiles) {</span>
+<span class="fc" id="L108">            throw new IllegalStateException(&quot;More than &quot; + maxFiles + &quot; .adoc files under &quot;</span>
+                    + real + &quot;; raise -Dike.topic-registry.maxFiles or narrow -Dike.topic-registry.roots&quot;);
+        }
+<span class="fc" id="L111">        files.sort((a, b) -&gt; real.relativize(a).toString().compareTo(real.relativize(b).toString()));</span>
+
+        // Parse in parallel; toList() keeps the sorted encounter order.
+        List&lt;TopicHeader&gt; headers;
+        try {
+<span class="fc" id="L116">            headers = files.parallelStream().map(file -&gt; {</span>
+                try {
+<span class="fc" id="L118">                    return TopicHeader.parse(file, real);</span>
+<span class="nc" id="L119">                } catch (IOException e) {</span>
+<span class="nc" id="L120">                    throw new UncheckedIOException(e);</span>
+                }
+<span class="fc" id="L122">            }).toList();</span>
+<span class="nc" id="L123">        } catch (UncheckedIOException e) {</span>
+<span class="nc" id="L124">            throw e.getCause();</span>
+<span class="fc" id="L125">        }</span>
+<span class="fc" id="L126">        return collect(real, headers, linkFindings);</span>
+    }
+
+    /**
+     * Scan from one root file: the file and every {@code .adoc} file it
+     * reaches through {@code include::} lines, followed recursively and
+     * resolved relative to the including file as the AsciiDoc preprocessor
+     * does. Files under the root that are not reached are left out. An
+     * include whose target cannot be resolved statically (an attribute
+     * reference, an absolute path, a URI, a path above the root) or that
+     * names a missing file is a finding; a target that is not an
+     * {@code .adoc} file (a diagram, a CSV) is passed over. Each file is read
+     * once, so an include cycle ends.
+     *
+     * @param root     the scan root; registry paths are relative to it
+     * @param rootFile the {@code .adoc} file to start from, under {@code root}
+     * @return the scan result
+     * @throws IOException              if a file cannot be read
+     * @throws IllegalArgumentException if {@code rootFile} is not an
+     *                                  {@code .adoc} file under {@code root}
+     */
+    public static Scan scanFrom(Path root, Path rootFile) throws IOException {
+<span class="fc" id="L148">        Path real = root.toRealPath();</span>
+<span class="pc bpc" id="L149" title="2 of 4 branches missed.">        if (!Files.isRegularFile(rootFile) || !rootFile.getFileName().toString().endsWith(&quot;.adoc&quot;)) {</span>
+<span class="nc" id="L150">            throw new IllegalArgumentException(&quot;Not an AsciiDoc file: &quot; + rootFile);</span>
+        }
+<span class="fc" id="L152">        Path start = rootFile.toRealPath();</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (!start.startsWith(real)) {</span>
+<span class="fc" id="L154">            throw new IllegalArgumentException(rootFile + &quot; is not under the registry root &quot; + real);</span>
+        }
+<span class="fc" id="L156">        String first = real.relativize(start).toString().replace(File.separatorChar, '/');</span>
+<span class="fc" id="L157">        Set&lt;String&gt; seen = new HashSet&lt;&gt;(List.of(first));</span>
+<span class="fc" id="L158">        Deque&lt;String&gt; queue = new ArrayDeque&lt;&gt;(List.of(first));</span>
+<span class="fc" id="L159">        List&lt;TopicHeader&gt; headers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L160">        List&lt;String&gt; includeFindings = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        while (!queue.isEmpty()) {</span>
+<span class="fc" id="L162">            String relative = queue.removeFirst();</span>
+<span class="fc" id="L163">            String content = Files.readString(real.resolve(relative), StandardCharsets.UTF_8);</span>
+<span class="fc" id="L164">            headers.add(TopicHeader.parse(relative, content));</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">            for (String line : content.lines().toList()) {</span>
+<span class="fc" id="L166">                int bracket = line.indexOf('[');</span>
+<span class="pc bpc" id="L167" title="1 of 4 branches missed.">                if (!line.startsWith(&quot;include::&quot;) || bracket &lt; 0) {</span>
+<span class="nc" id="L168">                    continue;</span>
+                }
+<span class="fc" id="L170">                String target = line.substring(&quot;include::&quot;.length(), bracket).strip();</span>
+<span class="fc" id="L171">                String resolved = PacketAssembler.resolveInclude(relative, target);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                if (resolved == null) {</span>
+<span class="fc" id="L173">                    includeFindings.add(relative + &quot;: include::&quot; + target</span>
+                            + &quot;[] not followed (attribute reference, absolute path, URI or above the root)&quot;);
+<span class="fc" id="L175">                    continue;</span>
+                }
+<span class="fc bfc" id="L177" title="All 4 branches covered.">                if (!resolved.endsWith(&quot;.adoc&quot;) || !seen.add(resolved)) {</span>
+<span class="fc" id="L178">                    continue;</span>
+                }
+<span class="fc" id="L180">                Path file = real.resolve(resolved);</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">                if (Files.isSymbolicLink(file)) {</span>
+<span class="nc" id="L182">                    includeFindings.add(resolved + &quot;: symbolic link, skipped&quot;);</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">                } else if (!Files.isRegularFile(file)) {</span>
+<span class="fc" id="L184">                    includeFindings.add(relative + &quot;: include::&quot; + target + &quot;[] does not resolve to a file&quot;);</span>
+                } else {
+<span class="fc" id="L186">                    queue.addLast(resolved);</span>
+                }
+<span class="fc" id="L188">            }</span>
+<span class="fc" id="L189">        }</span>
+<span class="fc" id="L190">        headers.sort((a, b) -&gt; a.file().compareTo(b.file()));</span>
+<span class="fc" id="L191">        return collect(real, headers, includeFindings);</span>
+    }
+
+    /**
+     * Group parsed headers into topics and other files and gather their
+     * findings, the part of a scan shared by {@link #scan} and
+     * {@link #scanFrom}.
+     */
+    private static Scan collect(Path real, List&lt;TopicHeader&gt; headers, List&lt;String&gt; earlyFindings) {
+<span class="fc" id="L200">        List&lt;TopicHeader&gt; topics = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L201">        List&lt;TopicHeader&gt; others = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L202">        List&lt;String&gt; findings = new ArrayList&lt;&gt;(earlyFindings);</span>
+<span class="fc" id="L203">        findings.sort(null);</span>
+<span class="fc" id="L204">        Map&lt;String, String&gt; firstFileById = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        for (TopicHeader header : headers) {</span>
+<span class="fc" id="L206">            String relative = header.file();</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">            if (header.topic()) {</span>
+<span class="fc" id="L208">                topics.add(header);</span>
+<span class="fc" id="L209">                String earlier = firstFileById.putIfAbsent(header.id(), relative);</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                if (earlier != null) {</span>
+<span class="fc" id="L211">                    findings.add(relative + &quot;: duplicate id '&quot; + header.id()</span>
+                            + &quot;', already declared by &quot; + earlier);
+                }
+<span class="fc" id="L214">            } else {</span>
+<span class="fc" id="L215">                others.add(header);</span>
+            }
+<span class="fc bfc" id="L217" title="All 2 branches covered.">            for (String f : header.findings()) {</span>
+<span class="fc" id="L218">                findings.add(relative + &quot;: &quot; + f);</span>
+<span class="fc" id="L219">            }</span>
+<span class="fc" id="L220">        }</span>
+<span class="fc" id="L221">        return new Scan(real, List.copyOf(topics), List.copyOf(others), List.copyOf(findings));</span>
+    }
+
+    /**
+     * The domain a topic belongs to: the part of its id before the first
+     * hyphen, the {@code {domain-prefix}-{slug}} rule of
+     * {@code IKE-TOPIC-REGISTRY.md}.
+     *
+     * @param id the topic id
+     * @return the domain id, or the whole id when it has no hyphen
+     */
+    public static String domainOf(String id) {
+<span class="fc" id="L233">        int i = id.indexOf('-');</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        return i &lt;= 0 ? id : id.substring(0, i);</span>
+    }
+
+    /**
+     * The registry as an ordered map, ready for YAML: the schema's keys first
+     * ({@code registry-version}, {@code generated}, {@code topic-count},
+     * {@code domains} with their {@code topics}), then {@code assemblies},
+     * {@code other-files} and {@code findings}. Topics are grouped by
+     * {@link #domainOf domain} and sorted by id. A file path is relative to
+     * its root, prefixed with the root when several roots were scanned.
+     *
+     * @param scans the scanned roots
+     * @param base  the directory root paths are made relative to (the module
+     *              base directory)
+     * @param now   the generation instant
+     * @return the registry model
+     */
+    public static Map&lt;String, Object&gt; model(List&lt;Scan&gt; scans, Path base, Instant now) {
+<span class="fc" id="L252">        Map&lt;String, Object&gt; registry = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L253">        registry.put(&quot;registry-version&quot;, &quot;1.2&quot;);</span>
+<span class="fc" id="L254">        registry.put(&quot;generated&quot;, now.truncatedTo(ChronoUnit.SECONDS).toString());</span>
+<span class="fc" id="L255">        registry.put(&quot;scanned-from&quot;, base.toAbsolutePath().normalize().toString());</span>
+<span class="fc" id="L256">        List&lt;String&gt; roots = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        for (Scan scan : scans) {</span>
+<span class="fc" id="L258">            roots.add(relativeTo(base, scan.root()));</span>
+<span class="fc" id="L259">        }</span>
+<span class="fc" id="L260">        registry.put(&quot;roots&quot;, roots);</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        boolean prefix = scans.size() &gt; 1;</span>
+<span class="fc" id="L262">        TreeMap&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; domains = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L263">        List&lt;Object&gt; assemblies = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L264">        List&lt;Object&gt; otherFiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L265">        List&lt;String&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L266">        int files = 0;</span>
+<span class="fc" id="L267">        int topics = 0;</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        for (int i = 0; i &lt; scans.size(); i++) {</span>
+<span class="fc" id="L269">            Scan scan = scans.get(i);</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">            String rootPrefix = prefix ? roots.get(i) + &quot;/&quot; : &quot;&quot;;</span>
+<span class="fc" id="L271">            files += scan.topics().size() + scan.others().size();</span>
+<span class="fc" id="L272">            topics += scan.topics().size();</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">            for (TopicHeader t : scan.topics()) {</span>
+<span class="fc" id="L274">                domains.computeIfAbsent(domainOf(t.id()), k -&gt; new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L275">                        .add(topicEntry(t, rootPrefix + t.file()));</span>
+<span class="fc" id="L276">            }</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">            for (TopicHeader o : scan.others()) {</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">                (o.includes() &gt; 0 ? assemblies : otherFiles).add(otherEntry(o, rootPrefix + o.file()));</span>
+<span class="fc" id="L279">            }</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">            for (String f : scan.findings()) {</span>
+<span class="fc" id="L281">                findings.add(rootPrefix + f);</span>
+<span class="fc" id="L282">            }</span>
+        }
+<span class="fc" id="L284">        registry.put(&quot;topic-count&quot;, topics);</span>
+<span class="fc" id="L285">        registry.put(&quot;file-count&quot;, files);</span>
+<span class="fc" id="L286">        List&lt;Object&gt; domainList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L287" title="All 2 branches covered.">        for (Map.Entry&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; e : domains.entrySet()) {</span>
+<span class="fc" id="L288">            Map&lt;String, Object&gt; domain = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L289">            domain.put(&quot;id&quot;, e.getKey());</span>
+<span class="fc" id="L290">            e.getValue().sort((x, y) -&gt; String.valueOf(x.get(&quot;id&quot;)).compareTo(String.valueOf(y.get(&quot;id&quot;))));</span>
+<span class="fc" id="L291">            domain.put(&quot;topics&quot;, e.getValue());</span>
+<span class="fc" id="L292">            domainList.add(domain);</span>
+<span class="fc" id="L293">        }</span>
+<span class="fc" id="L294">        registry.put(&quot;domains&quot;, domainList);</span>
+<span class="fc" id="L295">        registry.put(&quot;assemblies&quot;, assemblies);</span>
+<span class="fc" id="L296">        registry.put(&quot;other-files&quot;, otherFiles);</span>
+<span class="fc" id="L297">        registry.put(&quot;findings&quot;, findings);</span>
+<span class="fc" id="L298">        return registry;</span>
+    }
+
+    /**
+     * Render the registry model as YAML in the registry's block style: two-space
+     * indent, sequences indented under their key, one scalar per line. Written
+     * directly rather than through SnakeYAML's emitter, which cost 40 percent
+     * of a large run and about 45 ms of class loading on every small one; the
+     * output round-trips through {@link #load} unchanged.
+     *
+     * @param model the registry model from {@link #model}
+     * @return the YAML text
+     */
+    public static String yaml(Map&lt;String, Object&gt; model) {
+<span class="fc" id="L312">        StringBuilder sb = new StringBuilder(1 &lt;&lt; 16);</span>
+<span class="fc" id="L313">        sb.append(&quot;# topic-registry.yaml, generated by idoc:topic-registry from the files. Do not edit.\n&quot;);</span>
+<span class="fc" id="L314">        emitMap(sb, model, 0);</span>
+<span class="fc" id="L315">        return sb.toString();</span>
+    }
+
+    private static void emitMap(StringBuilder sb, Map&lt;?, ?&gt; map, int indent) {
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        for (Map.Entry&lt;?, ?&gt; e : map.entrySet()) {</span>
+<span class="fc" id="L320">            pad(sb, indent).append(scalar(String.valueOf(e.getKey()))).append(':');</span>
+<span class="fc" id="L321">            emitValue(sb, e.getValue(), indent);</span>
+<span class="fc" id="L322">        }</span>
+<span class="fc" id="L323">    }</span>
+
+    private static void emitValue(StringBuilder sb, Object value, int indent) {
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if (value instanceof Map&lt;?, ?&gt; m) {</span>
+<span class="pc bpc" id="L327" title="1 of 2 branches missed.">            if (m.isEmpty()) {</span>
+<span class="nc" id="L328">                sb.append(&quot; {}\n&quot;);</span>
+            } else {
+<span class="fc" id="L330">                sb.append('\n');</span>
+<span class="fc" id="L331">                emitMap(sb, m, indent + 2);</span>
+            }
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        } else if (value instanceof List&lt;?&gt; l) {</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">            if (l.isEmpty()) {</span>
+<span class="fc" id="L335">                sb.append(&quot; []\n&quot;);</span>
+<span class="fc" id="L336">                return;</span>
+            }
+<span class="fc" id="L338">            sb.append('\n');</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">            for (Object item : l) {</span>
+<span class="fc" id="L340">                pad(sb, indent + 2).append('-');</span>
+<span class="pc bpc" id="L341" title="1 of 4 branches missed.">                if (item instanceof Map&lt;?, ?&gt; m &amp;&amp; !m.isEmpty()) {</span>
+<span class="fc" id="L342">                    boolean first = true;</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">                    for (Map.Entry&lt;?, ?&gt; e : m.entrySet()) {</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">                        if (first) {</span>
+<span class="fc" id="L345">                            sb.append(' ');</span>
+<span class="fc" id="L346">                            first = false;</span>
+                        } else {
+<span class="fc" id="L348">                            pad(sb, indent + 4);</span>
+                        }
+<span class="fc" id="L350">                        sb.append(scalar(String.valueOf(e.getKey()))).append(':');</span>
+<span class="fc" id="L351">                        emitValue(sb, e.getValue(), indent + 4);</span>
+<span class="fc" id="L352">                    }</span>
+<span class="fc" id="L353">                } else {</span>
+<span class="fc" id="L354">                    sb.append(' ');</span>
+<span class="fc" id="L355">                    emitScalarOrEmpty(sb, item);</span>
+<span class="fc" id="L356">                    sb.append('\n');</span>
+                }
+<span class="fc" id="L358">            }</span>
+        } else {
+<span class="fc" id="L360">            sb.append(' ');</span>
+<span class="fc" id="L361">            emitScalarOrEmpty(sb, value);</span>
+<span class="fc" id="L362">            sb.append('\n');</span>
+        }
+<span class="fc" id="L364">    }</span>
+
+    private static void emitScalarOrEmpty(StringBuilder sb, Object value) {
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if (value instanceof Map&lt;?, ?&gt;) {</span>
+<span class="nc" id="L368">            sb.append(&quot;{}&quot;);</span>
+<span class="pc bpc" id="L369" title="1 of 2 branches missed.">        } else if (value instanceof List&lt;?&gt;) {</span>
+<span class="nc" id="L370">            sb.append(&quot;[]&quot;);</span>
+        } else {
+<span class="fc" id="L372">            sb.append(scalar(value));</span>
+        }
+<span class="fc" id="L374">    }</span>
+
+    /** Words YAML 1.1 reads as booleans or null when unquoted. */
+<span class="fc" id="L377">    private static final Set&lt;String&gt; RESERVED = Set.of(&quot;true&quot;, &quot;false&quot;, &quot;yes&quot;, &quot;no&quot;, &quot;on&quot;, &quot;off&quot;,</span>
+            &quot;y&quot;, &quot;n&quot;, &quot;null&quot;, &quot;~&quot;, &quot;.inf&quot;, &quot;-.inf&quot;, &quot;.nan&quot;);
+
+    /**
+     * A scalar as YAML: numbers and booleans plain; strings plain when SnakeYAML
+     * would read them back as the same string, otherwise single-quoted (or
+     * double-quoted when they hold control characters).
+     */
+    static String scalar(Object value) {
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        if (value == null) {</span>
+<span class="nc" id="L387">            return &quot;null&quot;;</span>
+        }
+<span class="fc bfc" id="L389" title="All 4 branches covered.">        if (value instanceof Number || value instanceof Boolean) {</span>
+<span class="fc" id="L390">            return String.valueOf(value);</span>
+        }
+<span class="fc" id="L392">        String s = String.valueOf(value);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">        if (s.isEmpty()) {</span>
+<span class="fc" id="L394">            return &quot;''&quot;;</span>
+        }
+<span class="fc" id="L396">        boolean control = false;</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        for (int i = 0; i &lt; s.length(); i++) {</span>
+<span class="fc" id="L398">            char c = s.charAt(i);</span>
+<span class="pc bpc" id="L399" title="1 of 4 branches missed.">            if (c &lt; 0x20 || c == 0x7f) {</span>
+<span class="fc" id="L400">                control = true;</span>
+<span class="fc" id="L401">                break;</span>
+            }
+        }
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        if (control) {</span>
+<span class="fc" id="L405">            StringBuilder sb = new StringBuilder(&quot;\&quot;&quot;);</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">            for (int i = 0; i &lt; s.length(); i++) {</span>
+<span class="fc" id="L407">                char c = s.charAt(i);</span>
+<span class="pc bpc" id="L408" title="4 of 6 branches missed.">                switch (c) {</span>
+<span class="nc" id="L409">                    case '&quot;' -&gt; sb.append(&quot;\\\&quot;&quot;);</span>
+<span class="nc" id="L410">                    case '\\' -&gt; sb.append(&quot;\\\\&quot;);</span>
+<span class="fc" id="L411">                    case '\n' -&gt; sb.append(&quot;\\n&quot;);</span>
+<span class="nc" id="L412">                    case '\t' -&gt; sb.append(&quot;\\t&quot;);</span>
+<span class="nc" id="L413">                    case '\r' -&gt; sb.append(&quot;\\r&quot;);</span>
+                    default -&gt; {
+<span class="pc bpc" id="L415" title="2 of 4 branches missed.">                        if (c &lt; 0x20 || c == 0x7f) {</span>
+<span class="nc" id="L416">                            sb.append(String.format(&quot;\\x%02x&quot;, (int) c));</span>
+                        } else {
+<span class="fc" id="L418">                            sb.append(c);</span>
+                        }
+                    }
+                }
+            }
+<span class="fc" id="L423">            return sb.append('&quot;').toString();</span>
+        }
+<span class="fc bfc" id="L425" title="All 2 branches covered.">        if (isPlain(s)) {</span>
+<span class="fc" id="L426">            return s;</span>
+        }
+<span class="fc" id="L428">        return &quot;'&quot; + s.replace(&quot;'&quot;, &quot;''&quot;) + &quot;'&quot;;</span>
+    }
+
+    private static boolean isPlain(String s) {
+<span class="fc" id="L432">        char first = s.charAt(0);</span>
+<span class="fc" id="L433">        char last = s.charAt(s.length() - 1);</span>
+<span class="pc bpc" id="L434" title="2 of 6 branches missed.">        if (first == ' ' || last == ' ' || last == ':') {</span>
+<span class="fc" id="L435">            return false;</span>
+        }
+<span class="fc bfc" id="L437" title="All 2 branches covered.">        if (&quot;-?:,[]{}#&amp;*!|&gt;'\&quot;%@`&quot;.indexOf(first) &gt;= 0) {</span>
+<span class="fc" id="L438">            return false;</span>
+        }
+<span class="pc bpc" id="L440" title="1 of 6 branches missed.">        if (s.contains(&quot;: &quot;) || s.contains(&quot; #&quot;) || s.contains(&quot;\t&quot;)) {</span>
+<span class="fc" id="L441">            return false;</span>
+        }
+<span class="fc bfc" id="L443" title="All 2 branches covered.">        if (RESERVED.contains(s.toLowerCase(java.util.Locale.ROOT))) {</span>
+<span class="fc" id="L444">            return false;</span>
+        }
+        // Anything SnakeYAML could take for a number, a timestamp or a sexagesimal;
+        // only strings that start like one need the regex.
+<span class="pc bpc" id="L448" title="1 of 8 branches missed.">        if ((Character.isDigit(first) || first == '.' || first == '+') &amp;&amp; LOOKS_TYPED.matcher(s).matches()) {</span>
+<span class="fc" id="L449">            return false;</span>
+        }
+<span class="fc" id="L451">        return true;</span>
+    }
+
+<span class="fc" id="L454">    private static final java.util.regex.Pattern LOOKS_TYPED = java.util.regex.Pattern.compile(</span>
+            &quot;[-+]?(\\d[\\d_]*)?(\\.\\d[\\d_]*)?([eE][-+]?\\d+)?|0x[0-9a-fA-F_]+|0o?[0-7_]+|0b[01_]+&quot;
+                    + &quot;|[-+]?\\d[\\d_]*(:[0-5]?\\d)+(\\.\\d+)?|\\d{4}-\\d\\d?-\\d\\d?([Tt ].*)?&quot;);
+
+    private static StringBuilder pad(StringBuilder sb, int n) {
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L460">            sb.append(' ');</span>
+        }
+<span class="fc" id="L462">        return sb;</span>
+    }
+
+    /**
+     * The scan as an indented tree for the build log: directories, then
+     * each file with its id, type and status, and the files that are not
+     * topics with their include counts.
+     *
+     * @param scan the scan
+     * @param base the directory the root is shown relative to
+     * @return the lines, without newlines
+     */
+    public static List&lt;String&gt; tree(Scan scan, Path base) {
+<span class="fc" id="L475">        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L476">        lines.add(relativeTo(base, scan.root()));</span>
+<span class="fc" id="L477">        Map&lt;String, List&lt;TopicHeader&gt;&gt; byDir = new TreeMap&lt;&gt;();</span>
+<span class="fc bfc" id="L478" title="All 2 branches covered.">        for (TopicHeader t : scan.topics()) {</span>
+<span class="fc" id="L479">            byDir.computeIfAbsent(directoryOf(t.file()), k -&gt; new ArrayList&lt;&gt;()).add(t);</span>
+<span class="fc" id="L480">        }</span>
+<span class="fc bfc" id="L481" title="All 2 branches covered.">        for (TopicHeader o : scan.others()) {</span>
+<span class="fc" id="L482">            byDir.computeIfAbsent(directoryOf(o.file()), k -&gt; new ArrayList&lt;&gt;()).add(o);</span>
+<span class="fc" id="L483">        }</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">        for (Map.Entry&lt;String, List&lt;TopicHeader&gt;&gt; e : byDir.entrySet()) {</span>
+<span class="fc" id="L485">            String indent = &quot;  &quot;;</span>
+<span class="fc bfc" id="L486" title="All 2 branches covered.">            if (!e.getKey().isEmpty()) {</span>
+<span class="fc" id="L487">                lines.add(&quot;  &quot; + e.getKey() + &quot;/&quot;);</span>
+<span class="fc" id="L488">                indent = &quot;    &quot;;</span>
+            }
+<span class="fc bfc" id="L490" title="All 2 branches covered.">            for (TopicHeader h : e.getValue()) {</span>
+<span class="fc" id="L491">                String name = h.file().substring(h.file().lastIndexOf('/') + 1);</span>
+<span class="fc bfc" id="L492" title="All 2 branches covered.">                if (h.topic()) {</span>
+<span class="fc" id="L493">                    lines.add(indent + pad(name, 40) + pad(h.id(), 38)</span>
+<span class="fc" id="L494">                            + pad(h.attributes().getOrDefault(&quot;type&quot;, &quot;-&quot;), 11)</span>
+<span class="fc" id="L495">                            + h.attributes().getOrDefault(&quot;status&quot;, &quot;-&quot;));</span>
+                } else {
+<span class="fc" id="L497">                    lines.add(indent + pad(name, 40)</span>
+<span class="pc bpc" id="L498" title="1 of 2 branches missed.">                            + (h.includes() &gt; 0 ? &quot;assembly, &quot; + h.includes() + &quot; includes&quot; : &quot;plain&quot;));</span>
+                }
+<span class="fc" id="L500">            }</span>
+<span class="fc" id="L501">        }</span>
+<span class="fc" id="L502">        return lines;</span>
+    }
+
+    /**
+     * Read a registry written by {@link #yaml(Map)} back into its model.
+     *
+     * @param registryFile the generated registry file
+     * @return the model, with the same shape {@link #model} produces
+     * @throws IOException if the file cannot be read or is not a generated registry
+     */
+    public static Map&lt;String, Object&gt; load(Path registryFile) throws IOException {
+<span class="fc" id="L513">        LoaderOptions options = new LoaderOptions();</span>
+        // SnakeYAML refuses documents over 3 MB by default; a registry of a few
+        // thousand topics is larger than that. 256 MB is far above any corpus.
+<span class="fc" id="L516">        options.setCodePointLimit(256 * 1024 * 1024);</span>
+<span class="fc" id="L517">        Yaml yaml = new Yaml(new SafeConstructor(options));</span>
+<span class="fc" id="L518">        try (Reader reader = Files.newBufferedReader(registryFile, StandardCharsets.UTF_8)) {</span>
+<span class="fc" id="L519">            Object loaded = yaml.load(reader);</span>
+<span class="pc bpc" id="L520" title="2 of 4 branches missed.">            if (!(loaded instanceof Map&lt;?, ?&gt; map) || !(map.get(&quot;domains&quot;) instanceof List&lt;?&gt;)</span>
+<span class="fc bfc" id="L521" title="All 2 branches covered.">                    || !(map.get(&quot;roots&quot;) instanceof List&lt;?&gt;)) {</span>
+<span class="fc" id="L522">                throw new IOException(&quot;Not a generated topic registry: &quot; + registryFile);</span>
+            }
+            @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L525">            Map&lt;String, Object&gt; model = (Map&lt;String, Object&gt;) map;</span>
+<span class="fc" id="L526">            return model;</span>
+        }
+    }
+
+    /**
+     * Add files to an existing registry, or refresh their entries, without
+     * rescanning the roots: each file is parsed alone, placed in its domain in
+     * id order, counted, and checked for a duplicate id against the ids the
+     * registry already holds. An entry for the same file is replaced, so a
+     * re-ingested document is safe to add again. Files the registry lists but
+     * that no longer exist are not noticed here; a full scan is.
+     *
+     * @param model the registry model, from {@link #model} or {@link #load};
+     *              updated in place
+     * @param base  the module base directory the registry's roots are relative to
+     * @param files the files to add, relative to {@code base} or absolute; each
+     *              must be an {@code .adoc} file under one of the registry's roots
+     * @param now   the update instant, recorded as {@code generated}
+     * @return the parsed headers of the added files, in the order given
+     * @throws IOException              if a file cannot be read
+     * @throws IllegalArgumentException if a file is missing, is not AsciiDoc,
+     *                                  or lies under none of the registry's roots
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static List&lt;TopicHeader&gt; add(Map&lt;String, Object&gt; model, Path base, List&lt;Path&gt; files,
+                                        Instant now) throws IOException {
+<span class="fc" id="L552">        List&lt;String&gt; roots = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L553" title="All 2 branches covered.">        for (Object r : (List&lt;Object&gt;) model.get(&quot;roots&quot;)) {</span>
+<span class="fc" id="L554">            roots.add(String.valueOf(r));</span>
+<span class="fc" id="L555">        }</span>
+<span class="pc bpc" id="L556" title="1 of 2 branches missed.">        boolean prefix = roots.size() &gt; 1;</span>
+<span class="fc" id="L557">        List&lt;String&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L558" title="All 2 branches covered.">        for (Object f : (List&lt;Object&gt;) model.getOrDefault(&quot;findings&quot;, List.of())) {</span>
+<span class="fc" id="L559">            findings.add(String.valueOf(f));</span>
+<span class="fc" id="L560">        }</span>
+<span class="fc" id="L561">        List&lt;TopicHeader&gt; added = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        for (Path file : files) {</span>
+<span class="fc" id="L563">            Path abs = base.resolve(file);</span>
+<span class="pc bpc" id="L564" title="1 of 2 branches missed.">            if (!Files.isRegularFile(abs)) {</span>
+<span class="nc" id="L565">                throw new IllegalArgumentException(&quot;Not a file: &quot; + abs);</span>
+            }
+<span class="pc bpc" id="L567" title="1 of 2 branches missed.">            if (!abs.getFileName().toString().endsWith(&quot;.adoc&quot;)) {</span>
+<span class="nc" id="L568">                throw new IllegalArgumentException(&quot;Not an AsciiDoc file: &quot; + abs);</span>
+            }
+<span class="fc" id="L570">            Path real = abs.toRealPath();</span>
+<span class="fc" id="L571">            String rootName = null;</span>
+<span class="fc" id="L572">            Path rootPath = null;</span>
+<span class="fc bfc" id="L573" title="All 2 branches covered.">            for (String name : roots) {</span>
+<span class="fc" id="L574">                Path candidate = base.resolve(name);</span>
+<span class="pc bpc" id="L575" title="1 of 4 branches missed.">                if (Files.isDirectory(candidate) &amp;&amp; real.startsWith(candidate.toRealPath())) {</span>
+<span class="fc" id="L576">                    rootName = name;</span>
+<span class="fc" id="L577">                    rootPath = candidate.toRealPath();</span>
+<span class="fc" id="L578">                    break;</span>
+                }
+<span class="fc" id="L580">            }</span>
+<span class="fc bfc" id="L581" title="All 2 branches covered.">            if (rootName == null) {</span>
+<span class="fc" id="L582">                throw new IllegalArgumentException(abs + &quot; is under none of the registry's roots &quot;</span>
+                        + roots + &quot;; run a full idoc:topic-registry instead&quot;);
+            }
+<span class="fc" id="L585">            TopicHeader header = TopicHeader.parse(real, rootPath);</span>
+<span class="pc bpc" id="L586" title="1 of 2 branches missed.">            String fileValue = (prefix ? rootName + &quot;/&quot; : &quot;&quot;) + header.file();</span>
+<span class="fc" id="L587">            remove(model, fileValue);</span>
+<span class="fc" id="L588">            findings.removeIf(f -&gt; f.startsWith(fileValue + &quot;: &quot;));</span>
+<span class="fc bfc" id="L589" title="All 2 branches covered.">            if (header.topic()) {</span>
+<span class="fc" id="L590">                String earlier = fileDeclaring(model, header.id());</span>
+<span class="fc bfc" id="L591" title="All 2 branches covered.">                if (earlier != null) {</span>
+<span class="fc" id="L592">                    findings.add(fileValue + &quot;: duplicate id '&quot; + header.id()</span>
+                            + &quot;', already declared by &quot; + earlier);
+                }
+<span class="fc" id="L595">                insertTopic(model, header, fileValue);</span>
+<span class="fc" id="L596">            } else {</span>
+<span class="fc" id="L597">                insertOther(model, header, fileValue);</span>
+            }
+<span class="pc bpc" id="L599" title="1 of 2 branches missed.">            for (String f : header.findings()) {</span>
+<span class="nc" id="L600">                findings.add(fileValue + &quot;: &quot; + f);</span>
+<span class="nc" id="L601">            }</span>
+<span class="fc" id="L602">            added.add(header);</span>
+<span class="fc" id="L603">        }</span>
+<span class="fc" id="L604">        recount(model);</span>
+<span class="fc" id="L605">        model.put(&quot;generated&quot;, now.truncatedTo(ChronoUnit.SECONDS).toString());</span>
+<span class="fc" id="L606">        model.put(&quot;findings&quot;, findings);</span>
+<span class="fc" id="L607">        return added;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static List&lt;Map&lt;String, Object&gt;&gt; listOf(Map&lt;String, Object&gt; holder, String key) {
+<span class="pc" id="L612">        return (List&lt;Map&lt;String, Object&gt;&gt;) holder.computeIfAbsent(key, k -&gt; new ArrayList&lt;&gt;());</span>
+    }
+
+    private static void remove(Map&lt;String, Object&gt; model, String fileValue) {
+<span class="fc bfc" id="L616" title="All 2 branches covered.">        for (Iterator&lt;Map&lt;String, Object&gt;&gt; it = listOf(model, &quot;domains&quot;).iterator(); it.hasNext();) {</span>
+<span class="fc" id="L617">            Map&lt;String, Object&gt; domain = it.next();</span>
+<span class="fc" id="L618">            List&lt;Map&lt;String, Object&gt;&gt; topics = listOf(domain, &quot;topics&quot;);</span>
+<span class="fc" id="L619">            topics.removeIf(t -&gt; fileValue.equals(t.get(&quot;file&quot;)));</span>
+<span class="pc bpc" id="L620" title="1 of 2 branches missed.">            if (topics.isEmpty()) {</span>
+<span class="nc" id="L621">                it.remove();</span>
+            }
+<span class="fc" id="L623">        }</span>
+<span class="fc" id="L624">        listOf(model, &quot;assemblies&quot;).removeIf(o -&gt; fileValue.equals(o.get(&quot;file&quot;)));</span>
+<span class="pc" id="L625">        listOf(model, &quot;other-files&quot;).removeIf(o -&gt; fileValue.equals(o.get(&quot;file&quot;)));</span>
+<span class="fc" id="L626">    }</span>
+
+    private static String fileDeclaring(Map&lt;String, Object&gt; model, String id) {
+<span class="fc bfc" id="L629" title="All 2 branches covered.">        for (Map&lt;String, Object&gt; domain : listOf(model, &quot;domains&quot;)) {</span>
+<span class="fc bfc" id="L630" title="All 2 branches covered.">            for (Map&lt;String, Object&gt; t : listOf(domain, &quot;topics&quot;)) {</span>
+<span class="fc bfc" id="L631" title="All 2 branches covered.">                if (id.equals(t.get(&quot;id&quot;))) {</span>
+<span class="fc" id="L632">                    return String.valueOf(t.get(&quot;file&quot;));</span>
+                }
+<span class="fc" id="L634">            }</span>
+<span class="fc" id="L635">        }</span>
+<span class="fc" id="L636">        return null;</span>
+    }
+
+    private static void insertTopic(Map&lt;String, Object&gt; model, TopicHeader header, String fileValue) {
+<span class="fc" id="L640">        List&lt;Map&lt;String, Object&gt;&gt; domains = listOf(model, &quot;domains&quot;);</span>
+<span class="fc" id="L641">        String key = domainOf(header.id());</span>
+<span class="fc" id="L642">        Map&lt;String, Object&gt; domain = null;</span>
+<span class="fc" id="L643">        int position = 0;</span>
+<span class="fc bfc" id="L644" title="All 2 branches covered.">        for (int i = 0; i &lt; domains.size(); i++) {</span>
+<span class="fc" id="L645">            String d = String.valueOf(domains.get(i).get(&quot;id&quot;));</span>
+<span class="fc bfc" id="L646" title="All 2 branches covered.">            if (d.equals(key)) {</span>
+<span class="fc" id="L647">                domain = domains.get(i);</span>
+<span class="fc" id="L648">                break;</span>
+            }
+<span class="pc bpc" id="L650" title="1 of 2 branches missed.">            if (d.compareTo(key) &lt; 0) {</span>
+<span class="fc" id="L651">                position = i + 1;</span>
+            }
+        }
+<span class="fc bfc" id="L654" title="All 2 branches covered.">        if (domain == null) {</span>
+<span class="fc" id="L655">            domain = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L656">            domain.put(&quot;id&quot;, key);</span>
+<span class="fc" id="L657">            domain.put(&quot;topics&quot;, new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L658">            domains.add(position, domain);</span>
+        }
+<span class="fc" id="L660">        List&lt;Map&lt;String, Object&gt;&gt; topics = listOf(domain, &quot;topics&quot;);</span>
+<span class="fc" id="L661">        int at = 0;</span>
+<span class="fc bfc" id="L662" title="All 2 branches covered.">        while (at &lt; topics.size()</span>
+<span class="fc bfc" id="L663" title="All 2 branches covered.">                &amp;&amp; String.valueOf(topics.get(at).get(&quot;id&quot;)).compareTo(header.id()) &lt;= 0) {</span>
+<span class="fc" id="L664">            at++;</span>
+        }
+<span class="fc" id="L666">        topics.add(at, topicEntry(header, fileValue));</span>
+<span class="fc" id="L667">    }</span>
+
+    private static void insertOther(Map&lt;String, Object&gt; model, TopicHeader header, String fileValue) {
+<span class="pc bpc" id="L670" title="1 of 2 branches missed.">        List&lt;Map&lt;String, Object&gt;&gt; list = listOf(model, header.includes() &gt; 0 ? &quot;assemblies&quot; : &quot;other-files&quot;);</span>
+<span class="fc" id="L671">        int at = 0;</span>
+<span class="pc bpc" id="L672" title="1 of 2 branches missed.">        while (at &lt; list.size()</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">                &amp;&amp; String.valueOf(list.get(at).get(&quot;file&quot;)).compareTo(fileValue) &lt; 0) {</span>
+<span class="nc" id="L674">            at++;</span>
+        }
+<span class="fc" id="L676">        list.add(at, otherEntry(header, fileValue));</span>
+<span class="fc" id="L677">    }</span>
+
+    private static void recount(Map&lt;String, Object&gt; model) {
+<span class="fc" id="L680">        int topics = 0;</span>
+<span class="fc bfc" id="L681" title="All 2 branches covered.">        for (Map&lt;String, Object&gt; domain : listOf(model, &quot;domains&quot;)) {</span>
+<span class="fc" id="L682">            topics += listOf(domain, &quot;topics&quot;).size();</span>
+<span class="fc" id="L683">        }</span>
+<span class="fc" id="L684">        model.put(&quot;topic-count&quot;, topics);</span>
+<span class="fc" id="L685">        model.put(&quot;file-count&quot;, topics + listOf(model, &quot;assemblies&quot;).size()</span>
+<span class="fc" id="L686">                + listOf(model, &quot;other-files&quot;).size());</span>
+<span class="fc" id="L687">    }</span>
+
+    /** An assembly or plain file: its path, title, document attributes and include count. */
+    private static Map&lt;String, Object&gt; otherEntry(TopicHeader o, String fileValue) {
+<span class="fc" id="L691">        Map&lt;String, Object&gt; entry = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L692">        entry.put(&quot;file&quot;, fileValue);</span>
+<span class="pc bpc" id="L693" title="1 of 2 branches missed.">        if (o.title() != null) {</span>
+<span class="fc" id="L694">            entry.put(&quot;title&quot;, o.title());</span>
+<span class="fc bfc" id="L695" title="All 2 branches covered.">            if (o.level() != 1) {</span>
+<span class="fc" id="L696">                entry.put(&quot;level&quot;, o.level());</span>
+            }
+        }
+<span class="fc bfc" id="L699" title="All 2 branches covered.">        if (!o.documentAttributes().isEmpty()) {</span>
+<span class="fc" id="L700">            entry.put(&quot;attributes&quot;, new LinkedHashMap&lt;&gt;(o.documentAttributes()));</span>
+        }
+<span class="fc bfc" id="L702" title="All 2 branches covered.">        if (o.includes() &gt; 0) {</span>
+<span class="fc" id="L703">            entry.put(&quot;includes&quot;, o.includes());</span>
+        }
+<span class="fc" id="L705">        return entry;</span>
+    }
+
+    /**
+     * One topic in the registry's field order ({@code id}, {@code file},
+     * {@code title}, {@code type}, {@code keywords}, {@code status},
+     * {@code char-count}, {@code dependencies}, {@code related},
+     * {@code summary}, {@code supersedes}, {@code notes}), then what the
+     * header adds: provenance, scope note, citation, license, the anchor and
+     * header verdicts, unknown {@code :topic-*:} attributes under
+     * {@code extra}, document attributes, and the include count.
+     * Shared with {@code idoc:diff}, which generates the registry for each
+     * side of a comparison in this same shape.
+     *
+     * @param t         the parsed topic header
+     * @param fileValue the file path to record
+     * @return the registry entry
+     */
+    public static Map&lt;String, Object&gt; topicEntry(TopicHeader t, String fileValue) {
+<span class="fc" id="L724">        Map&lt;String, Object&gt; entry = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L725">        entry.put(&quot;id&quot;, t.id());</span>
+<span class="fc" id="L726">        entry.put(&quot;file&quot;, fileValue);</span>
+<span class="pc bpc" id="L727" title="1 of 2 branches missed.">        if (t.title() != null) {</span>
+<span class="fc" id="L728">            entry.put(&quot;title&quot;, t.title());</span>
+        }
+<span class="fc" id="L730">        putIfPresent(entry, &quot;type&quot;, t.attributes().get(&quot;type&quot;));</span>
+<span class="fc" id="L731">        entry.put(&quot;keywords&quot;, t.keywords());</span>
+<span class="fc" id="L732">        putIfPresent(entry, &quot;status&quot;, t.attributes().get(&quot;status&quot;));</span>
+<span class="fc" id="L733">        entry.put(&quot;char-count&quot;, t.charCount());</span>
+<span class="fc" id="L734">        putListIfPresent(entry, &quot;dependencies&quot;, t.attributes().get(&quot;dependencies&quot;));</span>
+<span class="fc" id="L735">        putListIfPresent(entry, &quot;related&quot;, t.attributes().get(&quot;related&quot;));</span>
+<span class="fc" id="L736">        putIfPresent(entry, &quot;summary&quot;, t.attributes().get(&quot;summary&quot;));</span>
+<span class="fc" id="L737">        putIfPresent(entry, &quot;supersedes&quot;, t.attributes().get(&quot;supersedes&quot;));</span>
+<span class="fc" id="L738">        putIfPresent(entry, &quot;notes&quot;, t.attributes().get(&quot;notes&quot;));</span>
+<span class="fc" id="L739">        putIfPresent(entry, &quot;provenance&quot;, t.attributes().get(&quot;provenance&quot;));</span>
+<span class="fc" id="L740">        putIfPresent(entry, &quot;scope-note&quot;, t.attributes().get(&quot;scope-note&quot;));</span>
+<span class="fc" id="L741">        putIfPresent(entry, &quot;citation&quot;, t.attributes().get(&quot;citation&quot;));</span>
+<span class="fc" id="L742">        putIfPresent(entry, &quot;license&quot;, t.attributes().get(&quot;license&quot;));</span>
+<span class="fc" id="L743">        entry.put(&quot;anchor&quot;, t.anchor());</span>
+<span class="fc" id="L744">        List&lt;String&gt; missing = t.missingRequired();</span>
+<span class="fc bfc" id="L745" title="All 2 branches covered.">        entry.put(&quot;header&quot;, missing.isEmpty() ? &quot;complete&quot; : &quot;missing: &quot; + String.join(&quot;, &quot;, missing));</span>
+<span class="fc" id="L746">        Map&lt;String, String&gt; extra = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L747">        Set&lt;String&gt; known = Set.of(&quot;id&quot;, &quot;type&quot;, &quot;keywords&quot;, &quot;status&quot;, &quot;dependencies&quot;, &quot;related&quot;,</span>
+                &quot;summary&quot;, &quot;supersedes&quot;, &quot;notes&quot;, &quot;provenance&quot;, &quot;scope-note&quot;, &quot;citation&quot;, &quot;license&quot;);
+<span class="fc bfc" id="L749" title="All 2 branches covered.">        for (Map.Entry&lt;String, String&gt; a : t.attributes().entrySet()) {</span>
+<span class="pc bpc" id="L750" title="1 of 2 branches missed.">            if (!known.contains(a.getKey())) {</span>
+<span class="nc" id="L751">                extra.put(a.getKey(), a.getValue());</span>
+            }
+<span class="fc" id="L753">        }</span>
+<span class="pc bpc" id="L754" title="1 of 2 branches missed.">        if (!extra.isEmpty()) {</span>
+<span class="nc" id="L755">            entry.put(&quot;extra&quot;, extra);</span>
+        }
+<span class="pc bpc" id="L757" title="1 of 2 branches missed.">        if (!t.documentAttributes().isEmpty()) {</span>
+<span class="nc" id="L758">            entry.put(&quot;attributes&quot;, new LinkedHashMap&lt;&gt;(t.documentAttributes()));</span>
+        }
+<span class="pc bpc" id="L760" title="1 of 2 branches missed.">        if (t.includes() &gt; 0) {</span>
+<span class="nc" id="L761">            entry.put(&quot;includes&quot;, t.includes());</span>
+        }
+<span class="fc" id="L763">        return entry;</span>
+    }
+
+    private static void putIfPresent(Map&lt;String, Object&gt; entry, String key, String value) {
+<span class="pc bpc" id="L767" title="1 of 4 branches missed.">        if (value != null &amp;&amp; !value.isBlank()) {</span>
+<span class="fc" id="L768">            entry.put(key, value);</span>
+        }
+<span class="fc" id="L770">    }</span>
+
+    private static void putListIfPresent(Map&lt;String, Object&gt; entry, String key, String value) {
+<span class="pc bpc" id="L773" title="3 of 4 branches missed.">        if (value != null &amp;&amp; !value.isBlank()) {</span>
+<span class="nc" id="L774">            entry.put(key, split(value));</span>
+        }
+<span class="fc" id="L776">    }</span>
+
+    private static List&lt;String&gt; split(String value) {
+<span class="nc" id="L779">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L780" title="All 2 branches missed.">        for (String v : value.split(&quot;,&quot;)) {</span>
+<span class="nc" id="L781">            String t = v.strip();</span>
+<span class="nc bnc" id="L782" title="All 2 branches missed.">            if (!t.isEmpty()) {</span>
+<span class="nc" id="L783">                out.add(t);</span>
+            }
+        }
+<span class="nc" id="L786">        return out;</span>
+    }
+
+    private static String directoryOf(String relativeFile) {
+<span class="fc" id="L790">        int slash = relativeFile.lastIndexOf('/');</span>
+<span class="fc bfc" id="L791" title="All 2 branches covered.">        return slash &lt; 0 ? &quot;&quot; : relativeFile.substring(0, slash);</span>
+    }
+
+    private static String relativeTo(Path base, Path path) {
+        try {
+<span class="fc" id="L796">            Path b = base.toRealPath();</span>
+<span class="pc bpc" id="L797" title="1 of 2 branches missed.">            if (path.startsWith(b)) {</span>
+<span class="fc" id="L798">                String relative = b.relativize(path).toString().replace('\\', '/');</span>
+<span class="fc bfc" id="L799" title="All 2 branches covered.">                return relative.isEmpty() ? &quot;.&quot; : relative;</span>
+            }
+<span class="nc" id="L801">        } catch (IOException e) {</span>
+            // fall through to the absolute form
+<span class="nc" id="L803">        }</span>
+<span class="nc" id="L804">        return path.toString();</span>
+    }
+
+    private static String pad(String s, int width) {
+<span class="pc bpc" id="L808" title="1 of 2 branches missed.">        return s.length() &gt;= width ? s + &quot; &quot; : s + &quot; &quot;.repeat(width - s.length());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

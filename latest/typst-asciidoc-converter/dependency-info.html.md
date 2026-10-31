@@ -1,6 +1,6 @@
 ---
-date_published: 2026-10-29
-date_modified: 2026-10-29
+date_published: 2026-10-30
+date_modified: 2026-10-30
 canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 ---
 
@@ -12,14 +12,14 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <dependency>
   <groupId>network.ike.docs</groupId>
   <artifactId>typst-asciidoc-converter</artifactId>
-  <version>134</version>
+  <version>135</version>
 </dependency>
 ```
 
 ## [Apache Ivy](#apache-ivy)
 
 ```
-<dependency org="network.ike.docs" name="typst-asciidoc-converter" rev="134">
+<dependency org="network.ike.docs" name="typst-asciidoc-converter" rev="135">
   <artifact name="typst-asciidoc-converter" type="jar" />
 </dependency>
 ```
@@ -28,24 +28,24 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 
 ```
 @Grapes(
-@Grab(group='network.ike.docs', module='typst-asciidoc-converter', version='134')
+@Grab(group='network.ike.docs', module='typst-asciidoc-converter', version='135')
 )
 ```
 
 ## [Gradle/Grails](#gradle-grails)
 
 ```
-implementation 'network.ike.docs:typst-asciidoc-converter:134'
+implementation 'network.ike.docs:typst-asciidoc-converter:135'
 ```
 
 ## [Scala SBT](#scala-sbt)
 
 ```
-libraryDependencies += "network.ike.docs" % "typst-asciidoc-converter" % "134"
+libraryDependencies += "network.ike.docs" % "typst-asciidoc-converter" % "135"
 ```
 
 ## [Leiningen](#leiningen)
 
 ```
-[network.ike.docs/typst-asciidoc-converter "134"]
+[network.ike.docs/typst-asciidoc-converter "135"]
 ```
