@@ -234,4 +234,41 @@ class AdocDiffMarkerTest {
         assertThat(r.lines().get(title + 2)).isEqualTo("[NOTE]");
         assertThat(String.join("\n", r.lines())).contains("Change summary: ~");
     }
+
+    @Test
+    void stampedFullLineInsertion_closingParagraph_cannotReadAsAttributeList() {
+        // IKE-Network/ike-issues#1334: a full-line mark with a trailing stamp
+        // footnote opens with [ and closes with ], which Asciidoctor consumes
+        // as a block attribute line; the marker must break that shape.
+        AdocDiffMarker.StampSource stamps = new AdocDiffMarker.StampSource() {
+            @Override
+            public String activeRef(int newLineIndex) {
+                return "footnote:s1a[STAMP Active]";
+            }
+
+            @Override
+            public String inactiveRef() {
+                return "footnote:s1i[STAMP Inactive]";
+            }
+        };
+        List<String> oldLines = List.of("[[t]]", "= T", "",
+                "The patients of rural Nevada,", "seen in clinics and at home.");
+        List<String> newLines = List.of("[[t]]", "= T", "",
+                "The patients of rural Nevada,", "seen in clinics and at home,",
+                "are the ones those tests leave out.");
+        AdocDiffMarker.MarkResult r = AdocDiffMarker.mark(oldLines, newLines, stamps);
+        assertThat(r.lines()).anySatisfy(l -> assertThat(l)
+                .startsWith("{empty}[.diff-ins]##are the ones those tests leave out.##")
+                .endsWith("footnote:s1a[STAMP Active]"));
+        assertThat(r.lines()).noneSatisfy(l -> assertThat(l.startsWith("[.diff-") && l.endsWith("]")).isTrue());
+    }
+
+    @Test
+    void addedTopicBanner_withStamp_cannotReadAsAttributeList() {
+        List<String> newLines = List.of("[[t]]", "= T", "", "Body.");
+        AdocDiffMarker.MarkResult r = AdocDiffMarker.markAdded(newLines, "abc1234", "footnote:s1a[STAMP Active]");
+        assertThat(r.lines()).anySatisfy(l -> assertThat(l)
+                .startsWith("{empty}[.diff-meta]#New topic")
+                .endsWith("footnote:s1a[STAMP Active]"));
+    }
 }

@@ -216,10 +216,33 @@ public final class AdocDiffMarker {
                 continue;
             }
             int idx = pendingRefs.get(i)[0];
-            out.set(idx, out.get(idx) + pendingRefText.get(i));
+            out.set(idx, guardAttributeLookalike(out.get(idx) + pendingRefText.get(i)));
         }
         pendingRefs.clear();
         pendingRefText.clear();
+    }
+
+
+    /**
+     * Keep a marked paragraph line from reading as a block attribute list.
+     *
+     * <p>A line that opens with {@code [} and closes with {@code ]} matches
+     * Asciidoctor's block-attribute-line test and is consumed, not rendered.
+     * A full-line mark that carries a trailing stamp footnote
+     * ({@code [.diff-ins]##…##footnote:id[…]}) is exactly that shape, so
+     * the parser dropped the last inserted line of a paragraph
+     * (IKE-Network/ike-issues#1334). A leading {@code {empty}} attribute
+     * reference renders as nothing and breaks the match.
+     *
+     * @param line the finished marked line
+     * @return the line, prefixed with {@code {empty}} when it would otherwise
+     *         read as an attribute list
+     */
+    static String guardAttributeLookalike(String line) {
+        if (line.startsWith("[") && line.endsWith("]")) {
+            return "{empty}" + line;
+        }
+        return line;
     }
 
     /** Block-attribute line opening a diagram block. */
@@ -380,8 +403,8 @@ public final class AdocDiffMarker {
                 out.add("");
                 out.add("[NOTE]");
                 out.add("====");
-                out.add("[.diff-meta]#New topic — did not exist at " + fromRef
-                        + "; full text follows.#" + (stampRef == null ? "" : stampRef));
+                out.add(guardAttributeLookalike("[.diff-meta]#New topic — did not exist at " + fromRef
+                        + "; full text follows.#" + (stampRef == null ? "" : stampRef)));
                 out.add("====");
                 placed = true;
             }
