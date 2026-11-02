@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.UUID;
 
 /**
@@ -114,6 +115,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             return createBlock(parent, "literal", lines);
         }
         double price = price(attributes.get("health-price"));
+        OptionalDouble cohort = cohort(attributes.get("cohort"));
         String symbol = attributes.get("symbol") == null ? "$" : String.valueOf(attributes.get("symbol"));
         String title = attributes.get("title") == null ? "The decision as a tree" : String.valueOf(attributes.get("title"));
         Node root = parsed.root();
@@ -128,7 +130,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
         Document doc = parent.getDocument();
         boolean typst = isTypst(doc);
-        container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep), title));
+        container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort), title));
         parseContent(container, legend(rollback, symbol));
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
             DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
@@ -148,6 +150,19 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         }
         parseContent(container, source);
         return container;
+    }
+
+    /** The cohort a block asks to be counted out for, {@code cohort=1000}; empty when it states none or a bad one. */
+    static OptionalDouble cohort(Object attribute) {
+        if (attribute == null) {
+            return OptionalDouble.empty();
+        }
+        try {
+            double size = Double.parseDouble(String.valueOf(attribute).replace(",", "").strip());
+            return size > 0 ? OptionalDouble.of(size) : OptionalDouble.empty();
+        } catch (NumberFormatException e) {
+            return OptionalDouble.empty();
+        }
     }
 
     static double price(Object attribute) {

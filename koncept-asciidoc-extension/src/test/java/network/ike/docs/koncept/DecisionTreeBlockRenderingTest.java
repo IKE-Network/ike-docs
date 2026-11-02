@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -265,6 +266,26 @@ class DecisionTreeBlockRenderingTest {
     }
 
     @Test
+    @DisplayName("The cohort attribute counts the tree out: how many go each way, and where they end up")
+    void cohortAttribute() {
+        String html = convert("""
+                [decision-tree, cohort=1000]
+                ----
+                %s----
+                """.formatted(SCAN_TREE));
+        assertTrue(html.contains("214 of 1,000"), "214 of a thousand test positive");
+        assertTrue(html.contains("all 1,000"), "every one takes each alternative");
+        int at = html.indexOf("Of 1,000 who take");
+        // this test's tree names its outcomes "18.2% rupture risk" and "risk cut to 1.8%"
+        assertTrue(html.contains("Of 1,000 who take \u201Cno scan\u201D: 980 clear and 20 18.2% rupture risk (1 in 50)"),
+                "the tally: " + (at < 0 ? "none" : html.substring(at, Math.min(html.length(), at + 600))));
+        assertTrue(html.contains("18 risk cut to 1.8% (1 in 56)"), "the retreat decision's choice is followed");
+        assertTrue(html.contains("how many of the 1,000 go that way"), "and the legend says so");
+        assertEquals(OptionalDouble.of(1_000), DecisionTreeBlockProcessor.cohort("1,000"));
+        assertEquals(OptionalDouble.empty(), DecisionTreeBlockProcessor.cohort(null));
+    }
+
+    @Test
     @DisplayName("The health price attribute moves the figure")
     void healthPriceAttribute() {
         String html = convert("""
@@ -275,6 +296,7 @@ class DecisionTreeBlockRenderingTest {
 
         assertTrue(html.contains("50,000 a year of healthy life"), "the legend names the price");
         assertTrue(html.contains("class=\"run chosen\""), "a course is chosen, drawn heavy");
+        assertTrue(html.contains("a healthy year given up for $"), "at half the price not scanning is chosen, and the trade reads the other way");
         assertTrue(html.contains("21.4%"), "a share is a percentage");
         assertTrue(html.contains("(residual)"), "and the residual's share is printed");
         assertTrue(html.contains("$700"), "a money cost carries the symbol");

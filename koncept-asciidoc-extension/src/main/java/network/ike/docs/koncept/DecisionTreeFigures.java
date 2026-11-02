@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Set;
 
 /**
@@ -89,7 +90,13 @@ final class DecisionTreeFigures {
      * @param sweep    the sweep, when one ran: a measure whose range holds a flip of the root's choice is marked
      */
     static DecisionFigure tree(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep) {
-        return new TreeBuilder(root, rollback, symbol, sweep).build();
+        return tree(root, rollback, symbol, sweep, OptionalDouble.empty());
+    }
+
+    /** The tree, counted out for a cohort when one is given: how many go each way beneath every run, and where they end up. */
+    static DecisionFigure tree(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep,
+                               OptionalDouble cohort) {
+        return new TreeBuilder(root, rollback, symbol, sweep, cohort).build();
     }
 
     private static final class TreeBuilder {
@@ -108,10 +115,17 @@ final class DecisionTreeFigures {
         private final Set<Node> barred = Collections.newSetFromMap(new IdentityHashMap<>());
         private final Set<Node> chosenBranches = Collections.newSetFromMap(new IdentityHashMap<>());
 
-        TreeBuilder(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep) {
+        private final Optional<DecisionTreeCohort> cohort;
+        private final Optional<DecisionTreeTradeoff> tradeoff;
+
+        TreeBuilder(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep,
+                    OptionalDouble cohortSize) {
             this.root = root;
             this.rollback = rollback;
             this.symbol = symbol == null ? "" : symbol;
+            this.cohort = root != null && cohortSize.isPresent()
+                    ? Optional.of(DecisionTreeCohort.of(root, rollback, cohortSize.getAsDouble())) : Optional.empty();
+            this.tradeoff = root == null ? Optional.empty() : DecisionTreeTradeoff.of(root, rollback);
             sweep.ifPresent(s -> {
                 for (Swing swing : s.swings()) {
                     if (swing.key() instanceof Measure measure && !swing.flipsAt(s.root()).isEmpty()) {
@@ -155,23 +169,87 @@ final class DecisionTreeFigures {
                 row(marks, nodeTop.get(placed.node()), textLeft, placed.y() - lineHeight);
                 row(marks, nodeBottom.get(placed.node()), textLeft, placed.y() + (terminal ? 2 : 1));
             }
-            // the legend: what the numbers on the figure are, beneath the drawing
+            // the readouts: what the choice trades, and where a cohort ends up; then the legend
             double legendSize = BASE * 0.78;
             double legendLine = DecisionFigureText.lineHeight(legendSize);
+            double wrapWidth = Math.max(200, layout.width() - 12);
             double y = layout.height() + 2;
-            for (String line : DecisionFigureText.wrap(legend(), legendSize, Math.max(200, layout.width() - 12))) {
+            List<String> readouts = readouts();
+            for (String readout : readouts) {
+                for (String line : DecisionFigureText.wrap(readout, legendSize, wrapWidth)) {
+                    marks.add(new Text(6, y, line, legendSize, false, false, DecisionFigureText.INK, "readout"));
+                    y += legendLine;
+                }
+            }
+            if (!readouts.isEmpty()) {
+                y += 3;
+            }
+            for (String line : DecisionFigureText.wrap(legend(), legendSize, wrapWidth)) {
                 marks.add(new Text(6, y, line, legendSize, false, false, DecisionFigureText.CAPTION, "legend"));
                 y += legendLine;
             }
             return new DecisionFigure(layout.width(), y + 4, "decision-tree", marks);
         }
 
+        /** The sentences beneath the drawing: the trade at the root, and a tally per alternative when a cohort is counted. */
+        List<String> readouts() {
+            List<String> lines = new ArrayList<>();
+            tradeoff.ifPresent(t -> {
+                String healthUnit = healthUnit();
+                String moneyText = money(Interval.point(Math.abs(t.money())), symbol);
+                String healthText = DecisionFigureText.quantity(Math.abs(t.health()), DecisionFigureText.Unit.PLAIN, healthUnit);
+                String priceText = Double.isNaN(t.pricePerHealthyYear()) ? "" : money(Interval.point(t.pricePerHealthyYear()), symbol);
+                lines.add(DecisionFigureText.tradeoff(t.chosen().label(), t.nextBest().label(), t.money(), moneyText,
+                        t.health(), healthText, priceText, money(Interval.point(t.priced()), symbol)));
+            });
+            cohort.ifPresent(c -> {
+                for (DecisionTreeCohort.Tally tally : c.tallies()) {
+                    if (tally.leaves().isEmpty()) {
+                        continue;
+                    }
+                    // like outcomes read alike: two leaves named "clear" are one entry, whatever their ids
+                    Map<String, Double> byName = new java.util.LinkedHashMap<>();
+                    for (DecisionTreeCohort.Leaf leaf : tally.leaves()) {
+                        byName.merge(leaf.node().concept != null ? leaf.node().label() : "reach the end", leaf.count(), Double::sum);
+                    }
+                    List<Map.Entry<String, Double>> entries = new ArrayList<>(byName.entrySet());
+                    entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+                    lines.add(DecisionFigureText.tally(tally.alternative().label(), tally.count(),
+                            entries.stream().map(Map.Entry::getKey).toList(), entries.stream().map(Map.Entry::getValue).toList()));
+                }
+            });
+            return lines;
+        }
+
+        /** The name of the health unit the tree's health costs are in, from the first such cost; empty when none. */
+        private String healthUnit() {
+            return firstSemantic(root, MeasureKind.HEALTH);
+        }
+
+        private static String firstSemantic(Node node, MeasureKind kind) {
+            for (Measure measure : node.measures) {
+                if (measure.kind() == kind && measure.semantic() != null) {
+                    return measure.semantic().shown();
+                }
+            }
+            for (Node child : node.children) {
+                String found = firstSemantic(child, kind);
+                if (!found.isEmpty()) {
+                    return found;
+                }
+            }
+            return "";
+        }
+
         /** One or two sentences saying what the numbers are, as the live surface says beneath its drawing. */
         private String legend() {
             String unit = symbol.isEmpty() ? "" : ", in " + symbol;
+            String beneath = cohort.isPresent()
+                    ? " beneath a branch, how many of the " + DecisionFigureText.count(cohort.get().size()) + " go that way, and what it costs."
+                    : " beneath a branch, what it costs.";
             return "\u21D2 is the expected cost from that point on" + unit + ", a year of healthy life priced at "
                     + money(Interval.point(rollback.healthPrice()), symbol) + ". A percentage is the share who go that way;"
-                    + " beneath a branch, what it costs. The heavy run is the alternative chosen, a barred one is"
+                    + beneath + " The heavy run is the alternative chosen, a barred one is"
                     + " rejected, and \u25B2 marks a value whose range flips the root's choice.";
         }
 
@@ -271,10 +349,17 @@ final class DecisionTreeFigures {
             }
             branchAbove.put(branch, above);
             List<Span> below = new ArrayList<>();
+            cohort.ifPresent(c -> c.count(branch).ifPresent(count -> below.add(new Span(
+                    DecisionFigureText.ofCohort(count, c.size()), size, false, false, DecisionFigureText.CAPTION, "count"))));
+            List<Span> costs = new ArrayList<>();
             if (!branch.costs().isEmpty()) {
-                callout(branch).ifPresent(below::add);
+                callout(branch).ifPresent(costs::add);
             }
-            below.addAll(costs(branch.costs()));
+            costs.addAll(costs(branch.costs()));
+            if (!below.isEmpty() && !costs.isEmpty()) {
+                below.add(new Span("\u00B7", size, false, false, DecisionFigureText.CAPTION, "plus"));
+            }
+            below.addAll(costs);
             branchBelow.put(branch, below);
             if (branch.kind == DecisionTreeSource.Kind.ALTERNATIVE && decided && !chosen) {
                 barred.add(branch);
