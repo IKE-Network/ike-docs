@@ -131,7 +131,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         Document doc = parent.getDocument();
         boolean typst = isTypst(doc);
         container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort), title));
-        parseContent(container, legend(rollback, symbol));
+        parseContent(container, legend(rollback, symbol, anyHealth(root)));
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
             DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
                     typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
@@ -252,12 +252,28 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
     }
 
     /** How to read the tree: one paragraph after it, in the topics' words. */
-    static List<String> legend(DecisionTreeRollback rollback, String symbol) {
+    static List<String> legend(DecisionTreeRollback rollback, String symbol, boolean anyHealth) {
+        // a tree with no health anywhere says nothing about health
+        String health = anyHealth ? ", health counted at " + symbol + DecisionTreeFormat.money(rollback.healthPrice()) + " a year of healthy life" : "";
         return List.of("A square is a choice, a circle is a chance, and a triangle is where the consequences are counted."
-                + " The figure after \u21D2 is the expected cost still ahead of a patient who reaches that point, health"
-                + " counted at " + symbol + DecisionTreeFormat.money(rollback.healthPrice()) + " a year of healthy life;"
+                + " The figure after \u21D2 is the expected cost still ahead of a patient who reaches that point" + health + ";"
                 + " a branch's own costs are beneath its run, and a percentage is the share who leave a circle by that"
                 + " branch. A number in an orange callout is worked in the table beneath, under the same callout.", "");
+    }
+
+    /** Whether any node of the tree carries a health cost. */
+    static boolean anyHealth(Node node) {
+        for (DecisionTreeSource.Measure measure : node.costs()) {
+            if (measure.kind() == DecisionTreeSource.MeasureKind.HEALTH) {
+                return true;
+            }
+        }
+        for (Node child : node.children) {
+            if (anyHealth(child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ── The assumptions ──────────────────────────────────────────────────────

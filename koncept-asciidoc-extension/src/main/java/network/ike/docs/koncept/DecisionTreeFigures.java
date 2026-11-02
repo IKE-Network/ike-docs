@@ -347,11 +347,14 @@ final class DecisionTreeFigures {
         /** One or two sentences saying what the numbers are, as the live surface says beneath its drawing. */
         private String legend() {
             String unit = symbol.isEmpty() ? "" : ", in " + symbol;
+            // a tree with no health anywhere says nothing about health
+            String priced = hasKind(root, MeasureKind.HEALTH)
+                    ? ", a year of healthy life priced at " + money(Interval.point(rollback.healthPrice()), symbol) : "";
             String beneath = cohort.isPresent()
                     ? " beneath a branch, how many of the " + DecisionFigureText.count(cohort.get().size()) + " go that way, and what it costs."
                     : " beneath a branch, what it costs.";
-            return "\u21D2 is the expected cost from that point on" + unit + ", a year of healthy life priced at "
-                    + money(Interval.point(rollback.healthPrice()), symbol) + ". A percentage is the share who go that way;"
+            return "\u21D2 is the expected cost from that point on" + unit + priced
+                    + ". A percentage is the share who go that way;"
                     + beneath + " The heavy run is the alternative chosen, a barred one is"
                     + " rejected, and \u25B2 marks a value whose range flips the root's choice.";
         }
