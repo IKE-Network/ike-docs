@@ -155,7 +155,24 @@ final class DecisionTreeFigures {
                 row(marks, nodeTop.get(placed.node()), textLeft, placed.y() - lineHeight);
                 row(marks, nodeBottom.get(placed.node()), textLeft, placed.y() + (terminal ? 2 : 1));
             }
-            return new DecisionFigure(layout.width(), layout.height(), "decision-tree", marks);
+            // the legend: what the numbers on the figure are, beneath the drawing
+            double legendSize = BASE * 0.78;
+            double legendLine = DecisionFigureText.lineHeight(legendSize);
+            double y = layout.height() + 2;
+            for (String line : DecisionFigureText.wrap(legend(), legendSize, Math.max(200, layout.width() - 12))) {
+                marks.add(new Text(6, y, line, legendSize, false, false, DecisionFigureText.CAPTION, "legend"));
+                y += legendLine;
+            }
+            return new DecisionFigure(layout.width(), y + 4, "decision-tree", marks);
+        }
+
+        /** One or two sentences saying what the numbers are, as the live surface says beneath its drawing. */
+        private String legend() {
+            String unit = symbol.isEmpty() ? "" : ", in " + symbol;
+            return "\u21D2 is the expected cost from that point on" + unit + ", a year of healthy life priced at "
+                    + money(Interval.point(rollback.healthPrice()), symbol) + ". A percentage is the share who go that way;"
+                    + " beneath a branch, what it costs. The heavy run is the alternative chosen, a barred one is"
+                    + " rejected, and \u25B2 marks a value whose range flips the root's choice.";
         }
 
         private Mark glyph(Placed placed) {
@@ -237,9 +254,13 @@ final class DecisionTreeFigures {
                 Optional<Measure> probability = branch.probability();
                 if (probability.isPresent()) {
                     above.addAll(chip("p", probability.get()));
+                } else if (branch.residual) {
+                    // the residual's share is what the other events leave, printed so that no one subtracts
+                    String rest = rollback.share(branch).map(b -> DecisionFigureText.chip(b.lower(), b.upper(), b.lowerOpen(),
+                            b.upperOpen(), true, DecisionFigureText.Unit.SHARE, "")).orElse("?");
+                    above.add(new Span(rest + " (residual)", size, false, true, DecisionFigureText.CAPTION, "measure"));
                 } else {
-                    above.add(new Span(branch.residual ? "p (residual)" : "p ?", size, false, false,
-                            branch.residual ? DecisionFigureText.CAPTION : DecisionFigureText.GAP, "measure"));
+                    above.add(new Span("p ?", size, false, false, DecisionFigureText.GAP, "measure"));
                 }
             }
             if (branch.kind == DecisionTreeSource.Kind.ALTERNATIVE) {
@@ -247,9 +268,6 @@ final class DecisionTreeFigures {
                 above.add(new Span(value.map(v -> "⇒ " + money(v, symbol)).orElse("⇒ ?"), size, true, false,
                         value.isPresent() ? (chosen ? DecisionFigureText.CHOSEN : DecisionFigureText.INK)
                                 : DecisionFigureText.GAP, "value"));
-            }
-            if (chosen) {
-                above.add(new Span("✓ chosen", size, true, false, DecisionFigureText.CHOSEN, "chosen"));
             }
             branchAbove.put(branch, above);
             List<Span> below = new ArrayList<>();
@@ -267,22 +285,40 @@ final class DecisionTreeFigures {
             return rollback.step(node).map(step -> new Span(Integer.toString(step.number()), size, true, false, CALLOUT, "callout"));
         }
 
+        /** A branch's or an outcome's costs: money then health, each in its unit, joined by a plus. */
         private List<Span> costs(List<Measure> costs) {
             List<Span> below = new ArrayList<>();
             for (Measure cost : costs) {
+                if (!below.isEmpty()) {
+                    below.add(new Span("+", size, false, false, DecisionFigureText.CAPTION, "plus"));
+                }
                 below.addAll(chip(cost.kind() == MeasureKind.MONEY ? "money" : "health", cost));
             }
             return below;
         }
 
-        /** A measure as its chip reads: the word, the bounds, and a mark when its range holds a flip of the root's choice. */
+        /**
+         * A measure as its chip reads: the bounds in the measure's unit, a share as a percentage,
+         * money after its symbol, health with its unit's name, the kind's word only when there is
+         * no symbol or name to say it; and a mark when its range holds a flip of the root's choice.
+         */
         private List<Span> chip(String word, Measure measure) {
             Optional<Interval> bounds = rollback.measure(measure);
-            String shown = bounds.map(b -> bounds(b, measure.derived(), "money".equals(word))).orElse("?");
+            boolean computed = measure.derived();
+            DecisionFigureText.Unit unit = switch (word) {
+                case "p" -> DecisionFigureText.Unit.SHARE;
+                case "money" -> DecisionFigureText.Unit.MONEY;
+                default -> DecisionFigureText.Unit.PLAIN;
+            };
+            String unitSymbol = unit == DecisionFigureText.Unit.MONEY ? symbol
+                    : "health".equals(word) && measure.semantic() != null ? measure.semantic().shown() : "";
+            boolean worded = unit != DecisionFigureText.Unit.SHARE && unitSymbol.isEmpty();
+            String shown = bounds.map(b -> DecisionFigureText.chip(b.lower(), b.upper(), b.lowerOpen(), b.upperOpen(),
+                    computed, unit, unitSymbol)).orElse("?");
             String colour = bounds.isEmpty() ? DecisionFigureText.GAP
                     : measure.derived() ? DecisionFigureText.DERIVED : DecisionFigureText.INK;
             List<Span> spans = new ArrayList<>();
-            spans.add(new Span(word.isEmpty() ? shown : word + " " + shown, size, false, measure.derived(), colour, "measure"));
+            spans.add(new Span(worded ? word + " " + shown : shown, size, false, measure.derived(), colour, "measure"));
             if (flipping.contains(measure)) {
                 spans.add(new Span("▲", size * 0.75, false, false, DecisionFigureText.HOT, "flip-mark"));
             }
@@ -339,17 +375,24 @@ final class DecisionTreeFigures {
 
     // ── The tornado ──────────────────────────────────────────────────────────
 
-    /** The sweep read into the shared tornado builder's terms, named as the live chart names things. */
-    static Tornado tornado(DecisionTreeSweep sweep) {
+    /**
+     * The sweep read into the shared tornado builder's terms, named as the live chart names
+     * things: on the net value of the base's choice where the sweep carries one, else on the
+     * root's expected cost, every caption and threshold printed in the measure's own unit.
+     */
+    static Tornado tornado(DecisionTreeSweep sweep, String symbol) {
         Node root = sweep.root();
         Node baseChosen = sweep.baseChosen().orElse(null);
+        boolean net = sweep.netValued();
+        String chosen = baseChosen == null ? null : baseChosen.label();
         Map<Measure, Node> owners = new IdentityHashMap<>();
         DecisionTreeSweep.collect(root, new ArrayList<>(), owners);
         List<Bar> bars = new ArrayList<>();
         for (Swing swing : sweep.swings()) {
-            if (swing.width() <= 0) {
+            if ((net ? swing.netWidth() : swing.width()) <= 0) {
                 continue;
             }
+            Quantity quantity = quantity(root, swing, symbol);
             List<Flip> rootFlips = swing.flipsAt(root);
             List<Double> cuts = new ArrayList<>();
             cuts.add(swing.range().lower());
@@ -357,33 +400,107 @@ final class DecisionTreeFigures {
             cuts.add(swing.range().upper());
             List<Segment> segments = new ArrayList<>();
             for (int i = 1; i < cuts.size(); i++) {
-                Node chosen = i == 1
+                Node chosenHere = i == 1
                         ? (rootFlips.isEmpty() ? baseChosen : rootFlips.get(0).chosenBelow())
                         : rootFlips.get(i - 2).chosenAbove();
-                Choice choice = chosen == null ? Choice.OPEN : chosen == baseChosen ? Choice.BASE : Choice.OTHER;
-                segments.add(new Segment(swing.rootAtValue(cuts.get(i - 1)).orElse(sweep.baseRoot()),
-                        swing.rootAtValue(cuts.get(i)).orElse(sweep.baseRoot()), choice));
+                Choice choice = chosenHere == null ? Choice.OPEN : chosenHere == baseChosen ? Choice.BASE : Choice.OTHER;
+                segments.add(new Segment(at(sweep, swing, cuts.get(i - 1), net), at(sweep, swing, cuts.get(i), net), choice));
             }
             List<Tick> ticks = new ArrayList<>();
             for (Flip flip : swing.flips()) {
-                ticks.add(new Tick(swing.rootAtValue(flip.at()).orElse(sweep.baseRoot()), flip.decision() == root,
-                        DecisionFigureText.value(flip.at())));
+                ticks.add(new Tick(at(sweep, swing, flip.at(), net), flip.decision() == root, quantity.print(flip.at())));
             }
-            bars.add(new Bar(nameOf(swing.key(), owners), swing.range().lower(), swing.range().upper(), swing.stated(),
-                    swing.rootAtLow(), swing.rootAtHigh(), swing.least(), swing.greatest(), segments, ticks));
+            bars.add(new Bar(nameOf(swing.key(), owners), quantity.print(swing.range().lower()),
+                    quantity.print(swing.range().upper()), swing.stated(),
+                    net ? swing.netAtLow() : swing.rootAtLow(), net ? swing.netAtHigh() : swing.rootAtHigh(),
+                    net ? swing.leastNet() : swing.least(), net ? swing.greatestNet() : swing.greatest(), segments, ticks));
         }
         List<String> notes = new ArrayList<>();
-        int still = (int) sweep.swings().stream().filter(s -> s.width() <= 0).count();
+        int still = (int) sweep.swings().stream().filter(s -> (net ? s.netWidth() : s.width()) <= 0).count();
         if (still > 0) {
-            notes.add(still == 1 ? "One value does not move the expected cost." : still + " values do not move the expected cost.");
+            notes.add(still == 1 ? "One value does not move the answer." : still + " values do not move the answer.");
         }
         for (Unswept unswept : sweep.unswept()) {
             notes.add("Not swept: " + nameOf(unswept.key(), owners) + ", " + unswept.why() + ".");
         }
-        return new Tornado(sweep.baseRoot(), sweep.least(), sweep.greatest(), bars, notes);
+        String unit = symbol == null || symbol.isBlank() ? "" : ", in " + symbol;
+        String title = net
+                ? "Net value of \u201C" + chosen + "\u201D: what the next best alternative would cost, less what it costs"
+                + unit + ". Zero is break-even."
+                : "Expected cost at the root" + unit;
+        return new Tornado(title, net, net ? chosen : null, net ? sweep.baseNet() : sweep.baseRoot(),
+                net ? sweep.leastNet() : sweep.least(), net ? sweep.greatestNet() : sweep.greatest(), bars, notes);
     }
 
-    /** How a swept measure is named: its quantity, or its kind under the branch that carries it. */
+    /** Where the axis stands when a swing's measure is a value: the net value, or the root's cost. */
+    private static double at(DecisionTreeSweep sweep, Swing swing, double value, boolean net) {
+        return net ? swing.netAtValue(value).orElse(sweep.baseNet()) : swing.rootAtValue(value).orElse(sweep.baseRoot());
+    }
+
+    /** How a swept quantity's values print: the unit, and the money symbol or the unit's name. */
+    record Quantity(DecisionFigureText.Unit unit, String symbol) {
+        String print(double value) {
+            return DecisionFigureText.quantity(value, unit, symbol);
+        }
+    }
+
+    /**
+     * The quantity a swept measure is, as the live surface's {@code SweptQuantity} reads it: a
+     * probability or a share-valued parameter is a share; a money cost, the price of a healthy
+     * year, and a parameter on a money cost's semantic are money; a health cost and anything else
+     * carry their unit's name.
+     */
+    static Quantity quantity(Node root, Swing swing, String symbol) {
+        String money = symbol == null ? "" : symbol;
+        if (swing.key() == DecisionTreeSweep.HEALTH_PRICE) {
+            return new Quantity(DecisionFigureText.Unit.MONEY, money);
+        }
+        if (!(swing.key() instanceof Measure measure)) {
+            return new Quantity(DecisionFigureText.Unit.PLAIN, "");
+        }
+        return switch (measure.kind()) {
+            case MONEY -> new Quantity(DecisionFigureText.Unit.MONEY, money);
+            case HEALTH -> new Quantity(DecisionFigureText.Unit.PLAIN, measure.semantic() == null ? "" : measure.semantic().shown());
+            case PROBABILITY -> new Quantity(DecisionFigureText.Unit.SHARE, "");
+            case PARAMETER -> {
+                if (measure.semantic() == null) {
+                    boolean share = swing.range().lower() >= 0 && swing.range().upper() <= 1;
+                    yield new Quantity(share ? DecisionFigureText.Unit.SHARE : DecisionFigureText.Unit.PLAIN, "");
+                }
+                if (namesSemanticOf(root, MeasureKind.MONEY, measure.semantic())) {
+                    yield new Quantity(DecisionFigureText.Unit.MONEY, money);
+                }
+                yield new Quantity(DecisionFigureText.Unit.PLAIN, measure.semantic().shown());
+            }
+        };
+    }
+
+    /** Whether a concept is the semantic any cost of a kind in the tree is on, by identifier, else by key. */
+    private static boolean namesSemanticOf(Node node, MeasureKind kind, DecisionTreeSource.Concept concept) {
+        for (Measure measure : node.measures) {
+            if (measure.kind() == kind && measure.semantic() != null && same(measure.semantic(), concept)) {
+                return true;
+            }
+        }
+        for (Node child : node.children) {
+            if (namesSemanticOf(child, kind, concept)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean same(DecisionTreeSource.Concept a, DecisionTreeSource.Concept b) {
+        if (a.identifier() != null && b.identifier() != null) {
+            return a.identifier().equals(b.identifier());
+        }
+        return a.key() != null && a.key().equals(b.key());
+    }
+
+    /**
+     * How a swept measure is named: its quantity for a parameter, the price of a healthy year, or
+     * its kind at the node that carries it, the node's name in quotes.
+     */
     static String nameOf(Object key, Map<Measure, Node> owners) {
         if (key == DecisionTreeSweep.HEALTH_PRICE) {
             return "price of a healthy year";
@@ -392,11 +509,11 @@ final class DecisionTreeFigures {
             return "a value";
         }
         Node owner = owners.get(measure);
-        String ownerName = owner == null ? "a node" : owner.label();
+        String ownerName = owner == null ? "a node" : "\u201C" + owner.label() + "\u201D";
         return switch (measure.kind()) {
             case PARAMETER -> measure.quantity() != null ? measure.quantity().shown() : "a parameter";
-            case MONEY -> ownerName + " · money";
-            case HEALTH -> ownerName + " · health";
+            case MONEY -> "money cost at " + ownerName;
+            case HEALTH -> "health cost at " + ownerName;
             case PROBABILITY -> "p of " + ownerName;
         };
     }
@@ -405,15 +522,16 @@ final class DecisionTreeFigures {
     static String money(Interval bounds, String symbol) {
         String prefix = symbol == null ? "" : symbol;
         if (bounds.isPoint()) {
-            return prefix + String.format(Locale.ROOT, "%,d", Math.round(bounds.lower()));
+            // a negative amount, which a net value can be, carries its sign before the symbol
+            return (bounds.lower() < 0 ? "\u2212" : "") + prefix + String.format(Locale.ROOT, "%,d", Math.round(Math.abs(bounds.lower())));
         }
         return (bounds.lowerOpen() ? "(" : "[") + prefix + String.format(Locale.ROOT, "%,d", Math.round(bounds.lower()))
                 + ", " + prefix + String.format(Locale.ROOT, "%,d", Math.round(bounds.upper())) + (bounds.upperOpen() ? ")" : "]");
     }
 
-    /** A root cost on the tornado's axis. */
-    static String money(double root, String symbol) {
-        return Double.isNaN(root) ? "?" : money(Interval.point(root), symbol);
+    /** An amount on the tornado's axis. */
+    static String money(double amount, String symbol) {
+        return Double.isNaN(amount) ? "?" : money(Interval.point(amount), symbol);
     }
 
     /** A measure's bounds as its chip prints them, which is how the live surface's {@code Bounds} prints: whole, or to four places. */

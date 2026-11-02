@@ -131,10 +131,11 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep), title));
         parseContent(container, legend(rollback, symbol));
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
-            DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s),
+            DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
                     typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
-            container.append(figure(container, doc, tornado,
-                    "How far each value, moved on its own across its range, swings the expected cost at the root"));
+            container.append(figure(container, doc, tornado, s.netValued()
+                    ? "How far each value, moved on its own across its range, swings the net value of the chosen alternative"
+                    : "How far each value, moved on its own across its range, swings the expected cost at the root"));
         });
         List<String> source = new ArrayList<>();
         source.addAll(assumptions(root, rollback, symbol));
@@ -240,10 +241,8 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         return List.of("A square is a choice, a circle is a chance, and a triangle is where the consequences are counted."
                 + " The figure after \u21D2 is the expected cost still ahead of a patient who reaches that point, health"
                 + " counted at " + symbol + DecisionTreeFormat.money(rollback.healthPrice()) + " a year of healthy life;"
-                + " a branch's own costs are beneath its run, and a probability is the share who leave a circle by that"
-                + " branch. The heavy branch is the alternative the rollback chooses, and a barred one is rejected."
-                + " A number in an orange callout is worked in the table beneath, under the same callout; a small"
-                + " triangle marks a value whose range holds a flip of the choice at the root.", "");
+                + " a branch's own costs are beneath its run, and a percentage is the share who leave a circle by that"
+                + " branch. A number in an orange callout is worked in the table beneath, under the same callout.", "");
     }
 
     // ── The assumptions ──────────────────────────────────────────────────────

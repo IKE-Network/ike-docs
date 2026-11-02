@@ -28,6 +28,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.ToDoubleFunction;
 
 /**
  * The one-way sensitivity of a decision tree read from source: the store-free twin of the live
@@ -38,12 +39,17 @@ import java.util.Optional;
  * decision's chosen alternative flips. This is what the tornado draws, bar by bar.
  *
  * <p>A measure stated as an interval swings from its lower to its upper bound, and the swing is
- * <em>stated</em>. A measure stated as a point swings over an assumed range: zero to one for a
- * share, half to double for anything else; a probability under a chance with a residual event may
- * rise only as far as the other events leave. A derived measure is never swept. The base is every
- * measure at its midpoint. A flip is found by bisection between two steps whose chosen alternatives
- * differ, to a ten-thousandth of the range. Measures are known by identity; the price of a healthy
- * year by {@link #HEALTH_PRICE}.
+ * <em>stated</em>. A measure stated as a point swings over an assumed range: half to double, a
+ * share no higher than one; a probability under a chance with a residual event may rise only as
+ * far as the other events leave, and a share of exactly zero swings zero to one. A derived measure
+ * is never swept. The base is every measure at its midpoint. A flip is found by bisection between
+ * two steps whose chosen alternatives differ, to a ten-thousandth of the range. Measures are known
+ * by identity; the price of a healthy year by {@link #HEALTH_PRICE}.
+ *
+ * <p>Every step carries the root's net value as well as its cost: the advantage of the alternative
+ * the base chose, what the next best alternative would cost less what the chosen one costs, so it
+ * is positive while the base choice holds, zero at a flip and negative beyond it. It is
+ * {@code NaN} when the root did not decide at the base, and the root's cost is then all there is.
  */
 final class DecisionTreeSweep {
 
@@ -58,8 +64,11 @@ final class DecisionTreeSweep {
     /** The steps a swing is divided into when no one says otherwise. */
     static final int DEFAULT_STEPS = 12;
 
-    /** One step of a swing: the value, the expected cost at the root, and what every decision chose. */
-    record Sample(double value, double root, Map<Node, Node> chosen) {
+    /**
+     * One step of a swing: the value, the expected cost at the root, the net value of the base's
+     * choice there ({@code NaN} when the base did not decide), and what every decision chose.
+     */
+    record Sample(double value, double root, double net, Map<Node, Node> chosen) {
         Node chosen(Node decision) {
             return chosen.get(decision);
         }
@@ -92,21 +101,76 @@ final class DecisionTreeSweep {
             return greatest() - least();
         }
 
+        /** Whether every step carries a net value: the base decided, and every moved tree valued both arms. */
+        boolean hasNet() {
+            return samples.stream().noneMatch(sample -> Double.isNaN(sample.net()));
+        }
+
+        double netAtLow() {
+            return samples.get(0).net();
+        }
+
+        double netAtHigh() {
+            return samples.get(samples.size() - 1).net();
+        }
+
+        double leastNet() {
+            return samples.stream().mapToDouble(Sample::net).min().orElse(Double.NaN);
+        }
+
+        double greatestNet() {
+            return samples.stream().mapToDouble(Sample::net).max().orElse(Double.NaN);
+        }
+
+        /** How far the net value moves across the range: the bar's length on a net-value axis. */
+        double netWidth() {
+            return greatestNet() - leastNet();
+        }
+
         List<Flip> flipsAt(Node decision) {
             return flips.stream().filter(flip -> flip.decision() == decision).toList();
         }
 
         /** The expected cost at the root when the measure is a value, read off the steps by straight lines. */
         Optional<Double> rootAtValue(double value) {
+            return at(value, Sample::root);
+        }
+
+        /** The net value of the base's choice when the measure is a value, read off the steps by straight lines. */
+        Optional<Double> netAtValue(double value) {
+            return at(value, Sample::net);
+        }
+
+        /** The value of the measure at which the net value is a given amount; empty when it is never reached. */
+        Optional<Double> valueAtNet(double net) {
+            for (int i = 1; i < samples.size(); i++) {
+                Sample a = samples.get(i - 1);
+                Sample b = samples.get(i);
+                double lo = Math.min(a.net(), b.net());
+                double hi = Math.max(a.net(), b.net());
+                if (net >= lo - Interval.EPSILON && net <= hi + Interval.EPSILON) {
+                    if (b.net() == a.net()) {
+                        return Optional.of(a.value());
+                    }
+                    double t = (net - a.net()) / (b.net() - a.net());
+                    return Optional.of(a.value() + t * (b.value() - a.value()));
+                }
+            }
+            return Optional.empty();
+        }
+
+        private Optional<Double> at(double value, ToDoubleFunction<Sample> axis) {
             for (int i = 1; i < samples.size(); i++) {
                 Sample a = samples.get(i - 1);
                 Sample b = samples.get(i);
                 if (value >= a.value() - Interval.EPSILON && value <= b.value() + Interval.EPSILON) {
+                    double ya = axis.applyAsDouble(a);
+                    double yb = axis.applyAsDouble(b);
                     if (b.value() == a.value()) {
-                        return Optional.of(a.root());
+                        return Optional.of(ya);
                     }
                     double t = (value - a.value()) / (b.value() - a.value());
-                    return Optional.of(a.root() + t * (b.root() - a.root()));
+                    return Optional.of(ya + t * (yb - ya));
                 }
             }
             return Optional.empty();
@@ -120,6 +184,7 @@ final class DecisionTreeSweep {
     private final Node root;
     private final DecisionTreeRollback base;
     private final double baseRoot;
+    private final double baseNet;
     private final List<Swing> swings;
     private final List<Unswept> unswept;
 
@@ -127,6 +192,7 @@ final class DecisionTreeSweep {
         this.root = root;
         this.base = base;
         this.baseRoot = base.value(root).map(v -> (v.lower() + v.upper()) / 2).orElse(Double.NaN);
+        this.baseNet = net(root, base, base.chosen(root).orElse(null));
         this.swings = Collections.unmodifiableList(swings);
         this.unswept = Collections.unmodifiableList(unswept);
     }
@@ -150,6 +216,7 @@ final class DecisionTreeSweep {
         List<Unswept> unswept = new ArrayList<>();
         List<Node> decisions = new ArrayList<>();
         decisions(root, decisions);
+        Node baseChosen = base.chosen(root).orElse(null);
         if (base.value(root).isPresent()) {
             for (Measure measure : stated) {
                 Optional<Interval> range = range(root, base, measure, owners.get(measure));
@@ -165,7 +232,7 @@ final class DecisionTreeSweep {
                     Map<Measure, Interval> moved = new IdentityHashMap<>(baseBounds);
                     moved.put(measure, Interval.point(value));
                     return DecisionTreeRollback.of(root, price, moved);
-                }, steps, root, decisions);
+                }, steps, root, baseChosen, decisions);
                 if (swing.isPresent()) {
                     swings.add(swing.get());
                 } else {
@@ -174,10 +241,12 @@ final class DecisionTreeSweep {
             }
             if (price > 0) {
                 sweep(HEALTH_PRICE, new Interval(price / 2, price * 2, false, false), false, price,
-                        other -> DecisionTreeRollback.of(root, other, baseBounds), steps, root, decisions).ifPresent(swings::add);
+                        other -> DecisionTreeRollback.of(root, other, baseBounds), steps, root, baseChosen, decisions).ifPresent(swings::add);
             }
         }
-        swings.sort(Comparator.comparingDouble(Swing::width).reversed());
+        // longest first on the axis a tornado draws: the net value where every swing carries one, else the cost
+        boolean net = swings.stream().allMatch(Swing::hasNet);
+        swings.sort(Comparator.comparingDouble(net ? Swing::netWidth : Swing::width).reversed());
         return new DecisionTreeSweep(root, base, swings, unswept);
     }
 
@@ -235,7 +304,10 @@ final class DecisionTreeSweep {
                 }
                 ceiling = Math.max(value, Math.min(1, 1 - others));
             }
-            return Optional.of(new Interval(0, ceiling, false, false));
+            if (value == 0) {
+                return Optional.of(new Interval(0, ceiling, false, false));
+            }
+            return Optional.of(new Interval(value / 2, Math.min(ceiling, value * 2), false, false));
         }
         if (value == 0) {
             return Optional.empty();
@@ -262,11 +334,11 @@ final class DecisionTreeSweep {
     }
 
     private static Optional<Swing> sweep(Object key, Interval range, boolean stated, double base, Step step, int steps,
-                                         Node root, List<Node> decisions) {
+                                         Node root, Node baseChosen, List<Node> decisions) {
         List<Sample> samples = new ArrayList<>();
         for (int i = 0; i <= steps; i++) {
             double value = range.lower() + (range.upper() - range.lower()) * i / steps;
-            sample(step, value, root, decisions).ifPresent(samples::add);
+            sample(step, value, root, baseChosen, decisions).ifPresent(samples::add);
         }
         if (samples.size() < 2) {
             return Optional.empty();
@@ -278,27 +350,27 @@ final class DecisionTreeSweep {
             Sample above = samples.get(i);
             for (Node decision : decisions) {
                 if (below.chosen(decision) != above.chosen(decision)) {
-                    flips.add(bisect(step, decision, below, above, tolerance, root, decisions));
+                    flips.add(bisect(step, decision, below, above, tolerance, root, baseChosen, decisions));
                 }
             }
         }
         flips.sort(Comparator.comparingDouble(Flip::at));
         for (Flip flip : flips) {
-            sample(step, flip.at(), root, decisions).ifPresent(samples::add);
+            sample(step, flip.at(), root, baseChosen, decisions).ifPresent(samples::add);
         }
         samples.sort(Comparator.comparingDouble(Sample::value));
         return Optional.of(new Swing(key, range, stated, base, List.copyOf(samples), List.copyOf(flips)));
     }
 
     private static Flip bisect(Step step, Node decision, Sample below, Sample above, double tolerance, Node root,
-                               List<Node> decisions) {
+                               Node baseChosen, List<Node> decisions) {
         double lo = below.value();
         double hi = above.value();
         Node chosenBelow = below.chosen(decision);
         Node chosenAbove = above.chosen(decision);
         for (int i = 0; i < 40 && hi - lo > tolerance; i++) {
             double mid = (lo + hi) / 2;
-            Optional<Sample> at = sample(step, mid, root, decisions);
+            Optional<Sample> at = sample(step, mid, root, baseChosen, decisions);
             if (at.isEmpty()) {
                 break;
             }
@@ -313,7 +385,7 @@ final class DecisionTreeSweep {
         return new Flip(decision, (lo + hi) / 2, chosenBelow, chosenAbove);
     }
 
-    private static Optional<Sample> sample(Step step, double value, Node root, List<Node> decisions) {
+    private static Optional<Sample> sample(Step step, double value, Node root, Node baseChosen, List<Node> decisions) {
         DecisionTreeRollback rollback = step.at(value);
         Optional<Interval> rootValue = rollback.value(root);
         if (rootValue.isEmpty()) {
@@ -323,7 +395,35 @@ final class DecisionTreeSweep {
         for (Node decision : decisions) {
             rollback.chosen(decision).ifPresent(alternative -> chosen.put(decision, alternative));
         }
-        return Optional.of(new Sample(value, (rootValue.get().lower() + rootValue.get().upper()) / 2, chosen));
+        return Optional.of(new Sample(value, (rootValue.get().lower() + rootValue.get().upper()) / 2,
+                net(root, rollback, baseChosen), chosen));
+    }
+
+    /**
+     * The net value of an alternative at the root of a rolled-back tree: what the next best
+     * alternative would cost, less what this one costs. {@code NaN} when there is no such
+     * alternative, or when either is not determinable.
+     */
+    static double net(Node root, DecisionTreeRollback rollback, Node alternative) {
+        if (alternative == null || root.kind != Kind.DECISION) {
+            return Double.NaN;
+        }
+        Optional<Interval> own = rollback.value(alternative);
+        double nextBest = Double.POSITIVE_INFINITY;
+        for (Node other : root.children) {
+            if (other.kind != Kind.ALTERNATIVE || other == alternative) {
+                continue;
+            }
+            Optional<Interval> cost = rollback.value(other);
+            if (cost.isEmpty()) {
+                return Double.NaN;
+            }
+            nextBest = Math.min(nextBest, (cost.get().lower() + cost.get().upper()) / 2);
+        }
+        if (own.isEmpty() || Double.isInfinite(nextBest)) {
+            return Double.NaN;
+        }
+        return nextBest - (own.get().lower() + own.get().upper()) / 2;
     }
 
     Node root() {
@@ -342,6 +442,24 @@ final class DecisionTreeSweep {
     /** The alternative the root chose at the base, when it decided. */
     Optional<Node> baseChosen() {
         return base.chosen(root);
+    }
+
+    /** Whether the sweep is drawn on net value: the root decided at the base, and every swing carries one. */
+    boolean netValued() {
+        return !Double.isNaN(baseNet) && swings.stream().allMatch(Swing::hasNet);
+    }
+
+    /** The net value of the base's choice at the base: its advantage over the next best alternative. */
+    double baseNet() {
+        return baseNet;
+    }
+
+    double leastNet() {
+        return Math.min(baseNet, swings.stream().mapToDouble(Swing::leastNet).min().orElse(baseNet));
+    }
+
+    double greatestNet() {
+        return Math.max(baseNet, swings.stream().mapToDouble(Swing::greatestNet).max().orElse(baseNet));
     }
 
     /** Every swing, longest first. */

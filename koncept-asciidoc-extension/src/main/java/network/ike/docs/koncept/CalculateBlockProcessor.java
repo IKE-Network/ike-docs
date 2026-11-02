@@ -138,14 +138,16 @@ public class CalculateBlockProcessor extends BlockProcessor {
                 Interval span = row.span();
                 least = Math.min(least, span.lower());
                 greatest = Math.max(greatest, span.upper());
-                bars.add(new Bar(row.input().name(), row.swing().lower(), row.swing().upper(), row.solid(),
+                bars.add(new Bar(row.input().name(), DecisionFigureText.value(row.swing().lower()),
+                        DecisionFigureText.value(row.swing().upper()), row.solid(),
                         CalculatorEvaluation.mid(row.low()), CalculatorEvaluation.mid(row.high()), span.lower(), span.upper(),
                         List.of(new Segment(span.lower(), span.upper(), Choice.BASE)), List.of()));
             }
             List<String> notes = List.of("One input at a time, the rest at their midpoints. A solid bar is an interval that enters the"
                     + " computation, a stated bound or a missing input's plausible range; a hollow bar is the assumed swing of a point"
                     + " reading. The hairline is the result with every input at its midpoint.");
-            Tornado tornado = new Tornado(mid, least, greatest, bars, notes);
+            Tornado tornado = new Tornado(outputName + " as one input moves across its swing, the rest at their midpoints",
+                    false, null, mid, least, greatest, bars, notes);
             CalculatorEvaluation shown = evaluation;
             DecisionFigure figure = DecisionFigureTornado.build(tornado,
                     DecisionTreeBlockProcessor.isTypst(doc) ? DecisionTreeBlockProcessor.TYPST_TORNADO_WIDTH : DecisionTreeBlockProcessor.TORNADO_WIDTH,

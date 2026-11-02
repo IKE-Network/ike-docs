@@ -249,7 +249,11 @@ class DecisionTreeBlockRenderingTest {
         assertTrue(html.contains("Figure 1. Should this patient have a scan in year 2?"), "the title is the figure's");
         assertTrue(html.contains("class=\"decision-tornado\""), "the tornado follows the tree");
         assertTrue(html.contains("Figure 2. How far each value"), "as a numbered figure");
-        assertTrue(html.contains("flips at 1,008"), "the scan's cost flips the choice where the lab says");
+        assertTrue(html.contains("flips at $1,008"), "the scan's cost flips the choice where the lab says");
+        assertTrue(html.contains("flips at 1.85%"), "a share's threshold reads as a percentage");
+        assertTrue(html.contains("base $308"), "the axis is the scan's net value over not scanning");
+        assertTrue(html.contains("Net value of \u201Cscan\u201D"), "and says so");
+        assertTrue(html.contains("\u201Cscan\u201D still best"), "with a legend for its colours");
         assertTrue(html.contains("overflow-x: auto"), "a wide tree scrolls");
         assertTrue(html.contains("A square is a choice"), "the legend follows the tree");
         assertTrue(html.contains("Where each number on the tree comes from"), "the worked table follows");
@@ -270,7 +274,10 @@ class DecisionTreeBlockRenderingTest {
                 """.formatted(SCAN_TREE));
 
         assertTrue(html.contains("50,000 a year of healthy life"), "the legend names the price");
-        assertTrue(html.contains("\u2713 chosen"), "a course is chosen");
+        assertTrue(html.contains("class=\"run chosen\""), "a course is chosen, drawn heavy");
+        assertTrue(html.contains("21.4%"), "a share is a percentage");
+        assertTrue(html.contains("(residual)"), "and the residual's share is printed");
+        assertTrue(html.contains("$700"), "a money cost carries the symbol");
         Node root = DecisionTreeSource.parse(List.of(SCAN_TREE.split("\n"))).root();
         assertEquals(root.children.get(1), DecisionTreeRollback.of(root, 50_000).chosen(root).orElseThrow(), "not scanning");
         assertEquals(50_000, DecisionTreeBlockProcessor.price("50,000"));
@@ -371,15 +378,18 @@ class DecisionTreeBlockRenderingTest {
         DecisionTreeSweep.Swing price = sweep.swing(DecisionTreeSweep.HEALTH_PRICE).orElseThrow();
         double breakEven = price.flipsAt(root).get(0).at();
         assertTrue(breakEven > 80_000 && breakEven < 90_000, "break-even " + breakEven);
+        assertTrue(sweep.netValued(), "the root decided at the base, so every swing carries a net value");
+        assertEquals(4_188 - 3_880, sweep.baseNet(), 1.0, "the scan's advantage over not scanning");
         for (int i = 1; i < sweep.swings().size(); i++) {
-            assertTrue(sweep.swings().get(i - 1).width() >= sweep.swings().get(i).width(), "longest first");
+            assertTrue(sweep.swings().get(i - 1).netWidth() >= sweep.swings().get(i).netWidth(), "longest first");
         }
-        DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(sweep), 640,
+        DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(sweep, "$"), 640,
                 cost -> DecisionTreeFigures.money(cost, "$"));
         String typst = DecisionFigureTypst.write(tornado);
         assertTrue(typst.startsWith("// decision-tornado\n#box(width: 640pt"), typst.substring(0, 40));
-        assertTrue(typst.contains("\"flips at 1,008\""));
-        assertTrue(typst.contains("\"base $3,880\""));
+        assertTrue(typst.contains("\"flips at $1,008\""));
+        assertTrue(typst.contains("\"base $308\""));
+        assertTrue(typst.contains("\"$0\""), "zero, break-even, is a tick");
         String tree = DecisionFigureTypst.write(DecisionTreeFigures.tree(root, DecisionTreeRollback.of(root, 100_000), "$",
                 Optional.of(sweep)));
         assertTrue(tree.contains("thickness: 2.6pt"), "the chosen alternative is heavy in print too");
@@ -404,7 +414,7 @@ class DecisionTreeBlockRenderingTest {
         assertTrue(typst.contains("thickness: 2.6pt"), "the chosen alternative is heavy");
         assertTrue(typst.contains("pass[typst drawing decision-tornado][How far each value"), "the tornado follows the tree");
         assertTrue(typst.contains("#box(width: 470pt"), "drawn to the Typst page's column");
-        assertTrue(typst.contains("\"flips at 1,008\""), "and marks the flip at the scan cost the lab says");
+        assertTrue(typst.contains("\"flips at $1,008\""), "and marks the flip at the scan cost the lab says");
         assertFalse(typst.contains(".svg"), "no SVG file stands in for a figure:\n" + typst);
         assertTrue(typst.contains("A square is a choice"), "the legend still follows the tree");
     }
