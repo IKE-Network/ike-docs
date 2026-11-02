@@ -154,7 +154,7 @@ class DecisionTreeTypstTest {
                 "the tree is a drawing in a figure, fitted to the column");
         assertContains(typst, "  ],\n  caption: [Should this patient have a scan in year 2?],\n)", "with the block's title as its caption");
         assertContains(typst, "#ike-drawing[\n// decision-tornado\n#box(width: 470pt", "the tornado follows, drawn to the column");
-        assertContains(typst, "caption: [How far each value, moved on its own across its range, swings the expected cost at the root]",
+        assertContains(typst, "caption: [How far each value, moved on its own across its range, swings the net value of the chosen alternative]",
                 "as a captioned figure");
         assertEquals(2, count(typst, "#ike-drawing["), "one drawing each");
         assertFalse(typst.contains("image("), "no figure is an embedded image:\n" + typst);
@@ -171,10 +171,11 @@ class DecisionTreeTypstTest {
         assertContains(typst, "\"Scan now?\"", "under the root's question");
         assertContains(typst, "\"⇒ $3,880\"", "the scan's rolled-back cost is on the tree");
         assertContains(typst, "\"⇒ $4,188\"", "and the cost without");
-        assertContains(typst, "\"✓ chosen\"", "the scan is chosen");
+        assertFalse(typst.contains("✓ chosen"), "the heavy run says what is chosen; no tag repeats it");
         assertEquals(2, count(typst, "thickness: 2.6pt"), "both chosen alternatives are heavy");
-        assertContains(typst, "\"base $3,880\"", "the tornado's axis names the base cost");
-        assertContains(typst, "\"flips at 1,008\"", "and the scan cost's bar marks the flip where the lab says");
+        assertContains(typst, "\"21.4%\"", "a share is a percentage");
+        assertContains(typst, "\"base $308\"", "the tornado's axis is the scan's net value over not scanning, named at the base");
+        assertContains(typst, "\"flips at $1,008\"", "and the scan cost's bar marks the flip where the lab says, in its unit");
         assertContains(typst, "\"▲\"", "the tree marks the value whose range holds the flip");
         assertContains(typst, "A square is a choice", "the legend follows the tree as text");
         assertContains(typst, "Where each number on the tree comes from", "and the worked table follows");
