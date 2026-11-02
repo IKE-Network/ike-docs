@@ -20,6 +20,8 @@ import network.ike.docs.koncept.DecisionTreeSource.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -208,34 +210,46 @@ final class DecisionTreeGeometry {
 
         DecisionTreeGeometry build() {
             int columns = pendingNodes.stream().mapToInt(Pending::column).max().orElse(-1) + 1;
-            double[] stub = new double[Math.max(columns, 1)];
-            double[] branchLabel = new double[Math.max(columns, 1)];
-            for (Pending node : pendingNodes) {
-                stub[node.column()] = Math.max(stub[node.column()], sizing.nodeLabelWidth(node.node()) + LABEL_PAD);
-            }
-            for (PendingRun run : pendingRuns) {
-                branchLabel[run.column()] = Math.max(branchLabel[run.column()], sizing.branchLabelWidth(run.branch()) + LABEL_PAD);
-            }
             double glyph = sizing.glyph();
-            double[] x = new double[Math.max(columns, 1)];
-            x[0] = sizing.margin() + glyph / 2;
-            for (int c = 1; c < columns; c++) {
-                x[c] = x[c - 1] + glyph / 2 + stub[c - 1] + branchLabel[c - 1] + sizing.gap() + glyph / 2;
+            // ragged: a node's stub is its own label's width, and its children stand just past the widest
+            // of its own branches' labels, so a short run is never stretched by a long one elsewhere at its depth;
+            // siblings still share one x, the bend they hang from
+            Map<Node, Double> xOf = new IdentityHashMap<>();
+            Map<Node, Double> stubOf = new IdentityHashMap<>();
+            Map<Node, Double> runRoomOf = new IdentityHashMap<>();
+            for (PendingRun run : pendingRuns) {
+                runRoomOf.merge(run.from(), sizing.branchLabelWidth(run.branch()) + LABEL_PAD, Math::max);
+            }
+            double right = sizing.margin();
+            for (Pending node : pendingNodes) {
+                double stub = sizing.nodeLabelWidth(node.node()) + LABEL_PAD;
+                stubOf.put(node.node(), stub);
+                double x = xOf.computeIfAbsent(node.node(), v -> sizing.margin() + glyph / 2);
+                right = Math.max(right, x + glyph / 2 + stub);
+                Double room = runRoomOf.get(node.node());
+                if (room != null) {
+                    double childX = x + glyph / 2 + stub + room + sizing.gap() + glyph / 2;
+                    for (PendingRun run : pendingRuns) {
+                        if (run.from() == node.node()) {
+                            xOf.put(run.to(), childX);
+                        }
+                    }
+                }
             }
             List<Placed> placed = new ArrayList<>();
             for (Pending node : pendingNodes) {
-                placed.add(new Placed(node.node(), node.kind(), node.column(), x[node.column()], node.y(), node.collapsed()));
+                placed.add(new Placed(node.node(), node.kind(), node.column(), xOf.get(node.node()), node.y(), node.collapsed()));
             }
             List<Run> runs = new ArrayList<>();
             for (PendingRun run : pendingRuns) {
                 double y0 = pendingNodes.stream().filter(n -> n.node() == run.from()).mapToDouble(Pending::y).findFirst()
                         .orElse(run.y());
-                double x0 = x[run.column()] + glyph / 2;
-                double xBend = x0 + stub[run.column()];
-                double x1 = x[run.column() + 1] - glyph / 2;
+                double x0 = xOf.get(run.from()) + glyph / 2;
+                double xBend = x0 + stubOf.get(run.from());
+                double x1 = xOf.get(run.to()) - glyph / 2;
                 runs.add(new Run(run.branch(), run.from(), run.to(), x0, y0, xBend, run.y(), x1));
             }
-            double width = columns == 0 ? 2 * sizing.margin() : x[columns - 1] + glyph / 2 + stub[columns - 1] + sizing.margin();
+            double width = columns == 0 ? 2 * sizing.margin() : right + sizing.margin();
             double height = 2 * sizing.margin() + Math.max(rows, 0) * sizing.rowHeight();
             return new DecisionTreeGeometry(placed, runs, width, height, rows, columns);
         }
