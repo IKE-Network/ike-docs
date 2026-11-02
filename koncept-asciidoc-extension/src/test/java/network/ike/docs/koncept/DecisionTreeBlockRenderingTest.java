@@ -273,7 +273,8 @@ class DecisionTreeBlockRenderingTest {
                 ----
                 %s----
                 """.formatted(SCAN_TREE));
-        assertTrue(html.contains("214 of 1,000"), "214 of a thousand test positive");
+        assertFalse(html.contains("214 of 1,000"), "the run says the count alone; the legend says of how many");
+        assertTrue(html.contains(">214<"), "214 test positive");
         assertTrue(html.contains("all 1,000"), "every one takes each alternative");
         int at = html.indexOf("Of 1,000 who take");
         // this test's tree names its outcomes "18.2% rupture risk" and "risk cut to 1.8%"

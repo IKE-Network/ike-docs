@@ -112,6 +112,8 @@ final class DecisionTreeFigures {
         private final Map<Node, List<Span>> nodeBottom = new IdentityHashMap<>();
         private final Map<Node, List<Span>> branchAbove = new IdentityHashMap<>();
         private final Map<Node, List<Span>> branchBelow = new IdentityHashMap<>();
+        /** The most lines any run or outcome stacks beneath itself, which every row makes room for. */
+        private int belowLines = 1;
         private final Set<Node> barred = Collections.newSetFromMap(new IdentityHashMap<>());
         private final Set<Node> chosenBranches = Collections.newSetFromMap(new IdentityHashMap<>());
 
@@ -379,10 +381,16 @@ final class DecisionTreeFigures {
                 return;
             }
             double at = x;
+            double y = top;
             for (Span span : spans) {
+                if (span == BREAK) {
+                    y += lineHeight;
+                    at = x;
+                    continue;
+                }
                 if (span.callout()) {
                     double r = size * 0.62;
-                    double cy = top + lineHeight / 2;
+                    double cy = y + lineHeight / 2;
                     marks.add(new Circle(at + r, cy, r, CALLOUT, null, "callout"));
                     double numberSize = size * 0.7;
                     double w = DecisionFigureText.width(span.text(), numberSize, true);
@@ -391,7 +399,7 @@ final class DecisionTreeFigures {
                     at += 2 * r + SPAN_GAP;
                     continue;
                 }
-                marks.add(new Text(at, top + (lineHeight - DecisionFigureText.lineHeight(span.size())) / 2, span.text(),
+                marks.add(new Text(at, y + (lineHeight - DecisionFigureText.lineHeight(span.size())) / 2, span.text(),
                         span.size(), span.bold(), span.italic(), span.colour(), span.role()));
                 at += DecisionFigureText.width(span.text(), span.size(), span.bold()) + SPAN_GAP;
             }
@@ -413,7 +421,9 @@ final class DecisionTreeFigures {
                 top.addAll(name);
                 nodeTop.put(node, top);
                 if (node.kind == DecisionTreeSource.Kind.OUTCOME) {
-                    nodeBottom.put(node, costs(node.costs()));
+                    List<Span> bottom = new ArrayList<>();
+                    stacked(bottom, callout(node), node.costs());
+                    nodeBottom.put(node, bottom);
                 }
             } else {
                 nodeTop.put(node, top);
@@ -457,15 +467,7 @@ final class DecisionTreeFigures {
             List<Span> below = new ArrayList<>();
             cohort.ifPresent(c -> c.count(branch).ifPresent(count -> below.add(new Span(
                     DecisionFigureText.ofCohort(count, c.size()), size, false, false, DecisionFigureText.CAPTION, "count"))));
-            List<Span> costs = new ArrayList<>();
-            if (!branch.costs().isEmpty()) {
-                callout(branch).ifPresent(costs::add);
-            }
-            costs.addAll(costs(branch.costs()));
-            if (!below.isEmpty() && !costs.isEmpty()) {
-                below.add(new Span("\u00B7", size, false, false, DecisionFigureText.CAPTION, "plus"));
-            }
-            below.addAll(costs);
+            stacked(below, callout(branch), branch.costs());
             branchBelow.put(branch, below);
             if (branch.kind == DecisionTreeSource.Kind.ALTERNATIVE && decided && !chosen) {
                 barred.add(branch);
@@ -477,6 +479,34 @@ final class DecisionTreeFigures {
         }
 
         /** A branch's or an outcome's costs: money then health, each in its unit, joined by a plus. */
+        /** A line break between stacked lines beneath a run or an outcome. */
+        private static final Span BREAK = new Span("", 0, false, false, DecisionFigureText.CAPTION, "break");
+
+        /**
+         * Stacks a node's costs beneath what is there already, the callout first: the priced costs on
+         * one line, money then health, and the counted ones on the next, so a column is as wide as its
+         * widest line rather than the whole of a run's text.
+         */
+        private void stacked(List<Span> into, Optional<Span> callout, List<Measure> costs) {
+            List<Span> priced = new ArrayList<>(costs(costs.stream().filter(c -> c.kind() != MeasureKind.COUNT).toList()));
+            List<Span> counted = new ArrayList<>(costs(costs.stream().filter(c -> c.kind() == MeasureKind.COUNT).toList()));
+            if (callout.isPresent() && !costs.isEmpty()) {
+                (priced.isEmpty() ? counted : priced).add(0, callout.get());
+            }
+            for (List<Span> line : List.of(priced, counted)) {
+                if (line.isEmpty()) {
+                    continue;
+                }
+                if (!into.isEmpty()) {
+                    into.add(BREAK);
+                }
+                into.addAll(line);
+            }
+            if (!into.isEmpty()) {
+                belowLines = Math.max(belowLines, 1 + (int) into.stream().filter(span -> span == BREAK).count());
+            }
+        }
+
         private List<Span> costs(List<Measure> costs) {
             List<Span> below = new ArrayList<>();
             for (Measure cost : costs) {
@@ -520,19 +550,25 @@ final class DecisionTreeFigures {
             if (spans == null || spans.isEmpty()) {
                 return 0;
             }
+            double widest = 0;
             double width = 0;
             for (Span span : spans) {
+                if (span == BREAK) {
+                    widest = Math.max(widest, width - SPAN_GAP);
+                    width = 0;
+                    continue;
+                }
                 width += (span.callout() ? 2 * size * 0.62 : DecisionFigureText.width(span.text(), span.size(), span.bold()))
                         + SPAN_GAP;
             }
-            return width - SPAN_GAP;
+            return Math.max(widest, width - SPAN_GAP);
         }
 
         private DecisionTreeGeometry.Sizing sizing() {
             return new DecisionTreeGeometry.Sizing() {
                 @Override
                 public double rowHeight() {
-                    return 2 * lineHeight + 10;
+                    return lineHeight * (1 + Math.max(1, belowLines)) + 10;
                 }
 
                 @Override
