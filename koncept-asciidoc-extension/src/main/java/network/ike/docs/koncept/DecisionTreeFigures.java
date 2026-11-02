@@ -174,6 +174,32 @@ final class DecisionTreeFigures {
             double legendLine = DecisionFigureText.lineHeight(legendSize);
             double wrapWidth = Math.max(200, layout.width() - 12);
             double y = layout.height() + 2;
+            // the ledger: every alternative's consequences in their own units, per cohort when one is counted
+            List<List<String>> table = ledgerTable(root, rollback, symbol, healthUnit(), cohort);
+            if (table.size() > 2) {
+                double[] widths = new double[table.get(0).size()];
+                for (List<String> row : table) {
+                    for (int i = 0; i < row.size(); i++) {
+                        widths[i] = Math.max(widths[i], DecisionFigureText.width(row.get(i), legendSize, true) + 18);
+                    }
+                }
+                marks.add(new Text(6, y, ledgerTitle(cohort), legendSize, true, false, DecisionFigureText.INK, "ledger-title"));
+                y += legendLine;
+                Optional<Node> chosenAlternative = rollback.chosen(root);
+                for (int r = 0; r < table.size(); r++) {
+                    List<String> row = table.get(r);
+                    boolean header = r == 0;
+                    boolean chosenRow = !header && chosenAlternative.isPresent() && chosenAlternative.get().label().equals(row.get(0));
+                    double x = 6;
+                    for (int i = 0; i < row.size(); i++) {
+                        marks.add(new Text(x, y, row.get(i), legendSize, chosenRow, header, header ? DecisionFigureText.CAPTION
+                                : chosenRow ? DecisionFigureText.CHOSEN : DecisionFigureText.INK, header ? "ledger-head" : "ledger"));
+                        x += widths[i];
+                    }
+                    y += legendLine;
+                }
+                y += 3;
+            }
             List<String> readouts = readouts();
             for (String readout : readouts) {
                 for (String line : DecisionFigureText.wrap(readout, legendSize, wrapWidth)) {
@@ -194,13 +220,32 @@ final class DecisionTreeFigures {
         /** The sentences beneath the drawing: the trade at the root, and a tally per alternative when a cohort is counted. */
         List<String> readouts() {
             List<String> lines = new ArrayList<>();
+            if (rollback.unpriced() && root.children.stream().filter(c -> c.kind == DecisionTreeSource.Kind.ALTERNATIVE).count() > 1) {
+                lines.add(DecisionFigureText.UNPRICED);
+            }
             tradeoff.ifPresent(t -> {
                 String healthUnit = healthUnit();
                 String moneyText = money(Interval.point(Math.abs(t.money())), symbol);
-                String healthText = DecisionFigureText.quantity(Math.abs(t.health()), DecisionFigureText.Unit.PLAIN, healthUnit);
+                // a tree with no health anywhere says nothing about health
+                String healthText = healthUnit.isEmpty() && firstSemantic(root, MeasureKind.HEALTH).isEmpty() && !hasKind(root, MeasureKind.HEALTH) ? ""
+                        : DecisionFigureText.quantity(Math.abs(t.health()), DecisionFigureText.Unit.PLAIN, healthUnit);
                 String priceText = Double.isNaN(t.pricePerHealthyYear()) ? "" : money(Interval.point(t.pricePerHealthyYear()), symbol);
+                double per = cohort.map(DecisionTreeCohort::size).orElse(1.0);
+                String perText = cohort.isPresent() ? DecisionFigureText.count(per) : "case";
+                List<String> clauses = new ArrayList<>();
+                for (DecisionTreeTradeoff.CountTrade trade : t.counts()) {
+                    double more = trade.more();
+                    if (Math.abs(more) < 1e-9) {
+                        continue;
+                    }
+                    boolean chosenSpares = more < 0;
+                    double paid = chosenSpares ? t.money() : -t.money();
+                    String each = paid > 1e-9 ? money(Interval.point(paid / Math.abs(more)), symbol) : null;
+                    clauses.add(DecisionFigureText.countClause((chosenSpares ? t.chosen() : t.nextBest()).label(), chosenSpares,
+                            DecisionFigureText.count(Math.abs(more) * per), trade.unit(), perText, each));
+                }
                 lines.add(DecisionFigureText.tradeoff(t.chosen().label(), t.nextBest().label(), t.money(), moneyText,
-                        t.health(), healthText, priceText, money(Interval.point(t.priced()), symbol)));
+                        t.health(), healthText, priceText, money(Interval.point(t.priced()), symbol), t.countedAgainst(), clauses));
             });
             cohort.ifPresent(c -> {
                 for (DecisionTreeCohort.Tally tally : c.tallies()) {
@@ -224,6 +269,64 @@ final class DecisionTreeFigures {
         /** The name of the health unit the tree's health costs are in, from the first such cost; empty when none. */
         private String healthUnit() {
             return firstSemantic(root, MeasureKind.HEALTH);
+        }
+
+        /** The ledger's title: what one row is counted for. */
+        static String ledgerTitle(Optional<DecisionTreeCohort> cohort) {
+            return cohort.isPresent() ? "Per " + DecisionFigureText.count(cohort.get().size()) + " who take each alternative"
+                    : "Per case who takes each alternative";
+        }
+
+        /** The ledger as rows of text, a header first; see the live surface's {@code DecisionTreeFigures.ledgerTable}. */
+        static List<List<String>> ledgerTable(Node root, DecisionTreeRollback rollback, String symbol, String healthUnit,
+                                              Optional<DecisionTreeCohort> cohort) {
+            Optional<DecisionTreeLedger> ledger = DecisionTreeLedger.of(root, rollback);
+            if (ledger.isEmpty() || ledger.get().entries().size() < 2) {
+                return List.of();
+            }
+            double per = cohort.map(DecisionTreeCohort::size).orElse(1.0);
+            boolean anyMoney = ledger.get().entries().stream().anyMatch(e -> Math.abs(e.money()) > 1e-9);
+            boolean anyHealth = ledger.get().entries().stream().anyMatch(e -> Math.abs(e.health()) > 1e-9);
+            List<List<String>> rows = new ArrayList<>();
+            List<String> head = new ArrayList<>();
+            head.add("");
+            if (anyMoney) {
+                head.add("money");
+            }
+            if (anyHealth) {
+                head.add(healthUnit.isEmpty() ? "healthy life lost" : healthUnit + " lost");
+            }
+            head.addAll(ledger.get().units());
+            rows.add(head);
+            for (DecisionTreeLedger.Entry entry : ledger.get().entries()) {
+                List<String> row = new ArrayList<>();
+                row.add(entry.alternative().label());
+                if (anyMoney) {
+                    row.add(money(Interval.point(entry.money() * per), symbol));
+                }
+                if (anyHealth) {
+                    row.add(DecisionFigureText.shown(entry.health() * per, true, false));
+                }
+                for (String unit : ledger.get().units()) {
+                    row.add(DecisionFigureText.count(entry.count(unit) * per));
+                }
+                rows.add(row);
+            }
+            return rows;
+        }
+
+        private static boolean hasKind(Node node, MeasureKind kind) {
+            for (Measure measure : node.measures) {
+                if (measure.kind() == kind) {
+                    return true;
+                }
+            }
+            for (Node child : node.children) {
+                if (hasKind(child, kind)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static String firstSemantic(Node node, MeasureKind kind) {
@@ -377,7 +480,7 @@ final class DecisionTreeFigures {
                 if (!below.isEmpty()) {
                     below.add(new Span("+", size, false, false, DecisionFigureText.CAPTION, "plus"));
                 }
-                below.addAll(chip(cost.kind() == MeasureKind.MONEY ? "money" : "health", cost));
+                below.addAll(chip(cost.kind() == MeasureKind.MONEY ? "money" : cost.kind() == MeasureKind.HEALTH ? "health" : "count", cost));
             }
             return below;
         }
@@ -396,7 +499,7 @@ final class DecisionTreeFigures {
                 default -> DecisionFigureText.Unit.PLAIN;
             };
             String unitSymbol = unit == DecisionFigureText.Unit.MONEY ? symbol
-                    : "health".equals(word) && measure.semantic() != null ? measure.semantic().shown() : "";
+                    : ("health".equals(word) || "count".equals(word)) && measure.semantic() != null ? measure.semantic().shown() : "";
             boolean worded = unit != DecisionFigureText.Unit.SHARE && unitSymbol.isEmpty();
             String shown = bounds.map(b -> DecisionFigureText.chip(b.lower(), b.upper(), b.lowerOpen(), b.upperOpen(),
                     computed, unit, unitSymbol)).orElse("?");
@@ -545,7 +648,7 @@ final class DecisionTreeFigures {
         }
         return switch (measure.kind()) {
             case MONEY -> new Quantity(DecisionFigureText.Unit.MONEY, money);
-            case HEALTH -> new Quantity(DecisionFigureText.Unit.PLAIN, measure.semantic() == null ? "" : measure.semantic().shown());
+            case HEALTH, COUNT -> new Quantity(DecisionFigureText.Unit.PLAIN, measure.semantic() == null ? "" : measure.semantic().shown());
             case PROBABILITY -> new Quantity(DecisionFigureText.Unit.SHARE, "");
             case PARAMETER -> {
                 if (measure.semantic() == null) {
@@ -599,6 +702,7 @@ final class DecisionTreeFigures {
             case PARAMETER -> measure.quantity() != null ? measure.quantity().shown() : "a parameter";
             case MONEY -> "money cost at " + ownerName;
             case HEALTH -> "health cost at " + ownerName;
+            case COUNT -> (measure.semantic() == null ? "count" : measure.semantic().shown()) + " at " + ownerName;
             case PROBABILITY -> "p of " + ownerName;
         };
     }

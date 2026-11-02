@@ -63,8 +63,30 @@ final class DecisionTreeRollback {
     /** Stated measures read at other bounds than the block states, by identity: what a sweep moves. */
     private final Map<Measure, Interval> overrides = new IdentityHashMap<>();
 
+    /** Whether the tree prices nothing: no money and no health anywhere, only counts, so no decision can be made on cost. */
+    private boolean unpriced;
+
     private DecisionTreeRollback(double healthPrice) {
         this.healthPrice = healthPrice;
+    }
+
+    /** Whether the tree prices nothing, so every decision is left open and the ledger alone weighs the alternatives. */
+    boolean unpriced() {
+        return unpriced;
+    }
+
+    private static boolean priced(Node node) {
+        for (Measure measure : node.measures) {
+            if (measure.kind() == MeasureKind.MONEY || measure.kind() == MeasureKind.HEALTH) {
+                return true;
+            }
+        }
+        for (Node child : node.children) {
+            if (priced(child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static DecisionTreeRollback of(Node root, double healthPrice) {
@@ -77,6 +99,7 @@ final class DecisionTreeRollback {
      */
     static DecisionTreeRollback of(Node root, double healthPrice, Map<Measure, Interval> overrides) {
         DecisionTreeRollback rollback = new DecisionTreeRollback(healthPrice);
+        rollback.unpriced = !priced(root);
         rollback.overrides.putAll(overrides);
         for (Measure parameter : root.parameters()) {
             if (parameter.quantity() != null) {
@@ -360,7 +383,7 @@ final class DecisionTreeRollback {
         for (int i = 1; i < costs.size(); i++) {
             least = least.least(costs.get(i));
         }
-        for (int i = 0; i < costs.size(); i++) {
+        for (int i = 0; i < costs.size() && !unpriced; i++) {
             boolean sure = true;
             for (int j = 0; j < costs.size(); j++) {
                 if (i != j && !costs.get(i).noGreaterThan(costs.get(j))) {
@@ -375,6 +398,7 @@ final class DecisionTreeRollback {
         }
         how.append(chosen.containsKey(decision)
                 ? ". The square takes the cheaper"
+                : unpriced ? ". Nothing is priced, so the square takes neither: the ledger weighs them"
                 : ". The bounds overlap, so the square takes neither for sure");
         step(decision, "§", DecisionTreeFormat.label(decision), how.toString(), least);
         return Optional.of(least);
@@ -390,6 +414,9 @@ final class DecisionTreeRollback {
             }
             if (cost.semantic() == null) {
                 return notDeterminable(node, "a cost names no measure semantic");
+            }
+            if (cost.kind() == MeasureKind.COUNT) {
+                continue; // counted in its own unit, never priced: the ledger weighs it beside money and health
             }
             total = cost.kind() == MeasureKind.MONEY
                     ? total.plus(value.get())
@@ -409,7 +436,9 @@ final class DecisionTreeRollback {
                 amount = cost.derivation().label.toLowerCase(Locale.ROOT) + " of "
                         + String.join(", ", cost.operands().stream().map(Concept::shown).toList()) + " = " + amount;
             }
-            if (cost.kind() == MeasureKind.MONEY) {
+            if (cost.kind() == MeasureKind.COUNT) {
+                how.append(amount).append(" ").append(cost.semantic() == null ? "counted" : cost.semantic().shown()).append(", not priced");
+            } else if (cost.kind() == MeasureKind.MONEY) {
                 how.append(amount).append(" billed");
             } else {
                 how.append(amount).append(" ")

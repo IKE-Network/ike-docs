@@ -254,8 +254,8 @@ final class DecisionTreeSweep {
     static void collect(Node node, List<Measure> stated, Map<Measure, Node> owners) {
         for (Measure measure : node.measures) {
             owners.put(measure, node);
-            if (measure.stated() && !Double.isNaN(measure.bounds().lower())) {
-                stated.add(measure);
+            if (measure.stated() && !Double.isNaN(measure.bounds().lower()) && measure.kind() != MeasureKind.COUNT) {
+                stated.add(measure); // a count is never priced, so it cannot move the answer
             }
         }
         for (Node child : node.children) {

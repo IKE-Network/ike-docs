@@ -286,6 +286,29 @@ class DecisionTreeBlockRenderingTest {
     }
 
     @Test
+    @DisplayName("A count is kept in its own unit: never priced, weighed in the ledger beneath the drawing")
+    void countsAreLedgered() {
+        // the count goes on the branch above the first untreated outcome
+        // on the positive event, which leads to the angiogram: the count line goes before the chance beneath it
+        int at = SCAN_TREE.indexOf("chance: k:Angiogram[");
+        assertTrue(at > 0, "the chance beneath the positive event");
+        int lineStart = SCAN_TREE.lastIndexOf('\n', at) + 1;
+        String indent = SCAN_TREE.substring(lineStart, at);
+        String counted = SCAN_TREE.substring(0, lineStart) + indent + "count = [1,1] k:Angiogram[angiograms] @id=rda-angiogram\n"
+                + SCAN_TREE.substring(lineStart);
+        assertTrue(counted.contains("count = [1,1]"), "the test tree carries a count: " + counted);
+        String html = convert("""
+                [decision-tree, cohort=1000]
+                ----
+                %s----
+                """.formatted(counted));
+        assertTrue(html.contains("\u21D2 $3,880"), "a count changes no priced value");
+        assertTrue(html.contains("angiograms"), "the ledger has a column for what is counted");
+        assertTrue(html.contains("Per 1,000 who take each alternative"), "per cohort");
+        assertTrue(html.contains("would spare ") && html.contains(" angiograms per 1,000"), "and the trade says who spares them: " + html.substring(html.indexOf("costs $"), Math.min(html.length(), html.indexOf("costs $") + 400)));
+    }
+
+    @Test
     @DisplayName("The health price attribute moves the figure")
     void healthPriceAttribute() {
         String html = convert("""

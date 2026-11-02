@@ -16,11 +16,10 @@
 package network.ike.docs.koncept;
 
 import network.ike.docs.koncept.DecisionTreeSource.Interval;
-import network.ike.docs.koncept.DecisionTreeSource.Kind;
-import network.ike.docs.koncept.DecisionTreeSource.Measure;
-import network.ike.docs.koncept.DecisionTreeSource.MeasureKind;
 import network.ike.docs.koncept.DecisionTreeSource.Node;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,7 +33,19 @@ import java.util.Optional;
  * @param health how much more healthy life the chosen alternative keeps than the next best; negative when less
  * @param priced the price of a healthy year the tree was rolled back at
  */
-record DecisionTreeTradeoff(Node chosen, Node nextBest, double money, double health, double priced) {
+record DecisionTreeTradeoff(Node chosen, Node nextBest, double money, double health, double priced, List<CountTrade> counts) {
+
+    /** How a counted unit stands between the chosen alternative and the next best, per case. */
+    record CountTrade(String unit, double chosen, double other) {
+        double more() {
+            return chosen - other;
+        }
+    }
+
+    /** Whether the chosen alternative brings more of any counted unit than the next best. */
+    boolean countedAgainst() {
+        return counts.stream().anyMatch(trade -> trade.more() > 1e-9);
+    }
 
     /** The price of a healthy year at which the two alternatives tie; NaN when nothing is traded. */
     double pricePerHealthyYear() {
@@ -43,92 +54,34 @@ record DecisionTreeTradeoff(Node chosen, Node nextBest, double money, double hea
     }
 
     static Optional<DecisionTreeTradeoff> of(Node root, DecisionTreeRollback base) {
+        Optional<DecisionTreeLedger> ledger = DecisionTreeLedger.of(root, base);
         Optional<Node> chosen = base.chosen(root);
-        if (root.kind != Kind.DECISION || chosen.isEmpty()) {
+        if (ledger.isEmpty() || chosen.isEmpty()) {
             return Optional.empty();
         }
         Node nextBest = null;
         double nextCost = Double.POSITIVE_INFINITY;
-        for (Node other : root.children) {
-            if (other.kind != Kind.ALTERNATIVE || other == chosen.get()) {
+        for (DecisionTreeLedger.Entry entry : ledger.get().entries()) {
+            if (entry.alternative() == chosen.get()) {
                 continue;
             }
-            Optional<Interval> cost = base.value(other);
+            Optional<Interval> cost = base.value(entry.alternative());
             if (cost.isPresent() && mid(cost.get()) < nextCost) {
                 nextCost = mid(cost.get());
-                nextBest = other;
+                nextBest = entry.alternative();
             }
         }
-        if (nextBest == null) {
+        Optional<DecisionTreeLedger.Entry> chosenEntry = ledger.get().entry(chosen.get());
+        Optional<DecisionTreeLedger.Entry> otherEntry = nextBest == null ? Optional.empty() : ledger.get().entry(nextBest);
+        if (chosenEntry.isEmpty() || otherEntry.isEmpty()) {
             return Optional.empty();
         }
-        Optional<double[]> chosenExpected = expected(base, chosen.get());
-        Optional<double[]> otherExpected = expected(base, nextBest);
-        if (chosenExpected.isEmpty() || otherExpected.isEmpty()) {
-            return Optional.empty();
+        List<CountTrade> counts = new ArrayList<>();
+        for (String unit : ledger.get().units()) {
+            counts.add(new CountTrade(unit, chosenEntry.get().count(unit), otherEntry.get().count(unit)));
         }
-        double money = chosenExpected.get()[0] - otherExpected.get()[0];
-        double health = otherExpected.get()[1] - chosenExpected.get()[1];
-        return Optional.of(new DecisionTreeTradeoff(chosen.get(), nextBest, money, health, base.healthPrice()));
-    }
-
-    /**
-     * The expected money and the expected health lost from a node on, along the course the rollback
-     * chose at every decision beneath it, kept apart; empty where a share or a cost is not
-     * determinable, or a decision is open.
-     */
-    static Optional<double[]> expected(DecisionTreeRollback base, Node node) {
-        switch (node.kind) {
-            case DECISION -> {
-                Optional<Node> chosen = base.chosen(node);
-                return chosen.isPresent() ? expected(base, chosen.get()) : Optional.empty();
-            }
-            case CHANCE -> {
-                double money = 0;
-                double health = 0;
-                for (Node event : node.children) {
-                    Optional<Interval> share = base.share(event);
-                    Optional<double[]> ahead = expected(base, event);
-                    if (share.isEmpty() || ahead.isEmpty()) {
-                        return Optional.empty();
-                    }
-                    money += mid(share.get()) * ahead.get()[0];
-                    health += mid(share.get()) * ahead.get()[1];
-                }
-                return Optional.of(new double[] {money, health});
-            }
-            case ALTERNATIVE, EVENT -> {
-                Optional<double[]> own = costs(base, node);
-                Optional<Node> next = node.next();
-                if (own.isEmpty()) {
-                    return Optional.empty();
-                }
-                if (next.isEmpty()) {
-                    return own;
-                }
-                return expected(base, next.get()).map(a -> new double[] {own.get()[0] + a[0], own.get()[1] + a[1]});
-            }
-            default -> {
-                return costs(base, node);
-            }
-        }
-    }
-
-    private static Optional<double[]> costs(DecisionTreeRollback base, Node node) {
-        double money = 0;
-        double health = 0;
-        for (Measure cost : node.costs()) {
-            Optional<Interval> bounds = base.measure(cost);
-            if (bounds.isEmpty()) {
-                return Optional.empty();
-            }
-            if (cost.kind() == MeasureKind.MONEY) {
-                money += mid(bounds.get());
-            } else {
-                health += mid(bounds.get());
-            }
-        }
-        return Optional.of(new double[] {money, health});
+        return Optional.of(new DecisionTreeTradeoff(chosen.get(), nextBest, chosenEntry.get().money() - otherEntry.get().money(),
+                otherEntry.get().health() - chosenEntry.get().health(), base.healthPrice(), List.copyOf(counts)));
     }
 
     private static double mid(Interval interval) {

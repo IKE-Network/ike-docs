@@ -58,7 +58,7 @@ final class DecisionTreeSource {
     enum Kind { DECISION, ALTERNATIVE, CHANCE, EVENT, OUTCOME }
 
     /** The kinds of measure a vertex carries. */
-    enum MeasureKind { PROBABILITY, MONEY, HEALTH, PARAMETER }
+    enum MeasureKind { PROBABILITY, MONEY, HEALTH, COUNT, PARAMETER }
 
     /**
      * The derivation kinds with native implementations, as the IKE starter set names them, known
@@ -249,7 +249,8 @@ final class DecisionTreeSource {
         }
 
         List<Measure> costs() {
-            return measures.stream().filter(m -> m.kind() == MeasureKind.MONEY || m.kind() == MeasureKind.HEALTH).toList();
+            return measures.stream().filter(m -> m.kind() == MeasureKind.MONEY || m.kind() == MeasureKind.HEALTH
+                    || m.kind() == MeasureKind.COUNT).toList();
         }
 
         List<Measure> parameters() {
@@ -379,6 +380,7 @@ final class DecisionTreeSource {
             case "probability", "p" -> MeasureKind.PROBABILITY;
             case "money" -> MeasureKind.MONEY;
             case "health" -> MeasureKind.HEALTH;
+            case "count" -> MeasureKind.COUNT;
             case "parameter" -> MeasureKind.PARAMETER;
             default -> null;
         };
@@ -466,7 +468,7 @@ final class DecisionTreeSource {
             problems.add("line " + line.number() + ": a parameter names its quantity");
         }
         if (unit == null && !share) {
-            problems.add("line " + line.number() + ": a cost names its measure semantic"
+            problems.add("line " + line.number() + (kind == MeasureKind.COUNT ? ": a count names what it counts" : ": a cost names its measure semantic")
                     + (derivationConcept != null ? " after in" : " after its interval"));
         }
         Map<String, String> attributes = attributes(line.rest());
@@ -578,12 +580,11 @@ final class DecisionTreeSource {
                     quoted = true;
                     word.append(c);
                 }
-                case '[', '(' -> {
-                    // a bracket opens a label or an interval; a parenthesis an open-ended one, so [0,5) is one word
+                case '[' -> {
                     depth++;
                     word.append(c);
                 }
-                case ']', ')' -> {
+                case ']' -> {
                     depth = Math.max(0, depth - 1);
                     word.append(c);
                 }
