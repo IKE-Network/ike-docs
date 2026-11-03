@@ -133,6 +133,11 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort), title));
         parseContent(container, legend(rollback, symbol, anyHealth(root)));
         decisionPoint(doc, root).ifPresent(sentence -> parseContent(container, List.of(sentence, "")));
+        List<String> statementProblems = new ArrayList<>();
+        List<String> statements = statements(doc, root, statementProblems);
+        if (!statements.isEmpty()) {
+            parseContent(container, statements);
+        }
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
             DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
                     typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
@@ -145,6 +150,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         source.addAll(table(rollback, symbol));
         List<String> problems = new ArrayList<>(parsed.problems());
         problems.addAll(rollback.findings());
+        problems.addAll(statementProblems);
         if (!problems.isEmpty()) {
             source.add("");
             source.add("NOTE: The tree has gaps: " + String.join("; ", problems) + ".");
@@ -279,6 +285,63 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
                             + " stated above" + (what.isEmpty() ? "" : ", " + DecisionTreeFormat.cell(what))
                             + ". The tree is for those cases, and its numbers are read for them.";
                 });
+    }
+
+    /**
+     * The table of the ANF statements the tree's nodes hold by naming the document's {@code [anf]}
+     * blocks, {@code statement=anf:req-scan}: each node, the statement it holds, and what the
+     * statement says. An alternative holds a request, an event or outcome a performance; a statement
+     * of another type, on a decision or chance, or named by no block before the tree is a problem.
+     */
+    static List<String> statements(Document doc, Node root, List<String> problems) {
+        List<String> rows = new ArrayList<>();
+        collect(doc, root, rows, problems);
+        if (rows.isEmpty()) {
+            return rows;
+        }
+        List<String> source = new ArrayList<>();
+        source.add(".The ANF statements the tree's nodes hold: a request for each course asked for, a performance for each finding");
+        source.add("[cols=\"2,3,6\", options=\"header\", role=\"" + AnfBlockProcessor.ROLE + "\"]");
+        source.add("|===");
+        source.add("| Node | Statement | What it states");
+        source.addAll(rows);
+        source.add("|===");
+        source.add("");
+        return source;
+    }
+
+    private static void collect(Document doc, Node node, List<String> rows, List<String> problems) {
+        for (String reference : node.statements) {
+            if (!reference.startsWith("anf:")) {
+                continue;
+            }
+            String name = reference.substring("anf:".length());
+            String kind = node.kind.name().toLowerCase(java.util.Locale.ROOT);
+            String what = (node.residual ? "residual" : kind) + " \u201C" + node.label() + "\u201D";
+            String expected = switch (node.kind) {
+                case ALTERNATIVE -> "request";
+                case EVENT, OUTCOME -> "performance";
+                default -> null;
+            };
+            if (expected == null) {
+                problems.add("the " + what + " holds anf:" + name + ", but a decision or chance holds no statement");
+                continue;
+            }
+            Optional<AnfBlockProcessor.Statement> statement = AnfBlockProcessor.defined(doc, name);
+            if (statement.isEmpty()) {
+                problems.add("the " + what + " holds anf:" + name + ", which no anf block before the tree names");
+                continue;
+            }
+            if (!statement.get().type().equals(expected)) {
+                problems.add("the " + what + " holds anf:" + name + ", a " + statement.get().type()
+                        + " statement; an alternative holds a request, an event or outcome a performance");
+            }
+            rows.add("| " + DecisionTreeFormat.cell(node.label()) + " (" + (node.residual ? "residual" : kind) + ") | "
+                    + statement.get().type() + " `" + name + "` | " + statement.get().summary());
+        }
+        for (Node child : node.children) {
+            collect(doc, child, rows, problems);
+        }
     }
 
     /** Whether any node of the tree carries a health cost. */

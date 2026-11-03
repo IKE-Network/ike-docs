@@ -61,6 +61,11 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         // the document whose root names it says which decision point it decides. Backend-agnostic.
         asciidoctor.javaExtensionRegistry()
                 .block(ComplexConceptBlockProcessor.class);
+        // The [anf] block: an ANF statement drawn as a small table, its type and name above, one row
+        // per field beneath (dev-anf-adoc-representation). Named, it is remembered so a decision tree
+        // later in the document lists the statements its nodes hold. Backend-agnostic.
+        asciidoctor.javaExtensionRegistry()
+                .block(AnfBlockProcessor.class);
 
         // The [calculator] and [calculate] blocks: the static projection of the calculator profile
         // the assistant surface renders live (dev-calculator-blocks) — the method's inputs as a

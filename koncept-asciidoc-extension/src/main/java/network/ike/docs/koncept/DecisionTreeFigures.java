@@ -73,6 +73,9 @@ final class DecisionTreeFigures {
     static final String CALLOUT = "#eb6834";
 
     /** One piece of a label row; a callout span draws as a badge with its number. */
+    /** The colour of the mark that a node holds ANF statements: the chosen run's blue. */
+    static final String STATEMENT_MARK = "#1f3b73";
+
     record Span(String text, double size, boolean bold, boolean italic, String colour, String role) {
         boolean callout() {
             return "callout".equals(role);
@@ -416,6 +419,7 @@ final class DecisionTreeFigures {
             List<Span> name = new ArrayList<>();
             if (!DecisionTreeGeometry.isBranch(node)) {
                 name.add(new Span(node.label(), size, false, false, DecisionFigureText.INK, "name"));
+                statementMark(node).ifPresent(name::add);
             }
             if (terminal) {
                 top.addAll(name);
@@ -444,6 +448,7 @@ final class DecisionTreeFigures {
             }
             List<Span> above = new ArrayList<>();
             above.add(new Span(branch.label(), size, false, false, DecisionFigureText.INK, "name"));
+            statementMark(branch).ifPresent(above::add);
             if (branch.kind == DecisionTreeSource.Kind.EVENT) {
                 Optional<Measure> probability = branch.probability();
                 if (probability.isPresent()) {
@@ -480,6 +485,12 @@ final class DecisionTreeFigures {
 
         /** A branch's or an outcome's costs: money then health, each in its unit, joined by a plus. */
         /** A line break between stacked lines beneath a run or an outcome. */
+        /** The mark beside a node's name that it holds ANF statements, as the live drawing marks it. */
+        private Optional<Span> statementMark(Node node) {
+            return node.statements.isEmpty() ? Optional.empty()
+                    : Optional.of(new Span("ANF", size * 0.72, true, false, STATEMENT_MARK, "anf-mark"));
+        }
+
         private static final Span BREAK = new Span("", 0, false, false, DecisionFigureText.CAPTION, "break");
 
         /**
