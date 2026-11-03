@@ -132,6 +132,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         boolean typst = isTypst(doc);
         container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort), title));
         parseContent(container, legend(rollback, symbol, anyHealth(root)));
+        decisionPoint(doc, root).ifPresent(sentence -> parseContent(container, List.of(sentence, "")));
         sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
             DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
                     typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
@@ -259,6 +260,25 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
                 + " The figure after \u21D2 is the expected cost still ahead of a patient who reaches that point" + health + ";"
                 + " a branch's own costs are beneath its run, and a percentage is the share who leave a circle by that"
                 + " branch. A number in an orange callout is worked in the table beneath, under the same callout.", "");
+    }
+
+    /**
+     * The sentence that says which decision point the tree decides, when its root decision names a
+     * complex concept a {@code [complex-concept]} block earlier in the document stated: the tree is
+     * for the cases the concept's prerequisites describe, and its numbers are read for those.
+     */
+    static Optional<String> decisionPoint(Document doc, Node root) {
+        Concept concept = root.concept;
+        if (concept == null) {
+            return Optional.empty();
+        }
+        return ComplexConceptBlockProcessor.defined(doc, concept.identifier())
+                .map(spec -> {
+                    String what = ComplexConceptSource.describe(spec);
+                    return "The decision point is the complex concept " + ComplexConceptBlockProcessor.chip(spec.concept())
+                            + " stated above" + (what.isEmpty() ? "" : ", " + DecisionTreeFormat.cell(what))
+                            + ". The tree is for those cases, and its numbers are read for them.";
+                });
     }
 
     /** Whether any node of the tree carries a health cost. */

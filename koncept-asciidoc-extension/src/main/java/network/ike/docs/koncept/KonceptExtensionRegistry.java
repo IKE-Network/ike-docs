@@ -55,6 +55,12 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         // asciidoctor-diagram where the build has it.
         asciidoctor.javaExtensionRegistry()
                 .block(DecisionTreeBlockProcessor.class);
+        // The [complex-concept] block: the static projection of the complex concept editor the
+        // assistant surface draws (dev-decision-point-knowledge) — the concept, its definition and
+        // its expansion, each prerequisite an ANF statement in a table row. A decision tree later in
+        // the document whose root names it says which decision point it decides. Backend-agnostic.
+        asciidoctor.javaExtensionRegistry()
+                .block(ComplexConceptBlockProcessor.class);
 
         // The [calculator] and [calculate] blocks: the static projection of the calculator profile
         // the assistant surface renders live (dev-calculator-blocks) — the method's inputs as a
