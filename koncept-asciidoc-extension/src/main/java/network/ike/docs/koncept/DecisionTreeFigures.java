@@ -73,6 +73,9 @@ final class DecisionTreeFigures {
     static final String CALLOUT = "#eb6834";
 
     /** One piece of a label row; a callout span draws as a badge with its number. */
+    /** The colour of the words that name the tree an outcome folds in: a link's blue. */
+    static final String FOLD_IN = "#1f5fa8";
+
     /** The colour of the mark that a node holds ANF statements: the chosen run's blue. */
     static final String STATEMENT_MARK = "#1f3b73";
 
@@ -99,7 +102,18 @@ final class DecisionTreeFigures {
     /** The tree, counted out for a cohort when one is given: how many go each way beneath every run, and where they end up. */
     static DecisionFigure tree(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep,
                                OptionalDouble cohort) {
-        return new TreeBuilder(root, rollback, symbol, sweep, cohort).build();
+        return tree(root, rollback, symbol, sweep, cohort, node -> !node.statements.isEmpty());
+    }
+
+    /**
+     * The tree, with the nodes that hold ANF statements marked beside their names: those that name
+     * statements, and any the document says more of, a decision whose concept is a complex concept.
+     */
+    static DecisionFigure tree(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep,
+                               OptionalDouble cohort, java.util.function.Predicate<Node> stated) {
+        TreeBuilder builder = new TreeBuilder(root, rollback, symbol, sweep, cohort);
+        builder.stated = stated;
+        return builder.build();
     }
 
     private static final class TreeBuilder {
@@ -122,6 +136,8 @@ final class DecisionTreeFigures {
 
         private final Optional<DecisionTreeCohort> cohort;
         private final Optional<DecisionTreeTradeoff> tradeoff;
+        /** Which nodes hold ANF statements, marked beside their names. */
+        private java.util.function.Predicate<Node> stated = node -> !node.statements.isEmpty();
 
         TreeBuilder(Node root, DecisionTreeRollback rollback, String symbol, Optional<DecisionTreeSweep> sweep,
                     OptionalDouble cohortSize) {
@@ -181,14 +197,15 @@ final class DecisionTreeFigures {
             double y = layout.height() + 2;
             // the ledger: every alternative's consequences in their own units, per cohort when one is counted
             List<List<String>> table = ledgerTable(root, rollback, symbol, healthUnit(), cohort);
-            if (table.size() > 2) {
+            if (table.size() > (root.kind == DecisionTreeSource.Kind.DECISION ? 2 : 1)) {
                 double[] widths = new double[table.get(0).size()];
                 for (List<String> row : table) {
                     for (int i = 0; i < row.size(); i++) {
                         widths[i] = Math.max(widths[i], DecisionFigureText.width(row.get(i), legendSize, true) + 18);
                     }
                 }
-                marks.add(new Text(6, y, ledgerTitle(cohort), legendSize, true, false, DecisionFigureText.INK, "ledger-title"));
+                marks.add(new Text(6, y, ledgerTitle(cohort, root.kind == DecisionTreeSource.Kind.DECISION), legendSize, true, false,
+                        DecisionFigureText.INK, "ledger-title"));
                 y += legendLine;
                 Optional<Node> chosenAlternative = rollback.chosen(root);
                 for (int r = 0; r < table.size(); r++) {
@@ -264,7 +281,7 @@ final class DecisionTreeFigures {
                     }
                     List<Map.Entry<String, Double>> entries = new ArrayList<>(byName.entrySet());
                     entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
-                    lines.add(DecisionFigureText.tally(tally.alternative().label(), tally.count(),
+                    lines.add(DecisionFigureText.tally(tally.alternative().label(), tally.alternative() == root, tally.count(),
                             entries.stream().map(Map.Entry::getKey).toList(), entries.stream().map(Map.Entry::getValue).toList()));
                 }
             });
@@ -278,6 +295,14 @@ final class DecisionTreeFigures {
 
         /** The ledger's title: what one row is counted for. */
         static String ledgerTitle(Optional<DecisionTreeCohort> cohort) {
+            return ledgerTitle(cohort, true);
+        }
+
+        /** The ledger's title, for a tree with a choice at its root or, when not {@code decided}, a tree of consequences. */
+        static String ledgerTitle(Optional<DecisionTreeCohort> cohort, boolean decided) {
+            if (!decided) {
+                return cohort.isPresent() ? "Per " + DecisionFigureText.count(cohort.get().size()) + " who reach it" : "Per case that reaches it";
+            }
             return cohort.isPresent() ? "Per " + DecisionFigureText.count(cohort.get().size()) + " who take each alternative"
                     : "Per case who takes each alternative";
         }
@@ -286,7 +311,9 @@ final class DecisionTreeFigures {
         static List<List<String>> ledgerTable(Node root, DecisionTreeRollback rollback, String symbol, String healthUnit,
                                               Optional<DecisionTreeCohort> cohort) {
             Optional<DecisionTreeLedger> ledger = DecisionTreeLedger.of(root, rollback);
-            if (ledger.isEmpty() || ledger.get().entries().size() < 2) {
+            // a choice needs two rows to weigh; a tree of consequences has one, what everyone who reaches it can expect
+            int least = root.kind == DecisionTreeSource.Kind.DECISION ? 2 : 1;
+            if (ledger.isEmpty() || ledger.get().entries().size() < least) {
                 return List.of();
             }
             double per = cohort.map(DecisionTreeCohort::size).orElse(1.0);
@@ -420,6 +447,7 @@ final class DecisionTreeFigures {
             if (!DecisionTreeGeometry.isBranch(node)) {
                 name.add(new Span(node.label(), size, false, false, DecisionFigureText.INK, "name"));
                 statementMark(node).ifPresent(name::add);
+                foldIn(node).ifPresent(name::add);
             }
             if (terminal) {
                 top.addAll(name);
@@ -487,8 +515,14 @@ final class DecisionTreeFigures {
         /** A line break between stacked lines beneath a run or an outcome. */
         /** The mark beside a node's name that it holds ANF statements, as the live drawing marks it. */
         private Optional<Span> statementMark(Node node) {
-            return node.statements.isEmpty() ? Optional.empty()
+            return !stated.test(node) ? Optional.empty()
                     : Optional.of(new Span("ANF", size * 0.72, true, false, STATEMENT_MARK, "anf-mark"));
+        }
+
+        /** What an outcome folds in, {@code tree=…}, named beside it as the live drawing links it. */
+        private Optional<Span> foldIn(Node node) {
+            return rollback.folded(node).map(inner -> new Span("folds in \u201C" + inner.root().label() + "\u201D \u2197",
+                    size * 0.85, false, true, FOLD_IN, "fold-in"));
         }
 
         private static final Span BREAK = new Span("", 0, false, false, DecisionFigureText.CAPTION, "break");

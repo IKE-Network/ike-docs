@@ -331,15 +331,15 @@ class DecisionTreeBlockRenderingTest {
     }
 
     @Test
-    @DisplayName("A block with no root decision renders as a literal block, and a gap is named")
+    @DisplayName("A block whose root is neither a decision nor a chance renders as a literal block, and a gap is named")
     void declinesAndNames() {
         String literal = convert("""
                 [decision-tree]
                 ----
-                chance: k:X[x] @id=11111111-0000-4000-8000-000000000001
+                outcome: k:X[x] @id=11111111-0000-4000-8000-000000000001
                 ----
                 """);
-        assertTrue(literal.contains("literalblock"), "no root decision renders as literal");
+        assertTrue(literal.contains("literalblock"), "a root that is neither a decision nor a chance renders as literal");
 
         String gaps = convert("""
                 [decision-tree]

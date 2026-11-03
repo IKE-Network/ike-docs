@@ -199,6 +199,11 @@ final class DecisionTreeSweep {
 
     /** Sweeps every stated measure of a tree and the price of a healthy year. */
     static DecisionTreeSweep of(Node root, double price, int steps) {
+        return of(root, price, steps, id -> Optional.empty());
+    }
+
+    /** Sweeps a tree whose outcomes may fold in other trees, which are held at their stated values. */
+    static DecisionTreeSweep of(Node root, double price, int steps, java.util.function.Function<String, Optional<Node>> linked) {
         if (steps < 2) {
             throw new IllegalArgumentException("a sweep takes two or more steps, not " + steps);
         }
@@ -211,7 +216,7 @@ final class DecisionTreeSweep {
                 baseBounds.put(measure, Interval.point((measure.bounds().lower() + measure.bounds().upper()) / 2));
             }
         }
-        DecisionTreeRollback base = DecisionTreeRollback.of(root, price, baseBounds);
+        DecisionTreeRollback base = DecisionTreeRollback.of(root, price, baseBounds, linked);
         List<Swing> swings = new ArrayList<>();
         List<Unswept> unswept = new ArrayList<>();
         List<Node> decisions = new ArrayList<>();
@@ -231,7 +236,7 @@ final class DecisionTreeSweep {
                 Optional<Swing> swing = sweep(measure, range.get(), statedRange, midpoint, value -> {
                     Map<Measure, Interval> moved = new IdentityHashMap<>(baseBounds);
                     moved.put(measure, Interval.point(value));
-                    return DecisionTreeRollback.of(root, price, moved);
+                    return DecisionTreeRollback.of(root, price, moved, linked);
                 }, steps, root, baseChosen, decisions);
                 if (swing.isPresent()) {
                     swings.add(swing.get());
@@ -241,7 +246,7 @@ final class DecisionTreeSweep {
             }
             if (price > 0) {
                 sweep(HEALTH_PRICE, new Interval(price / 2, price * 2, false, false), false, price,
-                        other -> DecisionTreeRollback.of(root, other, baseBounds), steps, root, baseChosen, decisions).ifPresent(swings::add);
+                        other -> DecisionTreeRollback.of(root, other, baseBounds, linked), steps, root, baseChosen, decisions).ifPresent(swings::add);
             }
         }
         // longest first on the axis a tornado draws: the net value where every swing carries one, else the cost

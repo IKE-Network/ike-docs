@@ -50,9 +50,24 @@ final class DecisionTreeCohort {
     private final double size;
     private final Map<Node, Double> counts = new IdentityHashMap<>();
     private final List<Tally> tallies = new ArrayList<>();
+    /** By outcome: the count of the tree it folds in, for those who reach the outcome. */
+    private final Map<Node, DecisionTreeCohort> folded = new IdentityHashMap<>();
 
     private DecisionTreeCohort(Node root, DecisionTreeRollback rollback, double size) {
         this.size = size;
+        if (root.kind == Kind.CHANCE) {
+            // a tree of consequences: one tally, of everyone who enters it
+            walk(root, rollback, size);
+            Map<Object, Leaf> leaves = new LinkedHashMap<>();
+            for (Node event : root.children) {
+                if (event.kind == Kind.EVENT) {
+                    gather(event, rollback, leaves);
+                }
+            }
+            List<Leaf> sorted = new ArrayList<>(leaves.values());
+            sorted.sort(Comparator.comparingDouble(Leaf::count).reversed());
+            tallies.add(new Tally(root, size, List.copyOf(sorted)));
+        }
         if (root.kind == Kind.DECISION) {
             walk(root, rollback, size);
             for (Node alternative : root.children) {
@@ -103,7 +118,8 @@ final class DecisionTreeCohort {
                 }
             }
             case ALTERNATIVE, EVENT -> node.next().ifPresent(next -> walk(next, rollback, count));
-            case OUTCOME -> { }
+            case OUTCOME -> rollback.folded(node).ifPresent(inner ->
+                    folded.put(node, new DecisionTreeCohort(inner.root(), inner, count)));
         }
     }
 
@@ -119,7 +135,19 @@ final class DecisionTreeCohort {
         }
         Node node = next.get();
         switch (node.kind) {
-            case OUTCOME -> leaf(node, here.getAsDouble(), leaves);
+            case OUTCOME -> {
+                // an outcome that folds in a tree ends where that tree's leaves do
+                DecisionTreeCohort inner = folded.get(node);
+                if (inner == null) {
+                    leaf(node, here.getAsDouble(), leaves);
+                } else {
+                    for (Tally tally : inner.tallies()) {
+                        for (Leaf leaf : tally.leaves()) {
+                            leaf(leaf.node(), leaf.count(), leaves);
+                        }
+                    }
+                }
+            }
             case CHANCE -> {
                 for (Node event : node.children) {
                     gather(event, rollback, leaves);

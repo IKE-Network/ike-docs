@@ -308,11 +308,12 @@ final class DecisionTreeSource {
             return new Parsed(null, problems);
         }
         Line root = roots.get(0);
-        if (!root.vertex() || !"decision".equals(root.word())) {
-            problems.add("line " + root.number() + ": the root is not a decision");
+        if (!root.vertex() || !("decision".equals(root.word()) || "chance".equals(root.word()))) {
+            problems.add("line " + root.number() + ": the root is not a decision or a chance");
             return new Parsed(null, problems);
         }
-        Node tree = vertex(root, Kind.DECISION, false, problems);
+        // a root chance is a tree of consequences with no choice in it, which other trees fold in
+        Node tree = vertex(root, "chance".equals(root.word()) ? Kind.CHANCE : Kind.DECISION, false, problems);
         return new Parsed(tree, problems);
     }
 

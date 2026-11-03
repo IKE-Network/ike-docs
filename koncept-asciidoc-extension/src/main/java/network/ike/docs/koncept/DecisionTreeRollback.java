@@ -24,12 +24,16 @@ import network.ike.docs.koncept.DecisionTreeSource.MeasureKind;
 import network.ike.docs.koncept.DecisionTreeSource.Node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * The rollback of a decision tree read from source, for the documentation build: the same fold
@@ -66,8 +70,35 @@ final class DecisionTreeRollback {
     /** Whether the tree prices nothing: no money and no health anywhere, only counts, so no decision can be made on cost. */
     private boolean unpriced;
 
+    /** The finding on an outcome whose {@code tree=} names no tree drawn before it in the document. */
+    static final String FOLDS_IN_NOTHING = "folds in a tree that no block before it in the document draws";
+
+    /** The trees an outcome may fold in, {@code tree=…}, by their roots' identifiers. */
+    private Function<String, Optional<Node>> linked = id -> Optional.empty();
+    /** The roots of the trees being rolled back on the way here, so a tree that folds itself in is refused. */
+    private Set<String> folding = Set.of();
+    /** By outcome: the rollback of the tree it folds in. */
+    private final Map<Node, DecisionTreeRollback> folded = new IdentityHashMap<>();
+    /** The root this rollback started from. */
+    private Node root;
+
     private DecisionTreeRollback(double healthPrice) {
         this.healthPrice = healthPrice;
+    }
+
+    /** The root this rollback started from. */
+    Node root() {
+        return root;
+    }
+
+    /** The rollback of the tree an outcome folds in, when it folds one in and that tree was drawn. */
+    Optional<DecisionTreeRollback> folded(Node outcome) {
+        return Optional.ofNullable(folded.get(outcome));
+    }
+
+    /** Every outcome that folds in a tree, with that tree's rollback, in the order they were met. */
+    Map<Node, DecisionTreeRollback> foldedAll() {
+        return Collections.unmodifiableMap(folded);
     }
 
     /** Whether the tree prices nothing, so every decision is left open and the ledger alone weighs the alternatives. */
@@ -98,7 +129,29 @@ final class DecisionTreeRollback {
      * measure as the block states it: one step of a one-way sweep.
      */
     static DecisionTreeRollback of(Node root, double healthPrice, Map<Measure, Interval> overrides) {
+        return of(root, healthPrice, overrides, id -> Optional.empty());
+    }
+
+    /**
+     * Rolls the tree back, folding in at an outcome that names one, {@code tree=…}, the tree whose
+     * root carries that identifier: its expected cost from its root, at the same price, added to the
+     * outcome's own costs. A tree that folds itself in, on any path, is refused.
+     */
+    static DecisionTreeRollback of(Node root, double healthPrice, Map<Measure, Interval> overrides,
+                                   Function<String, Optional<Node>> linked) {
+        return of(root, healthPrice, overrides, linked, Set.of());
+    }
+
+    private static DecisionTreeRollback of(Node root, double healthPrice, Map<Measure, Interval> overrides,
+                                           Function<String, Optional<Node>> linked, Set<String> folding) {
         DecisionTreeRollback rollback = new DecisionTreeRollback(healthPrice);
+        rollback.root = root;
+        rollback.linked = linked;
+        Set<String> here = new HashSet<>(folding);
+        if (root.concept != null && root.concept.identifier() != null) {
+            here.add(root.concept.identifier());
+        }
+        rollback.folding = Set.copyOf(here);
         rollback.unpriced = !priced(root);
         rollback.overrides.putAll(overrides);
         for (Measure parameter : root.parameters()) {
@@ -285,9 +338,30 @@ final class DecisionTreeRollback {
 
     private Optional<Interval> leaf(Node outcome) {
         Optional<Interval> cost = costs(outcome);
-        cost.ifPresent(c -> step(outcome, "‡", DecisionTreeFormat.label(outcome),
-                costFormula(outcome), c));
-        return cost;
+        if (cost.isEmpty() || outcome.treeReference == null) {
+            cost.ifPresent(c -> step(outcome, "‡", DecisionTreeFormat.label(outcome),
+                    costFormula(outcome), c));
+            return cost;
+        }
+        String reference = outcome.treeReference;
+        if (folding.contains(reference)) {
+            return notDeterminable(outcome, "folds in a tree that folds this one in");
+        }
+        Optional<Node> other = linked.apply(reference);
+        if (other.isEmpty()) {
+            return notDeterminable(outcome, FOLDS_IN_NOTHING);
+        }
+        DecisionTreeRollback inner = of(other.get(), healthPrice, Map.of(), linked, folding);
+        folded.put(outcome, inner);
+        Optional<Interval> ahead = inner.value(other.get());
+        if (ahead.isEmpty()) {
+            return notDeterminable(outcome, "the tree it folds in is not determinable");
+        }
+        Interval total = cost.get().plus(ahead.get());
+        String own = outcome.costs().isEmpty() ? "" : costFormula(outcome) + " + ";
+        step(outcome, "‡", DecisionTreeFormat.label(outcome), own + DecisionTreeFormat.plain(ahead.get())
+                + " expected from \u201C" + other.get().label() + "\u201D, folded in", total);
+        return Optional.of(total);
     }
 
     private Optional<Interval> follow(Node branch) {

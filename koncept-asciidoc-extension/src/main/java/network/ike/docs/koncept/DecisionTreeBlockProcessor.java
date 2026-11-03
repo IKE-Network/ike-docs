@@ -39,6 +39,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -122,16 +123,28 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         // a share a calculate block earlier in the document computed becomes a parameter the tree
         // states no line for (dev-calculator-blocks); the text never carries the number
         DocumentCalculations.of(parent.getDocument()).inject(root);
-        DecisionTreeRollback rollback = DecisionTreeRollback.of(root, price);
+        Document doc = parent.getDocument();
+        // known to the document by its root, so a tree after it may fold it in at an outcome, tree=…
+        String treeId = root.concept == null ? null : root.concept.identifier();
+        DocumentTrees trees = DocumentTrees.of(doc);
+        DecisionTreeRollback rollback = DecisionTreeRollback.of(root, price, Map.of(), trees::tree);
         Optional<DecisionTreeSweep> sweep = rollback.value(root).isPresent()
-                ? Optional.of(DecisionTreeSweep.of(root, price, DecisionTreeSweep.DEFAULT_STEPS))
+                ? Optional.of(DecisionTreeSweep.of(root, price, DecisionTreeSweep.DEFAULT_STEPS, trees::tree))
                 : Optional.empty();
 
         StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
-        Document doc = parent.getDocument();
+        if (treeId != null) {
+            container.setId(DocumentTrees.anchor(treeId));
+        }
+        trees.define(treeId, root, container);
         boolean typst = isTypst(doc);
-        container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort), title));
+        container.append(figure(container, doc, DecisionTreeFigures.tree(root, rollback, symbol, sweep, cohort,
+                node -> !node.statements.isEmpty() || situation(doc, node).isPresent()), title));
         parseContent(container, legend(rollback, symbol, anyHealth(root)));
+        List<String> foldIns = foldIns(this, rollback, trees, treeId);
+        if (!foldIns.isEmpty()) {
+            parseContent(container, foldIns);
+        }
         decisionPoint(doc, root).ifPresent(sentence -> parseContent(container, List.of(sentence, "")));
         List<String> statementProblems = new ArrayList<>();
         List<String> statements = statements(doc, root, statementProblems);
@@ -300,7 +313,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             return rows;
         }
         List<String> source = new ArrayList<>();
-        source.add(".The ANF statements the tree's nodes hold: a request for each course asked for, a performance for each finding");
+        source.add(".The ANF statements the tree's nodes hold: the situation the decision is made in, a request for each course asked for, the situation each event reveals and each outcome ends in");
         source.add("[cols=\"2,3,6\", options=\"header\", role=\"" + AnfBlockProcessor.ROLE + "\"]");
         source.add("|===");
         source.add("| Node | Statement | What it states");
@@ -310,7 +323,18 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         return source;
     }
 
+    /** The complex concept that states the situation a decision is made in, when the decision's concept is one. */
+    static Optional<ComplexConceptSource.Spec> situation(Document doc, Node node) {
+        if (node.kind != DecisionTreeSource.Kind.DECISION || node.concept == null) {
+            return Optional.empty();
+        }
+        return ComplexConceptBlockProcessor.defined(doc, node.concept.identifier());
+    }
+
     private static void collect(Document doc, Node node, List<String> rows, List<String> problems) {
+        situation(doc, node).ifPresent(spec -> rows.add("| " + DecisionTreeFormat.cell(node.label()) + " (decision) | situation, "
+                + "the prerequisites of " + ComplexConceptBlockProcessor.chip(spec.concept()) + " | "
+                + DecisionTreeFormat.cell(ComplexConceptSource.describe(spec))));
         for (String reference : node.statements) {
             if (!reference.startsWith("anf:")) {
                 continue;
@@ -320,11 +344,11 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             String what = (node.residual ? "residual" : kind) + " \u201C" + node.label() + "\u201D";
             String expected = switch (node.kind) {
                 case ALTERNATIVE -> "request";
-                case EVENT, OUTCOME -> "performance";
+                case DECISION, EVENT, OUTCOME -> "performance";
                 default -> null;
             };
             if (expected == null) {
-                problems.add("the " + what + " holds anf:" + name + ", but a decision or chance holds no statement");
+                problems.add("the " + what + " holds anf:" + name + ", but a chance holds no statement; the events beneath it do");
                 continue;
             }
             Optional<AnfBlockProcessor.Statement> statement = AnfBlockProcessor.defined(doc, name);
@@ -334,7 +358,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
             }
             if (!statement.get().type().equals(expected)) {
                 problems.add("the " + what + " holds anf:" + name + ", a " + statement.get().type()
-                        + " statement; an alternative holds a request, an event or outcome a performance");
+                        + " statement; an alternative holds a request, a decision, an event or an outcome a performance");
             }
             rows.add("| " + DecisionTreeFormat.cell(node.label()) + " (" + (node.residual ? "residual" : kind) + ") | "
                     + statement.get().type() + " `" + name + "` | " + statement.get().summary());
@@ -342,6 +366,43 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         for (Node child : node.children) {
             collect(doc, child, rows, problems);
         }
+    }
+
+    /**
+     * The sentences that link the outcomes folding in another tree to it, one per tree folded in,
+     * and the note on that tree that this one folds it in, which the tree processor turns into a
+     * link back once the whole document is read.
+     */
+    static List<String> foldIns(BlockProcessor processor, DecisionTreeRollback rollback, DocumentTrees trees, String treeId) {
+        Map<Node, List<Node>> byTree = new LinkedHashMap<>();
+        rollback.foldedAll().forEach((outcome, inner) -> byTree.computeIfAbsent(inner.root(), r -> new ArrayList<>()).add(outcome));
+        List<String> source = new ArrayList<>();
+        byTree.forEach((folded, outcomes) -> {
+            String foldedId = folded.concept == null ? null : folded.concept.identifier();
+            List<String> names = new ArrayList<>();
+            for (Node outcome : outcomes) {
+                String name = "\u201C" + DecisionTreeFormat.cell(outcome.label()) + "\u201D";
+                if (!names.contains(name)) {
+                    names.add(name);
+                }
+            }
+            String link = foldedId == null ? "\u201C" + folded.label() + "\u201D"
+                    : "<<" + DocumentTrees.anchor(foldedId) + "," + DecisionTreeFormat.cell(folded.label()) + ">>";
+            String which = outcomes.size() == 1 ? "The outcome " + names.get(0) + " folds"
+                    : names.size() == 1 ? "Each outcome " + names.get(0) + ", " + outcomes.size() + " in all, folds"
+                    : "The outcomes " + String.join(" and ", names) + ", " + outcomes.size() + " in all, each fold";
+            source.add(which + " in " + link + ": its expected cost from its root is added there, and its counts"
+                    + " and endpoints join the ledger and the tally.");
+            source.add("");
+            // the folded tree is drawn already: the link back is appended to its block
+            if (trees.foldedBy(foldedId, treeId) && treeId != null) {
+                String name = trees.tree(treeId).map(Node::label).orElse(treeId);
+                trees.block(foldedId).ifPresent(block -> processor.parseContent(block, List.of("",
+                        "Folded in by <<" + DocumentTrees.anchor(treeId) + "," + DecisionTreeFormat.cell(name)
+                                + ">>, at the outcomes that end in it.")));
+            }
+        });
+        return source;
     }
 
     /** Whether any node of the tree carries a health cost. */

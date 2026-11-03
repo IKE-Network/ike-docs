@@ -56,12 +56,19 @@ final class DecisionTreeLedger {
     }
 
     static Optional<DecisionTreeLedger> of(Node root, DecisionTreeRollback rollback) {
-        if (root == null || root.kind != Kind.DECISION) {
+        if (root == null || (root.kind != Kind.DECISION && root.kind != Kind.CHANCE)) {
             return Optional.empty();
         }
         List<String> units = new ArrayList<>();
         collectUnits(root, units);
+        for (DecisionTreeRollback inner : rollback.foldedAll().values()) {
+            collectUnits(inner.root(), units);
+        }
         List<Entry> entries = new ArrayList<>();
+        if (root.kind == Kind.CHANCE) {
+            // a tree of consequences: one row, what everyone who enters it can expect
+            expected(rollback, root).ifPresent(entries::add);
+        }
         for (Node alternative : root.children) {
             if (alternative.kind == Kind.ALTERNATIVE) {
                 expected(rollback, alternative).ifPresent(entries::add);
@@ -130,7 +137,13 @@ final class DecisionTreeLedger {
                 return expected(base, next.get()).map(a -> plus(own.get(), a, 1));
             }
             default -> {
-                return costs(base, node);
+                Optional<Entry> own = costs(base, node);
+                Optional<DecisionTreeRollback> inner = base.folded(node);
+                if (own.isEmpty() || inner.isEmpty()) {
+                    return own;
+                }
+                // what the tree it folds in holds for everyone who enters it
+                return expected(inner.get(), inner.get().root()).map(a -> plus(own.get(), a, 1));
             }
         }
     }
