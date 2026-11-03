@@ -659,6 +659,11 @@ final class DecisionTreeFigures {
         String chosen = baseChosen == null ? null : baseChosen.label();
         Map<Measure, Node> owners = new IdentityHashMap<>();
         DecisionTreeSweep.collect(root, new ArrayList<>(), owners);
+        for (Node folded : sweep.foldedRoots()) {
+            DecisionTreeSweep.collect(folded, new ArrayList<>(), owners);
+        }
+        java.util.function.Function<Object, String> name = key -> nameOf(key, owners)
+                + (key instanceof Measure m ? sweep.foldedIn(m).map(r -> " in \u201C" + r.label() + "\u201D").orElse("") : "");
         List<Bar> bars = new ArrayList<>();
         for (Swing swing : sweep.swings()) {
             if ((net ? swing.netWidth() : swing.width()) <= 0) {
@@ -682,7 +687,7 @@ final class DecisionTreeFigures {
             for (Flip flip : swing.flips()) {
                 ticks.add(new Tick(at(sweep, swing, flip.at(), net), flip.decision() == root, quantity.print(flip.at())));
             }
-            bars.add(new Bar(nameOf(swing.key(), owners), quantity.print(swing.range().lower()),
+            bars.add(new Bar(name.apply(swing.key()), quantity.print(swing.range().lower()),
                     quantity.print(swing.range().upper()), swing.stated(),
                     net ? swing.netAtLow() : swing.rootAtLow(), net ? swing.netAtHigh() : swing.rootAtHigh(),
                     net ? swing.leastNet() : swing.least(), net ? swing.greatestNet() : swing.greatest(), segments, ticks));
@@ -693,7 +698,7 @@ final class DecisionTreeFigures {
             notes.add(still == 1 ? "One value does not move the answer." : still + " values do not move the answer.");
         }
         for (Unswept unswept : sweep.unswept()) {
-            notes.add("Not swept: " + nameOf(unswept.key(), owners) + ", " + unswept.why() + ".");
+            notes.add("Not swept: " + name.apply(unswept.key()) + ", " + unswept.why() + ".");
         }
         String unit = symbol == null || symbol.isBlank() ? "" : ", in " + symbol;
         String title = net

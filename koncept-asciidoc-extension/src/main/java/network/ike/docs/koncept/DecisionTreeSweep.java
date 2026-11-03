@@ -187,6 +187,24 @@ final class DecisionTreeSweep {
     private final double baseNet;
     private final List<Swing> swings;
     private final List<Unswept> unswept;
+    /** By identity: the root of the folded tree each swept value of a folded tree belongs to. */
+    private final Map<Measure, Node> foldedIn = new IdentityHashMap<>();
+
+    /** The root of the tree folded in that a swept measure belongs to, when it belongs to one. */
+    Optional<Node> foldedIn(Measure measure) {
+        return Optional.ofNullable(foldedIn.get(measure));
+    }
+
+    /** The roots of the trees folded in whose values were swept, in the order they were met. */
+    List<Node> foldedRoots() {
+        List<Node> roots = new ArrayList<>();
+        for (Node folded : foldedIn.values()) {
+            if (roots.stream().noneMatch(r -> r == folded)) {
+                roots.add(folded);
+            }
+        }
+        return roots;
+    }
 
     private DecisionTreeSweep(Node root, DecisionTreeRollback base, List<Swing> swings, List<Unswept> unswept) {
         this.root = root;
@@ -216,6 +234,25 @@ final class DecisionTreeSweep {
                 baseBounds.put(measure, Interval.point((measure.bounds().lower() + measure.bounds().upper()) / 2));
             }
         }
+        // the trees folded in: their stated values are swept too, each moved by identity and the whole tree rolled back
+        Map<Measure, Node> foldedIn = new IdentityHashMap<>();
+        Map<Node, Node> innerRoots = new IdentityHashMap<>();
+        for (DecisionTreeRollback inner : DecisionTreeRollback.of(root, price, baseBounds, linked).foldedAll().values()) {
+            Node innerRoot = inner.root();
+            if (innerRoots.containsKey(innerRoot)) {
+                continue;
+            }
+            innerRoots.put(innerRoot, innerRoot);
+            List<Measure> innerStated = new ArrayList<>();
+            collect(innerRoot, innerStated, owners);
+            for (Measure measure : innerStated) {
+                foldedIn.put(measure, innerRoot);
+                stated.add(measure);
+                if (!measure.bounds().isPoint()) {
+                    baseBounds.put(measure, Interval.point((measure.bounds().lower() + measure.bounds().upper()) / 2));
+                }
+            }
+        }
         DecisionTreeRollback base = DecisionTreeRollback.of(root, price, baseBounds, linked);
         List<Swing> swings = new ArrayList<>();
         List<Unswept> unswept = new ArrayList<>();
@@ -224,7 +261,10 @@ final class DecisionTreeSweep {
         Node baseChosen = base.chosen(root).orElse(null);
         if (base.value(root).isPresent()) {
             for (Measure measure : stated) {
-                Optional<Interval> range = range(root, base, measure, owners.get(measure));
+                Node treeOf = foldedIn.getOrDefault(measure, root);
+                DecisionTreeRollback baseOf = treeOf == root ? base : base.foldedAll().values().stream()
+                        .filter(r -> r.root() == treeOf).findFirst().orElse(base);
+                Optional<Interval> range = range(treeOf, baseOf, measure, owners.get(measure));
                 if (range.isEmpty()) {
                     unswept.add(new Unswept(measure, measure.kind() == MeasureKind.PROBABILITY
                             ? "its chance has no residual event to take up what it gives or takes"
@@ -252,7 +292,9 @@ final class DecisionTreeSweep {
         // longest first on the axis a tornado draws: the net value where every swing carries one, else the cost
         boolean net = swings.stream().allMatch(Swing::hasNet);
         swings.sort(Comparator.comparingDouble(net ? Swing::netWidth : Swing::width).reversed());
-        return new DecisionTreeSweep(root, base, swings, unswept);
+        DecisionTreeSweep sweep = new DecisionTreeSweep(root, base, swings, unswept);
+        sweep.foldedIn.putAll(foldedIn);
+        return sweep;
     }
 
     /** Every stated measure of the tree, in reading order, and the node each sits under. */

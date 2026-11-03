@@ -92,6 +92,9 @@ class FoldInRenderingTest {
         assertTrue(html.contains("14,750"), "the folded tree's expected cost reaches the outcome");
         assertTrue(html.contains(">deaths<"), "the folded tree's counted unit is a ledger column");
         assertTrue(html.contains("35 death"), "of 1,000 who wait, 35 die");
+        // a long name is cut to the tornado's label column, so the start of it is what shows
+        assertTrue(html.contains("Case fatality of a rupture in \u201CConsequences"),
+                "the folding tree's tornado swings the folded tree's values too");
     }
 
     @Test

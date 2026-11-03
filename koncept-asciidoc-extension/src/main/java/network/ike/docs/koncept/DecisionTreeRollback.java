@@ -351,7 +351,8 @@ final class DecisionTreeRollback {
         if (other.isEmpty()) {
             return notDeterminable(outcome, FOLDS_IN_NOTHING);
         }
-        DecisionTreeRollback inner = of(other.get(), healthPrice, Map.of(), linked, folding);
+        // a value of the folded tree a sweep moves is moved there too: the overrides go by identity
+        DecisionTreeRollback inner = of(other.get(), healthPrice, overrides, linked, folding);
         folded.put(outcome, inner);
         Optional<Interval> ahead = inner.value(other.get());
         if (ahead.isEmpty()) {
