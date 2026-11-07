@@ -6,7 +6,7 @@ canonical_url: https://github.com/IKE-Network/ike-docs/licenses.html
 
 # Licenses (SPDX)
 
-Licenses for declared dependencies of `ike-doc-maven-plugin` 138, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
+Licenses for declared dependencies of `ike-doc-maven-plugin` 139, grouped by SPDX expression. Rendered from `[bom.json](bom.json)[1]` (CycloneDX) at `pre-site` phase by `ike:render-spdx-licenses` (ike-issues#335).
 
 ## [#summary](#summary)Summary
 
@@ -45,10 +45,10 @@ Reference: [Apache-2.0 on spdx.org](https://spdx.org/licenses/Apache-2.0.html)[2
 | `joda-time` | `joda-time` | `2.14.0` |
 | `me.qmx.jitescript` | `jitescript` | `0.4.1` |
 | `network.ike` | `ike-base-parent` | `15` |
-| `network.ike.docs` | `ike-doc-resources` | `138` |
-| `network.ike.docs` | `koncept-asciidoc-extension` | `138` |
-| `network.ike.docs` | `koncept-core` | `138` |
-| `network.ike.docs` | `typst-asciidoc-converter` | `138` |
+| `network.ike.docs` | `ike-doc-resources` | `139` |
+| `network.ike.docs` | `koncept-asciidoc-extension` | `139` |
+| `network.ike.docs` | `koncept-core` | `139` |
+| `network.ike.docs` | `typst-asciidoc-converter` | `139` |
 | `network.ike.tooling` | `ike-build-standards` | `278` |
 | `network.ike.tooling` | `ike-build-standards` | `278` |
 | `network.ike.tooling` | `ike-build-standards` | `278` |

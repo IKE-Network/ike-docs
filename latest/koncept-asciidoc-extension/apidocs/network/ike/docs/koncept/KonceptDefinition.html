@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 138</div>
+<div class="about-language"><b>Koncept Extension</b> 139</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -127,10 +127,12 @@ loadScripts(document, 'script');</script>
                        the glossary renders them as parent chips and inverts them across
                        the source to render each koncept's children</dd>
 <dd><code><span id="param-status">status</span></code> - Optional logical-definition status from the stated EL++ expression
-                       (<code>defined</code>, <code>primitive</code>, <code>root</code>); <code>null</code> or
-                       absent means no stated definition — the badge stays bare
-                       (ike-issues#742 design amendment, #940). Multi-parent is not a
-                       status: it is derived from <code>broader</code>'s size</dd>
+                       (<code>defined</code>, <code>primitive</code>, <code>root</code>, <code>undefined</code>).
+                       Absent with no <code>axiom</code>, the concept has no stated definition
+                       and the badge leads with <code>C</code>; absent beside an <code>axiom</code>,
+                       the concept is defined but its status was never recorded, and the
+                       badge carries no mark (ike-issues#742 design amendment, #940).
+                       Multi-parent is not a status: it is derived from <code>broader</code>'s size</dd>
 <dd><code><span id="param-state">state</span></code> - Optional lifecycle state of the koncept's latest version;
                        <code>inactive</code> renders the retired treatment — struck-through
                        label in the retired colour (#742 retired parity, #864). Absent
@@ -334,8 +336,7 @@ the badge renders as the appended <a href="https://github.com/IKE-Network/ike-do
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptStatus</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#konceptStatus()" class="member-name-link">konceptStatus</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">The logical-definition status as the typed vocabulary — <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#NONE" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptStatus.NONE</code></a>
-when <a href="#status()"><code>status()</code></a> is absent or unrecognised.</div>
+<div class="block">The logical-definition status as the typed vocabulary.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#label()" class="member-name-link">label</a>()</code></div>
@@ -498,8 +499,11 @@ in order.</div>
 <h3>konceptStatus</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html" title="class or interface in network.ike.docs.konceptcore" class="external-link">KonceptStatus</a></span>&nbsp;<span class="element-name">konceptStatus</span>()</div>
-<div class="block">The logical-definition status as the typed vocabulary — <a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#NONE" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptStatus.NONE</code></a>
-when <a href="#status()"><code>status()</code></a> is absent or unrecognised.</div>
+<div class="block">The logical-definition status as the typed vocabulary. With no <a href="#status()"><code>status()</code></a>, the
+<a href="#axiom()"><code>axiom()</code></a> decides: a koncept with neither has no stated definition
+(<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#UNDEFINED" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptStatus.UNDEFINED</code></a>), while one with an axiom is defined in a way the entry
+never classified, and a <code>C</code> would misreport it (<a href="https://github.com/IKE-Network/ike-docs/apidocs/network.ike.docs.konceptcore/network/ike/docs/konceptcore/KonceptStatus.html#NONE" title="class or interface in network.ike.docs.konceptcore" class="external-link"><code>KonceptStatus.NONE</code></a>, as for
+an unrecognised status name).</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the resolved status, never <code>null</code></dd>
