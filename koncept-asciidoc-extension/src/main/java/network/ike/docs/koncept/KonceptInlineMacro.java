@@ -170,7 +170,7 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
                                        KonceptStatus status, boolean multiParent, boolean inactive) {
         String dataUri = IdenticonRenderer.dataUri(idString);
         // One leading mark (ike-issues#742 amendment): a letter kind prepends its coloured sigil;
-        // a Koncept prepends its logical-status copula cluster (or stays truly bare). Self-contained
+        // a Koncept prepends its logical-status cluster, when it has one. Self-contained
         // inline styles from the shared KonceptAppearance spec (#864) — no dependency on
         // koncept.css, which consuming documents may not link and which only mirrors the spec.
         String sigil = markHtml(kind, status, multiParent);
@@ -328,9 +328,8 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     /**
      * The single leading mark a badge carries (ike-issues#742 amendment): the coloured kind
      * sigil for a letter kind, the logical-status copula cluster for a Koncept, nothing
-     * otherwise (a stamp's pentagon is drawn by the stamp paths; a Koncept with no stated
-     * definition stays truly bare). Kind sigils and status glyphs never co-occur, so the
-     * leading slot always holds at most one mark class.
+     * otherwise (a stamp's pentagon is drawn by the stamp paths). Kind sigils and status glyphs
+     * never co-occur, so the leading slot always holds at most one mark class.
      *
      * @param kind        the component kind
      * @param status      the Koncept's logical-definition status
@@ -362,10 +361,11 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
     }
 
     /**
-     * The logical-status copula cluster span a Koncept badge leads with (ike-issues#742
-     * amendment): the copula glyph in its status colour, with the appended multi-parent
-     * fork in its own colour, and the accessible names as the hover title — always visible,
-     * never hover-dependent (the title only <em>explains</em> the visible mark).
+     * The logical-status cluster span a Koncept badge leads with (ike-issues#742 amendment):
+     * the glyph in its status colour, with the appended multi-parent fork in its own colour,
+     * and the accessible names as the hover title — always visible, never hover-dependent (the
+     * title only <em>explains</em> the visible mark). A letter ({@code C}, no stated definition)
+     * is set bold as a kind sigil is, and takes no fork.
      *
      * @param status      the logical-definition status
      * @param multiParent whether the concept has more than one stated parent
@@ -375,17 +375,19 @@ public class KonceptInlineMacro extends InlineMacroProcessor {
         if (!status.hasGlyph()) {
             return "";
         }
-        String title = multiParent
+        boolean forked = multiParent && !status.isLetter();
+        String title = forked
                 ? status.accessibleName() + " · " + KonceptStatus.MULTI_PARENT_ACCESSIBLE_NAME
                 : status.accessibleName();
-        String fork = multiParent
+        String fork = forked
                 ? "<span class=\"koncept-status-multiparent\" style=\"color:%s;\">%s</span>"
                         .formatted(KonceptStatus.MULTI_PARENT_COLOR_HEX,
                                 KonceptStatus.MULTI_PARENT_GLYPH)
                 : "";
         return "<span class=\"koncept-status koncept-status-%s\" title=\"%s\" "
                 .formatted(status.name().toLowerCase(java.util.Locale.ROOT), escapeXmlStatic(title))
-                + "style=\"font-size:0.85em;margin-right:0.25em;white-space:nowrap;\">"
+                + "style=\"font-size:0.85em;margin-right:0.25em;white-space:nowrap;%s\">"
+                .formatted(status.isLetter() ? "font-weight:bold;" : "")
                 + "<span style=\"color:%s;\">%s</span>".formatted(status.colorHex(), status.glyph())
                 + fork + "</span>";
     }

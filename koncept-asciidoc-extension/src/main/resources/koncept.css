@@ -74,7 +74,8 @@ a.koncept-identicon-ref .koncept-label {
 
 /* Koncept logical-status cluster (ike-issues#742 amendment): the leading copula from the
    concept's own stated EL++ expression — ≡ sufficiently defined, ⊑ primitive, ⊤ root — with
-   the ⋎ fork appended for a multi-parent concept. Colours are set inline from KonceptStatus
+   the ⋎ fork appended for a multi-parent concept. A concept with no stated definition has no
+   copula, so it leads with a bold C instead. Colours are set inline from KonceptStatus
    (data, for cross-medium parity); these rules mirror the emitted styles for consistency
    when koncept.css IS linked. Kind sigils and status glyphs never co-occur. */
 .koncept-status {
@@ -85,6 +86,7 @@ a.koncept-identicon-ref .koncept-label {
 .koncept-status-defined     { color: #3b8c2f; }
 .koncept-status-primitive   { color: #6b7682; }
 .koncept-status-root        { color: #8a6d00; }
+.koncept-status-undefined   { color: #2a5a8a; font-weight: bold; }
 .koncept-status-multiparent { color: #185fa5; }
 
 /* Larger identicon in the Referenced Koncepts glossary */

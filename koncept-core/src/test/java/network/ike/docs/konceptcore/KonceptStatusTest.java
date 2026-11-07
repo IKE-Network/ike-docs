@@ -37,6 +37,8 @@ class KonceptStatusTest {
         assertEquals("#6b7682", KonceptStatus.PRIMITIVE.colorHex());
         assertEquals("⊤", KonceptStatus.ROOT.glyph());
         assertEquals("#8a6d00", KonceptStatus.ROOT.colorHex());
+        assertEquals("C", KonceptStatus.UNDEFINED.glyph());
+        assertEquals("#2a5a8a", KonceptStatus.UNDEFINED.colorHex());
         assertEquals("⋎", KonceptStatus.MULTI_PARENT_GLYPH);
         assertEquals("#185fa5", KonceptStatus.MULTI_PARENT_COLOR_HEX);
         assertNull(KonceptStatus.NONE.glyph());
@@ -48,6 +50,7 @@ class KonceptStatusTest {
         assertEquals(KonceptStatus.DEFINED, KonceptStatus.fromString("defined"));
         assertEquals(KonceptStatus.PRIMITIVE, KonceptStatus.fromString("Primitive"));
         assertEquals(KonceptStatus.ROOT, KonceptStatus.fromString(" ROOT "));
+        assertEquals(KonceptStatus.UNDEFINED, KonceptStatus.fromString("undefined"));
         assertEquals(KonceptStatus.NONE, KonceptStatus.fromString(null));
         assertEquals(KonceptStatus.NONE, KonceptStatus.fromString("  "));
         assertEquals(KonceptStatus.NONE, KonceptStatus.fromString("unrecognised"));
@@ -64,10 +67,21 @@ class KonceptStatusTest {
     }
 
     @Test
+    void anUndefinedConceptLeadsWithALetterThatTakesNoFork() {
+        assertTrue(KonceptStatus.UNDEFINED.hasGlyph());
+        assertTrue(KonceptStatus.UNDEFINED.isLetter());
+        assertEquals("C", KonceptStatus.UNDEFINED.cluster(false));
+        assertEquals("C", KonceptStatus.UNDEFINED.cluster(true));
+        assertFalse(KonceptStatus.PRIMITIVE.isLetter());
+        assertFalse(KonceptStatus.NONE.isLetter());
+    }
+
+    @Test
     void accessibleNamesAreTheNonGlyphChannel() {
         assertEquals("Sufficiently defined", KonceptStatus.DEFINED.accessibleName());
         assertEquals("Primitive", KonceptStatus.PRIMITIVE.accessibleName());
         assertEquals("Taxonomy root", KonceptStatus.ROOT.accessibleName());
+        assertEquals("No stated definition", KonceptStatus.UNDEFINED.accessibleName());
         assertEquals("Multiple parents", KonceptStatus.MULTI_PARENT_ACCESSIBLE_NAME);
     }
 }

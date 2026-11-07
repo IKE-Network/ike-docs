@@ -66,8 +66,9 @@ final class KonceptResolver {
      * @param idString    the Tinkar identicon idString, or empty when none resolves
      * @param kind        the component kind
      * @param status      the logical-definition status a Koncept badge leads with
-     *                    ({@link KonceptStatus#NONE} for a non-concept kind, an uncurated
-     *                    reference, or a concept with no stated definition)
+     *                    ({@link KonceptStatus#UNDEFINED} for a concept with no stated
+     *                    definition; {@link KonceptStatus#NONE} for a non-concept kind, an
+     *                    uncurated reference, or a concept whose status was never recorded)
      * @param multiParent whether the concept has more than one stated parent (renders the
      *                    appended {@value KonceptStatus#MULTI_PARENT_GLYPH} fork)
      * @param inactive    whether the referent's latest version is inactive — renders the

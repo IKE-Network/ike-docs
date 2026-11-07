@@ -30,9 +30,24 @@ RootThing:
 
 Statusless:
   label: Statusless Concept
-  definition: A concept with no stated logical definition — its badge stays truly bare.
+  definition: A concept with no stated logical definition — its badge leads with C.
   uuids:
     - "aaaaaaaa-4444-4000-8000-000000000004"
+
+StatuslessMulti:
+  label: Statusless Multi Parent
+  definition: A concept with no stated definition under two parents — C takes no fork.
+  broader: [RootThing, DefinedSingle]
+  uuids:
+    - "aaaaaaaa-7777-4000-8000-000000000007"
+
+AxiomUnclassified:
+  label: Axiom Unclassified
+  definition: A concept with an axiom but no status — defined, so a C would misreport it.
+  axiom: "≡ RootThing"
+  broader: [RootThing]
+  uuids:
+    - "aaaaaaaa-8888-4000-8000-000000000008"
 
 RetiredConcept:
   label: Retired Concept
