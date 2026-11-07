@@ -12,6 +12,6 @@ canonical_url: https://github.com/IKE-Network/ike-docs/dependency-info.html
 <plugin>
   <groupId>network.ike.docs</groupId>
   <artifactId>semantic-linebreak</artifactId>
-  <version>136</version>
+  <version>137</version>
 </plugin>
 ```
