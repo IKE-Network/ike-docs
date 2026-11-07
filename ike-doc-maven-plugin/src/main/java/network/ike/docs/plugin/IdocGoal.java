@@ -45,12 +45,28 @@ public enum IdocGoal implements GoalRef {
     /** {@code idoc:inject-breadcrumb} — inject breadcrumbs into rendered HTML. */
     INJECT_BREADCRUMB("inject-breadcrumb", InjectBreadcrumbMojo.class,
             "Inject breadcrumb navigation into rendered HTML."),
+    /** {@code idoc:lint-packages} — lint the packages layout of a topic library (#1341). */
+    LINT_PACKAGES("lint-packages", LintPackagesMojo.class,
+            "Lint a topic library laid out as packages (ike.adoc.layout="
+                    + "packages): the root holds only dotted-group directories "
+                    + "and META-INF, every package begins with the module's "
+                    + "group, a topic's directory equals its id's domain "
+                    + "prefix, images are inside packages; lines still using "
+                    + "{topics} are warnings. Fails the build with every "
+                    + "finding listed."),
     /** {@code idoc:lint-site} — lint src/site/site.xml for IKE theme/breadcrumb drift (#319). */
     LINT_SITE("lint-site", LintSiteMojo.class,
             "Lint src/site/site.xml for IKE Network theme + "
                     + "breadcrumb conventions: <bodyClass> drift "
                     + "(Forest vs Horizon), stale breadcrumb names "
                     + "(IKE Pipeline post-#216), and skin GAV drift."),
+    /** {@code idoc:manifest} — generate the package manifest of a topic library (#1341). */
+    MANIFEST("manifest", ManifestMojo.class,
+            "Write META-INF/ike/<groupId>/<artifactId>/manifest.yaml for a "
+                    + "topic library laid out as packages (ike.adoc.layout="
+                    + "packages): its coordinates, the packages it ships "
+                    + "with their kind, and the path of its registry; "
+                    + "generated from the pom and the tree, never kept by hand."),
     /** {@code idoc:package-doc} — package rendered docs as an ike-doc artifact. */
     PACKAGE_DOC("package-doc", PackageDocMojo.class,
             "Package rendered docs as an ike-doc artifact."),
@@ -71,7 +87,10 @@ public enum IdocGoal implements GoalRef {
             "Read the :topic-*: header of every AsciiDoc file under the "
                     + "module's source root and write target/topic-registry.yaml: "
                     + "the topic registry, generated from the headers in "
-                    + "IKE-TOPIC-REGISTRY.md's shape instead of kept by hand.");
+                    + "IKE-TOPIC-REGISTRY.md's shape instead of kept by hand. "
+                    + "With ike.adoc.layout=packages the registry is blob-keyed "
+                    + "and incremental, and written with the term index under "
+                    + "META-INF/ike/<groupId>/<artifactId>/.");
 
     /** Shared {@code idoc:} prefix for all goals in this plugin. */
     public static final String PLUGIN_PREFIX = "idoc";

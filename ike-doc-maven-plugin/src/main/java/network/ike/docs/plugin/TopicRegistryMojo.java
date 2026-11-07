@@ -1,5 +1,11 @@
 package network.ike.docs.plugin;
 
+import network.ike.docs.plugin.packages.AdocLayout;
+import network.ike.docs.plugin.packages.AdocPackages;
+import network.ike.docs.plugin.registry.BlobIndex;
+import network.ike.docs.plugin.registry.GitBlobIndex;
+import network.ike.docs.plugin.registry.IncrementalRegistry;
+import network.ike.docs.plugin.registry.TermIndex;
 import network.ike.docs.plugin.registry.TopicHeader;
 import network.ike.docs.plugin.registry.TopicRegistry;
 import org.apache.maven.api.plugin.MojoException;
@@ -64,6 +70,21 @@ import java.util.Map;
  * phase (as {@code ike-parent} does for {@code lint-site}) refreshes the
  * registry on every build, including a bare {@code mvn validate}.
  *
+ * <p>With the POM property {@code ike.adoc.layout=packages}
+ * ({@code dev-adoc-packages}, IKE-Network/ike-issues#1341) the registry is
+ * blob-keyed and incremental: {@link GitBlobIndex} lists every file with
+ * the git blob id of its content without opening it, and
+ * {@link IncrementalRegistry} keeps the entry of a file whose path and
+ * blob are unchanged, re-keys the entry of a blob that moved, parses only
+ * a new or changed blob and drops a path that is gone. A tree without git
+ * falls back to hashing every file in Java, the full scan's cost. The
+ * registry and the term index are then written to
+ * {@code target/adoc-meta/META-INF/ike/<groupId>/<artifactId>/topic-registry.yaml}
+ * and {@code term-index.yaml}, which the parent POM ships in the adoc zip,
+ * with every {@code file:} relative to the AsciiDoc root; {@code add} is a
+ * special case of the blob rule and needs no separate path. Without the
+ * property nothing above changes.
+ *
  * <p>Skip with {@code -Dike.skip.topic-registry=true}.
  *
  * @since 109
@@ -122,6 +143,25 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
     @Parameter(property = "ike.skip.topic-registry", defaultValue = "false")
     boolean skip;
 
+    /**
+     * The layout the library declares: with {@code packages} the registry is
+     * blob-keyed, incremental, and written with the term index under
+     * {@code META-INF/ike/<groupId>/<artifactId>/} in {@link #metaDirectory}.
+     */
+    @Parameter(property = AdocLayout.PROPERTY)
+    String layout;
+
+    /**
+     * Where the packages layout's metadata tree is written; the parent POM
+     * zips it with the sources. Used only with {@code ike.adoc.layout=packages}.
+     */
+    @Parameter(property = "ike.adoc.meta-directory", defaultValue = "${project.build.directory}/adoc-meta")
+    File metaDirectory;
+
+    /** The build directory, to tell the default {@link #output} from one the user chose. */
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true)
+    File buildDirectory;
+
     /** The project this goal runs in; registry paths are shown relative to its base directory. */
     @org.apache.maven.api.di.Inject
     private org.apache.maven.api.Project project;
@@ -138,6 +178,21 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
         long started = System.nanoTime();
         Path base = project.getBasedir();
         boolean fromRootFile = rootFile != null && !rootFile.isBlank();
+        AdocLayout adocLayout;
+        try {
+            adocLayout = AdocLayout.of(layout);
+        } catch (IllegalArgumentException e) {
+            throw new MojoException(e.getMessage(), e);
+        }
+        if (adocLayout == AdocLayout.PACKAGES) {
+            if (fromRootFile) {
+                throw new MojoException("-Dike.topic-registry.rootFile is not supported with "
+                        + AdocLayout.PROPERTY + "=packages; the registry of a packaged library"
+                        + " covers every file under its root");
+            }
+            executePackages(base, started);
+            return;
+        }
         if (fromRootFile && add != null && !add.isBlank()) {
             throw new MojoException("-Dike.topic-registry.rootFile and -Dike.topic-registry.add"
                     + " cannot be combined; run with one or the other");
@@ -212,6 +267,93 @@ public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
                 + " other file" + (others == 1 ? "" : "s") + ", " + findings
                 + " finding" + (findings == 1 ? "" : "s") + "; topic registry written to "
                 + shown(base, out) + " (" + millis + " ms)");
+    }
+
+    /**
+     * The packages layout's run: one root, the blob index from git or by
+     * hashing, the incremental update against the registry written last
+     * time, the registry and the term index under {@code META-INF}.
+     */
+    private void executePackages(Path base, long started) throws MojoException {
+        List<Path> rootPaths = new ArrayList<>();
+        for (String r : roots.split(",")) {
+            if (!r.isBlank()) {
+                rootPaths.add(Path.of(r.strip()));
+            }
+        }
+        if (rootPaths.size() != 1) {
+            throw new MojoException(AdocLayout.PROPERTY + "=packages takes exactly one registry root,"
+                    + " the library's AsciiDoc root; got " + rootPaths + " (check -Dike.topic-registry.roots)");
+        }
+        Path root = rootPaths.get(0);
+        if (!Files.isDirectory(root)) {
+            if (root.toAbsolutePath().normalize().equals(base.resolve("src/docs/asciidoc").toAbsolutePath().normalize())) {
+                getLog().info("idoc:topic-registry — no src/docs/asciidoc in " + base.getFileName() + ", skipping");
+                return;
+            }
+            throw new MojoException("Registry root does not exist: " + root + " (check -Dike.topic-registry.roots)");
+        }
+        Path metaDir = metaDirectory.toPath().resolve(AdocPackages.metaDirectory(project.getGroupId(),
+                project.getArtifactId()));
+        Path defaultOutput = buildDirectory.toPath().resolve("topic-registry.yaml").toAbsolutePath().normalize();
+        Path out = output.toPath().toAbsolutePath().normalize().equals(defaultOutput)
+                ? metaDir.resolve("topic-registry.yaml") : output.toPath();
+        Path termsOut = out.resolveSibling("term-index.yaml");
+
+        Map<String, Object> previous = null;
+        if (Files.isRegularFile(out)) {
+            try {
+                previous = TopicRegistry.load(out);
+            } catch (IOException e) {
+                getLog().warn("idoc:topic-registry — cannot read the previous registry " + shown(base, out)
+                        + " (" + e.getMessage() + "); parsing every file");
+            }
+        }
+        if (add != null && !add.isBlank()) {
+            getLog().info("idoc:topic-registry — -Dike.topic-registry.add is a special case of the blob rule"
+                    + " under " + AdocLayout.PROPERTY + "=packages: changed files are parsed, the rest kept");
+        }
+        BlobIndex index;
+        IncrementalRegistry.Outcome outcome;
+        try {
+            index = GitBlobIndex.read(root).orElse(null);
+            if (index == null) {
+                getLog().info("idoc:topic-registry — " + shown(base, root) + " is not in a git working tree;"
+                        + " hashing every file instead");
+                index = BlobIndex.hashed(root);
+            }
+            if (index.blobs().size() > maxFiles) {
+                throw new MojoException("More than " + maxFiles + " .adoc files under " + root
+                        + "; raise -Dike.topic-registry.maxFiles");
+            }
+            outcome = IncrementalRegistry.update(previous, root, index, base, Instant.now());
+        } catch (IOException e) {
+            throw new MojoException("Cannot index " + root + ": " + e.getMessage(), e);
+        }
+        Map<String, Object> model = outcome.model();
+        try {
+            Files.createDirectories(out.getParent());
+            Files.writeString(out, TopicRegistry.yaml(model), StandardCharsets.UTF_8);
+            Files.createDirectories(termsOut.getParent());
+            Files.writeString(termsOut, TermIndex.yaml(TermIndex.model(model, Instant.now())), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new MojoException("Cannot write the registry to " + out + ": " + e.getMessage(), e);
+        }
+        @SuppressWarnings("unchecked")
+        List<Object> findings = (List<Object>) model.get("findings");
+        for (Object f : findings) {
+            getLog().warn("registry: " + f);
+        }
+        int topics = (Integer) model.get("topic-count");
+        int others = (Integer) model.get("file-count") - topics;
+        long millis = (System.nanoTime() - started) / 1_000_000;
+        getLog().info(topics + " topic" + (topics == 1 ? "" : "s") + ", " + others
+                + " other file" + (others == 1 ? "" : "s") + ", " + findings.size()
+                + " finding" + (findings.size() == 1 ? "" : "s") + "; " + outcome.kept() + " kept, "
+                + outcome.rekeyed() + " re-keyed, " + outcome.parsed() + " parsed, " + outcome.dropped()
+                + " dropped by " + (index.source() == BlobIndex.Source.GIT ? "git blob" : "hashed blob")
+                + "; topic registry and term index written to " + shown(base, out.getParent())
+                + "/ (" + millis + " ms)");
     }
 
     private TopicRegistry.Scan scanFromRootFile(Path base, List<Path> rootPaths) throws MojoException {
