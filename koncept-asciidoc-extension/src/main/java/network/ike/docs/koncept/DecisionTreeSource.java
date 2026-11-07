@@ -48,6 +48,15 @@ import java.util.regex.Pattern;
  * A vertex is a line whose word ends in a colon, a measure a line whose word is followed by an
  * equals sign; indentation is the edge. Everything the processor does not understand is a
  * problem with its line number, and the tree is built around it.
+ *
+ * <p>A {@code [graphlet-model]} block is the same grammar with parameters that read the document's
+ * ANF statements by name ({@code dev-decision-point-knowledge}): {@code parameter = [0.15,0.15]
+ * anf:est-material-problem} reads the statement's range and scale through {@link StatementMeasures}
+ * and holds the value the tree runs at; {@code parameter = anf:est-material-problem} runs at the
+ * midpoint of the statement's range, computed and never written; {@code p = from anf:…} and
+ * {@code money = from anf:…} read such a parameter as {@code from} a quantity does, a cost on the
+ * statement's own scale; {@code of anf:…} reads it as an operand. A statement the document has not
+ * stated before the block leaves the parameter with no value, named as a problem, never guessed.
  */
 final class DecisionTreeSource {
 
@@ -189,12 +198,31 @@ final class DecisionTreeSource {
     /**
      * One measure a vertex carries: stated with bounds, or derived from a kind over the quantities
      * it reads, or read as it is from one parameter ({@code from} the quantity alone, no kind and
-     * no operands). A parameter also names the quantity it measures.
+     * no operands). A parameter also names the quantity it measures; a parameter that reads one of
+     * the document's statements names it, {@code anf:<name>}, and carries the range the statement
+     * determined, which is what a sweep swings it over.
      */
     record Measure(MeasureKind kind, Interval bounds, Concept semantic, String basis, String source, Concept quantity,
-                   Derivation derivation, Concept derivationConcept, List<Concept> operands, int line) {
+                   Derivation derivation, Concept derivationConcept, List<Concept> operands, int line,
+                   String statement, Interval range) {
+        /** A measure that reads no statement. */
+        Measure(MeasureKind kind, Interval bounds, Concept semantic, String basis, String source, Concept quantity,
+                Derivation derivation, Concept derivationConcept, List<Concept> operands, int line) {
+            this(kind, bounds, semantic, basis, source, quantity, derivation, derivationConcept, operands, line, null, null);
+        }
+
         boolean stated() {
             return bounds != null;
+        }
+
+        /** Whether this is a parameter that reads one of the document's statements by name. */
+        boolean readsAStatement() {
+            return statement != null;
+        }
+
+        /** The range a statement determined for this parameter, when it reads one the document states and the range is not a point. */
+        boolean hasStatedRange() {
+            return range != null && !range.isPoint();
         }
 
         boolean derived() {
@@ -270,12 +298,23 @@ final class DecisionTreeSource {
     private static final Pattern CONCEPT = Pattern.compile("^k:([^\\[\\s]*)\\[(.*?)]\\s*(?:@id=(\\S+))?\\s*$");
     private static final Pattern INTERVAL = Pattern.compile("^([\\[(])\\s*(\\S+?)\\s*,\\s*(\\S+?)\\s*([\\])])\\s*(.*)$");
 
+    /** The prefix of a reference to one of the document's {@code [anf]} blocks by name, {@code anf:est-material-problem}. */
+    static final String ANF_REFERENCE = "anf:";
+
     /** One raw line with its nesting resolved. */
     private record Line(int number, int indent, boolean vertex, String word, String rest, List<Line> children) {
     }
 
-    /** Reads the block lines into a decision tree. */
+    /** Reads the block lines into a decision tree, with no statements to read parameters from. */
     static Parsed parse(List<String> raw) {
+        return parse(raw, StatementMeasures.none());
+    }
+
+    /**
+     * Reads the block lines into a decision tree whose parameters may read the document's ANF
+     * statements by name, {@code anf:<name>}, through the measures given.
+     */
+    static Parsed parse(List<String> raw, StatementMeasures statements) {
         List<String> problems = new ArrayList<>();
         List<Line> roots = new ArrayList<>();
         Deque<Line> open = new ArrayDeque<>();
@@ -313,11 +352,12 @@ final class DecisionTreeSource {
             return new Parsed(null, problems);
         }
         // a root chance is a tree of consequences with no choice in it, which other trees fold in
-        Node tree = vertex(root, "chance".equals(root.word()) ? Kind.CHANCE : Kind.DECISION, false, problems);
+        Node tree = vertex(root, "chance".equals(root.word()) ? Kind.CHANCE : Kind.DECISION, false, problems,
+                statements == null ? StatementMeasures.none() : statements);
         return new Parsed(tree, problems);
     }
 
-    private static Node vertex(Line line, Kind kind, boolean residual, List<String> problems) {
+    private static Node vertex(Line line, Kind kind, boolean residual, List<String> problems, StatementMeasures statements) {
         Map<String, String> attributes = attributes(line.rest());
         String head = head(line.rest());
         Concept concept = null;
@@ -355,16 +395,16 @@ final class DecisionTreeSource {
         });
         for (Line child : line.children()) {
             if (!child.vertex()) {
-                measure(child, node, problems);
+                measure(child, node, problems, statements);
                 continue;
             }
             Node childNode = switch (child.word()) {
-                case "alternative" -> vertex(child, Kind.ALTERNATIVE, false, problems);
-                case "chance" -> vertex(child, Kind.CHANCE, false, problems);
-                case "event" -> vertex(child, Kind.EVENT, false, problems);
-                case "residual" -> vertex(child, Kind.EVENT, true, problems);
-                case "decision" -> vertex(child, Kind.DECISION, false, problems);
-                case "outcome" -> vertex(child, Kind.OUTCOME, false, problems);
+                case "alternative" -> vertex(child, Kind.ALTERNATIVE, false, problems, statements);
+                case "chance" -> vertex(child, Kind.CHANCE, false, problems, statements);
+                case "event" -> vertex(child, Kind.EVENT, false, problems, statements);
+                case "residual" -> vertex(child, Kind.EVENT, true, problems, statements);
+                case "decision" -> vertex(child, Kind.DECISION, false, problems, statements);
+                case "outcome" -> vertex(child, Kind.OUTCOME, false, problems, statements);
                 default -> null;
             };
             if (childNode == null) {
@@ -376,7 +416,7 @@ final class DecisionTreeSource {
         return node;
     }
 
-    private static void measure(Line line, Node node, List<String> problems) {
+    private static void measure(Line line, Node node, List<String> problems, StatementMeasures statements) {
         MeasureKind kind = switch (line.word().toLowerCase(Locale.ROOT)) {
             case "probability", "p" -> MeasureKind.PROBABILITY;
             case "money" -> MeasureKind.MONEY;
@@ -400,10 +440,32 @@ final class DecisionTreeSource {
         List<Concept> operands = new ArrayList<>();
         Concept unit = null;
         String mode = "";
+        // the statement a parameter reads, and the statement a value reads as it is
+        String statementName = null;
+        String readStatement = null;
         List<String> words = words(head(line.rest()));
         for (int i = 0; i < words.size(); i++) {
             String word = words.get(i);
-            if (word.startsWith("k:")) {
+            if (word.startsWith(ANF_REFERENCE) && word.length() > ANF_REFERENCE.length()) {
+                String name = word.substring(ANF_REFERENCE.length());
+                switch (mode) {
+                    case "from" -> {
+                        if (derivationConcept != null || readStatement != null) {
+                            problems.add("line " + line.number() + ": a measure reads one statement after from: anf:" + name);
+                        }
+                        readStatement = name;
+                    }
+                    case "of" -> operands.add(statementConcept(name, statements.measure(name)));
+                    case "in" -> problems.add("line " + line.number() + ": a measure semantic is a concept, not a statement: anf:" + name);
+                    default -> {
+                        if (parameter && quantity == null && statementName == null) {
+                            statementName = name;
+                        } else {
+                            problems.add("line " + line.number() + ": an unexpected statement: anf:" + name);
+                        }
+                    }
+                }
+            } else if (word.startsWith("k:")) {
                 String text = word;
                 if (i + 1 < words.size() && words.get(i + 1).startsWith("@id=")) {
                     text = word + " " + words.get(++i);
@@ -446,6 +508,67 @@ final class DecisionTreeSource {
                 problems.add("line " + line.number() + ": an unexpected word: " + word);
             }
         }
+        Map<String, String> attributes = attributes(line.rest());
+        String basis = attributes.get("basis");
+        if (basis != null && !List.of("estimated", "cited", "derived").contains(basis.toLowerCase(Locale.ROOT))) {
+            problems.add("line " + line.number() + ": a basis is estimated, cited or derived, not " + basis);
+            basis = null;
+        }
+        attributes.keySet().forEach(name -> {
+            if (!List.of("basis", "source", "@vertex").contains(name)) {
+                problems.add("line " + line.number() + ": unknown attribute of a measure: " + name);
+            }
+        });
+        if (statementName != null) {
+            // a parameter that reads a statement: the statement's range and scale, the model's value
+            if (derivationConcept != null || readStatement != null || !operands.isEmpty()) {
+                problems.add("line " + line.number() + ": a parameter that reads a statement is not also derived");
+            }
+            if (unit != null) {
+                problems.add("line " + line.number() + ": a parameter that reads a statement is on the statement's own scale, so it names no measure semantic");
+            }
+            Optional<StatementMeasures.Stated> stated = statements.measure(statementName);
+            if (stated.isEmpty()) {
+                problems.add("line " + line.number() + ": a parameter reads anf:" + statementName
+                        + ", which no anf block before it states" + (bounds == null ? ", and holds no value" : ""));
+            }
+            Interval value;
+            if (bounds != null) {
+                value = bounds;
+                if (!bounds.isPoint()) {
+                    problems.add("line " + line.number() + ": the value a model runs at is one number, with equal bounds; the range is the statement's");
+                }
+            } else if (stated.isPresent() && !Double.isInfinite(stated.get().range().lower())
+                    && !Double.isInfinite(stated.get().range().upper())) {
+                // the midpoint of the statement's range, computed and never written
+                value = Interval.point((stated.get().range().lower() + stated.get().range().upper()) / 2);
+            } else {
+                value = new Interval(Double.NaN, Double.NaN, false, false);
+                if (stated.isPresent()) {
+                    problems.add("line " + line.number() + ": a parameter reads anf:" + statementName
+                            + ", whose range has no midpoint to run at, and holds no value");
+                }
+            }
+            node.measures.add(new Measure(kind, value, stated.map(StatementMeasures.Stated::scale).orElse(null), basis,
+                    attributes.get("source"), statementConcept(statementName, stated), null, null, List.of(), line.number(),
+                    statementName, stated.map(StatementMeasures.Stated::range).orElse(null)));
+            return;
+        }
+        boolean scaleUnknown = false;
+        if (readStatement != null) {
+            // from a statement alone reads its parameter as it is, a cost on the statement's own scale
+            Optional<StatementMeasures.Stated> stated = statements.measure(readStatement);
+            derivationConcept = statementConcept(readStatement, stated);
+            if (unit == null && !share) {
+                if (stated.isPresent()) {
+                    unit = stated.get().scale();
+                } else {
+                    scaleUnknown = true;
+                    problems.add("line " + line.number() + ": a cost reads anf:" + readStatement
+                            + ", which no anf block before it states, so its scale is unknown");
+                }
+            }
+        }
         if (bounds == null && derivationConcept == null) {
             problems.add("line " + line.number() + ": a measure begins with an interval, [lo,hi], or is derived from a kind: " + head(line.rest()));
             return;
@@ -468,26 +591,25 @@ final class DecisionTreeSource {
         if (parameter && quantity == null) {
             problems.add("line " + line.number() + ": a parameter names its quantity");
         }
-        if (unit == null && !share) {
+        if (unit == null && !share && !scaleUnknown) {
             problems.add("line " + line.number() + (kind == MeasureKind.COUNT ? ": a count names what it counts" : ": a cost names its measure semantic")
                     + (derivationConcept != null ? " after in" : " after its interval"));
-        }
-        Map<String, String> attributes = attributes(line.rest());
-        String basis = attributes.get("basis");
-        if (basis != null && !List.of("estimated", "cited", "derived").contains(basis.toLowerCase(Locale.ROOT))) {
-            problems.add("line " + line.number() + ": a basis is estimated, cited or derived, not " + basis);
-            basis = null;
         }
         if (basis == null && derivationConcept != null) {
             basis = "derived";
         }
-        attributes.keySet().forEach(name -> {
-            if (!List.of("basis", "source", "@vertex").contains(name)) {
-                problems.add("line " + line.number() + ": unknown attribute of a measure: " + name);
-            }
-        });
         node.measures.add(new Measure(kind, bounds, unit, basis, attributes.get("source"), quantity,
                 derivation, derivationConcept, List.copyOf(operands), line.number()));
+    }
+
+    /**
+     * The quantity a statement's parameter is named by: an identity under the statement's name,
+     * {@code anf:<name>}, the same wherever the name recurs, labelled as the statement names it
+     * when the document has the statement, else by the name alone.
+     */
+    private static Concept statementConcept(String name, Optional<StatementMeasures.Stated> stated) {
+        String label = stated.map(StatementMeasures.Stated::label).filter(l -> !l.isBlank()).orElse(name);
+        return new Concept(name, label, ANF_REFERENCE + name);
     }
 
     private static double bound(String s, double unbounded) {

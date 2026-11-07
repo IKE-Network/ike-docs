@@ -55,6 +55,15 @@ public class KonceptExtensionRegistry implements ExtensionRegistry {
         // asciidoctor-diagram where the build has it.
         asciidoctor.javaExtensionRegistry()
                 .block(DecisionTreeBlockProcessor.class);
+        // The [graphlet-model] block: the model of a decision, its tree and its parameters together,
+        // parameters reading the document's ANF statements by name (dev-decision-point-knowledge). It
+        // tables the parameters at the values the tree runs at and keeps its text for the renderings
+        // after it: [decision-tree, model=<id>] draws the tree, [tornado, model=<id>] the tornado.
+        // Backend-agnostic, as the decision tree is.
+        asciidoctor.javaExtensionRegistry()
+                .block(GraphletModelBlockProcessor.class);
+        asciidoctor.javaExtensionRegistry()
+                .block(TornadoBlockProcessor.class);
         // The [complex-concept] block: the static projection of the complex concept editor the
         // assistant surface draws (dev-decision-point-knowledge) — the concept, its definition and
         // its expansion, each prerequisite an ANF statement in a table row. A decision tree later in

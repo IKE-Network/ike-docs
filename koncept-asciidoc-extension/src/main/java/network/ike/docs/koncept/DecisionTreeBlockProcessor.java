@@ -74,6 +74,14 @@ import java.util.UUID;
  * {@code typst}, so the print pipeline draws the figure with the document's own text and never
  * through an embedded image. A block with no root decision renders as a literal block, so the text
  * is visible, never dropped; a block with gaps renders with them named in a note.
+ *
+ * <p>A block that names a model, {@code [decision-tree, model=<id>]}, is a rendering of the
+ * {@code [graphlet-model]} block before it ({@code dev-decision-point-knowledge}, settled 2026-11-06):
+ * it holds no structure and no number, only how the model is viewed, the standpoint it is rolled
+ * back from and the cohort it is counted out for. It draws the model's tree, ledger and sentences
+ * and the worked table, and no tornado: that is the {@code [tornado, model=<id>]} block's; and no
+ * table of assumptions: the model block draws its own parameters. A block with a body of its own
+ * still reads as before, tornado beneath.
  */
 @Name("decision-tree")
 @Contexts(Contexts.LISTING)
@@ -110,7 +118,22 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
     @Override
     public Object process(StructuralNode parent, Reader reader, Map<String, Object> attributes) {
         List<String> lines = reader.readLines();
-        Parsed parsed = DecisionTreeSource.parse(lines);
+        Document doc = parent.getDocument();
+        // a rendering of a model: the model's text stands in for the body, which is empty
+        Optional<String> model = modelReference(attributes);
+        boolean rendering = model.isPresent();
+        if (rendering) {
+            Optional<List<String>> text = DocumentModels.of(doc).model(model.get());
+            if (text.isEmpty()) {
+                LOG.warn("decision-tree: no graphlet-model block before it is named {}", model.get());
+                StructuralNode container = createBlock(parent, "open", new ArrayList<String>());
+                parseContent(container, List.of("NOTE: No graphlet-model block earlier in this document is named `" + model.get()
+                        + "`, so there is no model to draw.", ""));
+                return container;
+            }
+            lines = text.get();
+        }
+        Parsed parsed = DecisionTreeSource.parse(lines, AnfBlockProcessor.measures(doc));
         if (parsed.root() == null) {
             LOG.debug("decision-tree: no root decision; rendering raw content as literal: {}", parsed.problems());
             return createBlock(parent, "literal", lines);
@@ -122,8 +145,7 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         Node root = parsed.root();
         // a share a calculate block earlier in the document computed becomes a parameter the tree
         // states no line for (dev-calculator-blocks); the text never carries the number
-        DocumentCalculations.of(parent.getDocument()).inject(root);
-        Document doc = parent.getDocument();
+        DocumentCalculations.of(doc).inject(root);
         // known to the document by its root, so a tree after it may fold it in at an outcome, tree=…
         String treeId = root.concept == null ? null : root.concept.identifier();
         DocumentTrees trees = DocumentTrees.of(doc);
@@ -151,7 +173,8 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         if (!statements.isEmpty()) {
             parseContent(container, statements);
         }
-        sweep.filter(s -> !s.swings().isEmpty()).ifPresent(s -> {
+        // a rendering draws no tornado: the tornado block does, from the same model
+        sweep.filter(s -> !rendering && !s.swings().isEmpty()).ifPresent(s -> {
             DecisionFigure tornado = DecisionFigureTornado.build(DecisionTreeFigures.tornado(s, symbol),
                     typst ? TYPST_TORNADO_WIDTH : TORNADO_WIDTH, cost -> DecisionTreeFigures.money(cost, symbol));
             container.append(figure(container, doc, tornado, s.netValued()
@@ -159,7 +182,10 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
                     : "How far each value, moved on its own across its range, swings the expected cost at the root"));
         });
         List<String> source = new ArrayList<>();
-        source.addAll(assumptions(root, rollback, symbol));
+        if (!rendering) {
+            // a model's parameters are tabled by the model block, each with its statement's range
+            source.addAll(assumptions(root, rollback, symbol));
+        }
         source.addAll(table(rollback, symbol));
         List<String> problems = new ArrayList<>(parsed.problems());
         problems.addAll(rollback.findings());
@@ -170,6 +196,12 @@ public class DecisionTreeBlockProcessor extends BlockProcessor {
         }
         parseContent(container, source);
         return container;
+    }
+
+    /** The model a rendering names, {@code model=<id>}, when it names one. */
+    static Optional<String> modelReference(Map<String, Object> attributes) {
+        Object value = attributes.get("model");
+        return value == null || String.valueOf(value).isBlank() ? Optional.empty() : Optional.of(String.valueOf(value).strip());
     }
 
     /** The cohort a block asks to be counted out for, {@code cohort=1000}; empty when it states none or a bad one. */

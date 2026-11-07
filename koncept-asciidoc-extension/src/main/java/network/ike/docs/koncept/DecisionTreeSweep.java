@@ -39,7 +39,8 @@ import java.util.function.ToDoubleFunction;
  * decision's chosen alternative flips. This is what the tornado draws, bar by bar.
  *
  * <p>A measure stated as an interval swings from its lower to its upper bound, and the swing is
- * <em>stated</em>. A measure stated as a point swings over an assumed range: half to double, a
+ * <em>stated</em>; so does a model's parameter over the range the statement it reads determined,
+ * from the value the model runs at. A measure stated as a point swings over an assumed range: half to double, a
  * share no higher than one; a probability under a chance with a residual event may rise only as
  * far as the other events leave, and a share of exactly zero swings zero to one. A derived measure
  * is never swept. The base is every measure at its midpoint. A flip is found by bisection between
@@ -271,7 +272,7 @@ final class DecisionTreeSweep {
                             : "a value of zero has no assumed range"));
                     continue;
                 }
-                boolean statedRange = !measure.bounds().isPoint();
+                boolean statedRange = !measure.bounds().isPoint() || measure.hasStatedRange();
                 double midpoint = (measure.bounds().lower() + measure.bounds().upper()) / 2;
                 Optional<Swing> swing = sweep(measure, range.get(), statedRange, midpoint, value -> {
                     Map<Measure, Interval> moved = new IdentityHashMap<>(baseBounds);
@@ -330,6 +331,10 @@ final class DecisionTreeSweep {
         Interval bounds = measure.bounds();
         if (!bounds.isPoint()) {
             return Optional.of(bounds);
+        }
+        if (measure.hasStatedRange()) {
+            // a model's parameter swings over the range its statement determined, from the model's value
+            return Optional.of(measure.range());
         }
         double value = bounds.lower();
         if (share(measure) && value >= 0 && value <= 1) {

@@ -23,6 +23,9 @@ import org.asciidoctor.extension.Contexts;
 import org.asciidoctor.extension.Name;
 import org.asciidoctor.extension.Reader;
 
+import network.ike.docs.koncept.DecisionTreeSource.Concept;
+import network.ike.docs.koncept.DecisionTreeSource.Interval;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,8 +55,10 @@ import java.util.regex.Pattern;
  *
  * A block that names itself, {@code id=…}, is remembered by that name, so a {@code [decision-tree]}
  * later in the document whose nodes hold it, {@code statement=anf:req-scan}, lists what each node
- * states. An element block whose body is still empty shows its sentence and that it is not yet
- * lifted. The output is AsciiDoc re-parsed in place, so it is backend-agnostic.
+ * states, and a {@code [graphlet-model]} whose parameters read it, {@code parameter = [0.15,0.15]
+ * anf:est-material-problem}, takes the range its {@code result::} determined and the scale the range
+ * is on ({@link #measure(Statement)}). An element block whose body is still empty shows its sentence
+ * and that it is not yet lifted. The output is AsciiDoc re-parsed in place, so it is backend-agnostic.
  */
 @Name("anf")
 @Contexts({Contexts.OPEN, Contexts.LISTING})
@@ -78,6 +83,11 @@ public class AnfBlockProcessor extends BlockProcessor {
             return fields.stream().filter(f -> f.name().equals(field)).map(Field::shown).findFirst();
         }
 
+        /** The first value of a field as the block wrote it, when the statement has it. */
+        Optional<String> raw(String field) {
+            return fields.stream().filter(f -> f.name().equals(field)).map(Field::raw).findFirst();
+        }
+
         /** What the statement says in one line: the topic, then the result or request, timing, method and purpose. */
         String summary() {
             List<String> parts = new ArrayList<>();
@@ -94,8 +104,8 @@ public class AnfBlockProcessor extends BlockProcessor {
         }
     }
 
-    /** One field: its name and its value as the document shows it, AsciiDoc with chips. */
-    record Field(String name, String shown) {
+    /** One field: its name, its value as the block wrote it, and the value as the document shows it, AsciiDoc with chips. */
+    record Field(String name, String raw, String shown) {
     }
 
     /** Creates a new block processor instance. */
@@ -141,7 +151,7 @@ public class AnfBlockProcessor extends BlockProcessor {
         for (String raw : lines) {
             Matcher m = FIELD.matcher(raw.strip());
             if (m.matches()) {
-                fields.add(new Field(m.group(1), value(m.group(2).strip())));
+                fields.add(new Field(m.group(1), m.group(2).strip(), value(m.group(2).strip())));
             }
         }
         return fields;
@@ -199,6 +209,98 @@ public class AnfBlockProcessor extends BlockProcessor {
     private static Optional<String> attribute(Map<String, Object> attributes, String name) {
         Object value = attributes.get(name);
         return value == null || String.valueOf(value).isBlank() ? Optional.empty() : Optional.of(String.valueOf(value));
+    }
+
+    // ── What a statement states, as a model's parameter reads it ─────────────
+
+    /**
+     * The measure a statement states, as a graphlet model's parameter reads it: a performance whose
+     * {@code result::} is an interval. The interval is the range someone determined; the scale after
+     * it is what the number is on, a share of the subject group when its name says share, fraction,
+     * proportion, probability or percent, which the tree reads as the share at a node, else the
+     * statement's own concept, a currency say. The parameter is named by the topic and, for a share,
+     * the group it is about, or else the scale in brackets, so two statements about one topic, the
+     * cost of an inspection and its sensitivity, read apart.
+     */
+    static Optional<StatementMeasures.Stated> measure(Statement statement) {
+        if (!"performance".equals(statement.type())) {
+            return Optional.empty();
+        }
+        Optional<String> result = statement.raw("result");
+        if (result.isEmpty()) {
+            return Optional.empty();
+        }
+        Matcher m = INTERVAL.matcher(result.get());
+        if (!m.matches()) {
+            return Optional.empty();
+        }
+        Interval range = new Interval(number(m.group(2), Double.NEGATIVE_INFINITY), number(m.group(3), Double.POSITIVE_INFINITY),
+                !"[".equals(m.group(1)), !"]".equals(m.group(4)));
+        if (Double.isNaN(range.lower()) || Double.isNaN(range.upper())) {
+            return Optional.empty();
+        }
+        Concept scale = concept(m.group(5).strip()).orElse(null);
+        boolean share = scale == null || isShare(scale.shown());
+        String topic = statement.raw("topic").flatMap(AnfBlockProcessor::concept).map(Concept::shown).orElse(statement.name());
+        String label;
+        if (share) {
+            String group = statement.raw("subject_of_information").flatMap(AnfBlockProcessor::concept).map(Concept::shown).orElse("");
+            label = group.isBlank() ? topic : topic + " among " + group;
+        } else {
+            label = topic + " (" + scale.shown() + ")";
+        }
+        return Optional.of(new StatementMeasures.Stated(range, share ? null : scale, label));
+    }
+
+    /** Whether a scale's name says the number is a share of its group: a share, a fraction, a proportion, a probability, a percentage. */
+    static boolean isShare(String label) {
+        if (label == null) {
+            return false;
+        }
+        String lower = label.toLowerCase(Locale.ROOT);
+        return lower.contains("fraction") || lower.contains("share") || lower.contains("proportion")
+                || lower.contains("probabilit") || lower.contains("percent");
+    }
+
+    /** The statements the document's {@code [anf]} blocks before this point state, as a model's parameters read them. */
+    static StatementMeasures measures(Document document) {
+        return name -> defined(document, name).flatMap(AnfBlockProcessor::measure);
+    }
+
+    /**
+     * A value as a concept: a {@code k:} token by its key, label and identifier; a candidate by its
+     * provisional label alone; nothing for a question or blank text.
+     */
+    static Optional<Concept> concept(String text) {
+        if (text == null || text.isBlank()) {
+            return Optional.empty();
+        }
+        Matcher token = TOKEN.matcher(text);
+        if (token.matches()) {
+            String label = token.group(2).isBlank() ? token.group(1) : token.group(2);
+            return Optional.of(new Concept(token.group(1), label, token.group(3)));
+        }
+        Matcher candidate = CANDIDATE.matcher(text);
+        if (candidate.matches()) {
+            return Optional.of(new Concept(candidate.group(1), candidate.group(1), null));
+        }
+        if (CLARIFY.matcher(text).matches()) {
+            return Optional.empty();
+        }
+        String plain = text.replaceAll("^\"|\"$", "").strip();
+        return plain.isEmpty() ? Optional.empty() : Optional.of(new Concept(plain, plain, null));
+    }
+
+    private static double number(String bound, double unbounded) {
+        String b = bound == null ? "" : bound.strip();
+        if (b.isEmpty() || b.endsWith("inf")) {
+            return unbounded;
+        }
+        try {
+            return Double.parseDouble(b);
+        } catch (NumberFormatException e) {
+            return Double.NaN;
+        }
     }
 
     // ── The document's statements ────────────────────────────────────────────
