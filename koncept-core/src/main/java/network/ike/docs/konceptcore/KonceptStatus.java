@@ -22,12 +22,16 @@ import java.util.Locale;
  * 2026-07-24): the concept's own defining copula from its stated EL++ expression — {@code ≡}
  * for a sufficiently defined concept, {@code ⊑} for a primitive (necessary-conditions-only)
  * concept, {@code ⊤} for a taxonomy root — plus the appended {@value #MULTI_PARENT_GLYPH} fork
- * when the concept has more than one stated parent.
+ * when the concept has more than one stated parent. A concept with no stated definition has no
+ * copula to lead with, so it leads with the letter {@code C} ({@link #UNDEFINED}): a bare badge
+ * would read as nothing known about the concept, when what is known is that it was never
+ * defined.
  *
  * <p>Status marks and {@link KonceptKind kind sigils} never co-occur: only Koncepts carry a
  * logical definition, and the Koncept is the one kind with no sigil — so the badge's leading
- * slot always holds exactly one mark class. A Koncept with no stated definition
- * ({@link #NONE}) stays truly bare.
+ * slot always holds exactly one mark class. {@link #NONE} is the absence of that mark, for
+ * whatever carries no status: a component that is not a concept, or a concept whose status
+ * cannot be told.
  *
  * <p>Like {@link KonceptKind}, the glyph and colour are <em>data</em> (not styling), so every
  * medium adapter — the adoc renderer, the Zulip/email PNG, the JavaFX badge — renders the same
@@ -37,8 +41,14 @@ import java.util.Locale;
  */
 public enum KonceptStatus {
 
-    /** No stated logical definition — the badge stays truly bare. */
-    NONE(null, null, "No stated definition"),
+    /** No mark applies: a component that is not a concept, or a status that cannot be told. */
+    NONE(null, null, "No status"),
+
+    /**
+     * A concept with no stated definition. Blue {@code C}, the badge's name colour: a letter set
+     * in the text face, as a kind sigil is, not a copula.
+     */
+    UNDEFINED("C", "#2a5a8a", "No stated definition"),
 
     /** A taxonomy root: a stated definition with no is-a parents. Dark-amber {@code ⊤}. */
     ROOT("⊤", "#8a6d00", "Taxonomy root"),
@@ -91,8 +101,8 @@ public enum KonceptStatus {
     /**
      * The copula glyph this status displays.
      *
-     * @return the glyph string ({@code ≡} defined, {@code ⊑} primitive, {@code ⊤} root), or
-     *         {@code null} for {@link #NONE}
+     * @return the glyph string ({@code ≡} defined, {@code ⊑} primitive, {@code ⊤} root,
+     *         {@code C} undefined), or {@code null} for {@link #NONE}
      */
     public String glyph() {
         return glyph;
@@ -127,17 +137,28 @@ public enum KonceptStatus {
     }
 
     /**
-     * The full leading cluster for a badge: the copula glyph, with the
-     * {@value #MULTI_PARENT_GLYPH} fork appended when {@code multiParent} is set.
+     * Whether the glyph is a letter rather than a logic symbol. A letter is set in the text face,
+     * as a kind sigil is; the bundled glyph face holds only the logic symbols. It also takes no
+     * fork, which only ever follows a copula.
+     *
+     * @return {@code true} for {@link #UNDEFINED}
+     */
+    public boolean isLetter() {
+        return this == UNDEFINED;
+    }
+
+    /**
+     * The full leading cluster for a badge: the glyph, with the {@value #MULTI_PARENT_GLYPH} fork
+     * appended when {@code multiParent} is set and there is a copula for it to follow.
      *
      * @param multiParent whether the concept has more than one stated parent
-     * @return the cluster text (e.g. {@code ≡}, {@code ⊑⋎}), or the empty string for
-     *         {@link #NONE} (the fork is never shown without a copula to follow)
+     * @return the cluster text (e.g. {@code ≡}, {@code ⊑⋎}, {@code C}), or the empty string for
+     *         {@link #NONE}
      */
     public String cluster(boolean multiParent) {
         if (glyph == null) {
             return "";
         }
-        return multiParent ? glyph + MULTI_PARENT_GLYPH : glyph;
+        return multiParent && !isLetter() ? glyph + MULTI_PARENT_GLYPH : glyph;
     }
 }

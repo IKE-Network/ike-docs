@@ -25,10 +25,12 @@ import java.util.List;
  *                        the glossary renders them as parent chips and inverts them across
  *                        the source to render each koncept's children
  * @param status          Optional logical-definition status from the stated EL++ expression
- *                        ({@code defined}, {@code primitive}, {@code root}); {@code null} or
- *                        absent means no stated definition — the badge stays bare
- *                        (ike-issues#742 design amendment, #940). Multi-parent is not a
- *                        status: it is derived from {@code broader}'s size
+ *                        ({@code defined}, {@code primitive}, {@code root}, {@code undefined}).
+ *                        Absent with no {@code axiom}, the concept has no stated definition
+ *                        and the badge leads with {@code C}; absent beside an {@code axiom},
+ *                        the concept is defined but its status was never recorded, and the
+ *                        badge carries no mark (ike-issues#742 design amendment, #940).
+ *                        Multi-parent is not a status: it is derived from {@code broader}'s size
  * @param state           Optional lifecycle state of the koncept's latest version;
  *                        {@code inactive} renders the retired treatment — struck-through
  *                        label in the retired colour (#742 retired parity, #864). Absent
@@ -150,13 +152,19 @@ public record KonceptDefinition(
     }
 
     /**
-     * The logical-definition status as the typed vocabulary — {@link KonceptStatus#NONE}
-     * when {@link #status()} is absent or unrecognised.
+     * The logical-definition status as the typed vocabulary. With no {@link #status()}, the
+     * {@link #axiom()} decides: a koncept with neither has no stated definition
+     * ({@link KonceptStatus#UNDEFINED}), while one with an axiom is defined in a way the entry
+     * never classified, and a {@code C} would misreport it ({@link KonceptStatus#NONE}, as for
+     * an unrecognised status name).
      *
      * @return the resolved status, never {@code null}
      */
     public KonceptStatus konceptStatus() {
-        return KonceptStatus.fromString(status);
+        if (status != null && !status.isBlank()) {
+            return KonceptStatus.fromString(status);
+        }
+        return axiom == null || axiom.isBlank() ? KonceptStatus.UNDEFINED : KonceptStatus.NONE;
     }
 
     /**
@@ -341,7 +349,8 @@ public record KonceptDefinition(
 
         /**
          * Sets the logical-definition status name ({@code defined}, {@code primitive},
-         * {@code root}); {@code null} or absent means no stated definition.
+         * {@code root}, {@code undefined}); see {@link KonceptDefinition#konceptStatus()} for
+         * what its absence means.
          *
          * @param status the status name to set
          * @return this builder
