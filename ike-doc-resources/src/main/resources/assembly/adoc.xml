@@ -2,6 +2,14 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0
           http://maven.apache.org/xsd/assembly-2.2.0.xsd">
+    <!-- The adoc zip of a topic library (dev-adoc-packages,
+         IKE-Network/ike-issues#1343): the AsciiDoc source root at the
+         zip root, and beside it the metadata idoc:manifest and
+         idoc:topic-registry write under target/adoc-meta, so
+         META-INF/ike/<groupId>/<artifactId>/ ships with the packages
+         and ike:adoc-union can read the manifest at exactly that
+         entry. A library before the packages layout writes no
+         adoc-meta; the fileset is then empty and the zip unchanged. -->
     <id>adoc</id>
     <formats>
         <format>zip</format>
@@ -10,6 +18,10 @@
     <fileSets>
         <fileSet>
             <directory>${asciidoc.source.directory}</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/adoc-meta</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
