@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BlobIndex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">BlobIndex.java</span></div><h1>BlobIndex.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * Every {@code .adoc} file under a registry root with the git blob id of its
+ * content: the key the incremental registry decides staleness by
+ * ({@code dev-adoc-packages}, IKE-Network/ike-issues#1341). Dates are the
+ * wrong key, since a checkout, a rebase, a sync between machines or a
+ * restored file all change dates without changing content; the blob id
+ * addresses the content itself, and git already keeps it for every tracked
+ * file. {@link GitBlobIndex} reads it from git without opening a file;
+ * {@link #hashed(Path)} is the fallback for a tree without git, which
+ * reads every file once to compute the same id, so the two never disagree
+ * about an unchanged file.
+ *
+ * &lt;p&gt;Paths are relative to the root with {@code /} separators, in path
+ * order, with the directories {@link TopicRegistry#SKIPPED_DIRS} left out,
+ * as the full scan leaves them out. A symbolic link is never followed; it
+ * is a finding instead, as it is in the full scan.
+ *
+ * @param blobs    the files, path to blob id, iterating in path order
+ * @param findings what the index could not take: a symbolic link, prefixed
+ *                 with the path it concerns
+ * @param source   where the ids came from
+ * @since 136
+ */
+<span class="fc" id="L42">public record BlobIndex(Map&lt;String, String&gt; blobs, List&lt;String&gt; findings, Source source) {</span>
+
+    /** Where a {@link BlobIndex} took its blob ids from. */
+<span class="fc" id="L45">    public enum Source {</span>
+        /** From {@code git ls-files}, {@code git status} and {@code git hash-object}. */
+<span class="fc" id="L47">        GIT,</span>
+        /** Computed in Java by reading every file: the tree has no git. */
+<span class="fc" id="L49">        HASHED</span>
+    }
+
+    /**
+     * Index a root by reading every {@code .adoc} file under it and hashing
+     * the content as git hashes a blob ({@code &quot;blob &quot; + length + NUL +
+     * content}, SHA-1). This is the full scan's cost, paid when git is not
+     * there to answer for free.
+     *
+     * @param root the registry root
+     * @return the index
+     * @throws IOException if the tree cannot be read
+     */
+    public static BlobIndex hashed(Path root) throws IOException {
+<span class="fc" id="L63">        Path real = root.toRealPath();</span>
+<span class="fc" id="L64">        Map&lt;String, String&gt; blobs = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L65">        List&lt;String&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L66">        Files.walkFileTree(real, new SimpleFileVisitor&lt;&gt;() {</span>
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+<span class="fc bfc" id="L69" title="All 4 branches covered.">                if (!dir.equals(real) &amp;&amp; TopicRegistry.SKIPPED_DIRS.contains(dir.getFileName().toString())) {</span>
+<span class="fc" id="L70">                    return FileVisitResult.SKIP_SUBTREE;</span>
+                }
+<span class="fc" id="L72">                return FileVisitResult.CONTINUE;</span>
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+<span class="fc bfc" id="L77" title="All 2 branches covered.">                if (!file.getFileName().toString().endsWith(&quot;.adoc&quot;)) {</span>
+<span class="fc" id="L78">                    return FileVisitResult.CONTINUE;</span>
+                }
+<span class="fc" id="L80">                String relative = real.relativize(file).toString().replace('\\', '/');</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">                if (attrs.isSymbolicLink()) {</span>
+<span class="nc" id="L82">                    findings.add(relative + &quot;: symbolic link, skipped&quot;);</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">                } else if (attrs.isRegularFile()) {</span>
+                    try {
+<span class="fc" id="L85">                        blobs.put(relative, blobId(Files.readAllBytes(file)));</span>
+<span class="nc" id="L86">                    } catch (IOException e) {</span>
+<span class="nc" id="L87">                        throw new UncheckedIOException(e);</span>
+<span class="fc" id="L88">                    }</span>
+                }
+<span class="fc" id="L90">                return FileVisitResult.CONTINUE;</span>
+            }
+        });
+<span class="fc" id="L93">        findings.sort(null);</span>
+<span class="fc" id="L94">        return new BlobIndex(Collections.unmodifiableMap(blobs), List.copyOf(findings), Source.HASHED);</span>
+    }
+
+    /**
+     * The git blob id of content: the SHA-1 of {@code &quot;blob &lt;length&gt;\0&quot;}
+     * followed by the bytes, as {@code git hash-object} computes it for a
+     * file with no clean filter.
+     *
+     * @param content the file content
+     * @return the forty-character lowercase hex id
+     */
+    public static String blobId(byte[] content) {
+        try {
+<span class="fc" id="L107">            MessageDigest sha1 = MessageDigest.getInstance(&quot;SHA-1&quot;);</span>
+<span class="fc" id="L108">            sha1.update((&quot;blob &quot; + content.length + &quot;\0&quot;).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="fc" id="L109">            byte[] digest = sha1.digest(content);</span>
+<span class="fc" id="L110">            StringBuilder hex = new StringBuilder(40);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            for (byte b : digest) {</span>
+<span class="fc" id="L112">                hex.append(Character.forDigit((b &gt;&gt; 4) &amp; 0xf, 16)).append(Character.forDigit(b &amp; 0xf, 16));</span>
+            }
+<span class="fc" id="L114">            return hex.toString();</span>
+<span class="nc" id="L115">        } catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L116">            throw new IllegalStateException(&quot;SHA-1 is not available&quot;, e);</span>
+        }
+    }
+
+    /**
+     * Whether a relative path lies under a directory the scan never enters.
+     *
+     * @param relative a path relative to the root with {@code /} separators
+     * @return true when some directory of the path is in {@link TopicRegistry#SKIPPED_DIRS}
+     */
+    static boolean skipped(String relative) {
+<span class="fc" id="L127">        int from = 0;</span>
+        int slash;
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        while ((slash = relative.indexOf('/', from)) &gt;= 0) {</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (TopicRegistry.SKIPPED_DIRS.contains(relative.substring(from, slash))) {</span>
+<span class="fc" id="L131">                return true;</span>
+            }
+<span class="fc" id="L133">            from = slash + 1;</span>
+        }
+<span class="fc" id="L135">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

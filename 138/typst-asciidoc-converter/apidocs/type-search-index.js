@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html","k":"18"},{"p":"network.ike.docs.typst.asciidoc","l":"TypstConverter"},{"p":"network.ike.docs.typst.asciidoc","l":"TypstConverterRegistry"},{"p":"network.ike.docs.typst","l":"TypstPageSetup"},{"p":"network.ike.docs.typst","l":"TypstText"}];updateSearchResults();

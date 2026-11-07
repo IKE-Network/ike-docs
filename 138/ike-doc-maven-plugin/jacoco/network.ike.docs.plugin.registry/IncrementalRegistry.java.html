@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IncrementalRegistry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">IncrementalRegistry.java</span></div><h1>IncrementalRegistry.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+/**
+ * The blob-keyed incremental registry ({@code dev-adoc-packages},
+ * IKE-Network/ike-issues#1341). Every entry records the blob id of the
+ * content it was parsed from, and a run decides each file by one rule
+ * against the registry it wrote last time:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;same path and same blob: keep the entry, without opening the file;&lt;/li&gt;
+ *   &lt;li&gt;same blob at a path that is gone, a rename: re-key the entry to the
+ *       new path, without opening the file;&lt;/li&gt;
+ *   &lt;li&gt;a new or changed blob: parse the file;&lt;/li&gt;
+ *   &lt;li&gt;a path that is gone: drop the entry.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;Files that are not topics get an entry too, with their blob, so they
+ * are not opened again either. What is derived across files is derived
+ * again on every run from the entries: the duplicate-id findings, the
+ * counts, the domain grouping and the order. The result has the shape of
+ * {@link TopicRegistry#model}, so it reads back through
+ * {@link TopicRegistry#load} and serves as the previous registry of the
+ * next run. A first run, or a run after the previous registry was
+ * deleted, parses everything.
+ *
+ * @since 136
+ */
+public final class IncrementalRegistry {
+
+    /** The {@code registry-version} of a registry whose entries carry blobs. */
+    public static final String VERSION = &quot;1.3&quot;;
+
+    /**
+     * What one update did.
+     *
+     * @param model   the registry model, in the shape of {@link TopicRegistry#model}
+     * @param kept    entries kept as they were: same path, same blob
+     * @param rekeyed entries re-keyed to a new path: same blob, path gone
+     * @param parsed  files parsed: a new or changed blob
+     * @param dropped entries dropped: path gone and blob not seen elsewhere
+     */
+<span class="fc" id="L58">    public record Outcome(Map&lt;String, Object&gt; model, int kept, int rekeyed, int parsed, int dropped) {</span>
+    }
+
+    /** One entry of the previous registry with where it was filed. */
+<span class="fc" id="L62">    private record Previous(Map&lt;String, Object&gt; entry, boolean topic, boolean assembly, List&lt;String&gt; findings) {</span>
+    }
+
+    /** One entry of the new registry, in path order. */
+<span class="fc" id="L66">    private record Current(String file, Map&lt;String, Object&gt; entry, boolean topic, boolean assembly,</span>
+                           List&lt;String&gt; findings) {
+    }
+
+    private IncrementalRegistry() {
+    }
+
+    /**
+     * Update a registry against the files a blob index lists.
+     *
+     * @param previous the registry written last time, from
+     *                 {@link TopicRegistry#load}, or {@code null} for a first run
+     * @param root     the registry root the index paths are relative to
+     * @param index    every {@code .adoc} file under the root with its blob id
+     * @param base     the directory the root is shown relative to (the module
+     *                 base directory)
+     * @param now      the generation instant
+     * @return the outcome, with the new model
+     * @throws IOException if a file that must be parsed cannot be read
+     */
+    public static Outcome update(Map&lt;String, Object&gt; previous, Path root, BlobIndex index, Path base,
+                                 Instant now) throws IOException {
+<span class="fc" id="L88">        Map&lt;String, Previous&gt; byPath = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L89">        Map&lt;String, List&lt;String&gt;&gt; pathsByBlob = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (previous != null) {</span>
+<span class="fc" id="L91">            collectPrevious(previous, byPath, pathsByBlob);</span>
+        }
+
+<span class="fc" id="L94">        Set&lt;String&gt; consumed = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L95">        List&lt;String&gt; toParse = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L96">        Map&lt;String, Current&gt; current = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L97">        int kept = 0;</span>
+<span class="fc" id="L98">        int rekeyed = 0;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        for (Map.Entry&lt;String, String&gt; file : index.blobs().entrySet()) {</span>
+<span class="fc" id="L100">            String path = file.getKey();</span>
+<span class="fc" id="L101">            String blob = file.getValue();</span>
+<span class="fc" id="L102">            Previous same = byPath.get(path);</span>
+<span class="fc bfc" id="L103" title="All 4 branches covered.">            if (same != null &amp;&amp; blob.equals(same.entry().get(&quot;blob&quot;))) {</span>
+<span class="fc" id="L104">                consumed.add(path);</span>
+<span class="fc" id="L105">                current.put(path, new Current(path, copy(same.entry()), same.topic(), same.assembly(),</span>
+<span class="fc" id="L106">                        same.findings()));</span>
+<span class="fc" id="L107">                kept++;</span>
+<span class="fc" id="L108">                continue;</span>
+            }
+<span class="fc" id="L110">            String movedFrom = null;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            for (String candidate : pathsByBlob.getOrDefault(blob, List.of())) {</span>
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">                if (!index.blobs().containsKey(candidate) &amp;&amp; !consumed.contains(candidate)) {</span>
+<span class="fc" id="L113">                    movedFrom = candidate;</span>
+<span class="fc" id="L114">                    break;</span>
+                }
+<span class="nc" id="L116">            }</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            if (movedFrom != null) {</span>
+<span class="fc" id="L118">                consumed.add(movedFrom);</span>
+<span class="fc" id="L119">                Previous moved = byPath.get(movedFrom);</span>
+<span class="fc" id="L120">                Map&lt;String, Object&gt; entry = copy(moved.entry());</span>
+<span class="fc" id="L121">                entry.put(&quot;file&quot;, path);</span>
+<span class="fc" id="L122">                current.put(path, new Current(path, entry, moved.topic(), moved.assembly(), moved.findings()));</span>
+<span class="fc" id="L123">                rekeyed++;</span>
+<span class="fc" id="L124">                continue;</span>
+            }
+<span class="fc" id="L126">            toParse.add(path);</span>
+<span class="fc" id="L127">        }</span>
+<span class="fc" id="L128">        int dropped = 0;</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        for (String path : byPath.keySet()) {</span>
+<span class="fc bfc" id="L130" title="All 4 branches covered.">            if (!index.blobs().containsKey(path) &amp;&amp; !consumed.contains(path)) {</span>
+<span class="fc" id="L131">                dropped++;</span>
+            }
+<span class="fc" id="L133">        }</span>
+
+<span class="fc" id="L135">        Path real = root.toRealPath();</span>
+        List&lt;Current&gt; parsed;
+        try {
+<span class="fc" id="L138">            parsed = toParse.parallelStream().map(path -&gt; {</span>
+                try {
+<span class="fc" id="L140">                    return parse(real, path, index.blobs().get(path));</span>
+<span class="nc" id="L141">                } catch (IOException e) {</span>
+<span class="nc" id="L142">                    throw new UncheckedIOException(e);</span>
+                }
+<span class="fc" id="L144">            }).toList();</span>
+<span class="nc" id="L145">        } catch (UncheckedIOException e) {</span>
+<span class="nc" id="L146">            throw e.getCause();</span>
+<span class="fc" id="L147">        }</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (Current c : parsed) {</span>
+<span class="fc" id="L149">            current.put(c.file(), c);</span>
+<span class="fc" id="L150">        }</span>
+<span class="fc" id="L151">        return new Outcome(model(current.values(), index.findings(), real, base, now), kept, rekeyed,</span>
+<span class="fc" id="L152">                toParse.size(), dropped);</span>
+    }
+
+    /**
+     * Parse one file into its entry: the header through {@link TopicHeader},
+     * the index terms through {@link TermIndex}, the blob after the path.
+     */
+    private static Current parse(Path real, String path, String blob) throws IOException {
+<span class="fc" id="L160">        String content = Files.readString(real.resolve(path), StandardCharsets.UTF_8);</span>
+<span class="fc" id="L161">        TopicHeader header = TopicHeader.parse(path, content);</span>
+        Map&lt;String, Object&gt; entry;
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (header.topic()) {</span>
+<span class="fc" id="L164">            entry = withBlob(TopicRegistry.topicEntry(header, path), blob);</span>
+<span class="fc" id="L165">            List&lt;String&gt; terms = TermIndex.termsOf(content);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            if (!terms.isEmpty()) {</span>
+<span class="fc" id="L167">                entry.put(&quot;index-terms&quot;, terms);</span>
+            }
+<span class="fc" id="L169">        } else {</span>
+<span class="fc" id="L170">            entry = withBlob(TopicRegistry.otherEntry(header, path), blob);</span>
+        }
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        return new Current(path, entry, header.topic(), header.includes() &gt; 0, header.findings());</span>
+    }
+
+    /** The entry with {@code blob} right after {@code file}, and {@code topic: false} on a file that is not one. */
+    private static Map&lt;String, Object&gt; withBlob(Map&lt;String, Object&gt; entry, String blob) {
+<span class="fc" id="L177">        Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L178">        boolean topic = entry.containsKey(&quot;id&quot;);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        for (Map.Entry&lt;String, Object&gt; e : entry.entrySet()) {</span>
+<span class="fc" id="L180">            out.put(e.getKey(), e.getValue());</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">            if (e.getKey().equals(&quot;file&quot;)) {</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                if (!topic) {</span>
+<span class="fc" id="L183">                    out.put(&quot;topic&quot;, false);</span>
+                }
+<span class="fc" id="L185">                out.put(&quot;blob&quot;, blob);</span>
+            }
+<span class="fc" id="L187">        }</span>
+<span class="fc" id="L188">        return out;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static void collectPrevious(Map&lt;String, Object&gt; previous, Map&lt;String, Previous&gt; byPath,
+                                        Map&lt;String, List&lt;String&gt;&gt; pathsByBlob) {
+<span class="fc" id="L194">        Map&lt;String, List&lt;String&gt;&gt; findingsByFile = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        for (Object f : (List&lt;Object&gt;) previous.getOrDefault(&quot;findings&quot;, List.of())) {</span>
+<span class="fc" id="L196">            String finding = String.valueOf(f);</span>
+<span class="fc" id="L197">            int colon = finding.indexOf(&quot;: &quot;);</span>
+<span class="pc bpc" id="L198" title="1 of 4 branches missed.">            if (colon &lt; 0 || isDerived(finding)) {</span>
+<span class="fc" id="L199">                continue;</span>
+            }
+<span class="fc" id="L201">            findingsByFile.computeIfAbsent(finding.substring(0, colon), k -&gt; new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L202">                    .add(finding.substring(colon + 2));</span>
+<span class="fc" id="L203">        }</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (Object d : (List&lt;Object&gt;) previous.getOrDefault(&quot;domains&quot;, List.of())) {</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">            for (Object t : (List&lt;Object&gt;) ((Map&lt;String, Object&gt;) d).getOrDefault(&quot;topics&quot;, List.of())) {</span>
+<span class="fc" id="L206">                remember((Map&lt;String, Object&gt;) t, true, false, byPath, pathsByBlob, findingsByFile);</span>
+<span class="fc" id="L207">            }</span>
+<span class="fc" id="L208">        }</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (Object a : (List&lt;Object&gt;) previous.getOrDefault(&quot;assemblies&quot;, List.of())) {</span>
+<span class="fc" id="L210">            remember((Map&lt;String, Object&gt;) a, false, true, byPath, pathsByBlob, findingsByFile);</span>
+<span class="fc" id="L211">        }</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        for (Object o : (List&lt;Object&gt;) previous.getOrDefault(&quot;other-files&quot;, List.of())) {</span>
+<span class="fc" id="L213">            remember((Map&lt;String, Object&gt;) o, false, false, byPath, pathsByBlob, findingsByFile);</span>
+<span class="fc" id="L214">        }</span>
+<span class="fc" id="L215">    }</span>
+
+    private static void remember(Map&lt;String, Object&gt; entry, boolean topic, boolean assembly,
+                                 Map&lt;String, Previous&gt; byPath, Map&lt;String, List&lt;String&gt;&gt; pathsByBlob,
+                                 Map&lt;String, List&lt;String&gt;&gt; findingsByFile) {
+<span class="fc" id="L220">        String file = String.valueOf(entry.get(&quot;file&quot;));</span>
+<span class="fc" id="L221">        Object blob = entry.get(&quot;blob&quot;);</span>
+<span class="pc bpc" id="L222" title="1 of 4 branches missed.">        if (blob == null || byPath.containsKey(file)) {</span>
+<span class="fc" id="L223">            return;   // an entry without a blob, from a registry of the full scan, is parsed again</span>
+        }
+<span class="fc" id="L225">        byPath.put(file, new Previous(entry, topic, assembly,</span>
+<span class="fc" id="L226">                List.copyOf(findingsByFile.getOrDefault(file, List.of()))));</span>
+<span class="fc" id="L227">        pathsByBlob.computeIfAbsent(String.valueOf(blob), k -&gt; new ArrayList&lt;&gt;()).add(file);</span>
+<span class="fc" id="L228">    }</span>
+
+    /** A finding derived across files or from the tree, computed afresh on every run rather than carried. */
+    private static boolean isDerived(String finding) {
+<span class="pc bpc" id="L232" title="1 of 4 branches missed.">        return finding.contains(&quot;: duplicate id '&quot;) || finding.endsWith(&quot;: symbolic link, skipped&quot;);</span>
+    }
+
+    private static Map&lt;String, Object&gt; copy(Map&lt;String, Object&gt; entry) {
+<span class="fc" id="L236">        return new LinkedHashMap&lt;&gt;(entry);</span>
+    }
+
+    /**
+     * Assemble the model from the entries in path order, as
+     * {@link TopicRegistry#model} assembles it from headers: topics grouped
+     * by domain and sorted by id (a duplicate id kept in path order), the
+     * other files split into assemblies and plain files, the tree findings
+     * first and then each file's, with the duplicate-id findings derived
+     * again.
+     */
+    private static Map&lt;String, Object&gt; model(Iterable&lt;Current&gt; entries, List&lt;String&gt; treeFindings, Path real,
+                                             Path base, Instant now) {
+<span class="fc" id="L249">        Map&lt;String, Object&gt; registry = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L250">        registry.put(&quot;registry-version&quot;, VERSION);</span>
+<span class="fc" id="L251">        registry.put(&quot;generated&quot;, now.truncatedTo(ChronoUnit.SECONDS).toString());</span>
+<span class="fc" id="L252">        registry.put(&quot;scanned-from&quot;, base.toAbsolutePath().normalize().toString());</span>
+<span class="fc" id="L253">        registry.put(&quot;roots&quot;, List.of(relativeTo(base, real)));</span>
+<span class="fc" id="L254">        TreeMap&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; domains = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L255">        List&lt;Object&gt; assemblies = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L256">        List&lt;Object&gt; otherFiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L257">        List&lt;String&gt; findings = new ArrayList&lt;&gt;(treeFindings);</span>
+<span class="fc" id="L258">        findings.sort(null);</span>
+<span class="fc" id="L259">        Map&lt;String, String&gt; firstFileById = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L260">        int files = 0;</span>
+<span class="fc" id="L261">        int topics = 0;</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        for (Current c : entries) {</span>
+<span class="fc" id="L263">            files++;</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if (c.topic()) {</span>
+<span class="fc" id="L265">                topics++;</span>
+<span class="fc" id="L266">                String id = String.valueOf(c.entry().get(&quot;id&quot;));</span>
+<span class="fc" id="L267">                domains.computeIfAbsent(TopicRegistry.domainOf(id), k -&gt; new ArrayList&lt;&gt;()).add(c.entry());</span>
+<span class="fc" id="L268">                String earlier = firstFileById.putIfAbsent(id, c.file());</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">                if (earlier != null) {</span>
+<span class="fc" id="L270">                    findings.add(c.file() + &quot;: duplicate id '&quot; + id + &quot;', already declared by &quot; + earlier);</span>
+                }
+<span class="fc" id="L272">            } else {</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">                (c.assembly() ? assemblies : otherFiles).add(c.entry());</span>
+            }
+<span class="fc bfc" id="L275" title="All 2 branches covered.">            for (String f : c.findings()) {</span>
+<span class="fc" id="L276">                findings.add(c.file() + &quot;: &quot; + f);</span>
+<span class="fc" id="L277">            }</span>
+<span class="fc" id="L278">        }</span>
+<span class="fc" id="L279">        registry.put(&quot;topic-count&quot;, topics);</span>
+<span class="fc" id="L280">        registry.put(&quot;file-count&quot;, files);</span>
+<span class="fc" id="L281">        List&lt;Object&gt; domainList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">        for (Map.Entry&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; e : domains.entrySet()) {</span>
+<span class="fc" id="L283">            Map&lt;String, Object&gt; domain = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L284">            domain.put(&quot;id&quot;, e.getKey());</span>
+<span class="fc" id="L285">            e.getValue().sort((x, y) -&gt; String.valueOf(x.get(&quot;id&quot;)).compareTo(String.valueOf(y.get(&quot;id&quot;))));</span>
+<span class="fc" id="L286">            domain.put(&quot;topics&quot;, e.getValue());</span>
+<span class="fc" id="L287">            domainList.add(domain);</span>
+<span class="fc" id="L288">        }</span>
+<span class="fc" id="L289">        registry.put(&quot;domains&quot;, domainList);</span>
+<span class="fc" id="L290">        registry.put(&quot;assemblies&quot;, assemblies);</span>
+<span class="fc" id="L291">        registry.put(&quot;other-files&quot;, otherFiles);</span>
+<span class="fc" id="L292">        registry.put(&quot;findings&quot;, findings);</span>
+<span class="fc" id="L293">        return registry;</span>
+    }
+
+    private static String relativeTo(Path base, Path path) {
+        try {
+<span class="fc" id="L298">            Path b = base.toRealPath();</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">            if (path.startsWith(b)) {</span>
+<span class="fc" id="L300">                String relative = b.relativize(path).toString().replace('\\', '/');</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">                return relative.isEmpty() ? &quot;.&quot; : relative;</span>
+            }
+<span class="nc" id="L303">        } catch (IOException e) {</span>
+            // fall through to the absolute form
+<span class="nc" id="L305">        }</span>
+<span class="nc" id="L306">        return path.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
