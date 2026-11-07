@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -55,6 +55,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">Contents&nbsp;<input type="text" class="filter-input" disabled placeholder="Filter contents (type .)" aria-label="Filter table of contents" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="Reset"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">Description</a></li>
+<li><a href="#nested-class-summary" tabindex="0">Nested Class Summary</a></li>
 <li><a href="#field-summary" tabindex="0">Field Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
@@ -72,6 +73,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#OUTCOME_FILL" tabindex="0">OUTCOME_FILL</a></li>
 <li><a href="#FOLDED_FILL" tabindex="0">FOLDED_FILL</a></li>
 <li><a href="#FAMILY" tabindex="0">FAMILY</a></li>
+<li><a href="#UNPRICED" tabindex="0">UNPRICED</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -82,7 +84,20 @@ loadScripts(document, 'script');</script>
 <li><a href="#fit(java.lang.String,double,boolean,double)" tabindex="0">fit(String, double, boolean, double)</a></li>
 <li><a href="#wrap(java.lang.String,double,double)" tabindex="0">wrap(String, double, double)</a></li>
 <li><a href="#value(double)" tabindex="0">value(double)</a></li>
+<li><a href="#percent(double,boolean)" tabindex="0">percent(double, boolean)</a></li>
+<li><a href="#percent(double)" tabindex="0">percent(double)</a></li>
+<li><a href="#symbolFor(java.lang.String)" tabindex="0">symbolFor(String)</a></li>
+<li><a href="#chip(double,double,boolean,boolean,boolean,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)" tabindex="0">chip(double, double, boolean, boolean, boolean, DecisionFigureText.Unit, String)</a></li>
+<li><a href="#quantity(double,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)" tabindex="0">quantity(double, DecisionFigureText.Unit, String)</a></li>
 <li><a href="#shown(double,boolean,boolean)" tabindex="0">shown(double, boolean, boolean)</a></li>
+<li><a href="#atStep(double,double)" tabindex="0">atStep(double, double)</a></li>
+<li><a href="#count(double)" tabindex="0">count(double)</a></li>
+<li><a href="#ofCohort(double,double)" tabindex="0">ofCohort(double, double)</a></li>
+<li><a href="#tally(java.lang.String,double,java.util.List,java.util.List)" tabindex="0">tally(String, double, List, List)</a></li>
+<li><a href="#tally(java.lang.String,boolean,double,java.util.List,java.util.List)" tabindex="0">tally(String, boolean, double, List, List)</a></li>
+<li><a href="#tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">tradeoff(String, String, double, String, double, String, String, String)</a></li>
+<li><a href="#tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String,boolean,java.util.List)" tabindex="0">tradeoff(String, String, double, String, double, String, String, String, boolean, List)</a></li>
+<li><a href="#countClause(java.lang.String,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">countClause(String, boolean, String, String, String, String)</a></li>
 <li><a href="#length(double)" tabindex="0">length(double)</a></li>
 </ol>
 </li>
@@ -111,6 +126,23 @@ figure's palette and number formats, which the live JavaFX surface shares.
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>Nested Class Summary</h2>
+<div class="caption"><span>Nested Classes</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Class</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="DecisionFigureText.Unit.html" class="type-name-link" title="enum class in network.ike.docs.koncept">DecisionFigureText.Unit</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">What a swept quantity is: a share of those at a node, money, or anything else with a unit of its own.</div>
+</div>
+</div>
+</section>
+</li>
 <!-- =========== FIELD SUMMARY =========== -->
 <li>
 <section class="field-summary" id="field-summary">
@@ -177,6 +209,11 @@ figure's palette and number formats, which the live JavaFX surface shares.
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#OUTCOME_FILL" class="member-name-link">OUTCOME_FILL</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#UNPRICED" class="member-name-link">UNPRICED</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">When nothing is priced: the choice is left open, and the ledger alone weighs the alternatives.</div>
+</div>
 </div>
 </section>
 </li>
@@ -197,6 +234,43 @@ figure's palette and number formats, which the live JavaFX surface shares.
 <div class="block">Where the baseline of a line of text of a size sits beneath its top.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#atStep(double,double)" class="member-name-link">atStep</a><wbr>(double&nbsp;value,
+ double&nbsp;step)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A value at a step's resolution: as many decimals as the step has, so a slider stepping by
+0.05 shows 0.35, never 0.34999999.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#chip(double,double,boolean,boolean,boolean,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)" class="member-name-link">chip</a><wbr>(double&nbsp;lower,
+ double&nbsp;upper,
+ boolean&nbsp;lowerOpen,
+ boolean&nbsp;upperOpen,
+ boolean&nbsp;computed,
+ <a href="DecisionFigureText.Unit.html" title="enum class in network.ike.docs.koncept">DecisionFigureText.Unit</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;symbol)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A measure's bounds as a chip on the tree prints them, in the measure's unit: a share as a
+percentage, money after its symbol, anything else followed by its unit's name; an interval
+in brackets.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#count(double)" class="member-name-link">count</a><wbr>(double&nbsp;count)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A count of a cohort: whole from ten up, to two significant figures beneath, so 214.2 reads
+214, 3.31 reads 3.3, 2.04 reads 2 and 0.41 reads 0.41.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#countClause(java.lang.String,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">countClause</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sparer,
+ boolean&nbsp;chosenSpares,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;countText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;perText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eachText)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A clause for one counted unit: who spares how many, per how many cases, and at what in
+money each, when the other side pays for it.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fit(java.lang.String,double,boolean,double)" class="member-name-link">fit</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
  double&nbsp;size,
  boolean&nbsp;bold,
@@ -215,31 +289,116 @@ figure's palette and number formats, which the live JavaFX surface shares.
 <div class="block">The height of a line of text of a size, as the builders space lines.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ofCohort(double,double)" class="member-name-link">ofCohort</a><wbr>(double&nbsp;count,
+ double&nbsp;size)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">How many of a cohort go a way, as a branch says it: "214 of 1,000", or "all 1,000" when every one does.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#percent(double)" class="member-name-link">percent</a><wbr>(double&nbsp;share)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A computed share as a percentage; see <a href="#percent(double,boolean)"><code>percent(double, boolean)</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#percent(double,boolean)" class="member-name-link">percent</a><wbr>(double&nbsp;share,
+ boolean&nbsp;computed)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A share as a reader says it: a computed one as a percentage to three significant figures,
+no wider, so a threshold of 0.017463 reads 1.75%; a stated one as the block wrote it, so
+0.214 reads 21.4% and 0.9 reads 90%.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#quantity(double,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)" class="member-name-link">quantity</a><wbr>(double&nbsp;value,
+ <a href="DecisionFigureText.Unit.html" title="enum class in network.ike.docs.koncept">DecisionFigureText.Unit</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;symbol)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A quantity on a tornado's caption or threshold, with its unit: a share as a percentage, money
+after its symbol to the whole unit, anything else to three significant figures followed by
+its unit's name when it has one.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#shown(double,boolean,boolean)" class="member-name-link">shown</a><wbr>(double&nbsp;value,
  boolean&nbsp;computed,
  boolean&nbsp;money)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">A measure's value as its chip shows it, as the live surface shows it.</div>
+<div class="block">A measure's value as its chip shows it.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#value(double)" class="member-name-link">value</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#symbolFor(java.lang.String)" class="member-name-link">symbolFor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unitName)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">The sign a money unit is written with when it has a familiar one, from the unit's name:
+a dollar's <code>$</code>, a euro's <code>€</code>, a pound's <code>£</code>, a yen's <code>¥</code>; empty
+for any other, which then prints its name.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#tally(java.lang.String,boolean,double,java.util.List,java.util.List)" class="member-name-link">tally</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;alternative,
+ boolean&nbsp;entering,
+ double&nbsp;size,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;&nbsp;counts)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Where a cohort ends up, entering a tree of consequences with no choice at its root when <code>entering</code>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#tally(java.lang.String,double,java.util.List,java.util.List)" class="member-name-link">tally</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;alternative,
+ double&nbsp;size,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;&nbsp;counts)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Where a cohort that takes one alternative ends up, as one sentence: the outcomes largest
+first, each with its count and, where fewer than a third arrive, how rare it is as one in so
+many.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">tradeoff</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;other,
+ double&nbsp;money,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;moneyText,
+ double&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;healthText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;priceText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pricedText)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">What the choice at the root trades, as one sentence: how the chosen alternative stands
+against the next best in money and in health, and the price of a healthy year at which
+they tie, against the price the tree was read at.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String,boolean,java.util.List)" class="member-name-link">tradeoff</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;other,
+ double&nbsp;money,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;moneyText,
+ double&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;healthText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;priceText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pricedText,
+ boolean&nbsp;countedAgainst,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;clauses)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">The trade with what the tree counts weighed in: <code>countedAgainst</code> when the chosen
+alternative brings more of some counted unit than the next best, so that it does not win
+outright however health is priced; and a clause per counted unit that differs, already
+worded, which follows the sentence.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#value(double)" class="member-name-link">value</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">A measure's value as a threshold or a caption reads it: whole above a hundred, two decimals
 above one, four beneath, since a flip found by bisection is only as exact as its range.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#width(java.lang.String,double,boolean)" class="member-name-link">width</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#width(java.lang.String,double,boolean)" class="member-name-link">width</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
  double&nbsp;size,
  boolean&nbsp;bold)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">The estimated width of a run of text: each character by its class in a Helvetica-like
 face, bold a twentieth wider, a space between words narrow.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#wrap(java.lang.String,double,double)" class="member-name-link">wrap</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#wrap(java.lang.String,double,double)" class="member-name-link">wrap</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;text,
  double&nbsp;size,
  double&nbsp;maxWidth)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">The text broken into lines no wider than a width, at spaces.</div>
 </div>
 </div>
@@ -476,6 +635,23 @@ face, bold a twentieth wider, a space between words narrow.</div>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="UNPRICED">
+<h3>UNPRICED</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">UNPRICED</span></div>
+<div class="block">When nothing is priced: the choice is left open, and the ledger alone weighs the alternatives.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../constant-values.html#network.ike.docs.koncept.DecisionFigureText.UNPRICED">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -548,16 +724,199 @@ above one, four beneath, since a flip found by bisection is only as exact as its
 </section>
 </li>
 <li>
+<section class="detail" id="percent(double,boolean)">
+<h3>percent</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">percent</span><wbr><span class="parameters">(double&nbsp;share,
+ boolean&nbsp;computed)</span></div>
+<div class="block">A share as a reader says it: a computed one as a percentage to three significant figures,
+no wider, so a threshold of 0.017463 reads 1.75%; a stated one as the block wrote it, so
+0.214 reads 21.4% and 0.9 reads 90%.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="percent(double)">
+<h3>percent</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">percent</span><wbr><span class="parameters">(double&nbsp;share)</span></div>
+<div class="block">A computed share as a percentage; see <a href="#percent(double,boolean)"><code>percent(double, boolean)</code></a>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="symbolFor(java.lang.String)">
+<h3>symbolFor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">symbolFor</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unitName)</span></div>
+<div class="block">The sign a money unit is written with when it has a familiar one, from the unit's name:
+a dollar's <code>$</code>, a euro's <code>€</code>, a pound's <code>£</code>, a yen's <code>¥</code>; empty
+for any other, which then prints its name.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="chip(double,double,boolean,boolean,boolean,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)">
+<h3>chip</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">chip</span><wbr><span class="parameters">(double&nbsp;lower,
+ double&nbsp;upper,
+ boolean&nbsp;lowerOpen,
+ boolean&nbsp;upperOpen,
+ boolean&nbsp;computed,
+ <a href="DecisionFigureText.Unit.html" title="enum class in network.ike.docs.koncept">DecisionFigureText.Unit</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;symbol)</span></div>
+<div class="block">A measure's bounds as a chip on the tree prints them, in the measure's unit: a share as a
+percentage, money after its symbol, anything else followed by its unit's name; an interval
+in brackets. A stated number prints as the block wrote it, a computed one no wider than it
+earns, as <a href="#shown(double,boolean,boolean)"><code>shown(double, boolean, boolean)</code></a> prints them.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="quantity(double,network.ike.docs.koncept.DecisionFigureText.Unit,java.lang.String)">
+<h3>quantity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">quantity</span><wbr><span class="parameters">(double&nbsp;value,
+ <a href="DecisionFigureText.Unit.html" title="enum class in network.ike.docs.koncept">DecisionFigureText.Unit</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;symbol)</span></div>
+<div class="block">A quantity on a tornado's caption or threshold, with its unit: a share as a percentage, money
+after its symbol to the whole unit, anything else to three significant figures followed by
+its unit's name when it has one. A negative amount of money carries its sign before the
+symbol.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="shown(double,boolean,boolean)">
 <h3>shown</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">shown</span><wbr><span class="parameters">(double&nbsp;value,
  boolean&nbsp;computed,
  boolean&nbsp;money)</span></div>
-<div class="block">A measure's value as its chip shows it, as the live surface shows it. A stated number
-prints as the block wrote it and no wider; a computed one is held to what its inputs can
-carry: money to the whole unit of its currency, a share or a quantity to three significant
-figures, since a product of two-figure assumptions never earns a fifth decimal.</div>
+<div class="block">A measure's value as its chip shows it. A stated number prints as the block wrote it and no
+wider; a computed one is held to what its inputs can carry: money to the whole unit of its
+currency, a share or a quantity to three significant figures, since a product of two-figure
+assumptions never earns a fifth decimal.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="atStep(double,double)">
+<h3>atStep</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">atStep</span><wbr><span class="parameters">(double&nbsp;value,
+ double&nbsp;step)</span></div>
+<div class="block">A value at a step's resolution: as many decimals as the step has, so a slider stepping by
+0.05 shows 0.35, never 0.34999999.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="count(double)">
+<h3>count</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">count</span><wbr><span class="parameters">(double&nbsp;count)</span></div>
+<div class="block">A count of a cohort: whole from ten up, to two significant figures beneath, so 214.2 reads
+214, 3.31 reads 3.3, 2.04 reads 2 and 0.41 reads 0.41.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ofCohort(double,double)">
+<h3>ofCohort</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ofCohort</span><wbr><span class="parameters">(double&nbsp;count,
+ double&nbsp;size)</span></div>
+<div class="block">How many of a cohort go a way, as a branch says it: "214 of 1,000", or "all 1,000" when every one does.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tally(java.lang.String,double,java.util.List,java.util.List)">
+<h3>tally</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">tally</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;alternative,
+ double&nbsp;size,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;&nbsp;counts)</span></div>
+<div class="block">Where a cohort that takes one alternative ends up, as one sentence: the outcomes largest
+first, each with its count and, where fewer than a third arrive, how rare it is as one in so
+many. The outcome names and counts are given in order.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tally(java.lang.String,boolean,double,java.util.List,java.util.List)">
+<h3>tally</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">tally</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;alternative,
+ boolean&nbsp;entering,
+ double&nbsp;size,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;&nbsp;counts)</span></div>
+<div class="block">Where a cohort ends up, entering a tree of consequences with no choice at its root when <code>entering</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String)">
+<h3>tradeoff</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">tradeoff</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;other,
+ double&nbsp;money,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;moneyText,
+ double&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;healthText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;priceText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pricedText)</span></div>
+<div class="block">What the choice at the root trades, as one sentence: how the chosen alternative stands
+against the next best in money and in health, and the price of a healthy year at which
+they tie, against the price the tree was read at.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>money</code> - how much more money the chosen costs, printed with its sign dropped; negative means less</dd>
+<dd><code>health</code> - how much more healthy life the chosen keeps, printed with its sign dropped; negative means less</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tradeoff(java.lang.String,java.lang.String,double,java.lang.String,double,java.lang.String,java.lang.String,java.lang.String,boolean,java.util.List)">
+<h3>tradeoff</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">tradeoff</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;other,
+ double&nbsp;money,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;moneyText,
+ double&nbsp;health,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;healthText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;priceText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;pricedText,
+ boolean&nbsp;countedAgainst,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;clauses)</span></div>
+<div class="block">The trade with what the tree counts weighed in: <code>countedAgainst</code> when the chosen
+alternative brings more of some counted unit than the next best, so that it does not win
+outright however health is priced; and a clause per counted unit that differs, already
+worded, which follows the sentence.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="countClause(java.lang.String,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String)">
+<h3>countClause</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">countClause</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sparer,
+ boolean&nbsp;chosenSpares,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;countText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;perText,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;eachText)</span></div>
+<div class="block">A clause for one counted unit: who spares how many, per how many cases, and at what in
+money each, when the other side pays for it. "“scan” spares 3.3 ruptures per 1,000, at
+$590,000 each."; "“wear test” would spare 185,400 patients with an implant removed per
+100, at $54 each."</div>
 </div>
 </section>
 </li>

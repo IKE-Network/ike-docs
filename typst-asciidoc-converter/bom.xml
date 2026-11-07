@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom serialNumber="urn:uuid:a4651424-2757-3c96-b7e3-4aa72d01c171" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+<bom serialNumber="urn:uuid:03da24fa-2c52-3628-986f-bbfe8281066d" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
   <metadata>
     <lifecycles>
       <lifecycle>
@@ -27,11 +27,11 @@
         </component>
       </components>
     </tools>
-    <component type="library" bom-ref="pkg:maven/network.ike.docs/typst-asciidoc-converter@135?type=jar">
+    <component type="library" bom-ref="pkg:maven/network.ike.docs/typst-asciidoc-converter@136?type=jar">
       <publisher>IKE Network</publisher>
       <group>network.ike.docs</group>
       <name>typst-asciidoc-converter</name>
-      <version>135</version>
+      <version>136</version>
       <description>AsciidoctorJ converter for the `typst` backend: walks the Asciidoctor
         AST and emits Typst source (.typ) for the Typst print target
         (IKE-Network/ike-issues#1307, design topic dev-document-surface-pages).
@@ -43,7 +43,7 @@
           <id>Apache-2.0</id>
         </license>
       </licenses>
-      <purl>pkg:maven/network.ike.docs/typst-asciidoc-converter@135?type=jar</purl>
+      <purl>pkg:maven/network.ike.docs/typst-asciidoc-converter@136?type=jar</purl>
       <externalReferences>
         <reference type="website">
           <url>https://github.com/IKE-Network/ike-docs</url>
@@ -1223,7 +1223,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:maven/network.ike.docs/typst-asciidoc-converter@135?type=jar">
+    <dependency ref="pkg:maven/network.ike.docs/typst-asciidoc-converter@136?type=jar">
       <dependency ref="pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar"/>
       <dependency ref="pkg:maven/org.jruby/jruby@10.0.3.0?type=jar"/>
       <dependency ref="pkg:maven/org.slf4j/slf4j-api@2.0.12?type=jar"/>

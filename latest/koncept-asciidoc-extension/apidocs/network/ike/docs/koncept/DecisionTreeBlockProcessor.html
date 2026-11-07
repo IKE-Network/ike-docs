@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -120,7 +120,15 @@ an image block is what those converters place; on the Typst backend as native Ty
 (<a href="DecisionFigureTypst.html" title="class in network.ike.docs.koncept"><code>DecisionFigureTypst</code></a>), handed to the converter in a passthrough block with the role
 <code>typst</code>, so the print pipeline draws the figure with the document's own text and never
 through an embedded image. A block with no root decision renders as a literal block, so the text
-is visible, never dropped; a block with gaps renders with them named in a note.</div>
+is visible, never dropped; a block with gaps renders with them named in a note.
+
+<p>A block that names a model, <code>[decision-tree, model=&lt;id&gt;]</code>, is a rendering of the
+<code>[graphlet-model]</code> block before it (<code>dev-decision-point-knowledge</code>, settled 2026-11-06):
+it holds no structure and no number, only how the model is viewed, the standpoint it is rolled
+back from and the cohort it is counted out for. It draws the model's tree, ledger and sentences
+and the worked table, and no tornado: that is the <code>[tornado, model=&lt;id&gt;]</code> block's; and no
+table of assumptions: the model block draws its own parameters. A block with a body of its own
+still reads as before, tornado beneath.</div>
 </div>
 </section>
 <section class="summary">

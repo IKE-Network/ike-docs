@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ManifestMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">ManifestMojo.java</span></div><h1>ManifestMojo.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import network.ike.docs.plugin.packages.AdocLayout;
+import network.ike.docs.plugin.packages.AdocPackages;
+import network.ike.docs.plugin.packages.PackageManifest;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+/**
+ * Generate the package manifest of a topic library laid out as packages
+ * ({@code dev-adoc-packages}, IKE-Network/ike-issues#1341):
+ * {@code target/adoc-meta/META-INF/ike/&lt;groupId&gt;/&lt;artifactId&gt;/manifest.yaml},
+ * from the POM and the tree, never kept by hand. The manifest records the
+ * artifact's coordinates, the packages it ships, each as
+ * {@code {name: &lt;group&gt;/&lt;domain&gt;, kind: topics|library}}, and the path of
+ * its registry. A package's kind is {@code library} when the POM property
+ * {@code ike.adoc.library-package} names it, or when it holds an
+ * {@code index.adoc} and no topic. The parent POM adds the
+ * {@code target/adoc-meta} directory to the adoc zip, so the manifest
+ * ships beside the registry under {@code META-INF}, keyed by coordinates
+ * where it cannot collide in a union.
+ *
+ * &lt;p&gt;Gated by the POM property {@code ike.adoc.layout=packages}: a library
+ * without it is skipped, so the layout before packages keeps building
+ * unchanged. Runs at {@code generate-resources}. Skip with
+ * {@code -Dike.skip.manifest=true}.
+ *
+ * @since 136
+ */
+@Mojo(name = &quot;manifest&quot;, defaultPhase = &quot;generate-resources&quot;)
+public class ManifestMojo implements org.apache.maven.api.plugin.Mojo {
+
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.plugin.Log log;
+
+    /**
+     * Access the Maven logger.
+     *
+     * @return the logger
+     */
+<span class="nc" id="L49">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+
+    /** The layout the library declares; only {@code packages} is manifested. */
+    @Parameter(property = AdocLayout.PROPERTY)
+    String layout;
+
+    /** The package that is the library's own (the preview index, shared images), of kind {@code library}. */
+    @Parameter(property = &quot;ike.adoc.library-package&quot;)
+    String libraryPackage;
+
+    /** The AsciiDoc root the packages are under. */
+    @Parameter(property = &quot;ike.adoc.root&quot;, defaultValue = &quot;${project.basedir}/src/docs/asciidoc&quot;)
+    File root;
+
+    /** The directory the metadata tree is written under; the parent POM zips it with the sources. */
+    @Parameter(property = &quot;ike.adoc.meta-directory&quot;, defaultValue = &quot;${project.build.directory}/adoc-meta&quot;)
+    File metaDirectory;
+
+    /** Skip the goal. */
+    @Parameter(property = &quot;ike.skip.manifest&quot;, defaultValue = &quot;false&quot;)
+    boolean skip;
+
+    /** The project this goal runs in, for its coordinates. */
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.Project project;
+
+    /** Creates this goal instance. */
+<span class="nc" id="L76">    public ManifestMojo() {}</span>
+
+    @Override
+    public void execute() throws MojoException {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L81">            getLog().debug(&quot;idoc:manifest — skipped&quot;);</span>
+<span class="nc" id="L82">            return;</span>
+        }
+        AdocLayout adocLayout;
+        try {
+<span class="nc" id="L86">            adocLayout = AdocLayout.of(layout);</span>
+<span class="nc" id="L87">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L88">            throw new MojoException(e.getMessage(), e);</span>
+<span class="nc" id="L89">        }</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (adocLayout != AdocLayout.PACKAGES) {</span>
+<span class="nc" id="L91">            getLog().debug(&quot;idoc:manifest — &quot; + AdocLayout.PROPERTY + &quot; is not packages, skipping&quot;);</span>
+<span class="nc" id="L92">            return;</span>
+        }
+<span class="nc" id="L94">        Path rootPath = root.toPath();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!Files.isDirectory(rootPath)) {</span>
+<span class="nc" id="L96">            getLog().info(&quot;idoc:manifest — no &quot; + root + &quot;, skipping&quot;);</span>
+<span class="nc" id="L97">            return;</span>
+        }
+<span class="nc" id="L99">        String groupId = project.getGroupId();</span>
+<span class="nc" id="L100">        String artifactId = project.getArtifactId();</span>
+<span class="nc" id="L101">        Path out = metaDirectory.toPath().resolve(AdocPackages.metaDirectory(groupId, artifactId))</span>
+<span class="nc" id="L102">                .resolve(PackageManifest.FILE_NAME);</span>
+        List&lt;AdocPackages.Package&gt; packages;
+        try {
+<span class="nc" id="L105">            packages = AdocPackages.packages(rootPath, blankToNull(libraryPackage));</span>
+<span class="nc" id="L106">            Files.createDirectories(out.getParent());</span>
+<span class="nc" id="L107">            Files.writeString(out, PackageManifest.yaml(PackageManifest.model(packages, groupId, artifactId)),</span>
+                    StandardCharsets.UTF_8);
+<span class="nc" id="L109">        } catch (IOException e) {</span>
+<span class="nc" id="L110">            throw new MojoException(&quot;Cannot write the manifest to &quot; + out + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L111">        }</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (AdocPackages.Package p : packages) {</span>
+<span class="nc" id="L113">            getLog().info(&quot;manifest: &quot; + p.name() + &quot; (&quot; + p.kind().label() + &quot;, &quot; + p.topics().size()</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                    + &quot; topic&quot; + (p.topics().size() == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;)&quot;);</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">        getLog().info(&quot;idoc:manifest — &quot; + groupId + &quot;:&quot; + artifactId + &quot;, &quot; + packages.size() + &quot; package&quot;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                + (packages.size() == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;, written to &quot; + shown(project.getBasedir(), out));</span>
+<span class="nc" id="L118">    }</span>
+
+    private static String blankToNull(String value) {
+<span class="nc bnc" id="L121" title="All 4 branches missed.">        return value == null || value.isBlank() ? null : value.strip();</span>
+    }
+
+    private static String shown(Path base, Path out) {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        return out.toAbsolutePath().startsWith(base.toAbsolutePath())</span>
+<span class="nc" id="L126">                ? base.toAbsolutePath().relativize(out.toAbsolutePath()).toString()</span>
+<span class="nc" id="L127">                : out.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

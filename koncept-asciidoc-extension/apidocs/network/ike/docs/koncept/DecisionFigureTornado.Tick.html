@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -68,7 +68,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#toString()" tabindex="0">toString()</a></li>
 <li><a href="#hashCode()" tabindex="0">hashCode()</a></li>
 <li><a href="#equals(java.lang.Object)" tabindex="0">equals(Object)</a></li>
-<li><a href="#root()" tabindex="0">root()</a></li>
+<li><a href="#at()" tabindex="0">at()</a></li>
 <li><a href="#atRoot()" tabindex="0">atRoot()</a></li>
 <li><a href="#threshold()" tabindex="0">threshold()</a></li>
 </ol>
@@ -92,9 +92,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Tick</span>(double&nbsp;root, boolean&nbsp;atRoot, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;threshold)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Tick</span>(double&nbsp;at, boolean&nbsp;atRoot, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;threshold)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
-<div class="block">A flip, by the root's cost where it happens; <code>threshold</code> is the measure's value there, for a root flip.</div>
+<div class="block">A flip, by where it falls on the axis; <code>threshold</code> is the measure's value there,
+printed with its unit, for a root flip.</div>
 </div>
 </section>
 <section class="summary">
@@ -107,7 +108,7 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,boolean,java.lang.String)" class="member-name-link">Tick</a><wbr>(double&nbsp;root,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,boolean,java.lang.String)" class="member-name-link">Tick</a><wbr>(double&nbsp;at,
  boolean&nbsp;atRoot,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;threshold)</code></div>
 <div class="col-last even-row-color">
@@ -127,25 +128,25 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#atRoot()" class="member-name-link">atRoot</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#at()" class="member-name-link">at</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <code>at</code> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#atRoot()" class="member-name-link">atRoot</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>atRoot</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a hash code value for this object.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#root()" class="member-name-link">root</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>root</code> record component.</div>
+<div class="block">Returns a hash code value for this object.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#threshold()" class="member-name-link">threshold</a>()</code></div>
@@ -178,13 +179,13 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;(double,boolean,java.lang.String)">
 <h3>Tick</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Tick</span><wbr><span class="parameters">(double&nbsp;root,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Tick</span><wbr><span class="parameters">(double&nbsp;at,
  boolean&nbsp;atRoot,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;threshold)</span></div>
 <div class="block">Creates an instance of a <code>Tick</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>root</code> - the value for the <code>root</code> record component</dd>
+<dd><code>at</code> - the value for the <code>at</code> record component</dd>
 <dd><code>atRoot</code> - the value for the <code>atRoot</code> record component</dd>
 <dd><code>threshold</code> - the value for the <code>threshold</code> record component</dd>
 </dl>
@@ -247,14 +248,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="root()">
-<h3>root</h3>
+<section class="detail" id="at()">
+<h3>at</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">root</span>()</div>
-<div class="block">Returns the value of the <code>root</code> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">at</span>()</div>
+<div class="block">Returns the value of the <code>at</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>root</code> record component</dd>
+<dd>the value of the <code>at</code> record component</dd>
 </dl>
 </div>
 </section>

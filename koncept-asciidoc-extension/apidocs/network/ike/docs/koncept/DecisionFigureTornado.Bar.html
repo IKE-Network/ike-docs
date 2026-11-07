@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.lang.String,double,double,boolean,double,double,double,double,java.util.List,java.util.List)" tabindex="0">Bar(String, double, double, boolean, double, double, double, double, List, List)</a></li>
+<li><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,boolean,double,double,double,double,java.util.List,java.util.List)" tabindex="0">Bar(String, String, String, boolean, double, double, double, double, List, List)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -69,13 +69,13 @@ loadScripts(document, 'script');</script>
 <li><a href="#hashCode()" tabindex="0">hashCode()</a></li>
 <li><a href="#equals(java.lang.Object)" tabindex="0">equals(Object)</a></li>
 <li><a href="#name()" tabindex="0">name()</a></li>
-<li><a href="#low()" tabindex="0">low()</a></li>
-<li><a href="#high()" tabindex="0">high()</a></li>
+<li><a href="#lowCaption()" tabindex="0">lowCaption()</a></li>
+<li><a href="#highCaption()" tabindex="0">highCaption()</a></li>
 <li><a href="#stated()" tabindex="0">stated()</a></li>
-<li><a href="#rootAtLow()" tabindex="0">rootAtLow()</a></li>
-<li><a href="#rootAtHigh()" tabindex="0">rootAtHigh()</a></li>
-<li><a href="#leastRoot()" tabindex="0">leastRoot()</a></li>
-<li><a href="#greatestRoot()" tabindex="0">greatestRoot()</a></li>
+<li><a href="#atLow()" tabindex="0">atLow()</a></li>
+<li><a href="#atHigh()" tabindex="0">atHigh()</a></li>
+<li><a href="#least()" tabindex="0">least()</a></li>
+<li><a href="#greatest()" tabindex="0">greatest()</a></li>
 <li><a href="#segments()" tabindex="0">segments()</a></li>
 <li><a href="#ticks()" tabindex="0">ticks()</a></li>
 </ol>
@@ -96,13 +96,13 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Record Components:</dt>
 <dd><code><span id="param-name">name</span></code> - how the measure is named</dd>
-<dd><code><span id="param-low">low</span></code> - the measure's lower end</dd>
-<dd><code><span id="param-high">high</span></code> - the measure's upper end</dd>
+<dd><code><span id="param-lowCaption">lowCaption</span></code> - the measure's lower end, printed with its unit</dd>
+<dd><code><span id="param-highCaption">highCaption</span></code> - the measure's upper end, printed with its unit</dd>
 <dd><code><span id="param-stated">stated</span></code> - whether the block stated the range, which draws the bar solid</dd>
-<dd><code><span id="param-rootAtLow">rootAtLow</span></code> - the root's cost at the lower end</dd>
-<dd><code><span id="param-rootAtHigh">rootAtHigh</span></code> - the root's cost at the upper end</dd>
-<dd><code><span id="param-leastRoot">leastRoot</span></code> - the least root cost anywhere in the range</dd>
-<dd><code><span id="param-greatestRoot">greatestRoot</span></code> - the greatest root cost anywhere in the range</dd>
+<dd><code><span id="param-atLow">atLow</span></code> - where the axis stands with the measure at its lower end</dd>
+<dd><code><span id="param-atHigh">atHigh</span></code> - where the axis stands with the measure at its upper end</dd>
+<dd><code><span id="param-least">least</span></code> - the least the axis reaches anywhere in the range</dd>
+<dd><code><span id="param-greatest">greatest</span></code> - the greatest the axis reaches anywhere in the range</dd>
 <dd><code><span id="param-segments">segments</span></code> - the stretches between the root's flips, in rising order of the measure</dd>
 <dd><code><span id="param-ticks">ticks</span></code> - every flip, at any decision</dd>
 </dl>
@@ -112,7 +112,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Bar</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name, double&nbsp;low, double&nbsp;high, boolean&nbsp;stated, double&nbsp;rootAtLow, double&nbsp;rootAtHigh, double&nbsp;leastRoot, double&nbsp;greatestRoot, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Segment.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a>&gt;&nbsp;segments, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Tick.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tick</a>&gt;&nbsp;ticks)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Bar</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;lowCaption, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;highCaption, boolean&nbsp;stated, double&nbsp;atLow, double&nbsp;atHigh, double&nbsp;least, double&nbsp;greatest, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Segment.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a>&gt;&nbsp;segments, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Tick.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tick</a>&gt;&nbsp;ticks)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">One measure's bar.</div>
 </div>
@@ -127,14 +127,14 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,double,double,boolean,double,double,double,double,java.util.List,java.util.List)" class="member-name-link">Bar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- double&nbsp;low,
- double&nbsp;high,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,boolean,double,double,double,double,java.util.List,java.util.List)" class="member-name-link">Bar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;lowCaption,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;highCaption,
  boolean&nbsp;stated,
- double&nbsp;rootAtLow,
- double&nbsp;rootAtHigh,
- double&nbsp;leastRoot,
- double&nbsp;greatestRoot,
+ double&nbsp;atLow,
+ double&nbsp;atHigh,
+ double&nbsp;least,
+ double&nbsp;greatest,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Segment.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a>&gt;&nbsp;segments,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Tick.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tick</a>&gt;&nbsp;ticks)</code></div>
 <div class="col-last even-row-color">
@@ -154,50 +154,50 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#atHigh()" class="member-name-link">atHigh</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-atHigh"><code>atHigh</code></a> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#atLow()" class="member-name-link">atLow</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-atLow"><code>atLow</code></a> record component.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#greatestRoot()" class="member-name-link">greatestRoot</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#greatest()" class="member-name-link">greatest</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-greatestRoot"><code>greatestRoot</code></a> record component.</div>
+<div class="block">Returns the value of the <a href="#param-greatest"><code>greatest</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#high()" class="member-name-link">high</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#highCaption()" class="member-name-link">highCaption</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-high"><code>high</code></a> record component.</div>
+<div class="block">Returns the value of the <a href="#param-highCaption"><code>highCaption</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#leastRoot()" class="member-name-link">leastRoot</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#least()" class="member-name-link">least</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-leastRoot"><code>leastRoot</code></a> record component.</div>
+<div class="block">Returns the value of the <a href="#param-least"><code>least</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#low()" class="member-name-link">low</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lowCaption()" class="member-name-link">lowCaption</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-low"><code>low</code></a> record component.</div>
+<div class="block">Returns the value of the <a href="#param-lowCaption"><code>lowCaption</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#name()" class="member-name-link">name</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-name"><code>name</code></a> record component.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rootAtHigh()" class="member-name-link">rootAtHigh</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-rootAtHigh"><code>rootAtHigh</code></a> record component.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rootAtLow()" class="member-name-link">rootAtLow</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-rootAtLow"><code>rootAtLow</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="DecisionFigureTornado.Segment.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#segments()" class="member-name-link">segments</a>()</code></div>
@@ -237,30 +237,30 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.lang.String,double,double,boolean,double,double,double,double,java.util.List,java.util.List)">
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,java.lang.String,boolean,double,double,double,double,java.util.List,java.util.List)">
 <h3>Bar</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Bar</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
- double&nbsp;low,
- double&nbsp;high,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;lowCaption,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;highCaption,
  boolean&nbsp;stated,
- double&nbsp;rootAtLow,
- double&nbsp;rootAtHigh,
- double&nbsp;leastRoot,
- double&nbsp;greatestRoot,
+ double&nbsp;atLow,
+ double&nbsp;atHigh,
+ double&nbsp;least,
+ double&nbsp;greatest,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Segment.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a>&gt;&nbsp;segments,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Tick.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tick</a>&gt;&nbsp;ticks)</span></div>
 <div class="block">Creates an instance of a <code>Bar</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>name</code> - the value for the <a href="#param-name"><code>name</code></a> record component</dd>
-<dd><code>low</code> - the value for the <a href="#param-low"><code>low</code></a> record component</dd>
-<dd><code>high</code> - the value for the <a href="#param-high"><code>high</code></a> record component</dd>
+<dd><code>lowCaption</code> - the value for the <a href="#param-lowCaption"><code>lowCaption</code></a> record component</dd>
+<dd><code>highCaption</code> - the value for the <a href="#param-highCaption"><code>highCaption</code></a> record component</dd>
 <dd><code>stated</code> - the value for the <a href="#param-stated"><code>stated</code></a> record component</dd>
-<dd><code>rootAtLow</code> - the value for the <a href="#param-rootAtLow"><code>rootAtLow</code></a> record component</dd>
-<dd><code>rootAtHigh</code> - the value for the <a href="#param-rootAtHigh"><code>rootAtHigh</code></a> record component</dd>
-<dd><code>leastRoot</code> - the value for the <a href="#param-leastRoot"><code>leastRoot</code></a> record component</dd>
-<dd><code>greatestRoot</code> - the value for the <a href="#param-greatestRoot"><code>greatestRoot</code></a> record component</dd>
+<dd><code>atLow</code> - the value for the <a href="#param-atLow"><code>atLow</code></a> record component</dd>
+<dd><code>atHigh</code> - the value for the <a href="#param-atHigh"><code>atHigh</code></a> record component</dd>
+<dd><code>least</code> - the value for the <a href="#param-least"><code>least</code></a> record component</dd>
+<dd><code>greatest</code> - the value for the <a href="#param-greatest"><code>greatest</code></a> record component</dd>
 <dd><code>segments</code> - the value for the <a href="#param-segments"><code>segments</code></a> record component</dd>
 <dd><code>ticks</code> - the value for the <a href="#param-ticks"><code>ticks</code></a> record component</dd>
 </dl>
@@ -336,27 +336,27 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="low()">
-<h3>low</h3>
+<section class="detail" id="lowCaption()">
+<h3>lowCaption</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">low</span>()</div>
-<div class="block">Returns the value of the <a href="#param-low"><code>low</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">lowCaption</span>()</div>
+<div class="block">Returns the value of the <a href="#param-lowCaption"><code>lowCaption</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-low"><code>low</code></a> record component</dd>
+<dd>the value of the <a href="#param-lowCaption"><code>lowCaption</code></a> record component</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="high()">
-<h3>high</h3>
+<section class="detail" id="highCaption()">
+<h3>highCaption</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">high</span>()</div>
-<div class="block">Returns the value of the <a href="#param-high"><code>high</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">highCaption</span>()</div>
+<div class="block">Returns the value of the <a href="#param-highCaption"><code>highCaption</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-high"><code>high</code></a> record component</dd>
+<dd>the value of the <a href="#param-highCaption"><code>highCaption</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -375,53 +375,53 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="rootAtLow()">
-<h3>rootAtLow</h3>
+<section class="detail" id="atLow()">
+<h3>atLow</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">rootAtLow</span>()</div>
-<div class="block">Returns the value of the <a href="#param-rootAtLow"><code>rootAtLow</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">atLow</span>()</div>
+<div class="block">Returns the value of the <a href="#param-atLow"><code>atLow</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-rootAtLow"><code>rootAtLow</code></a> record component</dd>
+<dd>the value of the <a href="#param-atLow"><code>atLow</code></a> record component</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="rootAtHigh()">
-<h3>rootAtHigh</h3>
+<section class="detail" id="atHigh()">
+<h3>atHigh</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">rootAtHigh</span>()</div>
-<div class="block">Returns the value of the <a href="#param-rootAtHigh"><code>rootAtHigh</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">atHigh</span>()</div>
+<div class="block">Returns the value of the <a href="#param-atHigh"><code>atHigh</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-rootAtHigh"><code>rootAtHigh</code></a> record component</dd>
+<dd>the value of the <a href="#param-atHigh"><code>atHigh</code></a> record component</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="leastRoot()">
-<h3>leastRoot</h3>
+<section class="detail" id="least()">
+<h3>least</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">leastRoot</span>()</div>
-<div class="block">Returns the value of the <a href="#param-leastRoot"><code>leastRoot</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">least</span>()</div>
+<div class="block">Returns the value of the <a href="#param-least"><code>least</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-leastRoot"><code>leastRoot</code></a> record component</dd>
+<dd>the value of the <a href="#param-least"><code>least</code></a> record component</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="greatestRoot()">
-<h3>greatestRoot</h3>
+<section class="detail" id="greatest()">
+<h3>greatest</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">greatestRoot</span>()</div>
-<div class="block">Returns the value of the <a href="#param-greatestRoot"><code>greatestRoot</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">greatest</span>()</div>
+<div class="block">Returns the value of the <a href="#param-greatest"><code>greatest</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-greatestRoot"><code>greatestRoot</code></a> record component</dd>
+<dd>the value of the <a href="#param-greatest"><code>greatest</code></a> record component</dd>
 </dl>
 </div>
 </section>

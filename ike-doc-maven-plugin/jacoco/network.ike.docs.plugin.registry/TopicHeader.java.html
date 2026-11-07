@@ -251,8 +251,8 @@ import java.util.Set;
      */
     public List&lt;String&gt; keywords() {
 <span class="fc" id="L253">        String raw = attributes.get(&quot;keywords&quot;);</span>
-<span class="pc bpc" id="L254" title="2 of 4 branches missed.">        if (raw == null || raw.isBlank()) {</span>
-<span class="nc" id="L255">            return List.of();</span>
+<span class="pc bpc" id="L254" title="1 of 4 branches missed.">        if (raw == null || raw.isBlank()) {</span>
+<span class="fc" id="L255">            return List.of();</span>
         }
 <span class="fc" id="L257">        List&lt;String&gt; out = new ArrayList&lt;&gt;();</span>
 <span class="fc bfc" id="L258" title="All 2 branches covered.">        for (String k : raw.split(&quot;,&quot;)) {</span>

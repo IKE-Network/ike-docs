@@ -1,6 +1,6 @@
 ---
-date_published: 2026-10-30
-date_modified: 2026-10-30
+date_published: 2026-11-06
+date_modified: 2026-11-06
 canonical_url: https://github.com/IKE-Network/ike-docs/index.html
 ---
 
@@ -35,7 +35,9 @@ What this means for plugin consumers: nothing changes about how you **invoke** `
 | `idoc:asciidoc` | Render AsciiDoc sources via AsciidoctorJ — the heart of the doc pipeline. Handles IKE-specific renderer profiles (Prawn / Prince / AH / WeasyPrint / XEP / FOP / DocBook / single-page HTML). |
 | `idoc:render-pdf` | Wrapper around the five external PDF renderers (Prince, AH, FOP, WeasyPrint, XEP). Selects the active renderer per `-Dike.pdf.<name>=true` toggles set by the `doc-pipeline` profile. |
 | `idoc:diff` | Generate and render a **review packet**: every changed AsciiDoc topic between two refs (or a ref and the working tree), marked inline with insertion/deletion roles. See [Review packets](#review-packets-idocdiff) below. |
-| `idoc:topic-registry` | Read the `:topic-*:` header of every AsciiDoc file under the module’s source root and write `target/topic-registry.yaml`: the topic registry, generated from the headers in `IKE-TOPIC-REGISTRY.md’s shape instead of kept by hand. See [Topic registry](#topic-registry-idoctopic-registry) below. |
+| `idoc:topic-registry` | Read the `:topic-*:` header of every AsciiDoc file under the module’s source root and write `target/topic-registry.yaml`: the topic registry, generated from the headers in `IKE-TOPIC-REGISTRY.md’s shape instead of kept by hand. See [Topic registry](#topic-registry-idoctopic-registry) below. With `ike.adoc.layout=packages` the registry is blob-keyed and incremental, and written with the term index under `META-INF/ike/<groupId>/<artifactId>/`. See [AsciiDoc packages](#asciidoc-packages) below. |
+| `idoc:manifest` | Write `META-INF/ike/<groupId>/<artifactId>/manifest.yaml` for a topic library laid out as packages: its coordinates, the packages it ships with their kind, and the path of its registry. Generated from the POM and the tree, never kept by hand. |
+| `idoc:lint-packages` | Lint the packages layout of a topic library and fail the build with every finding listed: the root holds only dotted-group directories and `META-INF`, every package begins with the module’s group, a topic’s directory equals its id’s domain prefix, images are inside packages. Lines still using `{topics}` are warnings. |
 | `idoc:adocstudio` | Generate Adoc Studio sidecar projects for assembly modules. |
 | `idoc:patch-docbook` | Patch the stock DocBook XSL 1.79.2 stylesheets to suppress two known Saxon warnings. Applied during the `docbook-xsl` artifact build. |
 | `idoc:fix-svg` | Remove bare `<rect/>` elements that Mermaid emits as artifacts in generated HTML — they cause rendering glitches in some browsers. |
@@ -92,6 +94,46 @@ The goal’s default phase is `validate`, so a POM that declares an execution of
 </plugin>
 ```
 
+## [#asciidoc-packages-ike-adoc-layout-packages](#asciidoc-packages-ike-adoc-layout-packages)AsciiDoc packages (`ike.adoc.layout=packages`)
+
+A topic library may lay its AsciiDoc root out as packages (`dev-adoc-packages` in `ike-lab-documents/topics/`, epic [ike-issues#1340](https://github.com/IKE-Network/ike-issues/issues/1340)[6]; this plugin’s part is [ike-issues#1341](https://github.com/IKE-Network/ike-issues/issues/1341)[7]): the first directory under the root is the owning group written as one dotted segment, the directory under that is the topic domain, and a topic’s directory equals the domain prefix of its `:topic-id:`, so `dev-gitflow-overview` lives at `network.ike.lab/dev/gitflow-overview.adoc` and is included as `include::{adoc}/network.ike.lab/dev/gitflow-overview.adoc[]`. A library whose group ends in its only domain may use the group directory itself as the domain package (`network.ike.kompendium.anf/determine-topic.adoc`). Images are in an `images` directory inside the package that uses them. Artifact metadata goes under `META-INF/ike/<groupId>/<artifactId>/`, keyed by coordinates so that any number of libraries unpack into one tree without colliding. The preview index and shared images are rendered content, so they are in a package the library owns for itself, of kind `library`.
+
+Everything below is gated by the POM property `ike.adoc.layout=packages`. A library that has not declared it keeps building exactly as before, through the migration.
+
+```
+<properties>
+  <ike.adoc.layout>packages</ike.adoc.layout>
+  <ike.adoc.library-package>network.ike.lab/lab</ike.adoc.library-package>  <!-- optional -->
+  <ike.adoc.packages>network.ike.examples</ike.adoc.packages>               <!-- optional -->
+</properties>
+```
+
+### [#the-registry-stays-incremental](#the-registry-stays-incremental)The registry stays incremental
+
+With the packages layout `idoc:topic-registry` keys every entry by the git blob id of the content it was parsed from. One call, `git ls-files -s`, lists every path with its blob without opening a file; `git status` names what moved since, and those files are hashed on the spot with `git hash-object`. The rule is then exact: same path and same blob, the entry is kept; same blob at a new path, the entry is re-keyed; a new or changed blob is parsed; a path that is gone is dropped. Files that are not topics get an entry too, with their blob, so they are not opened again either. A tree without git hashes every file in Java, the full scan’s cost, and gets the same ids. `-Dike.topic-registry.add` is a special case of the rule and needs no separate path; `-Dike.topic-registry.rootFile` is not supported with packages.
+
+The registry and the term index (`IKE-INDEX.md`: every `indexterm:[]` and `term` a topic marks, collected once at parse time and kept on the entry as `index-terms`) are written to `target/adoc-meta/META-INF/ike/<groupId>/<artifactId>/topic-registry.yaml` and `term-index.yaml`; `ike-parent` adds `target/adoc-meta` to the adoc zip. Every `file:` is relative to the AsciiDoc root, as the include line names it. `-Dike.topic-registry.output` still wins when set.
+
+### [#the-manifest-idoc-manifest](#the-manifest-idoc-manifest)The manifest (`idoc:manifest`)
+
+`idoc:manifest` (default phase `generate-resources`) writes `manifest.yaml` beside the registry, from the POM and the tree, never kept by hand:
+
+```
+coordinates: network.ike.lab:unlv-topics
+packages:
+  - name: network.ike.lab/aip
+    kind: topics
+  - name: network.ike.lab/unlv
+    kind: library
+registry: META-INF/ike/network.ike.lab/unlv-topics/topic-registry.yaml
+```
+
+A package’s kind is `library` when `ike.adoc.library-package` names it or when it holds an `index.adoc` and no topic; otherwise `topics`. The goal that unpacks the union reads every manifest and refuses two libraries that ship one package, naming both. `-Dike.skip.manifest=true` skips it.
+
+### [#the-lint-idoc-lint-packages](#the-lint-idoc-lint-packages)The lint (`idoc:lint-packages`)
+
+`idoc:lint-packages` (default phase `validate`) fails the build with every finding listed: the root holds only dotted-group directories and `META-INF` (hidden entries such as `.asciidoctorconfig` are the editor’s and pass); every package begins with the module’s own group unless `ike.adoc.packages` declares another package name or group prefix on purpose, comma-separated; a topic’s directory equals the domain prefix of its `:topic-id:`; images are inside packages, not at the root or directly under a group. An include or image line that still uses the `{topics}` alias is a warning naming the file and line, so the alias can be retired once the last one is gone. `-Dike.skip.lint-packages=true` skips it.
+
 ## [#design-rationale](#design-rationale)Design rationale
 
 This plugin’s shape — regular plugin, no extensions, no custom packaging — is the result of a deliberate architectural decision documented in [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[4] and the `dev-classifier-canonical-doc-shape` topic in `ike-lab-documents/topics/`. Brief summary, since the issue will eventually close and this page is what surviving teams will land on:
@@ -100,7 +142,7 @@ This plugin’s shape — regular plugin, no extensions, no custom packaging —
 
 A plugin with `<extensions>true</extensions>` is loaded into the build extension realm at **project-load time** — during Maven’s “Scanning for projects” phase, before the Model Builder runs property interpolation. This means the plugin’s `<version>` in the POM cannot be a `${property}`; it must be a literal string.
 
-For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[6] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
+For a single-repo reactor with one plugin, the constraint is manageable. For our cross-repo cascade (`ike-tooling` → `ike-docs` → `ike-platform` → consumers), it became toxic: every consumer POM had to carry the literal version of every extension plugin from upstream, the literal had to be kept in sync manually across repos, and routine version-property tooling (`ws:align-publish`, `versions:set-property`) was structurally unable to maintain it. The pain surfaced as [ike-issues#236](https://github.com/IKE-Network/ike-issues/issues/236)[8] — pre-flight release checks repeatedly catching stale literals after upstream releases that the alignment tooling could not see.
 
 ### [#why-no-packagingike-doc-packaging](#why-no-packagingike-doc-packaging)Why no `<packaging>ike-doc</packaging>`
 
@@ -126,13 +168,13 @@ The classifier-canonical shape **is** fully Maven-canonical — every artifact d
 ### [#tracking](#tracking)Tracking
 
 - [ike-issues#321](https://github.com/IKE-Network/ike-issues/issues/321)[4] — primary tracking issue (umbrella); subsumes #220, #236, #320.
-- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[7] — repo split that established the cross-repo boundary the extension realm was working around.
+- [ike-issues#216](https://github.com/IKE-Network/ike-issues/issues/216)[9] — repo split that established the cross-repo boundary the extension realm was working around.
 - Design note: `dev-classifier-canonical-doc-shape` in `ike-lab-documents/topics/` (full Socratic discovery captured for posterity).
 
 ## [#see-also](#see-also)See also
 
 - [ike:* plugin in ike-tooling](https://ike.network/ike-tooling/ike-maven-plugin/)[2] — single-repo release orchestration.
 - [ws:* plugin in ike-platform](https://ike.network/ike-platform/ike-workspace-maven-plugin/)[1] — workspace-spanning goals.
-- [ike-docs reactor home](https://ike.network/ike-docs/)[8].
-- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[9].
-- [Issue tracker](https://github.com/IKE-Network/ike-issues)[10].
+- [ike-docs reactor home](https://ike.network/ike-docs/)[10].
+- [Source on GitHub](https://github.com/IKE-Network/ike-docs)[11].
+- [Issue tracker](https://github.com/IKE-Network/ike-issues)[12].

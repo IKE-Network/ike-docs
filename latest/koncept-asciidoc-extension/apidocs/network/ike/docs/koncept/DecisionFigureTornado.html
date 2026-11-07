@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -67,6 +67,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#build(network.ike.docs.koncept.DecisionFigureTornado.Tornado,double,network.ike.docs.koncept.DecisionFigureTornado.Money)" tabindex="0">build(DecisionFigureTornado.Tornado, double, DecisionFigureTornado.Money)</a></li>
+<li><a href="#ticks(double,double,double)" tabindex="0">ticks(double, double, double)</a></li>
 </ol>
 </li>
 </ol>
@@ -86,12 +87,17 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">A tornado diagram of a decision tree's one-way sensitivity as a <a href="DecisionFigure.html" title="class in network.ike.docs.koncept"><code>DecisionFigure</code></a>, drawn
 as the live <code>TornadoChart</code> draws it: one bar per swept measure, longest first, on one
-axis, which is the expected cost at the root, with a dashed line at the base case. A bar spans
-the root's cost from the measure's lower end to its upper end; it is solid when the block
+axis. The axis is the <em>net value</em> of the alternative the base chose, what the next best
+alternative would cost less what the chosen one costs, so zero is break-even, a bar is long
+only where its measure can change the answer, and every flip of the root's choice sits on the
+zero line; when the root did not decide at the base, the axis is the expected cost at the root
+instead. Round ticks with light gridlines cross the bars, a dashed line marks the base case and
+is named at its foot, and a title above the axis says what it measures. A bar spans the axis from the measure's lower
+end to its upper end, with each end's value printed in its own unit; it is solid when the block
 stated that range and hollow when the sweep assumed it. Where the root's chosen alternative
-flips inside the range, the bar changes colour beyond the flip and a tick carries the
-threshold. The builder reads a <a href="DecisionFigureTornado.Tornado.html" title="class in network.ike.docs.koncept"><code>DecisionFigureTornado.Tornado</code></a>, which is the sweep as numbers and names, so a
-sweep over the stored tree and a sweep over a block's text draw the same bars.
+flips inside the range, the bar changes colour beyond the flip and a tick carries the threshold.
+A legend names the colours. The builder reads a <a href="DecisionFigureTornado.Tornado.html" title="class in network.ike.docs.koncept"><code>DecisionFigureTornado.Tornado</code></a>, which is the sweep as numbers
+and names, so a sweep over the stored tree and a sweep over a block's text draw the same bars.
 
 <p>Kept word for word in step with its twin in <code>komet-claude-plugin</code>, package <code>network.ike.komet.claude.decision.render</code>.</div>
 </div>
@@ -120,17 +126,18 @@ sweep over the stored tree and a sweep over a block's text draw the same bars.
 <div class="col-first even-row-color"><code>static interface&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="DecisionFigureTornado.Money.html" class="type-name-link" title="interface in network.ike.docs.koncept">DecisionFigureTornado.Money</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">How the root's cost is printed on the axis.</div>
+<div class="block">How an amount on the axis is printed.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="DecisionFigureTornado.Segment.html" class="type-name-link" title="class in network.ike.docs.koncept">DecisionFigureTornado.Segment</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">A stretch of a bar between two cuts, by the root's cost at each cut.</div>
+<div class="block">A stretch of a bar between two cuts, by where each cut falls on the axis.</div>
 </div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="DecisionFigureTornado.Tick.html" class="type-name-link" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tick</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">A flip, by the root's cost where it happens; <code>threshold</code> is the measure's value there, for a root flip.</div>
+<div class="block">A flip, by where it falls on the axis; <code>threshold</code> is the measure's value there,
+printed with its unit, for a root flip.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="DecisionFigureTornado.Tornado.html" class="type-name-link" title="class in network.ike.docs.koncept">DecisionFigureTornado.Tornado</a></code></div>
@@ -179,6 +186,15 @@ sweep over the stored tree and a sweep over a block's text draw the same bars.
  <a href="DecisionFigureTornado.Money.html" title="interface in network.ike.docs.koncept">DecisionFigureTornado.Money</a>&nbsp;money)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Builds the figure.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ticks(double,double,double)" class="member-name-link">ticks</a><wbr>(double&nbsp;least,
+ double&nbsp;greatest,
+ double&nbsp;barWidth)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Round values for the axis: a step of one, two or five times a power of ten, the one nearest
+to what puts the labels about ninety units apart, from the first multiple at or above the
+least to the last at or below the greatest.</div>
 </div>
 </div>
 </div>
@@ -251,8 +267,21 @@ sweep over the stored tree and a sweep over a block's text draw the same bars.
 <dt>Parameters:</dt>
 <dd><code>tornado</code> - the sweep</dd>
 <dd><code>width</code> - the figure's width, which the bars share after the names and the captions</dd>
-<dd><code>money</code> - how the axis prints a cost</dd>
+<dd><code>money</code> - how the axis prints an amount</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ticks(double,double,double)">
+<h3>ticks</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">ticks</span><wbr><span class="parameters">(double&nbsp;least,
+ double&nbsp;greatest,
+ double&nbsp;barWidth)</span></div>
+<div class="block">Round values for the axis: a step of one, two or five times a power of ten, the one nearest
+to what puts the labels about ninety units apart, from the first multiple at or above the
+least to the last at or below the greatest.</div>
 </div>
 </section>
 </li>

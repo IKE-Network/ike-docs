@@ -35,7 +35,7 @@ loadScripts(document, 'script');</script>
 <li><a href="../../../../search.html">Search</a></li>
 <li><a href="../../../../help-doc.html#class">Help</a></li>
 </ul>
-<div class="about-language"><b>Koncept Extension</b> 135</div>
+<div class="about-language"><b>Koncept Extension</b> 136</div>
 </div>
 </div>
 <div class="sub-nav">
@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(double,double,double,java.util.List,java.util.List)" tabindex="0">Tornado(double, double, double, List, List)</a></li>
+<li><a href="#%3Cinit%3E(java.lang.String,boolean,java.lang.String,double,double,double,java.util.List,java.util.List)" tabindex="0">Tornado(String, boolean, String, double, double, double, List, List)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -68,7 +68,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#toString()" tabindex="0">toString()</a></li>
 <li><a href="#hashCode()" tabindex="0">hashCode()</a></li>
 <li><a href="#equals(java.lang.Object)" tabindex="0">equals(Object)</a></li>
-<li><a href="#baseRoot()" tabindex="0">baseRoot()</a></li>
+<li><a href="#title()" tabindex="0">title()</a></li>
+<li><a href="#net()" tabindex="0">net()</a></li>
+<li><a href="#chosen()" tabindex="0">chosen()</a></li>
+<li><a href="#base()" tabindex="0">base()</a></li>
 <li><a href="#least()" tabindex="0">least()</a></li>
 <li><a href="#greatest()" tabindex="0">greatest()</a></li>
 <li><a href="#bars()" tabindex="0">bars()</a></li>
@@ -90,11 +93,14 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>Record Components:</dt>
-<dd><code><span id="param-baseRoot">baseRoot</span></code> - the root's cost with every measure at its base</dd>
-<dd><code><span id="param-least">least</span></code> - the least root cost over every bar, the base included</dd>
-<dd><code><span id="param-greatest">greatest</span></code> - the greatest root cost over every bar, the base included</dd>
+<dd><code><span id="param-title">title</span></code> - what the axis measures, printed above it</dd>
+<dd><code><span id="param-net">net</span></code> - whether the axis is net value, so that zero is break-even and is drawn</dd>
+<dd><code><span id="param-chosen">chosen</span></code> - how the alternative the base chose is named, for the legend; <code>null</code> when the base did not decide</dd>
+<dd><code><span id="param-base">base</span></code> - where the axis stands with every measure at its base</dd>
+<dd><code><span id="param-least">least</span></code> - the least the axis reaches over every bar, the base included</dd>
+<dd><code><span id="param-greatest">greatest</span></code> - the greatest the axis reaches over every bar, the base included</dd>
 <dd><code><span id="param-bars">bars</span></code> - the bars, longest first, each with some length</dd>
-<dd><code><span id="param-notes">notes</span></code> - sentences for the footnote after the standard ones: what does not move the cost, what was not swept</dd>
+<dd><code><span id="param-notes">notes</span></code> - sentences for the footnote after the standard ones: what does not move the answer, what was not swept</dd>
 </dl>
 <dl class="notes">
 <dt>Enclosing class:</dt>
@@ -102,7 +108,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Tornado</span>(double&nbsp;baseRoot, double&nbsp;least, double&nbsp;greatest, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Bar.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Bar</a>&gt;&nbsp;bars, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;notes)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">DecisionFigureTornado.Tornado</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;title, boolean&nbsp;net, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen, double&nbsp;base, double&nbsp;least, double&nbsp;greatest, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Bar.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Bar</a>&gt;&nbsp;bars, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;notes)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">The sweep as the tornado reads it.</div>
 </div>
@@ -117,7 +123,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,double,double,java.util.List,java.util.List)" class="member-name-link">Tornado</a><wbr>(double&nbsp;baseRoot,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,boolean,java.lang.String,double,double,double,java.util.List,java.util.List)" class="member-name-link">Tornado</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;title,
+ boolean&nbsp;net,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ double&nbsp;base,
  double&nbsp;least,
  double&nbsp;greatest,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Bar.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Bar</a>&gt;&nbsp;bars,
@@ -145,38 +154,53 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the value of the <a href="#param-bars"><code>bars</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#baseRoot()" class="member-name-link">baseRoot</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#base()" class="member-name-link">base</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-baseRoot"><code>baseRoot</code></a> record component.</div>
+<div class="block">Returns the value of the <a href="#param-base"><code>base</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#chosen()" class="member-name-link">chosen</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-chosen"><code>chosen</code></a> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#greatest()" class="member-name-link">greatest</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#greatest()" class="member-name-link">greatest</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-greatest"><code>greatest</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#least()" class="member-name-link">least</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#least()" class="member-name-link">least</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-least"><code>least</code></a> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#net()" class="member-name-link">net</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-net"><code>net</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notes()" class="member-name-link">notes</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-notes"><code>notes</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#title()" class="member-name-link">title</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-title"><code>title</code></a> record component.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -197,10 +221,13 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(double,double,double,java.util.List,java.util.List)">
+<section class="detail" id="&lt;init&gt;(java.lang.String,boolean,java.lang.String,double,double,double,java.util.List,java.util.List)">
 <h3>Tornado</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Tornado</span><wbr><span class="parameters">(double&nbsp;baseRoot,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Tornado</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;title,
+ boolean&nbsp;net,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;chosen,
+ double&nbsp;base,
  double&nbsp;least,
  double&nbsp;greatest,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="DecisionFigureTornado.Bar.html" title="class in network.ike.docs.koncept">DecisionFigureTornado.Bar</a>&gt;&nbsp;bars,
@@ -208,7 +235,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Creates an instance of a <code>Tornado</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>baseRoot</code> - the value for the <a href="#param-baseRoot"><code>baseRoot</code></a> record component</dd>
+<dd><code>title</code> - the value for the <a href="#param-title"><code>title</code></a> record component</dd>
+<dd><code>net</code> - the value for the <a href="#param-net"><code>net</code></a> record component</dd>
+<dd><code>chosen</code> - the value for the <a href="#param-chosen"><code>chosen</code></a> record component</dd>
+<dd><code>base</code> - the value for the <a href="#param-base"><code>base</code></a> record component</dd>
 <dd><code>least</code> - the value for the <a href="#param-least"><code>least</code></a> record component</dd>
 <dd><code>greatest</code> - the value for the <a href="#param-greatest"><code>greatest</code></a> record component</dd>
 <dd><code>bars</code> - the value for the <a href="#param-bars"><code>bars</code></a> record component</dd>
@@ -273,14 +303,53 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="baseRoot()">
-<h3>baseRoot</h3>
+<section class="detail" id="title()">
+<h3>title</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">baseRoot</span>()</div>
-<div class="block">Returns the value of the <a href="#param-baseRoot"><code>baseRoot</code></a> record component.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">title</span>()</div>
+<div class="block">Returns the value of the <a href="#param-title"><code>title</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <a href="#param-baseRoot"><code>baseRoot</code></a> record component</dd>
+<dd>the value of the <a href="#param-title"><code>title</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="net()">
+<h3>net</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">net</span>()</div>
+<div class="block">Returns the value of the <a href="#param-net"><code>net</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-net"><code>net</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="chosen()">
+<h3>chosen</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">chosen</span>()</div>
+<div class="block">Returns the value of the <a href="#param-chosen"><code>chosen</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-chosen"><code>chosen</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="base()">
+<h3>base</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">base</span>()</div>
+<div class="block">Returns the value of the <a href="#param-base"><code>base</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-base"><code>base</code></a> record component</dd>
 </dl>
 </div>
 </section>

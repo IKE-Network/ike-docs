@@ -1,48 +1,68 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.IncludeRewrite,0,9,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler,559,187,51,31,122,35,34,17,7,3
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,StampRegistry.Status,28,0,0,0,7,0,3,0,3,0
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,ChangeManifest.ChangeEntity,0,18,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,GitSource,565,245,80,24,118,53,55,16,8,10
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker.MarkResult,0,15,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker.State,0,53,0,12,0,13,0,9,0,3
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,RegistryIndex,33,451,13,39,6,85,13,32,1,18
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.ScaffoldEntry,9,0,0,0,1,0,1,0,1,0
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,RegistryDelta,145,611,25,56,19,107,20,38,2,15
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,GitSource.Change,21,0,2,0,2,0,3,0,2,0
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.IncludeRewrite,0,9,0,0,0,1,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.diff,ChangeManifest.ChangeEntity,0,18,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,ChangeStatus,27,0,0,0,5,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.TopicEntry,12,0,0,0,1,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker,76,1290,44,144,20,254,40,82,0,28
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,GitSource.CommitMeta,0,21,0,0,0,1,0,1,0,1
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,RegistryIndex,33,451,13,39,6,85,13,32,1,18
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,PacketAssembler.ScaffoldEntry,9,0,0,0,1,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,StampRegistry.Stamp,27,0,0,0,1,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,AdocDiffMarker.DiagramBlock,0,12,0,0,0,1,0,1,0,1
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,StampRegistry,251,0,22,0,42,0,21,0,10,0
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,RegistryDelta,145,611,25,56,19,107,20,38,2,15
 IKE Doc Maven Plugin,network.ike.docs.plugin.diff,ChangeManifest,116,163,13,15,19,31,11,14,4,7
-IKE Doc Maven Plugin,network.ike.docs.plugin.diff,GitSource.Change,21,0,2,0,2,0,3,0,2,0
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TermIndex,1,334,3,33,1,61,3,24,0,9
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicHeader,53,625,32,80,8,123,31,32,1,6
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,BlobIndex.new SimpleFileVisitor() {...},13,61,2,8,3,12,2,6,0,3
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,BlobIndex,7,125,0,6,2,20,0,7,0,4
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,BlobIndex.Source,0,15,0,0,0,3,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,IncrementalRegistry.Outcome,0,18,0,0,0,1,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,IncrementalRegistry,18,786,7,67,8,147,7,44,0,14
 IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicRegistry.Scan,0,15,0,0,0,1,0,1,0,1
-IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicHeader,55,623,33,79,9,122,32,31,1,6
-IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicRegistry,213,2097,52,202,37,383,51,120,3,39
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,GitBlobIndex.Result,0,9,0,0,0,1,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,IncrementalRegistry.Previous,0,15,0,0,0,1,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicRegistry,212,2106,51,203,37,384,50,122,3,40
 IKE Doc Maven Plugin,network.ike.docs.plugin.registry,TopicRegistry.new SimpleFileVisitor() {...},2,60,2,8,1,10,2,6,0,3
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,IncrementalRegistry.Current,0,18,0,0,0,1,0,1,0,1
+IKE Doc Maven Plugin,network.ike.docs.plugin.registry,GitBlobIndex,90,432,15,39,20,64,15,15,0,3
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,PackageManifest,0,73,0,2,0,14,0,4,0,3
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,AdocPackages.Package,0,25,0,0,0,2,0,2,0,2
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,PackageKind,0,20,0,0,0,4,0,2,0,2
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,PackageLint.Report,0,13,0,0,0,2,0,2,0,2
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,AdocPackages,1,281,3,29,1,50,3,23,0,10
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,AdocLayout,0,44,0,7,0,9,0,6,0,2
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,PackageLint,0,313,1,57,0,59,1,33,0,5
+IKE Doc Maven Plugin,network.ike.docs.plugin.packages,AdocPackages.new SimpleFileVisitor() {...},0,43,2,8,0,8,2,6,0,3
 IKE Doc Maven Plugin,network.ike.docs.plugin,PatchDocbookMojo,18,91,2,4,4,22,2,7,0,6
 IKE Doc Maven Plugin,network.ike.docs.plugin,DocDiffMojo,1577,0,174,0,303,0,118,0,31,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,ScanRendererLogsMojo,18,187,4,18,5,46,4,15,0,8
+IKE Doc Maven Plugin,network.ike.docs.plugin,LintPackagesMojo,183,0,24,0,39,0,15,0,3,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,AdocStudioMojo,315,20,18,4,68,5,17,4,8,2
-IKE Doc Maven Plugin,network.ike.docs.plugin,OutputValidator,372,0,108,0,63,0,60,0,5,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,CopyDocsToSiteMojo,139,0,10,0,32,0,11,0,6,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,Backend,84,0,7,0,18,0,11,0,6,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,LintSiteMojo,114,146,12,20,25,37,11,11,3,3
-IKE Doc Maven Plugin,network.ike.docs.plugin,AsciidocMojo,1048,0,139,0,219,0,93,0,20,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,OutputValidator.Severity,15,0,0,0,3,0,1,0,1,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,AsciidocMojo.MavenLogHandler,89,0,16,0,22,0,10,0,2,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,RenderPdfMojo.RendererType,67,0,0,0,12,0,3,0,3,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,DocDiffMojo.new AdocDiffMarker.StampSource() {...},56,0,6,0,6,0,6,0,3,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,ManifestMojo,183,0,18,0,37,0,14,0,5,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,PrepareRendererOutputMojo,129,0,20,0,20,0,14,0,4,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,PackageDocMojo.new SimpleFileVisitor() {...},0,42,0,0,0,8,0,2,0,2
 IKE Doc Maven Plugin,network.ike.docs.plugin,RenderPdfMojo,982,0,115,0,212,0,83,0,21,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,InjectBreadcrumbMojo,54,151,6,14,10,38,5,13,0,8
 IKE Doc Maven Plugin,network.ike.docs.plugin,CopyDefaultPdfMojo,112,0,8,0,28,0,8,0,4,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,FixSvgMojo,23,78,2,6,6,22,2,7,0,5
+IKE Doc Maven Plugin,network.ike.docs.plugin,TopicRegistryMojo,995,0,110,0,184,0,62,0,7,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,ScanRendererLogsMojo,18,187,4,18,5,46,4,15,0,8
+IKE Doc Maven Plugin,network.ike.docs.plugin,OutputValidator,372,0,108,0,63,0,60,0,5,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,CopyDocsToSiteMojo,139,0,10,0,32,0,11,0,6,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,LintSiteMojo,114,146,12,20,25,37,11,11,3,3
+IKE Doc Maven Plugin,network.ike.docs.plugin,AsciidocMojo,1048,0,139,0,219,0,93,0,20,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,DocDiffMojo.new AdocDiffMarker.StampSource() {...},56,0,6,0,6,0,6,0,3,0
+IKE Doc Maven Plugin,network.ike.docs.plugin,PackageDocMojo.new SimpleFileVisitor() {...},0,42,0,0,0,8,0,2,0,2
 IKE Doc Maven Plugin,network.ike.docs.plugin,OutputValidator.Issue,42,0,0,0,2,0,2,0,2,0
 IKE Doc Maven Plugin,network.ike.docs.plugin,OutputValidator.new SimpleFileVisitor() {...},34,0,2,0,4,0,3,0,2,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,TopicRegistryMojo,629,0,74,0,116,0,43,0,6,0
-IKE Doc Maven Plugin,network.ike.docs.plugin,IdocGoal,35,149,4,0,6,22,6,4,4,4
+IKE Doc Maven Plugin,network.ike.docs.plugin,IdocGoal,35,167,4,0,6,24,6,4,4,4
 IKE Doc Maven Plugin,network.ike.docs.plugin,PackageDocMojo,95,31,4,2,24,6,6,2,4,1

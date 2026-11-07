@@ -1,6 +1,6 @@
 ---
-date_published: 2026-10-30
-date_modified: 2026-10-30
+date_published: 2026-11-06
+date_modified: 2026-11-06
 canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/summary.html
 ---
 
@@ -27,6 +27,6 @@ canonical_url: https://github.com/IKE-Network/ike-docbook-xsl/summary.html
 | --- | --- |
 | GroupId | network.ike.docs |
 | ArtifactId | docbook-xsl |
-| Version | 135 |
+| Version | 136 |
 | Type | jar |
 | Java Version | 25 |

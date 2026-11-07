@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TermIndex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">TermIndex.java</span></div><h1>TermIndex.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The term index {@code IKE-INDEX.md} and {@code IKE-TOPIC-REGISTRY.md}
+ * describe, {@code term-index.yaml}: the reverse mapping from the index
+ * terms a topic marks ({@code indexterm:[primary, secondary]},
+ * {@code indexterm2:[term]}, {@code ((term))}, {@code (((primary, secondary)))})
+ * to the topics that mark them. The registry's keywords say what a topic
+ * is about; its index terms say what it discusses.
+ *
+ * &lt;p&gt;Terms are collected once, when a topic is parsed, and kept on its
+ * registry entry as {@code index-terms}, each level joined with
+ * {@code &quot; &gt; &quot;}; the index is then derived from the registry alone, so an
+ * incremental registry run never reopens a file to rebuild it
+ * (IKE-Network/ike-issues#1341).
+ *
+ * @since 136
+ */
+public final class TermIndex {
+
+    /** The key under which a level lists the topics indexed at it. */
+    public static final String TOPICS_KEY = &quot;_topics&quot;;
+
+    /** The separator between the levels of a term as the registry records it. */
+    public static final String LEVEL_SEPARATOR = &quot; &gt; &quot;;
+
+    /** A macro, group 1, or an inline term, groups 2 (the concealing third parenthesis) and 3. */
+<span class="fc" id="L38">    private static final Pattern TERM = Pattern.compile(</span>
+            &quot;(?&lt;!\\w)indexterm2?:\\[([^\\]]*)]|\\(\\((\\(?)([^()]+?)\\)?\\)\\)&quot;);
+
+    private TermIndex() {
+    }
+
+    /**
+     * The index terms one file marks, in order of appearance, each as its
+     * levels joined with {@link #LEVEL_SEPARATOR}; a term marked twice is
+     * listed once. A visible term, {@code ((term))}, is one level; a
+     * concealed one, {@code (((primary, secondary)))}, splits on commas as
+     * {@code indexterm:[]} does. Lines that are comments are passed over.
+     *
+     * @param content the file content
+     * @return the terms, empty when the file marks none
+     */
+    public static List&lt;String&gt; termsOf(String content) {
+<span class="fc" id="L55">        List&lt;String&gt; terms = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        for (String line : content.lines().toList()) {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            if (line.startsWith(&quot;//&quot;)) {</span>
+<span class="fc" id="L58">                continue;</span>
+            }
+<span class="fc" id="L60">            Matcher term = TERM.matcher(line);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">            while (term.find()) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">                if (term.group(1) != null) {</span>
+<span class="fc" id="L63">                    add(terms, levels(term.group(1)));</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                } else if (term.group(2).isEmpty()) {</span>
+<span class="fc" id="L65">                    add(terms, List.of(term.group(3).strip()));</span>
+                } else {
+<span class="fc" id="L67">                    add(terms, levels(term.group(3)));</span>
+                }
+            }
+<span class="fc" id="L70">        }</span>
+<span class="fc" id="L71">        return List.copyOf(terms);</span>
+    }
+
+    private static List&lt;String&gt; levels(String list) {
+<span class="fc" id="L75">        List&lt;String&gt; levels = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (String part : list.split(&quot;,&quot;)) {</span>
+<span class="fc" id="L77">            String level = part.strip();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            if (!level.isEmpty()) {</span>
+<span class="fc" id="L79">                levels.add(level);</span>
+            }
+        }
+<span class="fc" id="L82">        return levels;</span>
+    }
+
+    private static void add(List&lt;String&gt; terms, List&lt;String&gt; levels) {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if (levels.isEmpty()) {</span>
+<span class="nc" id="L87">            return;</span>
+        }
+<span class="fc" id="L89">        String term = String.join(LEVEL_SEPARATOR, levels);</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (!terms.contains(term)) {</span>
+<span class="fc" id="L91">            terms.add(term);</span>
+        }
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * The term index as an ordered map, ready for YAML, from a registry
+     * model whose topic entries carry {@code index-terms}: {@code generated},
+     * {@code term-count}, then {@code terms}, a tree of levels in
+     * alphabetical order, each level with its {@code _topics} in id order
+     * and its sub-levels after.
+     *
+     * @param registry the registry model, from {@code TopicRegistry.model}
+     *                 or {@code TopicRegistry.load}
+     * @param now      the generation instant, recorded as a date
+     * @return the term index model
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static Map&lt;String, Object&gt; model(Map&lt;String, Object&gt; registry, Instant now) {
+<span class="fc" id="L109">        TreeMap&lt;String, Object&gt; tree = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L110">        int[] count = {0};</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (Object d : (List&lt;Object&gt;) registry.getOrDefault(&quot;domains&quot;, List.of())) {</span>
+<span class="fc" id="L112">            Map&lt;String, Object&gt; domain = (Map&lt;String, Object&gt;) d;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            for (Object t : (List&lt;Object&gt;) domain.getOrDefault(&quot;topics&quot;, List.of())) {</span>
+<span class="fc" id="L114">                Map&lt;String, Object&gt; topic = (Map&lt;String, Object&gt;) t;</span>
+<span class="fc" id="L115">                String id = String.valueOf(topic.get(&quot;id&quot;));</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                for (Object term : (List&lt;Object&gt;) topic.getOrDefault(&quot;index-terms&quot;, List.of())) {</span>
+<span class="fc" id="L117">                    TreeMap&lt;String, Object&gt; level = tree;</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                    for (String part : String.valueOf(term).split(Pattern.quote(LEVEL_SEPARATOR))) {</span>
+<span class="fc" id="L119">                        level = (TreeMap&lt;String, Object&gt;) level.computeIfAbsent(part, k -&gt; {</span>
+<span class="fc" id="L120">                            count[0]++;</span>
+<span class="fc" id="L121">                            return new TreeMap&lt;&gt;();</span>
+                        });
+                    }
+<span class="fc" id="L124">                    List&lt;String&gt; topics = (List&lt;String&gt;) level.computeIfAbsent(TOPICS_KEY, k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">                    if (!topics.contains(id)) {</span>
+<span class="fc" id="L126">                        topics.add(id);</span>
+                    }
+<span class="fc" id="L128">                }</span>
+<span class="fc" id="L129">            }</span>
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">        Map&lt;String, Object&gt; model = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L132">        model.put(&quot;generated&quot;, now.atOffset(ZoneOffset.UTC).toLocalDate().toString());</span>
+<span class="fc" id="L133">        model.put(&quot;term-count&quot;, count[0]);</span>
+<span class="fc" id="L134">        model.put(&quot;terms&quot;, ordered(tree, false));</span>
+<span class="fc" id="L135">        return model;</span>
+    }
+
+    /** A level with {@code _topics} first (the root has none), then its sub-levels in order, each sorted. */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static Map&lt;String, Object&gt; ordered(TreeMap&lt;String, Object&gt; level, boolean withTopics) {
+<span class="fc" id="L141">        Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (withTopics) {</span>
+<span class="fc" id="L143">            List&lt;String&gt; topics = (List&lt;String&gt;) level.get(TOPICS_KEY);</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            List&lt;String&gt; sorted = topics == null ? new ArrayList&lt;&gt;() : new ArrayList&lt;&gt;(topics);</span>
+<span class="fc" id="L145">            sorted.sort(null);</span>
+<span class="fc" id="L146">            out.put(TOPICS_KEY, sorted);</span>
+        }
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (Map.Entry&lt;String, Object&gt; e : level.entrySet()) {</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            if (!e.getKey().equals(TOPICS_KEY)) {</span>
+<span class="fc" id="L150">                out.put(e.getKey(), ordered((TreeMap&lt;String, Object&gt;) e.getValue(), true));</span>
+            }
+<span class="fc" id="L152">        }</span>
+<span class="fc" id="L153">        return out;</span>
+    }
+
+    /**
+     * Render the term index as YAML, in the registry's block style.
+     *
+     * @param model the model from {@link #model}
+     * @return the YAML text
+     */
+    public static String yaml(Map&lt;String, Object&gt; model) {
+<span class="fc" id="L163">        return TopicRegistry.yaml(model, &quot;term-index.yaml, generated by idoc:topic-registry from the index terms. Do not edit.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
