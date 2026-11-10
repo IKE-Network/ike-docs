@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PackageLint.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.packages</a> &gt; <span class="el_source">PackageLint.java</span></div><h1>PackageLint.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.packages;
+
+import network.ike.docs.plugin.registry.TopicHeader;
+import network.ike.docs.plugin.registry.TopicRegistry;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The ownership lint of the packages layout ({@code dev-adoc-packages},
+ * IKE-Network/ike-issues#1341), the check that makes the layout a
+ * guarantee and not a habit. It fails the build with every finding listed:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;the root holds nothing but dotted-group directories and
+ *       {@code META-INF}: a file at the root, an {@code images} directory
+ *       at the root, or a directory that is not a group is a finding;&lt;/li&gt;
+ *   &lt;li&gt;every package begins with the module's own group, unless
+ *       {@code ike.adoc.packages} declares another prefix on purpose;&lt;/li&gt;
+ *   &lt;li&gt;a topic's directory equals the domain prefix of its
+ *       {@code :topic-id:}, so that a person who knows a topic's id and its
+ *       owner can write its include line without looking;&lt;/li&gt;
+ *   &lt;li&gt;images are inside packages: an {@code images} directory directly
+ *       under a group that is not itself a package is a finding.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;An include or image line that still uses the {@code {topics}} alias
+ * is reported as a warning naming the file and line, so the alias can be
+ * retired once the last one is gone; it does not fail the build.
+ *
+ * @since 136
+ */
+public final class PackageLint {
+
+    /** The include attribute of the packages layout. */
+    public static final String ATTRIBUTE = &quot;{adoc}&quot;;
+
+    /** The migration alias the lint reports. */
+    public static final String ALIAS = &quot;{topics}&quot;;
+
+    /**
+     * What the lint found.
+     *
+     * @param errors   findings that fail the build, in the order found
+     * @param warnings findings that do not, in the order found
+     */
+<span class="fc" id="L51">    public record Report(List&lt;String&gt; errors, List&lt;String&gt; warnings) {</span>
+
+        /**
+         * Whether the build passes.
+         *
+         * @return true when there is no error
+         */
+        public boolean clean() {
+<span class="fc" id="L59">            return errors.isEmpty();</span>
+        }
+    }
+
+    private PackageLint() {
+    }
+
+    /**
+     * Lint a root.
+     *
+     * @param root     the AsciiDoc root
+     * @param groupId  the module's group id, which every package begins with
+     * @param declared package names or group prefixes
+     *                 {@code ike.adoc.packages} declares on purpose; a package
+     *                 passes the ownership rule when it equals one or begins
+     *                 with one followed by {@code /} or {@code .}
+     * @return the report
+     * @throws IOException if the tree cannot be read
+     */
+    public static Report lint(Path root, String groupId, List&lt;String&gt; declared) throws IOException {
+<span class="fc" id="L79">        Path real = root.toRealPath();</span>
+<span class="fc" id="L80">        List&lt;String&gt; errors = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">        List&lt;String&gt; warnings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L82">        lintRoot(real, errors);</span>
+<span class="fc" id="L83">        List&lt;AdocPackages.Package&gt; packages = AdocPackages.packages(real, null);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (AdocPackages.Package p : packages) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            if (!owned(p.name(), groupId, declared)) {</span>
+<span class="fc" id="L86">                errors.add(&quot;package &quot; + p.name() + &quot; does not begin with the module's group &quot; + groupId</span>
+                        + &quot;; move it to a library of its own, or declare the prefix in ike.adoc.packages on purpose&quot;);
+            }
+<span class="fc bfc" id="L89" title="All 2 branches covered.">            for (TopicHeader topic : p.topics()) {</span>
+<span class="fc" id="L90">                String domain = TopicRegistry.domainOf(topic.id());</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                if (!domain.equals(p.domain())) {</span>
+<span class="fc" id="L92">                    errors.add(topic.file() + &quot;: topic &quot; + topic.id() + &quot; is in package &quot; + p.name()</span>
+                            + &quot; but its id's domain is &quot; + domain + &quot;; move it to the &quot; + domain
+<span class="fc" id="L94">                            + &quot; package or rename it &quot; + p.domain() + &quot;-...&quot;);</span>
+                }
+<span class="fc" id="L96">            }</span>
+<span class="fc" id="L97">        }</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        for (Path group : AdocPackages.groupDirectories(real)) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (AdocPackages.isDomainPackage(group)) {</span>
+<span class="fc" id="L100">                continue;</span>
+            }
+<span class="fc" id="L102">            Path images = group.resolve(AdocPackages.IMAGES);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            if (Files.isDirectory(images)) {</span>
+<span class="fc" id="L104">                errors.add(real.relativize(images).toString().replace('\\', '/')</span>
+                        + &quot;: images outside a package; move them into the &quot; + AdocPackages.IMAGES
+                        + &quot; directory of the package that uses them&quot;);
+            }
+<span class="fc" id="L108">        }</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for (TopicHeader header : AdocPackages.headers(real, real)) {</span>
+<span class="fc" id="L110">            lintAlias(real, header.file(), warnings);</span>
+<span class="fc" id="L111">        }</span>
+<span class="fc" id="L112">        return new Report(List.copyOf(errors), List.copyOf(warnings));</span>
+    }
+
+    /** The root holds nothing but dotted-group directories and META-INF; hidden entries are the editor's. */
+    private static void lintRoot(Path real, List&lt;String&gt; errors) throws IOException {
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        for (Path entry : AdocPackages.children(real)) {</span>
+<span class="fc" id="L118">            String name = entry.getFileName().toString();</span>
+<span class="fc bfc" id="L119" title="All 4 branches covered.">            if (name.startsWith(&quot;.&quot;) || TopicRegistry.SKIPPED_DIRS.contains(name)) {</span>
+<span class="fc" id="L120">                continue;</span>
+            }
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (Files.isDirectory(entry)) {</span>
+<span class="fc bfc" id="L123" title="All 4 branches covered.">                if (name.equals(AdocPackages.META_INF) || AdocPackages.GROUP.matcher(name).matches()) {</span>
+<span class="fc" id="L124">                    continue;</span>
+                }
+<span class="fc bfc" id="L126" title="All 2 branches covered.">                if (name.equals(AdocPackages.IMAGES)) {</span>
+<span class="fc" id="L127">                    errors.add(name + &quot;/: images at the root; move them into the &quot; + AdocPackages.IMAGES</span>
+                            + &quot; directory of the package that uses them&quot;);
+                } else {
+<span class="fc" id="L130">                    errors.add(name + &quot;/: not a dotted group directory; the root holds only &lt;group&gt;/&lt;domain&gt;&quot;</span>
+                            + &quot; packages and &quot; + AdocPackages.META_INF);
+                }
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            } else if (name.endsWith(&quot;.adoc&quot;)) {</span>
+<span class="fc" id="L134">                errors.add(name + &quot;: a file at the root; a topic belongs in &lt;group&gt;/&lt;domain&gt;/, the preview&quot;</span>
+                        + &quot; index in the library's own package&quot;);
+            } else {
+<span class="fc" id="L137">                errors.add(name + &quot;: a file at the root; the root holds only &lt;group&gt;/&lt;domain&gt; packages and &quot;</span>
+                        + AdocPackages.META_INF);
+            }
+<span class="fc" id="L140">        }</span>
+<span class="fc" id="L141">    }</span>
+
+    /**
+     * Whether a package passes the ownership rule.
+     *
+     * @param name     the package name
+     * @param groupId  the module's group id
+     * @param declared the prefixes {@code ike.adoc.packages} declares
+     * @return true when the package begins with the group or a declared prefix
+     */
+    public static boolean owned(String name, String groupId, List&lt;String&gt; declared) {
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if (begins(name, groupId)) {</span>
+<span class="fc" id="L153">            return true;</span>
+        }
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        for (String prefix : declared) {</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">            if (begins(name, prefix.strip())) {</span>
+<span class="fc" id="L157">                return true;</span>
+            }
+<span class="fc" id="L159">        }</span>
+<span class="fc" id="L160">        return false;</span>
+    }
+
+    private static boolean begins(String name, String prefix) {
+<span class="pc bpc" id="L164" title="1 of 6 branches missed.">        return !prefix.isEmpty() &amp;&amp; (name.equals(prefix) || name.startsWith(prefix + &quot;/&quot;)</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">                || name.startsWith(prefix + &quot;.&quot;));</span>
+    }
+
+    /** An include or image line still using the {topics} alias is a warning naming the line. */
+    private static void lintAlias(Path real, String file, List&lt;String&gt; warnings) throws IOException {
+<span class="fc" id="L170">        List&lt;String&gt; lines = Files.readString(real.resolve(file), StandardCharsets.UTF_8).lines().toList();</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        for (int i = 0; i &lt; lines.size(); i++) {</span>
+<span class="fc" id="L172">            String line = lines.get(i);</span>
+<span class="fc bfc" id="L173" title="All 4 branches covered.">            if (line.startsWith(&quot;//&quot;) || !line.contains(ALIAS)) {</span>
+<span class="fc" id="L174">                continue;</span>
+            }
+<span class="fc bfc" id="L176" title="All 6 branches covered.">            if (line.startsWith(&quot;include::&quot;) || line.startsWith(&quot;image::&quot;) || line.contains(&quot;image:&quot;)) {</span>
+<span class="fc" id="L177">                warnings.add(file + &quot;:&quot; + (i + 1) + &quot;: still uses &quot; + ALIAS + &quot;, replace it with &quot; + ATTRIBUTE</span>
+<span class="fc" id="L178">                        + &quot;: &quot; + line.strip());</span>
+            }
+        }
+<span class="fc" id="L181">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

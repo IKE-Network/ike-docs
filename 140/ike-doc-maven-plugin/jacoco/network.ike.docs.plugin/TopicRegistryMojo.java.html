@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopicRegistryMojo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">TopicRegistryMojo.java</span></div><h1>TopicRegistryMojo.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import network.ike.docs.plugin.packages.AdocLayout;
+import network.ike.docs.plugin.packages.AdocPackages;
+import network.ike.docs.plugin.registry.BlobIndex;
+import network.ike.docs.plugin.registry.GitBlobIndex;
+import network.ike.docs.plugin.registry.IncrementalRegistry;
+import network.ike.docs.plugin.registry.TermIndex;
+import network.ike.docs.plugin.registry.TopicHeader;
+import network.ike.docs.plugin.registry.TopicRegistry;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Mojo;
+import org.apache.maven.api.plugin.annotations.Parameter;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Generate the topic registry: every AsciiDoc file under the module's source
+ * root, with its storage location and header metadata (the {@code :topic-*:}
+ * block of a topic fragment; the title, document attributes and include count
+ * of any file), written to {@code target/topic-registry.yaml} in the shape
+ * {@code IKE-TOPIC-REGISTRY.md} gives the registry: topics grouped into
+ * domains by the prefix of their id. The same structure is printed to the
+ * build log as a tree. It applies to every module the doc pipeline renders:
+ * topic libraries, assemblies, doc-only and hybrid projects.
+ *
+ * &lt;p&gt;This is the topic registry's build-time revision: the registry keeps its
+ * purpose and shape and is now generated from the files on every run instead
+ * of kept by hand at {@code src/docs/asciidoc/topic-registry.yaml}. It is
+ * never committed and never edits a source file. Header findings (a
+ * missing required attribute, an anchor that does not match the id, an
+ * unknown type or status, the same id in two files) are reported in the
+ * registry and the log and do not fail the build.
+ *
+ * &lt;p&gt;A module without {@code src/docs/asciidoc} is skipped with one log
+ * line, so the goal can run from a reactor root. Usage:
+ *
+ * &lt;pre&gt;
+ *   mvn idoc:topic-registry                                          # the module's src/docs/asciidoc
+ *   mvn idoc:topic-registry -Dike.topic-registry.roots=a,b           # other roots, comma-separated
+ *   mvn idoc:topic-registry -Dike.topic-registry.output=/tmp/r.yaml  # write elsewhere
+ *   mvn idoc:topic-registry -Dike.topic-registry.add=topics/x/new.adoc   # add one ingested file, no rescan
+ *   mvn idoc:topic-registry -Dike.topic-registry.rootFile=src/docs/asciidoc/index.adoc  # only what index.adoc includes
+ * &lt;/pre&gt;
+ *
+ * &lt;p&gt;With {@code -Dike.topic-registry.rootFile} the registry holds that file
+ * and the {@code .adoc} files it reaches through {@code include::} lines,
+ * recursively; other files under the root are left out. The file must lie
+ * under one of the roots, and paths stay relative to that root. Includes that
+ * cannot be followed (an attribute reference such as {@code {topicsdir}/},
+ * an absolute path, a URI, a missing file) are findings. It cannot be combined
+ * with {@code add}.
+ *
+ * &lt;p&gt;With {@code -Dike.topic-registry.add} the named files are parsed alone
+ * and merged into the existing registry: placed in their domain, counted, and
+ * checked for a duplicate id against the registry. An entry for the same file
+ * is replaced, so re-ingesting is safe. Deleted files are not noticed that
+ * way; a run without {@code add} re-derives everything.
+ *
+ * &lt;p&gt;The default phase is {@code validate}: the goal reads sources and
+ * writes only under {@code target/}, so an execution declared without a
+ * phase (as {@code ike-parent} does for {@code lint-site}) refreshes the
+ * registry on every build, including a bare {@code mvn validate}.
+ *
+ * &lt;p&gt;With the POM property {@code ike.adoc.layout=packages}
+ * ({@code dev-adoc-packages}, IKE-Network/ike-issues#1341) the registry is
+ * blob-keyed and incremental: {@link GitBlobIndex} lists every file with
+ * the git blob id of its content without opening it, and
+ * {@link IncrementalRegistry} keeps the entry of a file whose path and
+ * blob are unchanged, re-keys the entry of a blob that moved, parses only
+ * a new or changed blob and drops a path that is gone. A tree without git
+ * falls back to hashing every file in Java, the full scan's cost. The
+ * registry and the term index are then written to
+ * {@code target/adoc-meta/META-INF/ike/&lt;groupId&gt;/&lt;artifactId&gt;/topic-registry.yaml}
+ * and {@code term-index.yaml}, which the parent POM ships in the adoc zip,
+ * with every {@code file:} relative to the AsciiDoc root; {@code add} is a
+ * special case of the blob rule and needs no separate path. Without the
+ * property nothing above changes.
+ *
+ * &lt;p&gt;Skip with {@code -Dike.skip.topic-registry=true}.
+ *
+ * @since 109
+ */
+@Mojo(name = &quot;topic-registry&quot;, defaultPhase = &quot;validate&quot;)
+public class TopicRegistryMojo implements org.apache.maven.api.plugin.Mojo {
+
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.plugin.Log log;
+
+    /**
+     * Access the Maven logger.
+     *
+     * @return the logger
+     */
+<span class="nc" id="L103">    protected org.apache.maven.api.plugin.Log getLog() { return log; }</span>
+
+    /**
+     * Directories to scan, comma-separated. Defaults to the module's
+     * {@code src/docs/asciidoc}; when that default directory does not exist
+     * the goal is skipped, while a named directory that does not exist
+     * fails the build.
+     */
+    @Parameter(property = &quot;ike.topic-registry.roots&quot;,
+               defaultValue = &quot;${project.basedir}/src/docs/asciidoc&quot;)
+    String roots;
+
+    /** Where the generated registry is written. */
+    @Parameter(property = &quot;ike.topic-registry.output&quot;,
+               defaultValue = &quot;${project.build.directory}/topic-registry.yaml&quot;)
+    File output;
+
+    /** The most {@code .adoc} files one root may hold before the scan fails. */
+    @Parameter(property = &quot;ike.topic-registry.maxFiles&quot;, defaultValue = &quot;5000&quot;)
+    int maxFiles;
+
+    /**
+     * Files to add to the existing registry without rescanning, comma-separated,
+     * relative to the module base directory or absolute. Each must be an
+     * {@code .adoc} file under one of the registry's roots. When no generated
+     * registry exists yet, the full scan runs instead.
+     */
+    @Parameter(property = &quot;ike.topic-registry.add&quot;)
+    String add;
+
+    /**
+     * An {@code .adoc} file to build the registry from instead of scanning
+     * every file: the file and what it reaches through {@code include::}
+     * lines. Relative to the module base directory or absolute; it must lie
+     * under one of the {@link #roots}. Unset, the whole root is scanned.
+     */
+    @Parameter(property = &quot;ike.topic-registry.rootFile&quot;)
+    String rootFile;
+
+    /** Skip the goal. */
+    @Parameter(property = &quot;ike.skip.topic-registry&quot;, defaultValue = &quot;false&quot;)
+    boolean skip;
+
+    /**
+     * The layout the library declares: with {@code packages} the registry is
+     * blob-keyed, incremental, and written with the term index under
+     * {@code META-INF/ike/&lt;groupId&gt;/&lt;artifactId&gt;/} in {@link #metaDirectory}.
+     */
+    @Parameter(property = AdocLayout.PROPERTY)
+    String layout;
+
+    /**
+     * Where the packages layout's metadata tree is written; the parent POM
+     * zips it with the sources. Used only with {@code ike.adoc.layout=packages}.
+     */
+    @Parameter(property = &quot;ike.adoc.meta-directory&quot;, defaultValue = &quot;${project.build.directory}/adoc-meta&quot;)
+    File metaDirectory;
+
+    /** The build directory, to tell the default {@link #output} from one the user chose. */
+    @Parameter(defaultValue = &quot;${project.build.directory}&quot;, readonly = true)
+    File buildDirectory;
+
+    /** The project this goal runs in; registry paths are shown relative to its base directory. */
+    @org.apache.maven.api.di.Inject
+    private org.apache.maven.api.Project project;
+
+    /** Creates this goal instance. */
+<span class="nc" id="L170">    public TopicRegistryMojo() {}</span>
+
+    @Override
+    public void execute() throws MojoException {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (skip) {</span>
+<span class="nc" id="L175">            getLog().debug(&quot;idoc:topic-registry — skipped&quot;);</span>
+<span class="nc" id="L176">            return;</span>
+        }
+<span class="nc" id="L178">        long started = System.nanoTime();</span>
+<span class="nc" id="L179">        Path base = project.getBasedir();</span>
+<span class="nc bnc" id="L180" title="All 4 branches missed.">        boolean fromRootFile = rootFile != null &amp;&amp; !rootFile.isBlank();</span>
+        AdocLayout adocLayout;
+        try {
+<span class="nc" id="L183">            adocLayout = AdocLayout.of(layout);</span>
+<span class="nc" id="L184">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L185">            throw new MojoException(e.getMessage(), e);</span>
+<span class="nc" id="L186">        }</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (adocLayout == AdocLayout.PACKAGES) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            if (fromRootFile) {</span>
+<span class="nc" id="L189">                throw new MojoException(&quot;-Dike.topic-registry.rootFile is not supported with &quot;</span>
+                        + AdocLayout.PROPERTY + &quot;=packages; the registry of a packaged library&quot;
+                        + &quot; covers every file under its root&quot;);
+            }
+<span class="nc" id="L193">            executePackages(base, started);</span>
+<span class="nc" id="L194">            return;</span>
+        }
+<span class="nc bnc" id="L196" title="All 6 branches missed.">        if (fromRootFile &amp;&amp; add != null &amp;&amp; !add.isBlank()) {</span>
+<span class="nc" id="L197">            throw new MojoException(&quot;-Dike.topic-registry.rootFile and -Dike.topic-registry.add&quot;</span>
+                    + &quot; cannot be combined; run with one or the other&quot;);
+        }
+<span class="nc bnc" id="L200" title="All 4 branches missed.">        if (add != null &amp;&amp; !add.isBlank()) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            if (Files.isRegularFile(output.toPath())) {</span>
+<span class="nc" id="L202">                addToRegistry(base, output.toPath(), started);</span>
+<span class="nc" id="L203">                return;</span>
+            }
+<span class="nc" id="L205">            getLog().info(&quot;idoc:topic-registry — no generated registry at &quot; + output</span>
+                    + &quot; yet, running the full scan&quot;);
+        }
+<span class="nc" id="L208">        Path defaultRoot = base.resolve(&quot;src/docs/asciidoc&quot;);</span>
+<span class="nc" id="L209">        List&lt;Path&gt; rootPaths = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        for (String r : roots.split(&quot;,&quot;)) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            if (!r.isBlank()) {</span>
+<span class="nc" id="L212">                rootPaths.add(Path.of(r.strip()));</span>
+            }
+        }
+<span class="nc bnc" id="L215" title="All 4 branches missed.">        if (!fromRootFile &amp;&amp; rootPaths.size() == 1 &amp;&amp; rootPaths.get(0).toAbsolutePath().normalize()</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                .equals(defaultRoot.toAbsolutePath().normalize())</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                &amp;&amp; !Files.isDirectory(defaultRoot)) {</span>
+<span class="nc" id="L218">            getLog().info(&quot;idoc:topic-registry — no src/docs/asciidoc in &quot; + base.getFileName()</span>
+                    + &quot;, skipping&quot;);
+<span class="nc" id="L220">            return;</span>
+        }
+
+<span class="nc" id="L223">        List&lt;TopicRegistry.Scan&gt; scans = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        if (fromRootFile) {</span>
+<span class="nc" id="L225">            scans.add(scanFromRootFile(base, rootPaths));</span>
+        } else {
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            for (Path root : rootPaths) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                if (!Files.isDirectory(root)) {</span>
+<span class="nc" id="L229">                    throw new MojoException(&quot;Registry root does not exist: &quot; + root</span>
+                            + &quot; (check -Dike.topic-registry.roots)&quot;);
+                }
+                try {
+<span class="nc" id="L233">                    scans.add(TopicRegistry.scan(root, maxFiles));</span>
+<span class="nc" id="L234">                } catch (IOException e) {</span>
+<span class="nc" id="L235">                    throw new MojoException(&quot;Cannot scan &quot; + root + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L236">                } catch (IllegalStateException e) {</span>
+<span class="nc" id="L237">                    throw new MojoException(e.getMessage(), e);</span>
+<span class="nc" id="L238">                }</span>
+<span class="nc" id="L239">            }</span>
+        }
+
+<span class="nc" id="L242">        String yaml = TopicRegistry.yaml(TopicRegistry.model(scans, base, Instant.now()));</span>
+<span class="nc" id="L243">        Path out = output.toPath();</span>
+        try {
+<span class="nc" id="L245">            Files.createDirectories(out.getParent());</span>
+<span class="nc" id="L246">            Files.writeString(out, yaml, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L247">        } catch (IOException e) {</span>
+<span class="nc" id="L248">            throw new MojoException(&quot;Cannot write the registry to &quot; + out + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L249">        }</span>
+
+<span class="nc" id="L251">        int topics = 0;</span>
+<span class="nc" id="L252">        int others = 0;</span>
+<span class="nc" id="L253">        int findings = 0;</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        for (TopicRegistry.Scan scan : scans) {</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            for (String line : TopicRegistry.tree(scan, base)) {</span>
+<span class="nc" id="L256">                getLog().info(line);</span>
+<span class="nc" id="L257">            }</span>
+<span class="nc" id="L258">            topics += scan.topics().size();</span>
+<span class="nc" id="L259">            others += scan.others().size();</span>
+<span class="nc" id="L260">            findings += scan.findings().size();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            for (String finding : scan.findings()) {</span>
+<span class="nc" id="L262">                getLog().warn(&quot;registry: &quot; + finding);</span>
+<span class="nc" id="L263">            }</span>
+<span class="nc" id="L264">        }</span>
+<span class="nc" id="L265">        long millis = (System.nanoTime() - started) / 1_000_000;</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        getLog().info(topics + &quot; topic&quot; + (topics == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;, &quot; + others</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">                + &quot; other file&quot; + (others == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;, &quot; + findings</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                + &quot; finding&quot; + (findings == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;; topic registry written to &quot;</span>
+<span class="nc" id="L269">                + shown(base, out) + &quot; (&quot; + millis + &quot; ms)&quot;);</span>
+<span class="nc" id="L270">    }</span>
+
+    /**
+     * The packages layout's run: one root, the blob index from git or by
+     * hashing, the incremental update against the registry written last
+     * time, the registry and the term index under {@code META-INF}.
+     */
+    private void executePackages(Path base, long started) throws MojoException {
+<span class="nc" id="L278">        List&lt;Path&gt; rootPaths = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        for (String r : roots.split(&quot;,&quot;)) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">            if (!r.isBlank()) {</span>
+<span class="nc" id="L281">                rootPaths.add(Path.of(r.strip()));</span>
+            }
+        }
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        if (rootPaths.size() != 1) {</span>
+<span class="nc" id="L285">            throw new MojoException(AdocLayout.PROPERTY + &quot;=packages takes exactly one registry root,&quot;</span>
+                    + &quot; the library's AsciiDoc root; got &quot; + rootPaths + &quot; (check -Dike.topic-registry.roots)&quot;);
+        }
+<span class="nc" id="L288">        Path root = rootPaths.get(0);</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (!Files.isDirectory(root)) {</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">            if (root.toAbsolutePath().normalize().equals(base.resolve(&quot;src/docs/asciidoc&quot;).toAbsolutePath().normalize())) {</span>
+<span class="nc" id="L291">                getLog().info(&quot;idoc:topic-registry — no src/docs/asciidoc in &quot; + base.getFileName() + &quot;, skipping&quot;);</span>
+<span class="nc" id="L292">                return;</span>
+            }
+<span class="nc" id="L294">            throw new MojoException(&quot;Registry root does not exist: &quot; + root + &quot; (check -Dike.topic-registry.roots)&quot;);</span>
+        }
+<span class="nc" id="L296">        Path metaDir = metaDirectory.toPath().resolve(AdocPackages.metaDirectory(project.getGroupId(),</span>
+<span class="nc" id="L297">                project.getArtifactId()));</span>
+<span class="nc" id="L298">        Path defaultOutput = buildDirectory.toPath().resolve(&quot;topic-registry.yaml&quot;).toAbsolutePath().normalize();</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        Path out = output.toPath().toAbsolutePath().normalize().equals(defaultOutput)</span>
+<span class="nc" id="L300">                ? metaDir.resolve(&quot;topic-registry.yaml&quot;) : output.toPath();</span>
+<span class="nc" id="L301">        Path termsOut = out.resolveSibling(&quot;term-index.yaml&quot;);</span>
+
+<span class="nc" id="L303">        Map&lt;String, Object&gt; previous = null;</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        if (Files.isRegularFile(out)) {</span>
+            try {
+<span class="nc" id="L306">                previous = TopicRegistry.load(out);</span>
+<span class="nc" id="L307">            } catch (IOException e) {</span>
+<span class="nc" id="L308">                getLog().warn(&quot;idoc:topic-registry — cannot read the previous registry &quot; + shown(base, out)</span>
+<span class="nc" id="L309">                        + &quot; (&quot; + e.getMessage() + &quot;); parsing every file&quot;);</span>
+<span class="nc" id="L310">            }</span>
+        }
+<span class="nc bnc" id="L312" title="All 4 branches missed.">        if (add != null &amp;&amp; !add.isBlank()) {</span>
+<span class="nc" id="L313">            getLog().info(&quot;idoc:topic-registry — -Dike.topic-registry.add is a special case of the blob rule&quot;</span>
+                    + &quot; under &quot; + AdocLayout.PROPERTY + &quot;=packages: changed files are parsed, the rest kept&quot;);
+        }
+        BlobIndex index;
+        IncrementalRegistry.Outcome outcome;
+        try {
+<span class="nc" id="L319">            index = GitBlobIndex.read(root).orElse(null);</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">            if (index == null) {</span>
+<span class="nc" id="L321">                getLog().info(&quot;idoc:topic-registry — &quot; + shown(base, root) + &quot; is not in a git working tree;&quot;</span>
+                        + &quot; hashing every file instead&quot;);
+<span class="nc" id="L323">                index = BlobIndex.hashed(root);</span>
+            }
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            if (index.blobs().size() &gt; maxFiles) {</span>
+<span class="nc" id="L326">                throw new MojoException(&quot;More than &quot; + maxFiles + &quot; .adoc files under &quot; + root</span>
+                        + &quot;; raise -Dike.topic-registry.maxFiles&quot;);
+            }
+<span class="nc" id="L329">            outcome = IncrementalRegistry.update(previous, root, index, base, Instant.now());</span>
+<span class="nc" id="L330">        } catch (IOException e) {</span>
+<span class="nc" id="L331">            throw new MojoException(&quot;Cannot index &quot; + root + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L332">        }</span>
+<span class="nc" id="L333">        Map&lt;String, Object&gt; model = outcome.model();</span>
+        try {
+<span class="nc" id="L335">            Files.createDirectories(out.getParent());</span>
+<span class="nc" id="L336">            Files.writeString(out, TopicRegistry.yaml(model), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L337">            Files.createDirectories(termsOut.getParent());</span>
+<span class="nc" id="L338">            Files.writeString(termsOut, TermIndex.yaml(TermIndex.model(model, Instant.now())), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L339">        } catch (IOException e) {</span>
+<span class="nc" id="L340">            throw new MojoException(&quot;Cannot write the registry to &quot; + out + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L341">        }</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L343">        List&lt;Object&gt; findings = (List&lt;Object&gt;) model.get(&quot;findings&quot;);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        for (Object f : findings) {</span>
+<span class="nc" id="L345">            getLog().warn(&quot;registry: &quot; + f);</span>
+<span class="nc" id="L346">        }</span>
+<span class="nc" id="L347">        int topics = (Integer) model.get(&quot;topic-count&quot;);</span>
+<span class="nc" id="L348">        int others = (Integer) model.get(&quot;file-count&quot;) - topics;</span>
+<span class="nc" id="L349">        long millis = (System.nanoTime() - started) / 1_000_000;</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        getLog().info(topics + &quot; topic&quot; + (topics == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;, &quot; + others</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">                + &quot; other file&quot; + (others == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;, &quot; + findings.size()</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                + &quot; finding&quot; + (findings.size() == 1 ? &quot;&quot; : &quot;s&quot;) + &quot;; &quot; + outcome.kept() + &quot; kept, &quot;</span>
+<span class="nc" id="L353">                + outcome.rekeyed() + &quot; re-keyed, &quot; + outcome.parsed() + &quot; parsed, &quot; + outcome.dropped()</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                + &quot; dropped by &quot; + (index.source() == BlobIndex.Source.GIT ? &quot;git blob&quot; : &quot;hashed blob&quot;)</span>
+<span class="nc" id="L355">                + &quot;; topic registry and term index written to &quot; + shown(base, out.getParent())</span>
+                + &quot;/ (&quot; + millis + &quot; ms)&quot;);
+<span class="nc" id="L357">    }</span>
+
+    private TopicRegistry.Scan scanFromRootFile(Path base, List&lt;Path&gt; rootPaths) throws MojoException {
+<span class="nc" id="L360">        Path file = base.resolve(rootFile.strip());</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">        if (!Files.isRegularFile(file)) {</span>
+<span class="nc" id="L362">            throw new MojoException(&quot;Root file does not exist: &quot; + file</span>
+                    + &quot; (check -Dike.topic-registry.rootFile)&quot;);
+        }
+        try {
+<span class="nc" id="L366">            Path realFile = file.toRealPath();</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">            for (Path root : rootPaths) {</span>
+<span class="nc bnc" id="L368" title="All 4 branches missed.">                if (Files.isDirectory(root) &amp;&amp; realFile.startsWith(root.toRealPath())) {</span>
+<span class="nc" id="L369">                    getLog().info(&quot;idoc:topic-registry — from root file &quot; + shown(base, file));</span>
+<span class="nc" id="L370">                    return TopicRegistry.scanFrom(root, file);</span>
+                }
+<span class="nc" id="L372">            }</span>
+<span class="nc" id="L373">        } catch (IOException e) {</span>
+<span class="nc" id="L374">            throw new MojoException(&quot;Cannot scan from &quot; + file + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L375">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L376">            throw new MojoException(e.getMessage(), e);</span>
+<span class="nc" id="L377">        }</span>
+<span class="nc" id="L378">        throw new MojoException(&quot;Root file &quot; + file + &quot; is under none of the registry roots &quot;</span>
+                + rootPaths + &quot; (check -Dike.topic-registry.roots)&quot;);
+    }
+
+    private void addToRegistry(Path base, Path out, long started) throws MojoException {
+<span class="nc" id="L383">        List&lt;Path&gt; files = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        for (String f : add.split(&quot;,&quot;)) {</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">            if (!f.isBlank()) {</span>
+<span class="nc" id="L386">                files.add(Path.of(f.strip()));</span>
+            }
+        }
+        Map&lt;String, Object&gt; model;
+        try {
+<span class="nc" id="L391">            model = TopicRegistry.load(out);</span>
+<span class="nc" id="L392">        } catch (IOException e) {</span>
+<span class="nc" id="L393">            throw new MojoException(&quot;Cannot read the generated registry &quot; + out + &quot;: &quot;</span>
+<span class="nc" id="L394">                    + e.getMessage(), e);</span>
+<span class="nc" id="L395">        }</span>
+        List&lt;TopicHeader&gt; added;
+        try {
+<span class="nc" id="L398">            added = TopicRegistry.add(model, base, files, Instant.now());</span>
+<span class="nc" id="L399">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L400">            throw new MojoException(e.getMessage(), e);</span>
+<span class="nc" id="L401">        } catch (IOException e) {</span>
+<span class="nc" id="L402">            throw new MojoException(&quot;Cannot read a file to add: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L403">        }</span>
+        try {
+<span class="nc" id="L405">            Files.writeString(out, TopicRegistry.yaml(model), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L406">        } catch (IOException e) {</span>
+<span class="nc" id="L407">            throw new MojoException(&quot;Cannot write the registry to &quot; + out + &quot;: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L408">        }</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        for (TopicHeader h : added) {</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            getLog().info(&quot;registry: &quot; + (h.topic() ? &quot;topic &quot; + h.id() + &quot; at &quot; : &quot;file &quot;) + h.file());</span>
+<span class="nc" id="L411">        }</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L413">        List&lt;Object&gt; findings = (List&lt;Object&gt;) model.get(&quot;findings&quot;);</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        for (Object f : findings) {</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            for (TopicHeader h : added) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                if (String.valueOf(f).startsWith(h.file() + &quot;: &quot;)) {</span>
+<span class="nc" id="L417">                    getLog().warn(&quot;registry: &quot; + f);</span>
+                }
+<span class="nc" id="L419">            }</span>
+<span class="nc" id="L420">        }</span>
+<span class="nc" id="L421">        long millis = (System.nanoTime() - started) / 1_000_000;</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        getLog().info(&quot;added &quot; + added.size() + &quot; file&quot; + (added.size() == 1 ? &quot;&quot; : &quot;s&quot;)</span>
+<span class="nc" id="L423">                + &quot; to &quot; + shown(base, out) + &quot; without rescanning (&quot; + millis + &quot; ms)&quot;);</span>
+<span class="nc" id="L424">    }</span>
+
+    private static String shown(Path base, Path out) {
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        return out.toAbsolutePath().startsWith(base.toAbsolutePath())</span>
+<span class="nc" id="L428">                ? base.toAbsolutePath().relativize(out.toAbsolutePath()).toString()</span>
+<span class="nc" id="L429">                : out.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
