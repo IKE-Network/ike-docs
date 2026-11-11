@@ -32,6 +32,12 @@ import java.util.regex.Pattern;
  *       <rootDir> --font-path <fontPath>} (IKE-Network/ike-issues#1307)</li>
  * </ul>
  *
+ * <p>Before a CSS-based renderer reads a document, the goal writes the
+ * document's abstract into its header, so the print stylesheet sets it on
+ * the title page (see {@link TitlePageAbstract}; design
+ * {@code dev-document-front-matter}, IKE-Network/ike-issues#1307). A document
+ * with no abstract is not rewritten.
+ *
  * <p>By default, the goal discovers all input files in {@code inputDir}
  * and renders each one. To render specific documents, set the
  * {@code documents} parameter to a list of base names (without extension).
@@ -224,6 +230,10 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
             String suffix = (outputSuffix != null) ? outputSuffix : "";
             Path output = outputDir.toPath().resolve(baseName + suffix + ".pdf");
 
+            if (type.isCssBased()) {
+                placeAbstractOnTitlePage(input);
+            }
+
             List<String> command = buildCommand(
                     type, resolvedExecutable, input, output);
 
@@ -244,6 +254,33 @@ public class RenderPdfMojo implements org.apache.maven.api.plugin.Mojo {
 
         getLog().info("render-pdf [" + renderer + "]: rendered " + rendered
                 + " document(s) to " + outputDir);
+    }
+
+    // ── Title-page abstract ──────────────────────────────────────────
+
+    /**
+     * Rewrite a print HTML file so that the document's abstract is in its
+     * header, where the print stylesheet sets the title page. The file is
+     * left as it is when it has no abstract to move, so a second render of
+     * the same input directory changes nothing.
+     *
+     * @param html the print HTML file a CSS renderer is about to read
+     * @throws MojoException if the file cannot be read or written
+     * @see TitlePageAbstract
+     */
+    private void placeAbstractOnTitlePage(Path html) throws MojoException {
+        try {
+            String before = Files.readString(html);
+            String after = TitlePageAbstract.relocate(before);
+            if (!after.equals(before)) {
+                Files.writeString(html, after);
+                getLog().info("render-pdf [" + renderer + "]: abstract placed on"
+                        + " the title page of " + html.getFileName());
+            }
+        } catch (IOException e) {
+            throw new MojoException(
+                    "Failed to place the abstract on the title page of " + html, e);
+        }
     }
 
     // ── Renderer types ───────────────────────────────────────────────

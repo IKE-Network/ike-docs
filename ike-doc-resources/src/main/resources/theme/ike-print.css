@@ -519,6 +519,72 @@ table.colophon-credits td {
 }
 
 
+/* ── Abstract on the Title Page ────────────────────────────────── */
+/* A block with the abstract style that comes before the first      */
+/* section is the document's abstract. The render-pdf goal writes   */
+/* it into #header, after the title, the author and the date, as an */
+/* open block with the class ike-title-abstract (TitlePageAbstract  */
+/* in ike-doc-maven-plugin). An open block is set by the rules that */
+/* set the body's text, so nothing here restates the body's type:   */
+/* no label, no narrower measure. Only the header's centring is     */
+/* undone. Design: dev-document-front-matter;                       */
+/* IKE-Network/ike-issues#1307.                                     */
+
+#header .ike-title-abstract {
+    text-align: left;
+    margin-top: 3em !important;      /* space beneath the author and date;
+                                        !important because the backend's own
+                                        `div { margin: 0 }` otherwise wins */
+}
+
+/* A long abstract runs on to the next pages. Those pages are front */
+/* matter and have what the contents pages have: a lowercase roman  */
+/* folio at the foot. The title page itself keeps no folio. A       */
+/* header with an abstract therefore has a page name of its own.    */
+/* Every rule below matches only such a header, so a document with  */
+/* no abstract is laid out by the rules above and by none of these. */
+
+#header:has(> .ike-title-abstract) {
+    page: title-abstract;
+    prince-page-group: start;        /* lets :first-of-group find the title page */
+}
+
+@page title-abstract {
+    @top-left     { content: none; }
+    @top-right    { content: none; }
+    @bottom-left  { content: none; }
+    @bottom-right { content: none; }
+    @bottom-center {
+        content: counter(page, lower-roman);
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 9pt;
+        color: #999999;
+    }
+}
+
+/* The title page. :first-of-group is Prince's selector for the     */
+/* first page of a page group; from Prince 16, :first is only the   */
+/* first page of the whole document. Both are given, so a renderer  */
+/* that knows only :first still leaves the title page bare when it  */
+/* is the document's first page.                                    */
+@page title-abstract:first          { @bottom-center { content: none; } }
+@page title-abstract:first-of-group { @bottom-center { content: none; } }
+
+/* The blank verso that brings the contents to a recto. */
+@page title-abstract:blank          { @bottom-center { content: none; } }
+
+/* When the header holds the table of contents, the header ends on  */
+/* a page of its own after the contents. That page is blank today   */
+/* and stays blank: this empty box gives it the bare title-page     */
+/* name. Without it the page would take the abstract's page name    */
+/* and print a folio.                                               */
+#header:has(> .ike-title-abstract):has(> #toc)::after {
+    content: "";
+    display: block;
+    page: title-page;
+}
+
+
 /* ── Images / Figures ──────────────────────────────────────────── */
 
 .imageblock {
