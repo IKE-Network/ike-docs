@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GitBlobIndex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.registry</a> &gt; <span class="el_source">GitBlobIndex.java</span></div><h1>GitBlobIndex.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.registry;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Read a {@link BlobIndex} from git without opening a file
+ * ({@code dev-adoc-packages}, IKE-Network/ike-issues#1341). One call,
+ * {@code git ls-files -s}, lists every tracked path with the blob id of
+ * its content as the index holds it. The working tree may differ from the
+ * index, so {@code git status} is asked for what moved since: every path
+ * it names that still exists is hashed on the spot with
+ * {@code git hash-object}, which costs the same as the parse it causes,
+ * and every path it names that is gone is dropped. Untracked and ignored
+ * files are included and hashed too, so the index covers exactly the files
+ * the full scan would read. Renames are not asked for; a rename is a drop
+ * and an add here, and the registry re-keys it by blob.
+ *
+ * &lt;p&gt;Nothing here needs the tree to be committed, or clean. A tree that is
+ * not inside a git repository, or a machine without {@code git} on the
+ * path, gives {@link Optional#empty()}, and the caller falls back to
+ * {@link BlobIndex#hashed(Path)}.
+ *
+ * @since 136
+ */
+public final class GitBlobIndex {
+
+    /** The most milliseconds one git call may take before it is given up on. */
+    private static final long TIMEOUT_MILLIS = 60_000;
+
+    private GitBlobIndex() {
+    }
+
+    /**
+     * Index the {@code .adoc} files under a root from git.
+     *
+     * @param root the registry root, inside a git working tree
+     * @return the index, or empty when the root is not in a git working tree
+     *         or git cannot be run
+     * @throws IOException if git runs but fails, or its output cannot be read
+     */
+    public static Optional&lt;BlobIndex&gt; read(Path root) throws IOException {
+<span class="fc" id="L55">        Path real = root.toRealPath();</span>
+        Result prefix;
+        try {
+<span class="fc" id="L58">            prefix = run(real, null, &quot;git&quot;, &quot;rev-parse&quot;, &quot;--show-prefix&quot;);</span>
+<span class="nc" id="L59">        } catch (IOException e) {</span>
+            // git is not installed or not on the path
+<span class="nc" id="L61">            return Optional.empty();</span>
+<span class="fc" id="L62">        }</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (prefix.exit() != 0) {</span>
+<span class="fc" id="L64">            return Optional.empty();</span>
+        }
+<span class="fc" id="L66">        String rootPrefix = prefix.text().strip();</span>
+
+<span class="fc" id="L68">        Map&lt;String, String&gt; blobs = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L69">        List&lt;String&gt; findings = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L70">        Result listed = run(real, null, &quot;git&quot;, &quot;ls-files&quot;, &quot;-s&quot;, &quot;-z&quot;, &quot;--&quot;, &quot;.&quot;);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (listed.exit() != 0) {</span>
+<span class="nc" id="L72">            throw new IOException(&quot;git ls-files failed in &quot; + real + &quot;: &quot; + listed.text().strip());</span>
+        }
+<span class="fc" id="L74">        List&lt;String&gt; stale = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (String record : listed.text().split(&quot;\0&quot;)) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">            if (record.isEmpty()) {</span>
+<span class="nc" id="L77">                continue;</span>
+            }
+            // &quot;&lt;mode&gt; &lt;blob&gt; &lt;stage&gt;\t&lt;path&gt;&quot;
+<span class="fc" id="L80">            int tab = record.indexOf('\t');</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (tab &lt; 0) {</span>
+<span class="nc" id="L82">                continue;</span>
+            }
+<span class="fc" id="L84">            String[] head = record.substring(0, tab).split(&quot; &quot;);</span>
+<span class="fc" id="L85">            String path = record.substring(tab + 1);</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">            if (!path.endsWith(&quot;.adoc&quot;) || BlobIndex.skipped(path)) {</span>
+<span class="fc" id="L87">                continue;</span>
+            }
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            if (head[0].equals(&quot;120000&quot;)) {</span>
+<span class="nc" id="L90">                findings.add(path + &quot;: symbolic link, skipped&quot;);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">            } else if (head[0].equals(&quot;160000&quot;)) {</span>
+<span class="nc" id="L92">                continue;</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">            } else if (!head[2].equals(&quot;0&quot;)) {</span>
+<span class="nc" id="L94">                stale.add(path);</span>
+            } else {
+<span class="fc" id="L96">                blobs.put(path, head[1]);</span>
+            }
+        }
+
+<span class="fc" id="L100">        Result status = run(real, null, &quot;git&quot;, &quot;status&quot;, &quot;--porcelain=v1&quot;, &quot;-z&quot;,</span>
+                &quot;--untracked-files=all&quot;, &quot;--ignored=traditional&quot;, &quot;--no-renames&quot;, &quot;--&quot;, &quot;.&quot;);
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (status.exit() != 0) {</span>
+<span class="nc" id="L103">            throw new IOException(&quot;git status failed in &quot; + real + &quot;: &quot; + status.text().strip());</span>
+        }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for (String record : status.text().split(&quot;\0&quot;)) {</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            if (record.length() &lt; 4) {</span>
+<span class="fc" id="L107">                continue;</span>
+            }
+            // &quot;XY &lt;path&gt;&quot;, the path relative to the repository root
+<span class="fc" id="L110">            String full = record.substring(3);</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            if (!full.startsWith(rootPrefix)) {</span>
+<span class="nc" id="L112">                continue;</span>
+            }
+<span class="fc" id="L114">            String path = full.substring(rootPrefix.length());</span>
+<span class="pc bpc" id="L115" title="2 of 4 branches missed.">            if (!path.endsWith(&quot;.adoc&quot;) || BlobIndex.skipped(path)) {</span>
+<span class="nc" id="L116">                continue;</span>
+            }
+<span class="fc" id="L118">            blobs.remove(path);</span>
+<span class="fc" id="L119">            findings.remove(path + &quot;: symbolic link, skipped&quot;);</span>
+<span class="fc" id="L120">            Path file = real.resolve(path);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            if (Files.isSymbolicLink(file)) {</span>
+<span class="fc" id="L122">                findings.add(path + &quot;: symbolic link, skipped&quot;);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            } else if (Files.isRegularFile(file)) {</span>
+<span class="fc" id="L124">                stale.add(path);</span>
+            }
+        }
+<span class="pc bpc" id="L127" title="2 of 4 branches missed.">        stale.removeIf(p -&gt; !Files.isRegularFile(real.resolve(p)) || Files.isSymbolicLink(real.resolve(p)));</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (!stale.isEmpty()) {</span>
+            // hash-object reads stdin paths relative to the repository top, not the current directory
+<span class="fc" id="L130">            StringBuilder in = new StringBuilder();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            for (String path : stale) {</span>
+<span class="fc" id="L132">                in.append(rootPrefix).append(path).append('\n');</span>
+<span class="fc" id="L133">            }</span>
+<span class="fc" id="L134">            Result hashed = run(real, in.toString(), &quot;git&quot;, &quot;hash-object&quot;, &quot;--stdin-paths&quot;);</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">            if (hashed.exit() != 0) {</span>
+<span class="nc" id="L136">                throw new IOException(&quot;git hash-object failed in &quot; + real + &quot;: &quot; + hashed.text().strip());</span>
+            }
+<span class="fc" id="L138">            String[] ids = hashed.text().strip().split(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            if (ids.length != stale.size()) {</span>
+<span class="nc" id="L140">                throw new IOException(&quot;git hash-object returned &quot; + ids.length + &quot; ids for &quot;</span>
+<span class="nc" id="L141">                        + stale.size() + &quot; paths in &quot; + real);</span>
+            }
+<span class="fc bfc" id="L143" title="All 2 branches covered.">            for (int i = 0; i &lt; ids.length; i++) {</span>
+<span class="fc" id="L144">                blobs.put(stale.get(i), ids[i].strip());</span>
+            }
+        }
+<span class="fc" id="L147">        findings.sort(null);</span>
+<span class="fc" id="L148">        return Optional.of(new BlobIndex(Collections.unmodifiableMap(blobs), List.copyOf(findings),</span>
+                BlobIndex.Source.GIT));
+    }
+
+    /** One git call's exit code and standard output (standard error merged in on failure). */
+<span class="fc" id="L153">    private record Result(int exit, String text) {</span>
+    }
+
+    private static Result run(Path cwd, String stdin, String... command) throws IOException {
+<span class="fc" id="L157">        ProcessBuilder builder = new ProcessBuilder(command).directory(cwd.toFile());</span>
+<span class="fc" id="L158">        builder.redirectErrorStream(true);</span>
+<span class="fc" id="L159">        Process process = builder.start();</span>
+        try {
+<span class="fc" id="L161">            try (OutputStream in = process.getOutputStream()) {</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                if (stdin != null) {</span>
+<span class="fc" id="L163">                    in.write(stdin.getBytes(StandardCharsets.UTF_8));</span>
+                }
+            }
+<span class="fc" id="L166">            ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+<span class="fc" id="L167">            try (InputStream from = process.getInputStream()) {</span>
+<span class="fc" id="L168">                from.transferTo(out);</span>
+            }
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">            if (!process.waitFor(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {</span>
+<span class="nc" id="L171">                process.destroyForcibly();</span>
+<span class="nc" id="L172">                throw new IOException(String.join(&quot; &quot;, command) + &quot; did not finish in &quot;</span>
+                        + TIMEOUT_MILLIS / 1000 + &quot; s in &quot; + cwd);
+            }
+<span class="fc" id="L175">            return new Result(process.exitValue(), out.toString(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L176">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L177">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L178">            process.destroyForcibly();</span>
+<span class="nc" id="L179">            throw new IOException(String.join(&quot; &quot;, command) + &quot; was interrupted&quot;, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
