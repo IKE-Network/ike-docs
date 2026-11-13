@@ -1,7 +1,7 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.6",
-  "serialNumber" : "urn:uuid:466deea7-2e97-3541-8a98-7459cea41a66",
+  "serialNumber" : "urn:uuid:8bf7682e-117e-3433-9fa8-03b8a2765be1",
   "version" : 1,
   "metadata" : {
     "lifecycles" : [
@@ -57,11 +57,11 @@
     },
     "component" : {
       "type" : "library",
-      "bom-ref" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@143?type=jar",
+      "bom-ref" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@144?type=jar",
       "publisher" : "IKE Network",
       "group" : "network.ike.docs",
       "name" : "typst-asciidoc-converter",
-      "version" : "143",
+      "version" : "144",
       "description" : "AsciidoctorJ converter for the `typst` backend: walks the Asciidoctor AST and emits Typst source (.typ) for the Typst print target (IKE-Network/ike-issues#1307, design topic dev-document-surface-pages). The network.ike.docs.typst package is the seed of the shared Typst writer library (document setup, text escaping) that Komet's block-model writer will consume as well.",
       "licenses" : [
         {
@@ -70,7 +70,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@143?type=jar",
+      "purl" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@144?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -2271,7 +2271,7 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@143?type=jar",
+      "ref" : "pkg:maven/network.ike.docs/typst-asciidoc-converter@144?type=jar",
       "dependsOn" : [
         "pkg:maven/org.asciidoctor/asciidoctorj@3.0.1?type=jar",
         "pkg:maven/org.jruby/jruby@10.0.3.0?type=jar",

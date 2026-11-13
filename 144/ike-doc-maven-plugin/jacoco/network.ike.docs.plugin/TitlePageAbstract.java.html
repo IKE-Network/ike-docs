@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TitlePageAbstract.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin</a> &gt; <span class="el_source">TitlePageAbstract.java</span></div><h1>TitlePageAbstract.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Moves a document's abstract onto the title page of the print HTML.
+ *
+ * &lt;p&gt;An author marks an abstract with AsciiDoc's own {@code abstract} style
+ * on a paragraph or an open block that comes before the document's first
+ * section. The {@code html5} backend writes that block into the preamble,
+ * inside {@code &lt;div id=&quot;content&quot;&gt;}, after the header has closed. The print
+ * stylesheet gives {@code &lt;div id=&quot;header&quot;&gt;} the title page and starts the
+ * body, and page 1, at {@code #content}, so a stylesheet alone cannot print
+ * the abstract beneath the title.
+ *
+ * &lt;p&gt;This class rewrites the print HTML before a CSS renderer reads it. The
+ * abstract is taken out of the preamble and written into the header, after
+ * the title, the author and the date and before the table of contents. It is
+ * written there as an ordinary open block, so its paragraphs and lists are
+ * set by the same rules as the body's text. The stylesheet
+ * ({@code ike-print.css}) aligns it left and gives the pages it runs on to a
+ * lowercase roman folio. A preamble that is left with nothing that prints is
+ * taken out with the abstract, so the body begins at the first block after
+ * the abstract.
+ *
+ * &lt;p&gt;The rewrite happens here, and not in the docinfo script, because the
+ * build runs Prince with scripts off, and WeasyPrint runs none. The screen
+ * HTML is a separate output and is not touched.
+ *
+ * &lt;p&gt;Nothing is moved when the document has no title, when it has no
+ * abstract before its first section, or when nothing follows the abstract.
+ * The HTML is then returned as the same {@link String}. A second pass over
+ * HTML that was already rewritten finds nothing to move.
+ *
+ * &lt;p&gt;Design: {@code dev-document-front-matter} in {@code ike-lab-documents};
+ * IKE-Network/ike-issues#1307.
+ */
+final class TitlePageAbstract {
+
+    /** The class of the block that holds the abstract on the title page. */
+    static final String TITLE_ABSTRACT_CLASS = &quot;ike-title-abstract&quot;;
+
+    private static final String HEADER_OPEN = &quot;&lt;div id=\&quot;header\&quot;&gt;&quot;;
+    private static final String CONTENT_OPEN = &quot;&lt;div id=\&quot;content\&quot;&gt;&quot;;
+    private static final String PREAMBLE_OPEN = &quot;&lt;div id=\&quot;preamble\&quot;&gt;&quot;;
+    private static final String SECTIONBODY_OPEN = &quot;&lt;div class=\&quot;sectionbody\&quot;&gt;&quot;;
+    private static final String DIV_CLOSE = &quot;&lt;/div&gt;&quot;;
+
+    /** An opening or a closing {@code div} tag. */
+<span class="fc" id="L51">    private static final Pattern DIV_TAG =</span>
+<span class="fc" id="L52">            Pattern.compile(&quot;&lt;div\\b[^&gt;]*&gt;|&lt;/div\\s*&gt;&quot;);</span>
+
+    /**
+     * The opening tag of an abstract block, as the {@code html5} backend
+     * writes it: an optional id, then the classes {@code quoteblock abstract}
+     * and any roles.
+     */
+<span class="fc" id="L59">    private static final Pattern ABSTRACT_OPEN = Pattern.compile(</span>
+            &quot;&lt;div(?: id=\&quot;([^\&quot;]*)\&quot;)? class=\&quot;quoteblock abstract(?: [^\&quot;]*)?\&quot;&gt;&quot;);
+
+    /** The table of contents, when the backend writes it into the header. */
+<span class="fc" id="L63">    private static final Pattern TOC_OPEN =</span>
+<span class="fc" id="L64">            Pattern.compile(&quot;&lt;div id=\&quot;toc\&quot;[^&gt;]*&gt;&quot;);</span>
+
+    /** The parts of an abstract block: an optional title, then the quote. */
+<span class="fc" id="L67">    private static final Pattern ABSTRACT_PARTS = Pattern.compile(</span>
+            &quot;\\s*(&lt;div class=\&quot;title\&quot;&gt;.*?&lt;/div&gt;)?\\s*&lt;blockquote&gt;(.*)&lt;/blockquote&gt;\\s*&quot;,
+            Pattern.DOTALL);
+
+    /**
+     * How the content of a block that holds other blocks begins. An abstract
+     * written on a paragraph has plain text here, and is wrapped as a
+     * paragraph.
+     */
+<span class="fc" id="L76">    private static final Pattern BLOCK_START = Pattern.compile(</span>
+            &quot;&lt;(?:div|table|hr|details|h[1-6]|ul|ol|dl|p|pre|blockquote|figure|section)\\b&quot;);
+
+    /** What a preamble may still hold and print nothing. */
+<span class="fc" id="L80">    private static final Pattern NOT_PRINTED = Pattern.compile(</span>
+            &quot;&lt;style\\b.*?&lt;/style&gt;|&lt;script\\b.*?&lt;/script&gt;|&lt;!--.*?--&gt;&quot;,
+            Pattern.DOTALL);
+
+    private TitlePageAbstract() {
+    }
+
+    /**
+     * Move the abstract of an {@code html5} document into its header.
+     *
+     * @param html the document as the {@code html5} backend wrote it
+     * @return the document with its abstract in the header, or {@code html}
+     *         itself when there is nothing to move
+     */
+    static String relocate(String html) {
+<span class="fc" id="L95">        int header = html.indexOf(HEADER_OPEN);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (header &lt; 0) {</span>
+<span class="nc" id="L97">            return html;</span>
+        }
+<span class="fc" id="L99">        int headerBody = header + HEADER_OPEN.length();</span>
+<span class="fc" id="L100">        int headerClose = closeOf(html, headerBody);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (headerClose &lt; 0) {</span>
+<span class="nc" id="L102">            return html;</span>
+        }
+        // A document with no title has an empty header and no title page.
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (!html.substring(headerBody, headerClose).contains(&quot;&lt;h1&quot;)) {</span>
+<span class="fc" id="L106">            return html;</span>
+        }
+<span class="fc" id="L108">        int content = html.indexOf(CONTENT_OPEN, headerClose);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (content &lt; 0) {</span>
+<span class="nc" id="L110">            return html;</span>
+        }
+
+        // The blocks before the first section are in the preamble. A document
+        // with no section has no preamble, and its blocks are in #content.
+<span class="fc" id="L115">        int container = content + CONTENT_OPEN.length();</span>
+<span class="fc" id="L116">        int preamble = -1;</span>
+<span class="fc" id="L117">        int afterContent = skipWhitespace(html, container);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (html.startsWith(PREAMBLE_OPEN, afterContent)) {</span>
+<span class="fc" id="L119">            int afterPreamble = skipWhitespace(html, afterContent + PREAMBLE_OPEN.length());</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">            if (html.startsWith(SECTIONBODY_OPEN, afterPreamble)) {</span>
+<span class="fc" id="L121">                preamble = afterContent;</span>
+<span class="fc" id="L122">                container = afterPreamble + SECTIONBODY_OPEN.length();</span>
+            }
+        }
+<span class="fc" id="L125">        int containerClose = closeOf(html, container);</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if (containerClose &lt; 0) {</span>
+<span class="nc" id="L127">            return html;</span>
+        }
+
+<span class="fc" id="L130">        Matcher open = childMatching(html, container, containerClose, ABSTRACT_OPEN);</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (open == null) {</span>
+<span class="fc" id="L132">            return html;</span>
+        }
+<span class="fc" id="L134">        int abstractStart = open.start();</span>
+<span class="fc" id="L135">        int abstractClose = closeOf(html, open.end());</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if (abstractClose &lt; 0) {</span>
+<span class="nc" id="L137">            return html;</span>
+        }
+<span class="fc" id="L139">        int abstractEnd = abstractClose + DIV_CLOSE.length();</span>
+
+        // An abstract with nothing after it is not front matter: there is no
+        // body for it to come before. Only a document with no section can be
+        // in that state, because a preamble is followed by a section.
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">        if (preamble &lt; 0 &amp;&amp; html.substring(abstractEnd, containerClose).isBlank()) {</span>
+<span class="fc" id="L145">            return html;</span>
+        }
+
+<span class="fc" id="L148">        Matcher parts = ABSTRACT_PARTS.matcher(html.substring(open.end(), abstractClose));</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (!parts.matches()) {</span>
+<span class="nc" id="L150">            return html;</span>
+        }
+<span class="fc" id="L152">        String block = titlePageBlock(open.group(1), parts.group(1), parts.group(2).strip());</span>
+
+        // Where the abstract goes: before the table of contents when the
+        // header holds one, and otherwise at the end of the header.
+<span class="fc" id="L156">        Matcher toc = childMatching(html, headerBody, headerClose, TOC_OPEN);</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        int insertAt = toc != null ? toc.start() : headerClose;</span>
+
+        // What is taken out: the abstract, and the preamble with it when
+        // nothing that prints is left in it. A book's preamble starts a page
+        // of its own, so a preamble left empty would put a blank page 1 in
+        // front of the first section. A style or script element that was in
+        // the preamble is kept, in the preamble's place.
+<span class="fc" id="L164">        int removeStart = abstractStart;</span>
+<span class="fc" id="L165">        int removeEnd = skipWhitespace(html, abstractEnd);</span>
+<span class="fc" id="L166">        String kept = &quot;&quot;;</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if (preamble &gt;= 0) {</span>
+<span class="fc" id="L168">            String left = html.substring(container, abstractStart)</span>
+<span class="fc" id="L169">                    + html.substring(abstractEnd, containerClose);</span>
+<span class="fc" id="L170">            int preambleClose = closeOf(html, preamble + PREAMBLE_OPEN.length());</span>
+<span class="fc" id="L171">            int afterSectionBody = containerClose + DIV_CLOSE.length();</span>
+<span class="pc bpc" id="L172" title="1 of 4 branches missed.">            if (NOT_PRINTED.matcher(left).replaceAll(&quot;&quot;).isBlank()</span>
+                    &amp;&amp; preambleClose &gt;= 0
+<span class="fc bfc" id="L174" title="All 2 branches covered.">                    &amp;&amp; html.substring(afterSectionBody, preambleClose).isBlank()) {</span>
+<span class="fc" id="L175">                removeStart = preamble;</span>
+<span class="fc" id="L176">                removeEnd = skipWhitespace(html, preambleClose + DIV_CLOSE.length());</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                kept = left.isBlank() ? &quot;&quot; : left.strip() + &quot;\n&quot;;</span>
+            }
+        }
+
+<span class="fc" id="L181">        return html.substring(0, insertAt)</span>
+                + block
+<span class="fc" id="L183">                + html.substring(insertAt, removeStart)</span>
+                + kept
+<span class="fc" id="L185">                + html.substring(removeEnd);</span>
+    }
+
+    /**
+     * Write the abstract as an ordinary open block, so the stylesheet rules
+     * for the body's text are the rules that set it.
+     *
+     * @param id      the id of the abstract block, or {@code null}
+     * @param title   the block's title element, or {@code null}
+     * @param content the content of the block's quote
+     * @return the block for the title page, ending in a line break
+     */
+    private static String titlePageBlock(String id, String title, String content) {
+<span class="fc" id="L198">        StringBuilder block = new StringBuilder();</span>
+<span class="fc" id="L199">        block.append(&quot;&lt;div&quot;);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (id != null) {</span>
+<span class="fc" id="L201">            block.append(&quot; id=\&quot;&quot;).append(id).append('&quot;');</span>
+        }
+<span class="fc" id="L203">        block.append(&quot; class=\&quot;openblock &quot;).append(TITLE_ABSTRACT_CLASS).append(&quot;\&quot;&gt;\n&quot;);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (title != null) {</span>
+<span class="fc" id="L205">            block.append(title).append('\n');</span>
+        }
+<span class="fc" id="L207">        block.append(&quot;&lt;div class=\&quot;content\&quot;&gt;\n&quot;);</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (BLOCK_START.matcher(content).lookingAt()) {</span>
+<span class="fc" id="L209">            block.append(content).append('\n');</span>
+        } else {
+<span class="fc" id="L211">            block.append(&quot;&lt;div class=\&quot;paragraph\&quot;&gt;\n&lt;p&gt;&quot;).append(content).append(&quot;&lt;/p&gt;\n&lt;/div&gt;\n&quot;);</span>
+        }
+<span class="fc" id="L213">        block.append(&quot;&lt;/div&gt;\n&lt;/div&gt;\n&quot;);</span>
+<span class="fc" id="L214">        return block.toString();</span>
+    }
+
+    /**
+     * Find the first child element of a {@code div} whose opening tag matches
+     * a pattern. A {@code div} nested inside another child is not a child.
+     *
+     * @param html    the document
+     * @param from    the offset after the parent's opening tag
+     * @param to      the offset of the parent's closing tag
+     * @param pattern the opening tag looked for
+     * @return a matcher on the child's opening tag, or {@code null}
+     */
+    private static Matcher childMatching(String html, int from, int to, Pattern pattern) {
+<span class="fc" id="L228">        Matcher tag = DIV_TAG.matcher(html);</span>
+<span class="fc" id="L229">        tag.region(from, to);</span>
+<span class="fc" id="L230">        int depth = 0;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        while (tag.find()) {</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">            if (tag.group().startsWith(&quot;&lt;/&quot;)) {</span>
+<span class="fc" id="L233">                depth--;</span>
+            } else {
+<span class="fc bfc" id="L235" title="All 2 branches covered.">                if (depth == 0) {</span>
+<span class="fc" id="L236">                    Matcher child = pattern.matcher(html);</span>
+<span class="fc" id="L237">                    child.region(tag.start(), tag.end());</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">                    if (child.matches()) {</span>
+<span class="fc" id="L239">                        return child;</span>
+                    }
+                }
+<span class="fc" id="L242">                depth++;</span>
+            }
+        }
+<span class="fc" id="L245">        return null;</span>
+    }
+
+    /**
+     * Find the closing tag of a {@code div}.
+     *
+     * @param html the document
+     * @param from the offset after the opening tag
+     * @return the offset of the matching closing tag, or {@code -1} when the
+     *         {@code div} tags do not balance
+     */
+    private static int closeOf(String html, int from) {
+<span class="fc" id="L257">        Matcher tag = DIV_TAG.matcher(html);</span>
+<span class="fc" id="L258">        tag.region(from, html.length());</span>
+<span class="fc" id="L259">        int depth = 0;</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">        while (tag.find()) {</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">            if (tag.group().startsWith(&quot;&lt;/&quot;)) {</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">                if (depth == 0) {</span>
+<span class="fc" id="L263">                    return tag.start();</span>
+                }
+<span class="fc" id="L265">                depth--;</span>
+            } else {
+<span class="fc" id="L267">                depth++;</span>
+            }
+        }
+<span class="nc" id="L270">        return -1;</span>
+    }
+
+    private static int skipWhitespace(String html, int from) {
+<span class="fc" id="L274">        int at = from;</span>
+<span class="pc bpc" id="L275" title="1 of 4 branches missed.">        while (at &lt; html.length() &amp;&amp; Character.isWhitespace(html.charAt(at))) {</span>
+<span class="fc" id="L276">            at++;</span>
+        }
+<span class="fc" id="L278">        return at;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

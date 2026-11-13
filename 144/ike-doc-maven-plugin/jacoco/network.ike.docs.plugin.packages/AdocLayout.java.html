@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="stylesheet" href="jacoco-resources/ike-theme.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdocLayout.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><a href="../index.html" style="font-weight:bold;margin-right:8px">← Project Site</a> | <span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">IKE Doc Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">network.ike.docs.plugin.packages</a> &gt; <span class="el_source">AdocLayout.java</span></div><h1>AdocLayout.java</h1><pre class="source lang-java linenums">package network.ike.docs.plugin.packages;
+
+import java.util.Locale;
+
+/**
+ * How a library lays out its AsciiDoc root, chosen by the POM property
+ * {@code ike.adoc.layout} ({@code dev-adoc-packages},
+ * IKE-Network/ike-issues#1341). The property gates every rule of the
+ * packages layout, so a library that has not declared it keeps building
+ * exactly as before through the migration.
+ *
+ * @since 136
+ */
+<span class="fc" id="L14">public enum AdocLayout {</span>
+
+    /**
+     * The layout before packages: a {@code topics/&lt;domain&gt;/} tree under the
+     * root with the preview index and shared images beside it, the registry
+     * written to {@code target/topic-registry.yaml}. The default.
+     */
+<span class="fc" id="L21">    LEGACY,</span>
+
+    /**
+     * The packages layout: the root holds one directory per owning group,
+     * written as one dotted segment, with the topic domain as the directory
+     * under it; artifact metadata goes under {@code META-INF/ike/&lt;group&gt;/&lt;artifact&gt;/}.
+     */
+<span class="fc" id="L28">    PACKAGES;</span>
+
+    /** The property that selects the layout. */
+    public static final String PROPERTY = &quot;ike.adoc.layout&quot;;
+
+    /**
+     * Read the layout from the property's value.
+     *
+     * @param value the value of {@code ike.adoc.layout}, or {@code null} when
+     *              the property is absent
+     * @return the layout; {@link #LEGACY} when the value is absent or blank
+     * @throws IllegalArgumentException if the value names no layout
+     */
+    public static AdocLayout of(String value) {
+<span class="fc bfc" id="L42" title="All 4 branches covered.">        if (value == null || value.isBlank()) {</span>
+<span class="fc" id="L43">            return LEGACY;</span>
+        }
+<span class="fc bfc" id="L45" title="All 3 branches covered.">        return switch (value.strip().toLowerCase(Locale.ROOT)) {</span>
+<span class="fc" id="L46">            case &quot;packages&quot; -&gt; PACKAGES;</span>
+<span class="fc" id="L47">            case &quot;legacy&quot; -&gt; LEGACY;</span>
+<span class="fc" id="L48">            default -&gt; throw new IllegalArgumentException(&quot;Unknown &quot; + PROPERTY + &quot; '&quot; + value</span>
+                    + &quot;' (expected 'packages' or 'legacy')&quot;);
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
